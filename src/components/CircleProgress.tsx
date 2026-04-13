@@ -14,7 +14,7 @@ export function PieChart({ segments }: { segments: { label: string; value: numbe
         const x2 = cx + r * Math.cos(angle + sweep), y2 = cy + r * Math.sin(angle + sweep);
         const d = `M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r},0,${sweep > Math.PI ? 1 : 0},1,${x2.toFixed(2)},${y2.toFixed(2)}Z`;
         angle += sweep;
-        return <path key={i} d={d} fill={seg.color} stroke="#111" strokeWidth="1.5" />;
+        return <path key={i} d={d} fill={seg.color} stroke="#0a0a0a" strokeWidth="1.5" />;
       })}
     </svg>
   );
@@ -44,10 +44,10 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
   }, [pct, delay]);
 
   return (
-    <div className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer" onClick={onClick}>
+    <div className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105" onClick={onClick}>
       <div className="relative w-14 h-14 md:w-20 md:h-20">
         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="3.5" className="text-[#dbdbdb] dark:text-[#333]" />
+          <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="3.5" className="text-neutral-200 dark:text-[#262626]" />
           <motion.circle
             cx="32" cy="32" r={r}
             fill="none" stroke={color} strokeWidth="3.5"
@@ -60,7 +60,7 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.span
-            className="text-xs md:text-base font-bold text-[#262626] dark:text-[#f9f9f9]"
+            className="text-xs md:text-base font-bold text-neutral-800 dark:text-neutral-100"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: delay + 0.4 }}
@@ -69,7 +69,7 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
           </motion.span>
         </div>
       </div>
-      <span className="text-[10px] md:text-xs font-semibold text-[#8e8e8e] tracking-tight text-center leading-tight w-full">{label}</span>
+      <span className="text-[10px] md:text-xs font-semibold text-neutral-500 tracking-tight text-center leading-tight w-full">{label}</span>
     </div>
   );
 }
