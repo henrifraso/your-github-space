@@ -230,32 +230,35 @@ export default function App() {
     <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a] text-neutral-800 dark:text-neutral-100 font-sans">
 
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-3">
-        <div className="max-w-[935px] mx-auto px-5 flex items-center justify-between gap-3">
-          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200">
-            <span className="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
-            <h1 className="text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">{data.negocio.nome_fantasia}</h1>
-            <ChevronDown size={16} className="text-neutral-400" />
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3">
+        <div className="max-w-[935px] mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
+          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
+            <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
+            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">{data.negocio.nome_fantasia}</h1>
+            <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
+            <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200">
-              {dark ? <Sun size={20} /> : <Moon size={20} />}
+          <div className="flex items-center gap-0.5 sm:gap-1">
+            <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
+              {dark ? <Sun size={18} className="sm:hidden" /> : <Moon size={18} className="sm:hidden" />}
+              {dark ? <Sun size={20} className="hidden sm:block" /> : <Moon size={20} className="hidden sm:block" />}
             </button>
-            <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200">
-              <Bell size={20} />
+            <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
+              <Bell size={18} className="sm:hidden" />
+              <Bell size={20} className="hidden sm:block" />
             </button>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-[935px] mx-auto pt-4 md:pt-8">
+      <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
         {/* Perfil — colapsa ao rolar */}
-        <div style={{ display: 'grid', gridTemplateRows: scrolled ? '0fr' : '1fr', opacity: scrolled ? 0 : 1, transition: 'grid-template-rows 0.35s ease, opacity 0.25s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateRows: scrolled ? '0fr' : '1fr', opacity: scrolled ? 0 : 1, transition: 'grid-template-rows 0.4s cubic-bezier(0.25,0.1,0.25,1), opacity 0.3s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
         <div style={{ overflow: 'hidden' }}>
 
           {/* Foto + bio + botões */}
-          <section className="mb-8 md:mb-10 px-5">
-            <div className="flex flex-row gap-4 md:gap-24 items-center mb-5">
+          <section className="mb-6 sm:mb-8 md:mb-10 px-4 sm:px-5">
+            <div className="flex flex-row gap-3 sm:gap-4 md:gap-24 items-center mb-4 sm:mb-5">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <defs>
@@ -295,33 +298,35 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 min-w-0 flex flex-col gap-3 mt-0 md:mt-4">
-                <div className="flex gap-4 md:gap-10 text-xs md:text-base">
+              <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
+                <div className="flex gap-3 sm:gap-4 md:gap-10 text-[11px] sm:text-xs md:text-base">
                   <span><strong>{gridItems.length}</strong> oportunidades</span>
                   <span><strong>{data.concorrentes.length}</strong> concorrentes</span>
                   <span><strong>{data.negocio.nivel}</strong> Nível</span>
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs md:text-sm mt-1">
-                    <Tag size={14} className="text-[#0891b2] flex-shrink-0" />
-                    <span className="text-neutral-800 dark:text-neutral-200">Seu mercado atual · {data.mercado_nome ?? 'Beleza & Estética'}</span>
+                <div className="space-y-0.5 sm:space-y-1">
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
+                    <Tag size={12} className="sm:hidden text-[#0891b2] flex-shrink-0" />
+                    <Tag size={14} className="hidden sm:block text-[#0891b2] flex-shrink-0" />
+                    <span className="text-neutral-800 dark:text-neutral-200 truncate">Seu mercado · {data.mercado_nome ?? 'Beleza & Estética'}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs md:text-sm mt-0.5">
-                    <span className="text-[#ca8a04] flex-shrink-0 text-xs">📍</span>
-                    <span className="text-neutral-800 dark:text-neutral-200">Onde você está · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs md:text-sm">
+                    <span className="text-[#ca8a04] flex-shrink-0 text-[10px] sm:text-xs">📍</span>
+                    <span className="text-neutral-800 dark:text-neutral-200 truncate">Posição · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs md:text-sm mt-0.5">
-                    <TrendingUp size={14} className="text-[#16a34a] flex-shrink-0" />
-                    <span className="text-neutral-800 dark:text-neutral-200">Sua evolução hoje · {data.progresso_pct}% para o próximo nível</span>
+                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs md:text-sm">
+                    <TrendingUp size={12} className="sm:hidden text-[#16a34a] flex-shrink-0" />
+                    <TrendingUp size={14} className="hidden sm:block text-[#16a34a] flex-shrink-0" />
+                    <span className="text-neutral-800 dark:text-neutral-200 truncate">Evolução · {data.progresso_pct}% para o próximo nível</span>
                   </div>
                 </div>
               </div>
             </div>
             <MarketMapButton open={mapOpen} onToggle={() => setMapOpen(o => !o)} />
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
               {[['Plano', () => setPlanoOpen(true)], ['Estratégia', () => setEstrategiaOpen(true)], ['Prática', () => setPraticaOpen(true)]].map(([label, fn]) => (
                 <button key={label as string} onClick={fn as () => void}
-                  className="flex-[2] h-9 md:h-11 flex items-center justify-center bg-[#fafafa] dark:bg-[#161616] border border-neutral-200 dark:border-[#262626] hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 cursor-pointer">
+                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#fafafa] dark:bg-[#161616] border border-neutral-200 dark:border-[#262626] hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
                   {label as string}
                 </button>
               ))}
@@ -329,9 +334,9 @@ export default function App() {
           </section>
 
           {/* Destaques */}
-          <section className="flex gap-2 overflow-x-auto no-scrollbar px-5 pt-1 pb-2 md:justify-between">
+          <section className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar px-4 sm:px-5 pt-1 pb-2 md:justify-between">
             {circleData.map((c, i) => (
-              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.1} onClick={() => setCirclePopupIdx(i)} />
+              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setCirclePopupIdx(i)} />
             ))}
           </section>
 
@@ -341,14 +346,14 @@ export default function App() {
 
       {/* Feed */}
       <motion.div
-        className="max-w-[935px] mx-auto mt-6 pb-12 space-y-8 px-5"
+        className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-6 sm:space-y-8 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } }}
       >
 
         {/* O que mudou */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="O que mudou" icon={<TrendingUp size={18}/>}>
           {[
             { label: 'Concorrência', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
@@ -372,7 +377,7 @@ export default function App() {
         </motion.div>
 
         {/* Geografia */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Geografia" icon={<MapPin size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Região de atuação</p>
@@ -397,7 +402,7 @@ export default function App() {
         </motion.div>
 
         {/* Legislação */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Legislação" icon={<Scale size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">Conformidade</p>
@@ -418,7 +423,7 @@ export default function App() {
         </motion.div>
 
         {/* Produtos */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Produtos" icon={<Package size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Novidades do mercado</p>
@@ -440,7 +445,7 @@ export default function App() {
         </motion.div>
 
         {/* Serviços */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Serviços" icon={<Wrench size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">Ação da semana</p>
@@ -462,7 +467,7 @@ export default function App() {
         </motion.div>
 
         {/* Parceiros */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Parceiros" icon={<Handshake size={18}/>} count={`${data.fornecedores.length}`}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-4">Fornecedores · {data.fornecedores.length} mapeados</p>

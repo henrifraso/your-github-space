@@ -6,14 +6,14 @@ export function FeedSection({ title, icon, count, badge, children }: {
   title: string; icon: React.ReactNode; count?: string; badge?: string; children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2 px-1 pt-2">
+    <section className="space-y-3 sm:space-y-4">
+      <div className="flex items-center gap-2.5 px-1 pt-1 sm:pt-2">
         <span className="text-neutral-400">{icon}</span>
-        <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
-        {badge && <span className="ml-auto text-xs font-semibold text-neutral-500 bg-neutral-100 dark:bg-[#1a1a1a] px-2.5 py-0.5 rounded-full">{badge}</span>}
-        {count && !badge && <span className="ml-auto text-xs text-neutral-500">{count}</span>}
+        <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
+        {badge && <span className="ml-auto text-[11px] sm:text-xs font-semibold text-neutral-500 bg-neutral-100 dark:bg-[#1a1a1a] px-2 sm:px-2.5 py-0.5 rounded-full">{badge}</span>}
+        {count && !badge && <span className="ml-auto text-[11px] sm:text-xs text-neutral-500">{count}</span>}
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2.5 sm:space-y-3">
         {children}
       </div>
     </section>
@@ -157,7 +157,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
   const cardContent = (
     <>
       <div>{children}</div>
-      <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-[#262626] grid grid-cols-4 items-center min-h-[28px] sm:min-h-[40px]">
+      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#262626] grid grid-cols-4 items-center min-h-[32px] sm:min-h-[40px]">
 
         {/* ── Utilizar ── */}
         <button onClick={handleLike} disabled={utilStatus === 'loading'} className="flex items-center justify-start gap-1.5 sm:gap-2 overflow-hidden w-full cursor-pointer">
@@ -326,17 +326,17 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
       <AnimatePresence>
         {pergStatus === 'picking' && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.22 }}
-            className="mt-2 overflow-hidden" onClick={e => e.stopPropagation()}>
+            initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex gap-2">
               {PERGUNTAS_OPCOES.map((op, i) => (
                 <motion.button key={op.key}
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.07 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: i * 0.06, duration: 0.2, ease: 'easeOut' }}
                   onClick={e => handlePergChoice(e, op.label)}
-                  style={{ color: op.color, borderColor: op.color + '40', backgroundColor: op.color + '0a' }}
-                  className="flex-1 text-xs font-semibold border rounded-xl py-2 transition-all duration-200 hover:opacity-80 cursor-pointer">
+                  style={{ color: op.color, borderColor: op.color + '30', backgroundColor: op.color + '08' }}
+                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-xl py-2.5 sm:py-2 transition-all duration-200 hover:opacity-80 active:scale-95 cursor-pointer">
                   {op.label}
                 </motion.button>
               ))}
@@ -349,17 +349,17 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
       <AnimatePresence>
         {ideiaStatus === 'picking' && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.22 }}
-            className="mt-2 overflow-hidden" onClick={e => e.stopPropagation()}>
+            initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex gap-2">
               {IDEIAS_OPCOES.map((op, i) => (
                 <motion.button key={op.key}
-                  initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.07 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: i * 0.06, duration: 0.2, ease: 'easeOut' }}
                   onClick={e => handleIdeiaChoice(e, op.label)}
-                  style={{ color: op.color, borderColor: op.color + '40', backgroundColor: op.color + '0a' }}
-                  className="flex-1 text-xs font-semibold border rounded-xl py-2 transition-all duration-200 hover:opacity-80 cursor-pointer">
+                  style={{ color: op.color, borderColor: op.color + '30', backgroundColor: op.color + '08' }}
+                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-xl py-2.5 sm:py-2 transition-all duration-200 hover:opacity-80 active:scale-95 cursor-pointer">
                   {op.label}
                 </motion.button>
               ))}
@@ -370,8 +370,8 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
     </>
   );
 
-  const cls = "w-full bg-white dark:bg-[#161616] rounded-2xl border border-neutral-100 dark:border-[#262626] px-6 py-5 text-left transition-all duration-200 " +
-    (onClick ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] cursor-pointer" : "");
+  const cls = "w-full bg-white dark:bg-[#161616] rounded-2xl border border-neutral-100 dark:border-[#262626] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+    (onClick ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] active:scale-[0.99] cursor-pointer" : "");
 
   return onClick
     ? <button onClick={onClick} className={cls}>{cardContent}</button>
