@@ -10,15 +10,15 @@ export const TIPO_COLOR: Record<string, string> = {
 };
 
 const TIPO_BG: Record<string, string> = {
-  concorrente: 'rgba(239,68,68,0.12)',
-  fornecedor: 'rgba(59,130,246,0.12)',
-  mercado: 'rgba(34,197,94,0.12)',
+  concorrente: 'rgba(239,68,68,0.10)',
+  fornecedor: 'rgba(59,130,246,0.10)',
+  mercado: 'rgba(34,197,94,0.10)',
 };
 
 export function TimelineCard({ event, onOpen }: { event: TimelineEvent; onOpen: () => void }) {
   return (
     <motion.div onClick={onOpen}
-      className="flex-shrink-0 w-[240px] md:w-auto rounded-2xl border border-[#dbdbdb] dark:border-[#2a2a2a] bg-white dark:bg-[#111] p-6 cursor-pointer"
+      className="flex-shrink-0 w-[240px] md:w-auto rounded-2xl border border-neutral-200 dark:border-[#262626] bg-[#fafafa] dark:bg-[#161616] p-6 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50"
       whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -27,11 +27,11 @@ export function TimelineCard({ event, onOpen }: { event: TimelineEvent; onOpen: 
         </div>
         <div>
           <p className="text-xs font-bold uppercase tracking-wide" style={{ color: TIPO_COLOR[event.tipo] }}>{event.tipo}</p>
-          <p className="text-xs text-[#8e8e8e] mt-0.5">{event.data}</p>
+          <p className="text-xs text-neutral-500 mt-0.5">{event.data}</p>
         </div>
       </div>
-      <p className="text-base font-bold text-[#262626] dark:text-[#f9f9f9] leading-snug mb-3">{event.titulo}</p>
-      <p className="text-sm text-[#8e8e8e] leading-relaxed line-clamp-3">{event.detalhe}</p>
+      <p className="text-base font-bold text-neutral-800 dark:text-neutral-100 leading-snug mb-3">{event.titulo}</p>
+      <p className="text-sm text-neutral-500 leading-relaxed line-clamp-3">{event.detalhe}</p>
       <p className="text-xs font-semibold mt-4" style={{ color: TIPO_COLOR[event.tipo] }}>Ver mais →</p>
     </motion.div>
   );
@@ -47,13 +47,13 @@ export function TimelineModal({ event, onClose }: { event: TimelineEvent; onClos
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: TIPO_COLOR[event.tipo] }}>{event.tipo}</p>
-            <p className="text-[10px] text-[#8e8e8e]">{event.data}</p>
+            <p className="text-[10px] text-neutral-500">{event.data}</p>
           </div>
         </div>
         <CloseButton onClose={onClose} />
       </div>
-      <h2 className="text-base font-bold text-[#262626] dark:text-[#f9f9f9] mb-4">{event.titulo}</h2>
-      <p className="text-sm text-[#8e8e8e] leading-relaxed">{event.detalhe}</p>
+      <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100 mb-4">{event.titulo}</h2>
+      <p className="text-sm text-neutral-500 leading-relaxed">{event.detalhe}</p>
     </BottomModal>
   );
 }
