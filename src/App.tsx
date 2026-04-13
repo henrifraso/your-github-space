@@ -346,10 +346,10 @@ export default function App() {
 
       {/* Feed */}
       <motion.div
-        className="max-w-[935px] mx-auto mt-6 pb-12 space-y-8 px-5"
+        className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-6 sm:space-y-8 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } }}
       >
 
         {/* O que mudou */}
