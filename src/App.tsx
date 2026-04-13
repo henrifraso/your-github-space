@@ -334,9 +334,9 @@ export default function App() {
           </section>
 
           {/* Destaques */}
-          <section className="flex gap-2 overflow-x-auto no-scrollbar px-5 pt-1 pb-2 md:justify-between">
+          <section className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar px-4 sm:px-5 pt-1 pb-2 md:justify-between">
             {circleData.map((c, i) => (
-              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.1} onClick={() => setCirclePopupIdx(i)} />
+              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setCirclePopupIdx(i)} />
             ))}
           </section>
 
