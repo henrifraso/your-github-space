@@ -6,14 +6,16 @@ export function FeedSection({ title, icon, count, badge, children }: {
   title: string; icon: React.ReactNode; count?: string; badge?: string; children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-2">
+    <section className="space-y-3">
       <div className="flex items-center gap-2 px-1 pt-2">
-        <span className="text-[#8e8e8e]">{icon}</span>
-        <h3 className="text-sm font-bold text-[#262626] dark:text-[#f0f0f0]">{title}</h3>
-        {badge && <span className="ml-auto text-[10px] font-semibold text-[#8e8e8e] bg-[#f0f0f0] dark:bg-[#2a2a2a] px-2 py-0.5 rounded-full">{badge}</span>}
-        {count && !badge && <span className="ml-auto text-[11px] text-[#8e8e8e]">{count}</span>}
+        <span className="text-neutral-400">{icon}</span>
+        <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
+        {badge && <span className="ml-auto text-xs font-semibold text-neutral-500 bg-neutral-100 dark:bg-[#1a1a1a] px-2.5 py-0.5 rounded-full">{badge}</span>}
+        {count && !badge && <span className="ml-auto text-xs text-neutral-500">{count}</span>}
       </div>
-      {children}
+      <div className="space-y-3">
+        {children}
+      </div>
     </section>
   );
 }
@@ -24,9 +26,9 @@ const IDEIAS_STEPS    = ['Pensando...', 'Conectando...', 'Criando...', 'Finaliza
 const SHARE_STEPS     = ['Preparando...', 'Gerando link...', 'Pronto!'];
 
 const PERGUNTAS_OPCOES = [
-  { key: 'o-que', label: 'O que fazer', color: '#0077cc' },
-  { key: 'como',  label: 'Como fazer',  color: '#0095f6' },
-  { key: 'onde',  label: 'Onde fazer',  color: '#38bdf8' },
+  { key: 'o-que', label: 'O que fazer', color: '#3b82f6' },
+  { key: 'como',  label: 'Como fazer',  color: '#3b82f6' },
+  { key: 'onde',  label: 'Onde fazer',  color: '#3b82f6' },
 ];
 
 const IDEIAS_OPCOES = [
@@ -34,7 +36,7 @@ const IDEIAS_OPCOES = [
   { key: 'elaborada',    label: 'Ideia elaborada',    color: '#a855f7' },
 ];
 
-const DOT_COLORS = ['#0077cc', '#0095f6', '#38bdf8'];
+const DOT_COLORS = ['#3b82f6', '#60a5fa', '#93c5fd'];
 
 type UtilStatus  = 'idle' | 'loading' | 'done';
 type PergStatus  = 'idle' | 'picking' | 'loading' | 'done';
@@ -155,19 +157,19 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
   const cardContent = (
     <>
       <div>{children}</div>
-      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#f0f0f0] dark:border-[#2a2a2a] grid grid-cols-4 items-center min-h-[28px] sm:min-h-[40px]">
+      <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-[#262626] grid grid-cols-4 items-center min-h-[28px] sm:min-h-[40px]">
 
         {/* ── Utilizar ── */}
-        <button onClick={handleLike} disabled={utilStatus === 'loading'} className="flex items-center justify-start gap-1.5 sm:gap-2 overflow-hidden w-full">
+        <button onClick={handleLike} disabled={utilStatus === 'loading'} className="flex items-center justify-start gap-1.5 sm:gap-2 overflow-hidden w-full cursor-pointer">
           <AnimatePresence mode="wait">
             {utilStatus === 'idle' && (
               <motion.div key="u-idle" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Rocket size={14} className="sm:hidden" stroke="#8e8e8e" />
-                <Rocket size={18} className="hidden sm:block" stroke="#8e8e8e" />
-                <span className="text-[11px] sm:text-sm text-[#8e8e8e] font-medium">Utilizar</span>
-                <span className="hidden sm:inline text-sm text-[#8e8e8e]">· {likes}</span>
+                <Rocket size={16} className="sm:hidden text-neutral-400" />
+                <Rocket size={20} className="hidden sm:block text-neutral-400" />
+                <span className="text-xs sm:text-sm text-neutral-500 font-medium">Utilizar</span>
+                <span className="hidden sm:inline text-sm text-neutral-500">· {likes}</span>
               </motion.div>
             )}
             {utilStatus === 'loading' && (
@@ -175,7 +177,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                 <AnimatedDots />
                 <AnimatePresence mode="wait">
-                  <motion.span key={utilStep} className="hidden sm:inline text-sm text-[#0095f6] font-medium truncate"
+                  <motion.span key={utilStep} className="hidden sm:inline text-sm text-[#3b82f6] font-medium truncate"
                     initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}>
                     {UTILIZAR_STEPS[utilStep]}
@@ -187,34 +189,34 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
               <motion.div key="u-done" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
-                <Check size={14} className="sm:hidden" stroke="#38bdf8" strokeWidth={2.5} />
-                <Check size={18} className="hidden sm:block" stroke="#38bdf8" strokeWidth={2.5} />
-                <span className="text-[11px] sm:text-sm text-[#38bdf8] font-semibold">Implementado</span>
-                <span className="hidden sm:inline text-sm text-[#8e8e8e]">· {likes}</span>
+                <Check size={16} className="sm:hidden text-[#3b82f6]" strokeWidth={2.5} />
+                <Check size={20} className="hidden sm:block text-[#3b82f6]" strokeWidth={2.5} />
+                <span className="text-xs sm:text-sm text-[#3b82f6] font-semibold">Implementado</span>
+                <span className="hidden sm:inline text-sm text-neutral-500">· {likes}</span>
               </motion.div>
             )}
           </AnimatePresence>
         </button>
 
         {/* ── Perguntas ── */}
-        <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden w-full">
+        <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden w-full cursor-pointer">
           <AnimatePresence mode="wait">
             {pergStatus === 'idle' && (
               <motion.div key="p-idle" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <MessageCircle size={14} className="sm:hidden" stroke="#8e8e8e" />
-                <MessageCircle size={18} className="hidden sm:block" stroke="#8e8e8e" />
-                <span className="text-[11px] sm:text-sm text-[#8e8e8e] font-medium">Perguntas</span>
+                <MessageCircle size={16} className="sm:hidden text-neutral-400" />
+                <MessageCircle size={20} className="hidden sm:block text-neutral-400" />
+                <span className="text-xs sm:text-sm text-neutral-500 font-medium">Perguntas</span>
               </motion.div>
             )}
             {pergStatus === 'picking' && (
               <motion.div key="p-pick" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <MessageCircle size={14} className="sm:hidden" stroke="#0095f6" fill="rgba(0,149,246,0.12)" />
-                <MessageCircle size={18} className="hidden sm:block" stroke="#0095f6" fill="rgba(0,149,246,0.12)" />
-                <span className="text-[11px] sm:text-sm text-[#0095f6] font-medium">Perguntas</span>
+                <MessageCircle size={16} className="sm:hidden text-[#3b82f6]" fill="rgba(59,130,246,0.12)" />
+                <MessageCircle size={20} className="hidden sm:block text-[#3b82f6]" fill="rgba(59,130,246,0.12)" />
+                <span className="text-xs sm:text-sm text-[#3b82f6] font-medium">Perguntas</span>
               </motion.div>
             )}
             {pergStatus === 'loading' && (
@@ -222,7 +224,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                 <AnimatedDots />
                 <AnimatePresence mode="wait">
-                  <motion.span key={pergStep} className="hidden sm:inline text-sm text-[#0095f6] font-medium truncate"
+                  <motion.span key={pergStep} className="hidden sm:inline text-sm text-[#3b82f6] font-medium truncate"
                     initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}>
                     {PERGUNTAS_STEPS[pergStep]}
@@ -234,33 +236,33 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
               <motion.div key="p-done" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
-                <Check size={14} className="sm:hidden" stroke="#f97316" strokeWidth={2.5} />
-                <Check size={18} className="hidden sm:block" stroke="#f97316" strokeWidth={2.5} />
-                <span className="text-[11px] sm:text-sm text-[#f97316] font-semibold truncate">{pergChoice}</span>
+                <Check size={16} className="sm:hidden text-[#f97316]" strokeWidth={2.5} />
+                <Check size={20} className="hidden sm:block text-[#f97316]" strokeWidth={2.5} />
+                <span className="text-xs sm:text-sm text-[#f97316] font-semibold truncate">{pergChoice}</span>
               </motion.div>
             )}
           </AnimatePresence>
         </button>
 
         {/* ── Ideias ── */}
-        <button onClick={handleIdeias} disabled={ideiaStatus === 'loading'} className="flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden w-full">
+        <button onClick={handleIdeias} disabled={ideiaStatus === 'loading'} className="flex items-center justify-center gap-1.5 sm:gap-2 overflow-hidden w-full cursor-pointer">
           <AnimatePresence mode="wait">
             {ideiaStatus === 'idle' && (
               <motion.div key="i-idle" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Lightbulb size={14} className="sm:hidden" stroke="#8e8e8e" />
-                <Lightbulb size={18} className="hidden sm:block" stroke="#8e8e8e" />
-                <span className="text-[11px] sm:text-sm text-[#8e8e8e] font-medium">Ideias</span>
+                <Lightbulb size={16} className="sm:hidden text-neutral-400" />
+                <Lightbulb size={20} className="hidden sm:block text-neutral-400" />
+                <span className="text-xs sm:text-sm text-neutral-500 font-medium">Ideias</span>
               </motion.div>
             )}
             {ideiaStatus === 'picking' && (
               <motion.div key="i-pick" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Lightbulb size={14} className="sm:hidden" stroke="#a855f7" fill="rgba(168,85,247,0.12)" />
-                <Lightbulb size={18} className="hidden sm:block" stroke="#a855f7" fill="rgba(168,85,247,0.12)" />
-                <span className="text-[11px] sm:text-sm text-[#a855f7] font-medium">Ideias</span>
+                <Lightbulb size={16} className="sm:hidden text-[#a855f7]" fill="rgba(168,85,247,0.12)" />
+                <Lightbulb size={20} className="hidden sm:block text-[#a855f7]" fill="rgba(168,85,247,0.12)" />
+                <span className="text-xs sm:text-sm text-[#a855f7] font-medium">Ideias</span>
               </motion.div>
             )}
             {ideiaStatus === 'loading' && (
@@ -280,24 +282,24 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
               <motion.div key="i-done" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
-                <Check size={14} className="sm:hidden" stroke="#f97316" strokeWidth={2.5} />
-                <Check size={18} className="hidden sm:block" stroke="#f97316" strokeWidth={2.5} />
-                <span className="text-[11px] sm:text-sm text-[#f97316] font-semibold truncate">{ideiaChoice}</span>
+                <Check size={16} className="sm:hidden text-[#f97316]" strokeWidth={2.5} />
+                <Check size={20} className="hidden sm:block text-[#f97316]" strokeWidth={2.5} />
+                <span className="text-xs sm:text-sm text-[#f97316] font-semibold truncate">{ideiaChoice}</span>
               </motion.div>
             )}
           </AnimatePresence>
         </button>
 
         {/* ── Compartilhar ── */}
-        <button onClick={handleShare} disabled={shareStatus === 'loading'} className="flex items-center justify-end gap-1 sm:gap-2 overflow-hidden w-full">
+        <button onClick={handleShare} disabled={shareStatus === 'loading'} className="flex items-center justify-end gap-1 sm:gap-2 overflow-hidden w-full cursor-pointer">
           <AnimatePresence mode="wait">
             {shareStatus === 'idle' && (
               <motion.div key="sh-idle" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Share2 size={14} className="sm:hidden" stroke="#8e8e8e" />
-                <Share2 size={18} className="hidden sm:block" stroke="#8e8e8e" />
-                <span className="text-[9px] sm:text-sm text-[#8e8e8e] font-medium">Compartilhar</span>
+                <Share2 size={16} className="sm:hidden text-neutral-400" />
+                <Share2 size={20} className="hidden sm:block text-neutral-400" />
+                <span className="text-[10px] sm:text-sm text-neutral-500 font-medium">Compartilhar</span>
               </motion.div>
             )}
             {shareStatus === 'loading' && (
@@ -310,9 +312,9 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
               <motion.div key="sh-done" className="flex items-center gap-1.5 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
-                <Check size={14} className="sm:hidden" stroke="#f97316" strokeWidth={2.5} />
-                <Check size={18} className="hidden sm:block" stroke="#f97316" strokeWidth={2.5} />
-                <span className="text-[9px] sm:text-sm text-[#f97316] font-semibold">Compartilhado</span>
+                <Check size={16} className="sm:hidden text-[#f97316]" strokeWidth={2.5} />
+                <Check size={20} className="hidden sm:block text-[#f97316]" strokeWidth={2.5} />
+                <span className="text-[10px] sm:text-sm text-[#f97316] font-semibold">Compartilhado</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -333,8 +335,8 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.07 }}
                   onClick={e => handlePergChoice(e, op.label)}
-                  style={{ color: op.color, borderColor: op.color + '50', backgroundColor: op.color + '10' }}
-                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-full py-1.5 sm:py-2 transition-colors hover:opacity-80">
+                  style={{ color: op.color, borderColor: op.color + '40', backgroundColor: op.color + '0a' }}
+                  className="flex-1 text-xs font-semibold border rounded-xl py-2 transition-all duration-200 hover:opacity-80 cursor-pointer">
                   {op.label}
                 </motion.button>
               ))}
@@ -356,8 +358,8 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.07 }}
                   onClick={e => handleIdeiaChoice(e, op.label)}
-                  style={{ color: op.color, borderColor: op.color + '50', backgroundColor: op.color + '10' }}
-                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-full py-1.5 sm:py-2 transition-colors hover:opacity-80">
+                  style={{ color: op.color, borderColor: op.color + '40', backgroundColor: op.color + '0a' }}
+                  className="flex-1 text-xs font-semibold border rounded-xl py-2 transition-all duration-200 hover:opacity-80 cursor-pointer">
                   {op.label}
                 </motion.button>
               ))}
@@ -368,8 +370,8 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
     </>
   );
 
-  const cls = "w-full bg-white dark:bg-[#1c1c1c] rounded-2xl shadow-sm px-5 py-4 text-left transition-colors " +
-    (onClick ? "hover:bg-[#f7f7f7] dark:hover:bg-[#252525] cursor-pointer" : "");
+  const cls = "w-full bg-white dark:bg-[#161616] rounded-2xl border border-neutral-100 dark:border-[#262626] px-6 py-5 text-left transition-all duration-200 " +
+    (onClick ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] cursor-pointer" : "");
 
   return onClick
     ? <button onClick={onClick} className={cls}>{cardContent}</button>
