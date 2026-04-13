@@ -353,7 +353,7 @@ export default function App() {
       >
 
         {/* O que mudou */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="O que mudou" icon={<TrendingUp size={18}/>}>
           {[
             { label: 'Concorrência', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
@@ -377,7 +377,7 @@ export default function App() {
         </motion.div>
 
         {/* Geografia */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Geografia" icon={<MapPin size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Região de atuação</p>
@@ -402,7 +402,7 @@ export default function App() {
         </motion.div>
 
         {/* Legislação */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Legislação" icon={<Scale size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">Conformidade</p>
@@ -423,7 +423,7 @@ export default function App() {
         </motion.div>
 
         {/* Produtos */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Produtos" icon={<Package size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Novidades do mercado</p>
@@ -445,7 +445,7 @@ export default function App() {
         </motion.div>
 
         {/* Serviços */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Serviços" icon={<Wrench size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">Ação da semana</p>
@@ -467,7 +467,7 @@ export default function App() {
         </motion.div>
 
         {/* Parceiros */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } } }}>
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title="Parceiros" icon={<Handshake size={18}/>} count={`${data.fornecedores.length}`}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-4">Fornecedores · {data.fornecedores.length} mapeados</p>
