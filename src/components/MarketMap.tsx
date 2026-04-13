@@ -1,0 +1,182 @@
+import React, { useEffect } from 'react';
+import { MapPin } from 'lucide-react';
+import type { Competitor } from '../types';
+import { BottomModal, ModalHeader } from './BottomModal';
+import 'leaflet/dist/leaflet.css';
+
+// Coordenadas reais de São Paulo — Av. Paulista e entorno
+const COORDS: [number, number][] = [
+  [-23.5600, -46.6572], // Burger King Paulista — Av. Paulista, 900
+  [-23.5628, -46.6545], // Bob's Consolação — R. da Consolação, 2012
+  [-23.5601, -46.6580], // KFC Paulista — Av. Paulista, 1374
+  [-23.5590, -46.6598], // Subway Augusta — R. Augusta, 300
+  [-23.5640, -46.6520], // Giraffas Brigadeiro — Av. Brigadeiro Luís Antônio
+  [-23.5620, -46.6490], // Habib's Centro — R. Boa Vista, 254
+  [-23.5605, -46.6610], // Madero Burger Paulista — Av. Paulista, 2100
+  [-23.5648, -46.6530], // Popeyes Bela Vista — R. 13 de Maio, 150
+];
+
+// Ponto central — McDonald's Av. Paulista
+const YOU: [number, number] = [-23.5614, -46.6560];
+
+function isDireto(nome: string) {
+  return /burger king|bob's|bobs|kfc|giraffas|habib|popeyes/i.test(nome);
+}
+
+function ratingColor(nota: number | string) {
+  const n = Number(nota);
+  if (n >= 4.3) return '#22c55e';
+  if (n >= 4.0) return '#f59e0b';
+  return '#ef4444';
+}
+
+interface ButtonProps {
+  open: boolean;
+  onToggle: () => void;
+}
+
+interface ContentProps {
+  open: boolean;
+  onClose: () => void;
+  competitors: Competitor[];
+  onCompetitorClick?: (c: Competitor) => void;
+}
+
+export function MarketMapButton({ open, onToggle }: ButtonProps) {
+  return (
+    <button
+      onClick={onToggle}
+      className="w-full h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#2a2a2a] shadow-sm hover:bg-[#f7f7f7] dark:hover:bg-[#3a3a3a] rounded-lg text-xs md:text-sm font-semibold text-[#262626] dark:text-[#f0f0f0] transition-colors">
+      {open ? 'Fechar' : 'Mapa'}
+    </button>
+  );
+}
+
+export function MarketMapContent({ open, onClose, competitors, onCompetitorClick }: ContentProps) {
+  return (
+    <BottomModal onClose={onClose} height="90vh">
+      <ModalHeader onClose={onClose}>
+        <MapPin size={18} className="text-[#0095f6]" />
+        <h2 className="text-base font-bold">Mapa do Mercado</h2>
+      </ModalHeader>
+
+      <div style={{ height: 'calc(90vh - 120px)' }}>
+        <LeafletMap competitors={competitors} onCompetitorClick={onCompetitorClick} />
+      </div>
+
+      {/* Legenda */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 border-t border-[#f0f0f0] dark:border-[#2a2a2a] flex-shrink-0">
+        {[
+          { color: '#8e8e8e', label: 'Direto', filled: true },
+          { color: '#8e8e8e', label: 'Indireto', filled: false },
+          { color: '#22c55e', label: '≥ 4.3', filled: true },
+          { color: '#f59e0b', label: '4.0–4.2', filled: true },
+          { color: '#ef4444', label: '< 4.0', filled: true },
+        ].map(({ color, label, filled }) => (
+          <div key={label} className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: filled ? color : 'transparent', border: filled ? 'none' : `1.5px solid ${color}` }} />
+            <span className="text-[10px] text-[#8e8e8e]">{label}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-1.5 ml-auto">
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[#0095f6]" />
+          <span className="text-[10px] text-[#8e8e8e]">Você</span>
+        </div>
+      </div>
+    </BottomModal>
+  );
+}
+
+function LeafletMap({ competitors, onCompetitorClick }: { competitors: Competitor[]; onCompetitorClick?: (c: Competitor) => void }) {
+  const mapRef = React.useRef<HTMLDivElement>(null);
+  const mapInstanceRef = React.useRef<any>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    import('leaflet').then(L => {
+      // Fix ícones padrão do Leaflet
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      });
+
+      const map = L.map(mapRef.current!, {
+        center: YOU,
+        zoom: 15,
+        zoomControl: true,
+        scrollWheelZoom: true,
+      });
+
+      mapInstanceRef.current = map;
+
+      // Tiles OpenStreetMap
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Pin "Você"
+      const youIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+          width:20px;height:20px;border-radius:50%;
+          background:#0095f6;border:3px solid white;
+          box-shadow:0 2px 8px rgba(0,149,246,0.5);
+        "></div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      });
+      L.marker(YOU, { icon: youIcon }).addTo(map)
+        .bindPopup('<strong style="font-size:13px">Você está aqui</strong>');
+
+      // Pins dos concorrentes
+      competitors.slice(0, 8).forEach((c, i) => {
+        const coord = COORDS[i] ?? YOU;
+        const color = ratingColor(c.nota_google);
+        const direto = isDireto(c.nome);
+
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="
+            width:14px;height:14px;border-radius:50%;
+            background:${direto ? color : 'white'};
+            border:2.5px solid ${color};
+            box-shadow:0 1px 4px rgba(0,0,0,0.3);
+          "></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        });
+
+        const popup = `
+          <div style="min-width:160px;font-family:sans-serif">
+            <strong style="font-size:13px;display:block;margin-bottom:2px">${c.nome}</strong>
+            <span style="font-size:11px;color:#8e8e8e">${c.endereco}</span><br/>
+            <span style="font-size:12px;font-weight:600;color:${color}">★ ${Number(c.nota_google).toFixed(1)}</span>
+            <span style="font-size:11px;color:#8e8e8e;margin-left:6px">${c.faixa_preco}</span>
+            ${direto ? '<span style="font-size:10px;background:#f0f0f0;padding:1px 6px;border-radius:99px;margin-left:4px">Direto</span>' : '<span style="font-size:10px;background:#f0f0f0;padding:1px 6px;border-radius:99px;margin-left:4px">Indireto</span>'}
+          </div>
+        `;
+
+        L.marker(coord, { icon })
+          .addTo(map)
+          .bindPopup(popup)
+          .on('click', () => {
+            if (onCompetitorClick) onCompetitorClick(c);
+          });
+      });
+    });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  return <div ref={mapRef} style={{ width: '100%', height: '100%' }} />;
+}
