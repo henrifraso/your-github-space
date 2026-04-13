@@ -44,8 +44,8 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
   }, [pct, delay]);
 
   return (
-    <div className="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105" onClick={onClick}>
-      <div className="relative w-14 h-14 md:w-20 md:h-20">
+    <div className="flex flex-col items-center gap-1 sm:gap-1.5 flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95" onClick={onClick}>
+      <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20">
         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64">
           <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="3.5" className="text-neutral-200 dark:text-[#262626]" />
           <motion.circle
@@ -60,16 +60,16 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.span
-            className="text-xs md:text-base font-bold text-neutral-800 dark:text-neutral-100"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: delay + 0.4 }}
+            className="text-[10px] sm:text-xs md:text-base font-bold text-neutral-800 dark:text-neutral-100"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: delay + 0.4, duration: 0.3 }}
           >
             {displayPct}%
           </motion.span>
         </div>
       </div>
-      <span className="text-[10px] md:text-xs font-semibold text-neutral-500 tracking-tight text-center leading-tight w-full">{label}</span>
+      <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold text-neutral-500 tracking-tight text-center leading-tight w-full max-w-[60px] sm:max-w-none">{label}</span>
     </div>
   );
 }
