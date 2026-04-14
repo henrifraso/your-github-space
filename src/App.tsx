@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
   MapPin, Scale, Wrench, Handshake, Store, Zap,
-  SlidersHorizontal, X
+  Settings2, X
 } from 'lucide-react';
 
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
@@ -308,8 +308,8 @@ export default function App() {
           </button>
           <div className="flex items-center gap-0.5 sm:gap-1">
             <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
-              <SlidersHorizontal size={18} className="sm:hidden" />
-              <SlidersHorizontal size={20} className="hidden sm:block" />
+              <Settings2 size={18} className="sm:hidden" />
+              <Settings2 size={20} className="hidden sm:block" />
             </button>
             <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               {dark ? <Sun size={18} className="sm:hidden" /> : <Moon size={18} className="sm:hidden" />}
@@ -872,7 +872,7 @@ export default function App() {
             >
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal size={18} className="text-[#3b82f6]" />
+                  <Settings2 size={18} className="text-[#3b82f6]" />
                   <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Dificuldade</h2>
                 </div>
                 <button onClick={() => setDifficultyOpen(false)} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer">
