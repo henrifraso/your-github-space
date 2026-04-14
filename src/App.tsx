@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Grid, Bookmark, Tag, ChevronRight, TrendingUp, Package,
-  Lightbulb, Trophy, Search, ChevronDown, BarChart3,
+  Bookmark, ChevronRight, TrendingUp, Package,
+  Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
-  Users, MapPin, DollarSign, Scale, Wrench, Handshake, Calendar, Star
+  MapPin, Scale, Wrench, Handshake, Store, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -305,18 +305,19 @@ export default function App() {
                   <span><strong>{data.negocio.nivel}</strong> Nível</span>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
-                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
-                    <Tag size={12} className="sm:hidden text-[#0891b2] flex-shrink-0" />
-                    <Tag size={14} className="hidden sm:block text-[#0891b2] flex-shrink-0" />
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
+                    <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
+                    <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">Seu mercado · {data.mercado_nome ?? 'Beleza & Estética'}</span>
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs md:text-sm">
-                    <span className="text-[#ca8a04] flex-shrink-0 text-[10px] sm:text-xs">📍</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                    <MapPin size={13} className="sm:hidden text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
+                    <MapPin size={15} className="hidden sm:block text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">Posição · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs md:text-sm">
-                    <TrendingUp size={12} className="sm:hidden text-[#16a34a] flex-shrink-0" />
-                    <TrendingUp size={14} className="hidden sm:block text-[#16a34a] flex-shrink-0" />
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                    <Zap size={13} className="sm:hidden text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
+                    <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">Evolução · {data.progresso_pct}% para o próximo nível</span>
                   </div>
                 </div>
