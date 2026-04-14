@@ -157,7 +157,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
   const cardContent = (
     <>
       <div>{children}</div>
-      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#262626] flex items-center justify-between min-h-[32px] sm:min-h-[40px] gap-1">
+      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#262626] flex items-center justify-between min-h-[32px] sm:min-h-[40px]">
 
         {/* ── Utilizar ── */}
         <button onClick={handleLike} disabled={utilStatus === 'loading'} className="flex items-center justify-start gap-1.5 sm:gap-2 overflow-hidden w-full cursor-pointer">
