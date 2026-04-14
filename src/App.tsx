@@ -300,20 +300,22 @@ export default function App() {
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3">
         <div className="max-w-[935px] mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
-          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
-            <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">{data.negocio.nome_fantasia}</h1>
-            <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
-            <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
+              <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
+              <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">{data.negocio.nome_fantasia}</h1>
+              <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
+              <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
+            </button>
+            <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-500 dark:text-neutral-400 p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
+              <SlidersHorizontal size={15} className="sm:hidden" />
+              <SlidersHorizontal size={16} className="hidden sm:block" />
+            </button>
+          </div>
           <div className="flex items-center gap-0.5 sm:gap-1">
             <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               {dark ? <Sun size={18} className="sm:hidden" /> : <Moon size={18} className="sm:hidden" />}
               {dark ? <Sun size={20} className="hidden sm:block" /> : <Moon size={20} className="hidden sm:block" />}
-            </button>
-            <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
-              <SlidersHorizontal size={18} className="sm:hidden" />
-              <SlidersHorizontal size={20} className="hidden sm:block" />
             </button>
             <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               <Bell size={18} className="sm:hidden" />
