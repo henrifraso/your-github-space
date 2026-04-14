@@ -227,7 +227,7 @@ export default function App() {
 
   return (
     <div className={dark ? 'dark' : ''}>
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a] text-neutral-800 dark:text-neutral-100 font-sans">
+    <div className="min-h-screen bg-[#ececec] dark:bg-[#0a0a0a] text-neutral-800 dark:text-neutral-100 font-sans">
 
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3">
