@@ -207,7 +207,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ duration: 0.2 }}>
                 <MessageCircle size={16} className="sm:hidden text-neutral-400" />
                 <MessageCircle size={20} className="hidden sm:block text-neutral-400" />
-                <span className="text-xs sm:text-sm text-neutral-500 font-medium">Perguntas</span>
+                <span className="hidden sm:inline text-sm text-neutral-500 font-medium">Perguntas</span>
               </motion.div>
             )}
             {pergStatus === 'picking' && (
@@ -216,7 +216,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ duration: 0.2 }}>
                 <MessageCircle size={16} className="sm:hidden text-[#3b82f6]" fill="rgba(59,130,246,0.12)" />
                 <MessageCircle size={20} className="hidden sm:block text-[#3b82f6]" fill="rgba(59,130,246,0.12)" />
-                <span className="text-xs sm:text-sm text-[#3b82f6] font-medium">Perguntas</span>
+                <span className="hidden sm:inline text-sm text-[#3b82f6] font-medium">Perguntas</span>
               </motion.div>
             )}
             {pergStatus === 'loading' && (
@@ -238,7 +238,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
                 <Check size={16} className="sm:hidden text-[#f97316]" strokeWidth={2.5} />
                 <Check size={20} className="hidden sm:block text-[#f97316]" strokeWidth={2.5} />
-                <span className="text-xs sm:text-sm text-[#f97316] font-semibold truncate">{pergChoice}</span>
+                <span className="hidden sm:inline text-sm text-[#f97316] font-semibold truncate">{pergChoice}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -253,7 +253,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ duration: 0.2 }}>
                 <Lightbulb size={16} className="sm:hidden text-neutral-400" />
                 <Lightbulb size={20} className="hidden sm:block text-neutral-400" />
-                <span className="text-xs sm:text-sm text-neutral-500 font-medium">Ideias</span>
+                <span className="hidden sm:inline text-sm text-neutral-500 font-medium">Ideias</span>
               </motion.div>
             )}
             {ideiaStatus === 'picking' && (
@@ -262,7 +262,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ duration: 0.2 }}>
                 <Lightbulb size={16} className="sm:hidden text-[#a855f7]" fill="rgba(168,85,247,0.12)" />
                 <Lightbulb size={20} className="hidden sm:block text-[#a855f7]" fill="rgba(168,85,247,0.12)" />
-                <span className="text-xs sm:text-sm text-[#a855f7] font-medium">Ideias</span>
+                <span className="hidden sm:inline text-sm text-[#a855f7] font-medium">Ideias</span>
               </motion.div>
             )}
             {ideiaStatus === 'loading' && (
@@ -284,7 +284,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
                 <Check size={16} className="sm:hidden text-[#f97316]" strokeWidth={2.5} />
                 <Check size={20} className="hidden sm:block text-[#f97316]" strokeWidth={2.5} />
-                <span className="text-xs sm:text-sm text-[#f97316] font-semibold truncate">{ideiaChoice}</span>
+                <span className="hidden sm:inline text-sm text-[#f97316] font-semibold truncate">{ideiaChoice}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -299,7 +299,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ duration: 0.2 }}>
                 <Share2 size={16} className="sm:hidden text-neutral-400" />
                 <Share2 size={20} className="hidden sm:block text-neutral-400" />
-                <span className="text-[10px] sm:text-sm text-neutral-500 font-medium">Compartilhar</span>
+                <span className="hidden sm:inline text-sm text-neutral-500 font-medium">Compartilhar</span>
               </motion.div>
             )}
             {shareStatus === 'loading' && (
@@ -314,7 +314,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
                 <Check size={16} className="sm:hidden text-[#f97316]" strokeWidth={2.5} />
                 <Check size={20} className="hidden sm:block text-[#f97316]" strokeWidth={2.5} />
-                <span className="text-[10px] sm:text-sm text-[#f97316] font-semibold">Compartilhado</span>
+                <span className="hidden sm:inline text-sm text-[#f97316] font-semibold">Compartilhado</span>
               </motion.div>
             )}
           </AnimatePresence>
