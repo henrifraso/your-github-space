@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Grid, Bookmark, Tag, ChevronRight, TrendingUp, Package,
-  Lightbulb, Trophy, Search, ChevronDown, BarChart3,
+  Bookmark, ChevronRight, TrendingUp, Package,
+  Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
-  Users, MapPin, DollarSign, Scale, Wrench, Handshake, Calendar, Star
+  MapPin, Scale, Wrench, Handshake, Store, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
