@@ -168,7 +168,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ duration: 0.2 }}>
                 <Rocket size={16} className="sm:hidden text-neutral-400" />
                 <Rocket size={20} className="hidden sm:block text-neutral-400" />
-                <span className="text-xs sm:text-sm text-neutral-500 font-medium">Utilizar</span>
+                <span className="hidden sm:inline text-sm text-neutral-500 font-medium">Utilizar</span>
                 <span className="hidden sm:inline text-sm text-neutral-500">· {likes}</span>
               </motion.div>
             )}
