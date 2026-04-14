@@ -191,7 +191,7 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
                 transition={{ type: 'spring', stiffness: 400, damping: 18 }}>
                 <Check size={16} className="sm:hidden text-[#3b82f6]" strokeWidth={2.5} />
                 <Check size={20} className="hidden sm:block text-[#3b82f6]" strokeWidth={2.5} />
-                <span className="text-xs sm:text-sm text-[#3b82f6] font-semibold">Implementado</span>
+                <span className="hidden sm:inline text-sm text-[#3b82f6] font-semibold">Implementado</span>
                 <span className="hidden sm:inline text-sm text-neutral-500">· {likes}</span>
               </motion.div>
             )}
