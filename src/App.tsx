@@ -326,7 +326,7 @@ export default function App() {
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
               {[['Plano', () => setPlanoOpen(true)], ['Estratégia', () => setEstrategiaOpen(true)], ['Prática', () => setPraticaOpen(true)]].map(([label, fn]) => (
                 <button key={label as string} onClick={fn as () => void}
-                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#fafafa] dark:bg-[#161616] border border-neutral-200 dark:border-[#262626] hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
                   {label as string}
                 </button>
               ))}

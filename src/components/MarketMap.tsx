@@ -31,7 +31,7 @@ export function MarketMapButton({ open, onToggle }: ButtonProps) {
   return (
     <button
       onClick={onToggle}
-      className="w-full h-9 md:h-11 flex items-center justify-center bg-[#fafafa] dark:bg-[#161616] border border-neutral-200 dark:border-[#262626] hover:bg-neutral-100 dark:hover:bg-neutral-800/50 rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
+      className="w-full h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
       {open ? 'Fechar' : 'Mapa'}
     </button>
   );
