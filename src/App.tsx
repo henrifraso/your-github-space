@@ -8,8 +8,69 @@ import {
   Bookmark, ChevronRight, TrendingUp, Package,
   Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
-  MapPin, Scale, Wrench, Handshake, Store, Zap
+  MapPin, Scale, Wrench, Handshake, Store, Zap,
+  SlidersHorizontal, X
 } from 'lucide-react';
+
+// ─── Sistema de Dificuldade ───────────────────────────────────────────────────
+type Difficulty = 'muito_facil' | 'facil' | 'normal' | 'dificil' | 'muito_dificil';
+
+const DIFF_META: Record<Difficulty, { label: string; emoji: string; desc: string }> = {
+  muito_facil: { label: 'Muito Fácil',   emoji: '🌱', desc: 'Linguagem bem simples e direta' },
+  facil:       { label: 'Fácil',         emoji: '😊', desc: 'Fácil de entender' },
+  normal:      { label: 'Normal',        emoji: '⚖️', desc: 'Linguagem do dia a dia' },
+  dificil:     { label: 'Difícil',       emoji: '📊', desc: 'Termos de negócios' },
+  muito_dificil: { label: 'Muito Difícil', emoji: '🎯', desc: 'Linguagem técnica e estratégica' },
+};
+
+const DIFF_ORDER: Difficulty[] = ['muito_facil', 'facil', 'normal', 'dificil', 'muito_dificil'];
+
+type TextKey =
+  | 'sec_mudou' | 'sec_geo' | 'sec_leg' | 'sec_prod' | 'sec_serv' | 'sec_parc'
+  | 'lbl_conc' | 'lbl_merc' | 'lbl_econ' | 'lbl_even' | 'lbl_rep'
+  | 'stat_opor' | 'stat_conc' | 'stat_nivel'
+  | 'bio_mercado' | 'bio_posicao' | 'bio_evolucao'
+  | 'btn_plano' | 'btn_estrat' | 'btn_prat'
+  | 'geo_regiao' | 'geo_clima'
+  | 'leg_conf' | 'leg_atenc' | 'leg_desc'
+  | 'prod_novo' | 'serv_acao' | 'parc_label';
+
+const TEXTS: Record<TextKey, Record<Difficulty, string>> = {
+  sec_mudou:    { muito_facil: 'Novidades',            facil: 'Novidades',            normal: 'O que mudou',           dificil: 'Inteligência de Mercado',   muito_dificil: 'Market Intelligence' },
+  sec_geo:      { muito_facil: 'Sua região',           facil: 'Região',               normal: 'Geografia',             dificil: 'Análise Geográfica',        muito_dificil: 'Geomarketing' },
+  sec_leg:      { muito_facil: 'Regras',               facil: 'Documentação',         normal: 'Legislação',            dificil: 'Compliance',                muito_dificil: 'Regulatory Framework' },
+  sec_prod:     { muito_facil: 'Produtos',             facil: 'Produtos',             normal: 'Produtos',              dificil: 'Portfólio',                 muito_dificil: 'Product Portfolio' },
+  sec_serv:     { muito_facil: 'Dicas práticas',       facil: 'Dicas',                normal: 'Serviços',              dificil: 'Operações',                 muito_dificil: 'Service Operations' },
+  sec_parc:     { muito_facil: 'Fornecedores',         facil: 'Fornecedores',         normal: 'Parceiros',             dificil: 'Supply Chain',              muito_dificil: 'Supply Chain & Partners' },
+  lbl_conc:     { muito_facil: 'Concorrentes',         facil: 'Concorrência',         normal: 'Concorrência',          dificil: 'Landscape Competitivo',     muito_dificil: 'Competitive Intelligence' },
+  lbl_merc:     { muito_facil: 'O mercado',            facil: 'Mercado',              normal: 'Mercado',               dificil: 'Market Trends',             muito_dificil: 'Market Dynamics' },
+  lbl_econ:     { muito_facil: 'Preços na área',       facil: 'Economia',             normal: 'Economia',              dificil: 'Indicadores econômicos',    muito_dificil: 'Economic Indicators' },
+  lbl_even:     { muito_facil: 'Datas importantes',    facil: 'Eventos',              normal: 'Eventos',               dificil: 'Calendário estratégico',    muito_dificil: 'Strategic Calendar' },
+  lbl_rep:      { muito_facil: 'Avaliações',           facil: 'Reputação',            normal: 'Reputação',             dificil: 'Brand Equity',              muito_dificil: 'Reputation Management' },
+  stat_opor:    { muito_facil: 'dicas',                facil: 'oportunidades',        normal: 'oportunidades',         dificil: 'insights',                  muito_dificil: 'business opportunities' },
+  stat_conc:    { muito_facil: 'na área',              facil: 'concorrentes',         normal: 'concorrentes',          dificil: 'players',                   muito_dificil: 'market players' },
+  stat_nivel:   { muito_facil: 'Fase',                 facil: 'Nível',                normal: 'Nível',                 dificil: 'Tier',                      muito_dificil: 'Performance Tier' },
+  bio_mercado:  { muito_facil: 'Tipo de negócio',      facil: 'Seu mercado',          normal: 'Seu mercado',           dificil: 'Segmento de mercado',       muito_dificil: 'Market Segment' },
+  bio_posicao:  { muito_facil: 'Posição na área',      facil: 'Posição',              normal: 'Posição',               dificil: 'Market position',           muito_dificil: 'Competitive ranking' },
+  bio_evolucao: { muito_facil: 'Progresso',            facil: 'Evolução',             normal: 'Evolução',              dificil: 'Performance score',         muito_dificil: 'Growth trajectory' },
+  btn_plano:    { muito_facil: 'O que fazer',          facil: 'Plano',                normal: 'Plano',                 dificil: 'Roadmap',                   muito_dificil: 'Strategic Roadmap' },
+  btn_estrat:   { muito_facil: 'Posição',              facil: 'Estratégia',           normal: 'Estratégia',            dificil: 'Posicionamento',            muito_dificil: 'Market Positioning' },
+  btn_prat:     { muito_facil: 'Dicas',                facil: 'Prática',              normal: 'Prática',               dificil: 'Operações',                 muito_dificil: 'Best Practices' },
+  geo_regiao:   { muito_facil: 'Sua área',             facil: 'Região de atuação',    normal: 'Região de atuação',     dificil: 'Área de influência',        muito_dificil: 'Primary trade area' },
+  geo_clima:    { muito_facil: 'Tempo da semana',      facil: 'Clima da semana',      normal: 'Clima da semana',       dificil: 'Previsão meteorológica',    muito_dificil: 'Weather forecast' },
+  leg_conf:     { muito_facil: 'Licenças e documentos', facil: 'Documentação',        normal: 'Conformidade',          dificil: 'Status regulatório',        muito_dificil: 'Regulatory compliance' },
+  leg_atenc:    { muito_facil: 'Cuidado com isso',     facil: 'Importante',           normal: 'Atenção',               dificil: 'Risk Alert',                muito_dificil: 'Compliance Risk Alert' },
+  leg_desc:     {
+    muito_facil: 'Você precisa guardar registros de temperatura dos alimentos e as notas dos produtos. A Vigilância Sanitária de SP vai fazer vistoria em maio/2026.',
+    facil: 'A lei exige registro de temperatura e rastreabilidade dos alimentos (RDC 216/2004). Auditorias da Vigilância Sanitária SP previstas para mai/2026.',
+    normal: 'Resolução RDC 216/2004 ANVISA exige registro de temperatura e rastreabilidade de alimentos. Auditorias trimestrais da Vigilância Sanitária SP programadas para mai/2026.',
+    dificil: 'RDC 216/2004 ANVISA: compliance mandatório para controle de temperatura e rastreabilidade. Auditorias regulatórias Q2/2026 — risco de interdição em caso de não conformidade.',
+    muito_dificil: 'Regulatory exposure: RDC 216/2004 ANVISA mandates temperature logging & supply chain traceability. Q2/2026 regulatory audit cycle — non-compliance risk: operational shutdown.',
+  },
+  prod_novo:    { muito_facil: 'Novidades para vender', facil: 'Novidades do mercado', normal: 'Novidades do mercado', dificil: 'Innovation pipeline',       muito_dificil: 'Product Innovation Pipeline' },
+  serv_acao:    { muito_facil: 'Dica desta semana',    facil: 'Dica da semana',       normal: 'Ação da semana',        dificil: 'Quick win da semana',       muito_dificil: 'Weekly tactical execution' },
+  parc_label:   { muito_facil: 'Quem pode te fornecer', facil: 'Fornecedores',        normal: 'Fornecedores',          dificil: 'Supplier network',          muito_dificil: 'Strategic supplier network' },
+};
 import { motion, AnimatePresence } from 'motion/react';
 
 import type { OmniData, Competitor, TimelineEvent } from './types';
@@ -28,6 +89,9 @@ export default function App() {
   const [data, setData] = useState<OmniData>(MOCK_DATA);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => (localStorage.getItem('difficulty') as Difficulty) ?? 'normal');
+  const [difficultyOpen, setDifficultyOpen] = useState(false);
+  const txt = (key: TextKey) => TEXTS[key][difficulty];
   const [scrolled, setScrolled] = useState(false);
   const touchStartY = useRef(0);
   const scrollCooldownRef = useRef(false);
@@ -73,7 +137,7 @@ export default function App() {
 
   const anyModalOpen = storyIndex !== null || planoOpen || evolucaoOpen || empresaOpen ||
     circlePopupIdx !== null || salvosOpen || estrategiaOpen || praticaOpen || mapOpen ||
-    selectedConcorrente !== null || selectedTimelineEvent !== null || selectedItem !== null;
+    selectedConcorrente !== null || selectedTimelineEvent !== null || selectedItem !== null || difficultyOpen;
   const anyModalOpenRef = useRef(false);
   useEffect(() => { anyModalOpenRef.current = anyModalOpen; }, [anyModalOpen]);
 
@@ -88,6 +152,10 @@ export default function App() {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
     document.body.style.backgroundColor = dark ? '#0a0a0a' : '#fafafa';
   }, [dark]);
+
+  useEffect(() => {
+    localStorage.setItem('difficulty', difficulty);
+  }, [difficulty]);
 
   useEffect(() => {
     const omniData = (window as any).__OMNI_DATA__;
@@ -243,6 +311,10 @@ export default function App() {
               {dark ? <Sun size={18} className="sm:hidden" /> : <Moon size={18} className="sm:hidden" />}
               {dark ? <Sun size={20} className="hidden sm:block" /> : <Moon size={20} className="hidden sm:block" />}
             </button>
+            <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
+              <SlidersHorizontal size={18} className="sm:hidden" />
+              <SlidersHorizontal size={20} className="hidden sm:block" />
+            </button>
             <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               <Bell size={18} className="sm:hidden" />
               <Bell size={20} className="hidden sm:block" />
@@ -300,32 +372,32 @@ export default function App() {
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
                 <div className="flex gap-3 sm:gap-4 md:gap-10 text-[11px] sm:text-xs md:text-base">
-                  <span><strong>{gridItems.length}</strong> oportunidades</span>
-                  <span><strong>{data.concorrentes.length}</strong> concorrentes</span>
-                  <span><strong>{data.negocio.nivel}</strong> Nível</span>
+                  <span><strong>{gridItems.length}</strong> {txt('stat_opor')}</span>
+                  <span><strong>{data.concorrentes.length}</strong> {txt('stat_conc')}</span>
+                  <span><strong>{data.negocio.nivel}</strong> {txt('stat_nivel')}</span>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
-                    <span className="text-neutral-800 dark:text-neutral-200 truncate">Seu mercado · {data.mercado_nome ?? 'Beleza & Estética'}</span>
+                    <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_mercado')} · {data.mercado_nome ?? 'Beleza & Estética'}</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
                     <MapPin size={13} className="sm:hidden text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
                     <MapPin size={15} className="hidden sm:block text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
-                    <span className="text-neutral-800 dark:text-neutral-200 truncate">Posição · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
+                    <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_posicao')} · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
                     <Zap size={13} className="sm:hidden text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
                     <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
-                    <span className="text-neutral-800 dark:text-neutral-200 truncate">Evolução · {data.progresso_pct}% para o próximo nível</span>
+                    <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
                   </div>
                 </div>
               </div>
             </div>
             <MarketMapButton open={mapOpen} onToggle={() => setMapOpen(o => !o)} />
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-              {[['Plano', () => setPlanoOpen(true)], ['Estratégia', () => setEstrategiaOpen(true)], ['Prática', () => setPraticaOpen(true)]].map(([label, fn]) => (
+              {[[txt('btn_plano'), () => setPlanoOpen(true)], [txt('btn_estrat'), () => setEstrategiaOpen(true)], [txt('btn_prat'), () => setPraticaOpen(true)]].map(([label, fn]) => (
                 <button key={label as string} onClick={fn as () => void}
                   className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
                   {label as string}
@@ -355,13 +427,13 @@ export default function App() {
 
         {/* O que mudou */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title="O que mudou" icon={<TrendingUp size={18}/>}>
+        <FeedSection title={txt('sec_mudou')} icon={<TrendingUp size={18}/>}>
           {[
-            { label: 'Concorrência', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
-            { label: 'Mercado', color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
-            { label: 'Economia', color: '#3b82f6', titulo: `Ticket médio R$ 38–52 · Nota média ★ ${notaMediaNum} na região`, detalhe: 'Poder de compra estável na Paulista. Combos e promoções de app são o principal driver de decisão.', onClick: undefined },
-            { label: 'Eventos', color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
-            { label: 'Reputação', color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
+            { label: txt('lbl_conc'), color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
+            { label: txt('lbl_merc'), color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
+            { label: txt('lbl_econ'), color: '#3b82f6', titulo: `Ticket médio R$ 38–52 · Nota média ★ ${notaMediaNum} na região`, detalhe: 'Poder de compra estável na Paulista. Combos e promoções de app são o principal driver de decisão.', onClick: undefined },
+            { label: txt('lbl_even'), color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
+            { label: txt('lbl_rep'), color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
           ].map(item => (
             <FeedCard key={item.label} onClick={item.onClick}>
               <div className="flex items-start gap-3">
@@ -379,15 +451,15 @@ export default function App() {
 
         {/* Geografia */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title="Geografia" icon={<MapPin size={18}/>}>
+        <FeedSection title={txt('sec_geo')} icon={<MapPin size={18}/>}>
           <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Região de atuação</p>
-            <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Av. Paulista, {data.negocio.cidade} — alto fluxo e forte concorrência no corredor</p>
-            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">Corredor com +500 mil pessoas/dia. Pico de movimento: 11h–14h e 18h–21h. Público: executivos, turistas e moradores da região.</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">{txt('geo_regiao')}</p>
+            <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Av. Paulista, {data.negocio.cidade} — {difficulty === 'muito_facil' ? 'lugar com muita gente passando' : difficulty === 'facil' ? 'área movimentada com forte concorrência' : difficulty === 'dificil' ? 'corredor de alto tráfego com densidade competitiva elevada' : difficulty === 'muito_dificil' ? 'high-density corridor com intense competitive pressure' : 'alto fluxo e forte concorrência no corredor'}</p>
+            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{difficulty === 'muito_facil' ? 'Muita gente passa por aqui todo dia. Horários cheios: 11h–14h e 18h–21h. Público: trabalhadores, turistas e moradores.' : difficulty === 'muito_dificil' ? '+500k people/day. Peak hours: 11h–14h, 18h–21h. Demographics: corporate professionals, tourists, local residents.' : 'Corredor com +500 mil pessoas/dia. Pico de movimento: 11h–14h e 18h–21h. Público: executivos, turistas e moradores da região.'}</p>
           </FeedCard>
           {data.previsao_clima.length > 0 && (
             <FeedCard>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">Clima da semana</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">{txt('geo_clima')}</p>
               <div className="flex gap-4 overflow-x-auto no-scrollbar">
                 {data.previsao_clima.map((w, i) => (
                   <div key={i} className="flex-shrink-0 text-center">
@@ -404,9 +476,9 @@ export default function App() {
 
         {/* Legislação */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title="Legislação" icon={<Scale size={18}/>}>
+        <FeedSection title={txt('sec_leg')} icon={<Scale size={18}/>}>
           <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">Conformidade</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">{txt('leg_conf')}</p>
             <div className="grid grid-cols-2 gap-4">
               {[{label:'Vigilância sanitária',valor:'OK'},{label:'Alvará municipal',valor:'OK'},{label:'ANVISA alimentos',valor:'2025'},{label:'CVS-5 manipulação',valor:'Jan/25'}].map(s => (
                 <div key={s.label}>
@@ -417,17 +489,17 @@ export default function App() {
             </div>
           </FeedCard>
           <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">Atenção</p>
-            <p className="text-sm text-neutral-500 leading-relaxed">Resolução RDC 216/2004 ANVISA exige registro de temperatura e rastreabilidade de alimentos. Auditorias trimestrais da Vigilância Sanitária SP programadas para mai/2026.</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">{txt('leg_atenc')}</p>
+            <p className="text-sm text-neutral-500 leading-relaxed">{txt('leg_desc')}</p>
           </FeedCard>
         </FeedSection>
         </motion.div>
 
         {/* Produtos */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title="Produtos" icon={<Package size={18}/>}>
+        <FeedSection title={txt('sec_prod')} icon={<Package size={18}/>}>
           <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Novidades do mercado</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">{txt('prod_novo')}</p>
             <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{data.fornecedores[0]?.produto_servico ?? 'Lançamentos em máquinas e produtos para cabelo'}</p>
             <p className="text-xs text-neutral-500 mt-1">{data.fornecedores[0] ? `${data.fornecedores[0].nome} · R$ ${Number(data.fornecedores[0].preco_referencia||0).toFixed(0)}` : 'Novas tecnologias de finalização com menor tempo de serviço.'}</p>
           </FeedCard>
@@ -447,9 +519,9 @@ export default function App() {
 
         {/* Serviços */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title="Serviços" icon={<Wrench size={18}/>}>
+        <FeedSection title={txt('sec_serv')} icon={<Wrench size={18}/>}>
           <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">Ação da semana</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">{txt('serv_acao')}</p>
             <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{data.praticas[0]?.titulo ?? 'Automação do Agendamento via WhatsApp'}</p>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{data.praticas[0]?.conteudo ?? 'Confirmações automáticas reduzem no-show em até 35%.'}</p>
           </FeedCard>
@@ -469,9 +541,9 @@ export default function App() {
 
         {/* Parceiros */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title="Parceiros" icon={<Handshake size={18}/>} count={`${data.fornecedores.length}`}>
+        <FeedSection title={txt('sec_parc')} icon={<Handshake size={18}/>} count={`${data.fornecedores.length}`}>
           <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-4">Fornecedores · {data.fornecedores.length} mapeados</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-4">{txt('parc_label')} · {data.fornecedores.length} mapeados</p>
             {data.fornecedores.map((f, i) => (
               <div key={i} className="flex items-center justify-between py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
                 <div className="flex-1 min-w-0">
@@ -781,6 +853,63 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Gaveta de Dificuldade */}
+      <AnimatePresence>
+        {difficultyOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setDifficultyOpen(false)}
+              className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 340, damping: 34 }}
+              className="fixed bottom-0 left-0 right-0 z-[130] bg-white dark:bg-[#111111] rounded-t-2xl px-5 pt-5 pb-8 max-w-[935px] mx-auto"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={18} className="text-[#3b82f6]" />
+                  <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Dificuldade</h2>
+                </div>
+                <button onClick={() => setDifficultyOpen(false)} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer">
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="text-xs text-neutral-500 mb-4">Escolha como os dados são apresentados — de linguagem simples a técnica.</p>
+              <div className="space-y-2">
+                {DIFF_ORDER.map((d) => {
+                  const meta = DIFF_META[d];
+                  const isSelected = difficulty === d;
+                  return (
+                    <button
+                      key={d}
+                      onClick={() => { setDifficulty(d); setDifficultyOpen(false); }}
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all duration-200 cursor-pointer text-left ${
+                        isSelected
+                          ? 'bg-[#3b82f6]/10 border-[#3b82f6] dark:border-[#3b82f6]'
+                          : 'bg-white dark:bg-[#161616] border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a]'
+                      }`}
+                    >
+                      <span className="text-xl">{meta.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>
+                        <p className="text-xs text-neutral-500 mt-0.5">{meta.desc}</p>
+                      </div>
+                      {isSelected && (
+                        <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0">
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
