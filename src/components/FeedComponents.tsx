@@ -391,7 +391,10 @@ export function FeedCard({ onClick, containerType, onUtilizar, children }: {
     (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#262626] ") +
     (onClick ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] active:scale-[0.99] cursor-pointer" : "");
 
-  return onClick
-    ? <button onClick={onClick} className={cls}>{cardContent}</button>
-    : <div className={cls}>{cardContent}</div>;
+  return (
+    <div onClick={onClick} className={cls} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}>
+      {cardContent}
+    </div>
+  );
 }

@@ -138,7 +138,7 @@ export const MOCK_DATA: OmniData = {
 };
 
 export const BARBER_PHOTOS = {
-  profile:  'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/200px-McDonald%27s_Golden_Arches.svg.png',
+  profile:  'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop',
   interior: 'https://images.unsplash.com/photo-1571091655789-405eb7a3a3a8?w=600&h=900&fit=crop',
   cut1:     'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=900&fit=crop',
   cut2:     'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&h=900&fit=crop',
