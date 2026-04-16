@@ -561,8 +561,12 @@ export default function App() {
         {planoOpen && (
           <BottomModal onClose={() => setPlanoOpen(false)}>
             <ModalHeader onClose={() => setPlanoOpen(false)}><Trophy size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Plano de Ação</h2></ModalHeader>
-            <p className="text-xs text-neutral-500 uppercase font-bold tracking-widest mb-4">Semana atual · {data.semana_label}</p>
-            {selectedContainers.size > 0 && pepData ? (
+            {selectedContainers.size === 0 ? (
+              <div className="flex flex-col items-center justify-center h-36 gap-3 text-neutral-400">
+                <Trophy size={28} strokeWidth={1.5} />
+                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar seu Plano.</p>
+              </div>
+            ) : pepData ? (
               Array.from(selectedContainers).map(ct => {
                 const pep = pepData[ct];
                 if (!pep?.plano?.length) return null;
@@ -573,32 +577,12 @@ export default function App() {
                   </div>
                 );
               })
-            ) : selectedContainers.size > 0 ? (
+            ) : (
               <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
                 <span className="text-3xl">⏳</span>
                 <p className="text-sm text-center text-neutral-500">Plano ainda sendo gerado.</p>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {data.praticas.slice(0, 5).map((p, i) => (
-                  <div key={i} className="flex gap-3 py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-                    <div className="w-7 h-7 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-[#3b82f6]">{i + 1}</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold leading-snug">{p.titulo}</p>
-                      <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{p.conteudo}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
             )}
-            <div className="mt-5 pt-4 border-t border-neutral-200 dark:border-[#262626]">
-              <div className="flex items-center gap-2 text-[#3b82f6]">
-                <TrendingUp size={16} />
-                <span className="text-xs font-semibold">{data.progresso_pct}% do nível concluído · {data.negocio.pontos} pts</span>
-              </div>
-            </div>
           </BottomModal>
         )}
       </AnimatePresence>
@@ -642,7 +626,12 @@ export default function App() {
         {praticaOpen && (
           <BottomModal onClose={() => setPraticaOpen(false)}>
             <ModalHeader onClose={() => setPraticaOpen(false)}><Lightbulb size={18} className="text-[#0891b2]" /><h2 className="text-base font-bold">Prática</h2></ModalHeader>
-            {selectedContainers.size > 0 && pepData ? (
+            {selectedContainers.size === 0 ? (
+              <div className="flex flex-col items-center justify-center h-36 gap-3 text-neutral-400">
+                <Lightbulb size={28} strokeWidth={1.5} />
+                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar sua Prática.</p>
+              </div>
+            ) : pepData ? (
               Array.from(selectedContainers).map(ct => {
                 const pep = pepData[ct];
                 if (!pep?.pratica?.length) return null;
@@ -654,14 +643,9 @@ export default function App() {
                 );
               })
             ) : (
-              <div className="space-y-1">
-                {data.praticas.map((p, i) => (
-                  <div key={i} className="py-4 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 mb-1">{p.titulo}</p>
-                    <p className="text-xs text-neutral-500 leading-relaxed">{p.conteudo}</p>
-                    <p className="text-xs font-bold uppercase tracking-wider text-neutral-400 mt-2">Fonte: {p.fonte}</p>
-                  </div>
-                ))}
+              <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
+                <span className="text-3xl">⏳</span>
+                <p className="text-sm text-center text-neutral-500">Prática ainda sendo gerada.</p>
               </div>
             )}
           </BottomModal>
@@ -673,57 +657,28 @@ export default function App() {
         {estrategiaOpen && (
           <BottomModal onClose={() => setEstrategiaOpen(false)}>
             <ModalHeader onClose={() => setEstrategiaOpen(false)}><Layers size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Estratégia</h2></ModalHeader>
-            {selectedContainers.size > 0 && pepData && Array.from(selectedContainers).some(ct => pepData[ct]?.estrategia?.length) && (
-              <div className="mb-6">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-3">Estratégia gerada</p>
-                {Array.from(selectedContainers).map(ct => {
-                  const pep = pepData[ct];
-                  if (!pep?.estrategia?.length) return null;
-                  return (
-                    <div key={ct} className="mb-4">
-                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
-                      <div>{pep.estrategia.map((item, i) => renderPEPItem(item, i))}</div>
-                    </div>
-                  );
-                })}
-                <div className="border-t border-neutral-100 dark:border-[#262626] mt-4 pt-4" />
+            {selectedContainers.size === 0 ? (
+              <div className="flex flex-col items-center justify-center h-36 gap-3 text-neutral-400">
+                <Layers size={28} strokeWidth={1.5} />
+                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar sua Estratégia.</p>
+              </div>
+            ) : pepData ? (
+              Array.from(selectedContainers).map(ct => {
+                const pep = pepData[ct];
+                if (!pep?.estrategia?.length) return null;
+                return (
+                  <div key={ct} className="mb-5">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
+                    <div>{pep.estrategia.map((item, i) => renderPEPItem(item, i))}</div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
+                <span className="text-3xl">⏳</span>
+                <p className="text-sm text-center text-neutral-500">Estratégia ainda sendo gerada.</p>
               </div>
             )}
-            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Posição no mercado</p>
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <div>
-                  <p className="text-xl font-bold">{data.ranking_local ?? '—'}° lugar</p>
-                  <p className="text-xs text-neutral-500">de {data.concorrentes.length + 1} na região</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xl font-bold text-[#3b82f6]">{notaMediaNum}</p>
-                  <p className="text-xs text-neutral-500">nota média mercado</p>
-                </div>
-              </div>
-              <p className="text-xs text-neutral-500">{data.mercado_nome ?? 'Beleza & Estética'} · {data.mercado_tamanho ?? '—'}</p>
-            </div>
-            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Oportunidades identificadas</p>
-            <div className="space-y-2 mb-6">
-              {Array.from(new Set(data.concorrentes.flatMap(c => c.nao_oferece ?? []))).slice(0, 4).map((item, i) => (
-                <div key={i} className="flex items-center gap-2 px-4 py-3 bg-[#f0fdf4] dark:bg-[#0d2b1a] rounded-xl border border-[#bbf7d0] dark:border-[#166534]">
-                  <span className="text-[#16a34a] text-sm">↗</span>
-                  <span className="text-sm text-neutral-800 dark:text-neutral-300">{item}</span>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Movimentos recentes dos concorrentes</p>
-            <div className="space-y-2">
-              {data.concorrentes.flatMap(c => (c.mudancas_recentes ?? []).map(m => ({ nome: c.nome, mudanca: m }))).slice(0, 4).map((item, i) => (
-                <div key={i} className="flex items-start gap-2 px-4 py-3 bg-[#fff7ed] dark:bg-[#2d1600] rounded-xl border border-[#fed7aa] dark:border-[#7c2d12]">
-                  <span className="text-[#ea580c] text-sm mt-0.5">!</span>
-                  <div>
-                    <p className="text-xs font-bold text-[#ea580c]">{item.nome}</p>
-                    <p className="text-sm text-neutral-800 dark:text-neutral-300">{item.mudanca}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </BottomModal>
         )}
       </AnimatePresence>
