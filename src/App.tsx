@@ -76,7 +76,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { OmniData, Competitor, TimelineEvent } from './types';
 import { MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
 import { BottomModal, ModalHeader } from './components/BottomModal';
-import { FeedSection, FeedCard } from './components/FeedComponents';
+import { FeedSection, FeedCard, PEPItemRow } from './components/FeedComponents';
 import { CircleProgress, PieChart } from './components/CircleProgress';
 import { StoryViewer } from './components/StoryViewer';
 import { ConcorrenteModal } from './components/ConcorrenteModal';
@@ -130,62 +130,19 @@ export default function App() {
   };
 
   function renderPEPItem(item: { tipo: string; texto: string; icone?: string; acao?: string }, idx: number) {
-    // ☐ Tarefa principal
-    if (item.tipo === 'missao') return (
-      <div key={idx} className="flex items-start gap-2.5 pt-3 pb-1">
-        <span className="text-[#3b82f6] text-base flex-shrink-0 mt-0.5">☐</span>
-        <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{item.texto}</p>
-      </div>
-    );
-    // 📊 Dado / contexto de mercado
-    if (item.tipo === 'dado') return (
-      <div key={idx} className="flex items-start gap-2 py-1 pl-4">
-        <span className="text-xs flex-shrink-0 mt-0.5">📊</span>
-        <p className="text-xs text-neutral-500 italic leading-relaxed">{item.texto}</p>
-      </div>
-    );
-    // 📎 Referência / case
-    if (item.tipo === 'referencia') return (
-      <div key={idx} className="flex items-start gap-2 py-1 pl-4">
-        <span className="text-xs flex-shrink-0 mt-0.5">📎</span>
-        <p className="text-xs text-neutral-500 italic leading-relaxed">{item.texto}</p>
-      </div>
-    );
-    // 🔧 Ferramenta / ação
-    if (item.tipo === 'ferramenta') return (
-      <div key={idx} className="flex items-start gap-2 py-1 pl-4">
-        <span className="text-xs flex-shrink-0 mt-0.5">🔧</span>
-        <p className="text-xs text-[#3b82f6] italic leading-relaxed">{item.texto}</p>
-      </div>
-    );
-    // ⚡ Ação rápida
-    if (item.tipo === 'acao') return (
-      <div key={idx} className="flex items-start gap-2 py-1 pl-4">
-        <span className="text-xs flex-shrink-0 mt-0.5">⚡</span>
-        <p className="text-xs text-[#7c3aed] italic leading-relaxed">{item.texto}</p>
-      </div>
-    );
-    // 🤝 Parceria / monitoramento
-    if (item.tipo === 'parceria') return (
-      <div key={idx} className="flex items-start gap-2 py-1 pl-4">
-        <span className="text-xs flex-shrink-0 mt-0.5">🤝</span>
-        <p className="text-xs text-neutral-500 italic leading-relaxed">{item.texto}</p>
-      </div>
-    );
-    // Passo numerado (Prática)
-    if (item.tipo === 'passo') return (
-      <div key={idx} className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-        <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <span className="text-[10px] font-bold text-[#3b82f6]">{idx}</span>
-        </div>
-        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-snug">{item.texto}</p>
-      </div>
-    );
-    // Parágrafo narrativo (Estratégia)
     return (
-      <div key={idx} className="py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">{item.texto}</p>
-      </div>
+      <PEPItemRow
+        key={idx}
+        item={item}
+        stepIndex={idx}
+        onCheck={(pontos) => {
+          setData(prev => ({
+            ...prev,
+            negocio: { ...prev.negocio, pontos: prev.negocio.pontos + pontos },
+            gamificacao_log: [{ acao: `Tarefa concluída: ${item.texto.slice(0, 40)}…`, pontos }, ...prev.gamificacao_log],
+          }));
+        }}
+      />
     );
   }
 

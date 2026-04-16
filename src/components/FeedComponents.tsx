@@ -1,6 +1,138 @@
 import React, { useState, useEffect } from 'react';
-import { Rocket, MessageCircle, Share2, Check, Lightbulb } from 'lucide-react';
+import { Rocket, MessageCircle, Share2, Check, Lightbulb, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+
+// ─── PEP Item Row ─────────────────────────────────────────────────────────────
+
+const ICON_MAP: Record<string, string> = {
+  missao: '☐', dado: '📊', referencia: '📎',
+  ferramenta: '🔧', acao: '⚡', parceria: '🤝',
+};
+
+const ICON_DONE = '✅';
+
+export function PEPItemRow({
+  item, stepIndex, onCheck,
+}: {
+  item: { tipo: string; texto: string; icone?: string; acao?: string };
+  stepIndex?: number;
+  onCheck?: (pontos: number) => void;
+}) {
+  const [checked, setChecked]     = useState(false);
+  const [expanded, setExpanded]   = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [content, setContent]     = useState('');
+
+  const hasAction = !!item.acao;
+
+  function handleCheck(e: React.MouseEvent) {
+    e.stopPropagation();
+    const next = !checked;
+    setChecked(next);
+    if (next && onCheck) onCheck(5);
+  }
+
+  async function handleExpand(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (expanded) { setExpanded(false); return; }
+    setExpanded(true);
+    if (content) return;
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1200));
+    setLoading(false);
+    setContent('Conteúdo sendo gerado pelo sistema. Disponível com dados reais do cliente.');
+  }
+
+  // ── Missão (checkbox) ──
+  if (item.tipo === 'missao') return (
+    <div className="pt-3 pb-1">
+      <button onClick={handleCheck} className="flex items-start gap-2.5 w-full text-left cursor-pointer group">
+        <span className="text-base flex-shrink-0 mt-0.5 transition-all duration-200">
+          {checked ? ICON_DONE : <span className="text-[#3b82f6]">☐</span>}
+        </span>
+        <p className={`text-sm font-semibold leading-snug transition-all duration-200 ${checked ? 'line-through text-neutral-400' : 'text-neutral-800 dark:text-neutral-100'}`}>
+          {item.texto}
+        </p>
+      </button>
+    </div>
+  );
+
+  // ── Passo numerado (Prática) ──
+  if (item.tipo === 'passo') return (
+    <div className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+      <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span className="text-[10px] font-bold text-[#3b82f6]">{stepIndex ?? ''}</span>
+      </div>
+      <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-snug">{item.texto}</p>
+    </div>
+  );
+
+  // ── Dado (estático) ──
+  if (item.tipo === 'dado') return (
+    <div className="flex items-start gap-2 py-1 pl-4">
+      <span className="text-xs flex-shrink-0 mt-0.5">📊</span>
+      <p className="text-xs text-neutral-500 italic leading-relaxed">{item.texto}</p>
+    </div>
+  );
+
+  // ── Parágrafo narrativo (Estratégia) ──
+  if (item.tipo === 'paragrafo') return (
+    <div className="py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+      <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">{item.texto}</p>
+    </div>
+  );
+
+  // ── Itens com ação expansível (referencia, ferramenta, acao, parceria) ──
+  const colorMap: Record<string, string> = {
+    ferramenta: 'text-[#3b82f6]',
+    acao:       'text-[#7c3aed]',
+    parceria:   'text-[#0891b2]',
+    referencia: 'text-neutral-500',
+  };
+  const textColor = colorMap[item.tipo] ?? 'text-neutral-500';
+  const icon = item.icone ?? ICON_MAP[item.tipo] ?? '•';
+
+  return (
+    <div className="py-1 pl-4">
+      <div className="flex items-start gap-2">
+        <span className="text-xs flex-shrink-0 mt-0.5">{icon}</span>
+        <div className="flex-1 min-w-0">
+          <span className={`text-xs italic leading-relaxed ${textColor}`}>{item.texto}</span>
+          {hasAction && (
+            <button
+              onClick={handleExpand}
+              className={`ml-1.5 text-xs font-semibold underline underline-offset-2 cursor-pointer inline-flex items-center gap-0.5 ${textColor}`}
+            >
+              {item.acao}
+              <ChevronDown size={10} className={`transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+        </div>
+      </div>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.25 }}
+            className="overflow-hidden ml-5 mt-2">
+            {loading ? (
+              <div className="flex items-center gap-2 py-2">
+                <div className="w-1 h-1 rounded-full bg-[#3b82f6] animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1 h-1 rounded-full bg-[#3b82f6] animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-1 h-1 rounded-full bg-[#3b82f6] animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="text-xs text-neutral-400">Gerando...</span>
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed bg-neutral-50 dark:bg-[#1a1a1a] rounded-xl p-3 border border-neutral-100 dark:border-[#262626]">
+                {content}
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function FeedSection({ title, icon, count, badge, children }: {
   title: string; icon: React.ReactNode; count?: string; badge?: string; children: React.ReactNode;
