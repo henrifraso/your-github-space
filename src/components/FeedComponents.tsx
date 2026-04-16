@@ -56,7 +56,12 @@ function AnimatedDots() {
   );
 }
 
-export function FeedCard({ onClick, children }: { onClick?: () => void; children: React.ReactNode }) {
+export function FeedCard({ onClick, containerType, onUtilizar, children }: {
+  onClick?: () => void;
+  containerType?: string;
+  onUtilizar?: (containerType: string, selected: boolean) => void;
+  children: React.ReactNode;
+}) {
   const [utilStatus,   setUtilStatus]   = useState<UtilStatus>('idle');
   const [utilStep,     setUtilStep]     = useState(0);
   const [likes,        setLikes]        = useState(() => Math.floor(Math.random() * 180) + 20);
@@ -78,9 +83,15 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
     const iv = setInterval(() => {
       i++;
       if (i < UTILIZAR_STEPS.length) setUtilStep(i);
-      else { clearInterval(iv); setUtilStatus('done'); setLikes(n => n + 1); }
+      else {
+        clearInterval(iv);
+        setUtilStatus('done');
+        setLikes(n => n + 1);
+        if (containerType && onUtilizar) onUtilizar(containerType, true);
+      }
     }, 600);
     return () => clearInterval(iv);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [utilStatus]);
 
   useEffect(() => {
@@ -118,7 +129,13 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
 
   function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
-    if (utilStatus !== 'idle') return;
+    if (utilStatus === 'loading') return;
+    if (utilStatus === 'done') {
+      setUtilStatus('idle');
+      setLikes(n => n - 1);
+      if (containerType && onUtilizar) onUtilizar(containerType, false);
+      return;
+    }
     setUtilStatus('loading');
   }
 
@@ -370,7 +387,8 @@ export function FeedCard({ onClick, children }: { onClick?: () => void; children
     </>
   );
 
-  const cls = "w-full bg-white dark:bg-[#161616] rounded-2xl border border-neutral-100 dark:border-[#262626] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+  const cls = "w-full bg-white dark:bg-[#161616] rounded-2xl border px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+    (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#262626] ") +
     (onClick ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] active:scale-[0.99] cursor-pointer" : "");
 
   return onClick

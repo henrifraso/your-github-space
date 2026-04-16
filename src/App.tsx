@@ -120,6 +120,50 @@ export default function App() {
     []
   );
 
+  const [selectedContainers, setSelectedContainers] = useState<Set<string>>(new Set());
+  const pepData = (data as any).pep as Record<string, { plano: { tipo: string; texto: string }[]; estrategia: { tipo: string; texto: string }[]; pratica: { tipo: string; texto: string }[] }> | undefined;
+
+  const CONTAINER_LABELS: Record<string, string> = {
+    concorrencia: 'Concorrência', mercado: 'Mercado', economia: 'Economia',
+    eventos: 'Eventos', fornecedores: 'Fornecedores',
+    produtos: 'Produtos', servicos: 'Serviços', praticas: 'Práticas',
+  };
+
+  function renderPEPItem(item: { tipo: string; texto: string }, idx: number) {
+    if (item.tipo === 'missao') return (
+      <div key={idx} className="flex items-start gap-3 py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+        <span className="text-[#3b82f6] text-base flex-shrink-0">☐</span>
+        <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{item.texto}</p>
+      </div>
+    );
+    if (item.tipo === 'passo') return (
+      <div key={idx} className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+        <div className="w-6 h-6 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <span className="text-xs font-bold text-[#3b82f6]">{idx}</span>
+        </div>
+        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-snug">{item.texto}</p>
+      </div>
+    );
+    return (
+      <div key={idx} className="py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">{item.texto}</p>
+      </div>
+    );
+  }
+
+  const handleUtilizar = (containerType: string, selected: boolean) => {
+    setSelectedContainers(prev => {
+      const next = new Set(prev);
+      if (selected) next.add(containerType); else next.delete(containerType);
+      return next;
+    });
+    if (selected) {
+      const negocioId = (data as any).negocio?.id ?? omniToken;
+      if (negocioId) fetch('/api/interacoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ negocio_id: negocioId, container_tipo: containerType, tipo: 'utilizar' }) }).catch(() => {});
+      setPlanoOpen(true);
+    }
+  };
+
   const handlePhotoSave = async (s: PhotoSettings) => {
     setPhotoSettings(s);
     if (omniToken) {
@@ -429,13 +473,13 @@ export default function App() {
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
         <FeedSection title={txt('sec_mudou')} icon={<TrendingUp size={18}/>}>
           {[
-            { label: txt('lbl_conc'), color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
-            { label: txt('lbl_merc'), color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
-            { label: txt('lbl_econ'), color: '#3b82f6', titulo: `Ticket médio R$ 38–52 · Nota média ★ ${notaMediaNum} na região`, detalhe: 'Poder de compra estável na Paulista. Combos e promoções de app são o principal driver de decisão.', onClick: undefined },
-            { label: txt('lbl_even'), color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
-            { label: txt('lbl_rep'), color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
+            { label: txt('lbl_conc'), containerType: 'concorrencia', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
+            { label: txt('lbl_merc'), containerType: 'mercado', color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
+            { label: txt('lbl_econ'), containerType: 'economia', color: '#3b82f6', titulo: `Ticket médio R$ 38–52 · Nota média ★ ${notaMediaNum} na região`, detalhe: 'Poder de compra estável na Paulista. Combos e promoções de app são o principal driver de decisão.', onClick: undefined },
+            { label: txt('lbl_even'), containerType: 'eventos', color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
+            { label: txt('lbl_rep'), containerType: undefined as string | undefined, color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
           ].map(item => (
-            <FeedCard key={item.label} onClick={item.onClick}>
+            <FeedCard key={item.label} onClick={item.onClick} containerType={item.containerType} onUtilizar={handleUtilizar}>
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{color: item.color}}>{item.label}</p>
@@ -523,19 +567,37 @@ export default function App() {
           <BottomModal onClose={() => setPlanoOpen(false)}>
             <ModalHeader onClose={() => setPlanoOpen(false)}><Trophy size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Plano de Ação</h2></ModalHeader>
             <p className="text-xs text-neutral-500 uppercase font-bold tracking-widest mb-4">Semana atual · {data.semana_label}</p>
-            <div className="space-y-3">
-              {data.praticas.slice(0, 5).map((p, i) => (
-                <div key={i} className="flex gap-3 py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-                  <div className="w-7 h-7 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-xs font-bold text-[#3b82f6]">{i + 1}</span>
+            {selectedContainers.size > 0 && pepData ? (
+              Array.from(selectedContainers).map(ct => {
+                const pep = pepData[ct];
+                if (!pep?.plano?.length) return null;
+                return (
+                  <div key={ct} className="mb-5">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
+                    <div>{pep.plano.map((item, i) => renderPEPItem(item, i))}</div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold leading-snug">{p.titulo}</p>
-                    <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{p.conteudo}</p>
+                );
+              })
+            ) : selectedContainers.size > 0 ? (
+              <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
+                <span className="text-3xl">⏳</span>
+                <p className="text-sm text-center text-neutral-500">Plano ainda sendo gerado.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.praticas.slice(0, 5).map((p, i) => (
+                  <div key={i} className="flex gap-3 py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+                    <div className="w-7 h-7 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-xs font-bold text-[#3b82f6]">{i + 1}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold leading-snug">{p.titulo}</p>
+                      <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{p.conteudo}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
             <div className="mt-5 pt-4 border-t border-neutral-200 dark:border-[#262626]">
               <div className="flex items-center gap-2 text-[#3b82f6]">
                 <TrendingUp size={16} />
@@ -585,15 +647,28 @@ export default function App() {
         {praticaOpen && (
           <BottomModal onClose={() => setPraticaOpen(false)}>
             <ModalHeader onClose={() => setPraticaOpen(false)}><Lightbulb size={18} className="text-[#0891b2]" /><h2 className="text-base font-bold">Prática</h2></ModalHeader>
-            <div className="space-y-1">
-              {data.praticas.map((p, i) => (
-                <div key={i} className="py-4 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 mb-1">{p.titulo}</p>
-                  <p className="text-xs text-neutral-500 leading-relaxed">{p.conteudo}</p>
-                  <p className="text-xs font-bold uppercase tracking-wider text-neutral-400 mt-2">Fonte: {p.fonte}</p>
-                </div>
-              ))}
-            </div>
+            {selectedContainers.size > 0 && pepData ? (
+              Array.from(selectedContainers).map(ct => {
+                const pep = pepData[ct];
+                if (!pep?.pratica?.length) return null;
+                return (
+                  <div key={ct} className="mb-5">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[#0891b2] mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
+                    <div>{pep.pratica.map((item, i) => renderPEPItem(item, i))}</div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="space-y-1">
+                {data.praticas.map((p, i) => (
+                  <div key={i} className="py-4 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 mb-1">{p.titulo}</p>
+                    <p className="text-xs text-neutral-500 leading-relaxed">{p.conteudo}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-neutral-400 mt-2">Fonte: {p.fonte}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </BottomModal>
         )}
       </AnimatePresence>
@@ -603,6 +678,22 @@ export default function App() {
         {estrategiaOpen && (
           <BottomModal onClose={() => setEstrategiaOpen(false)}>
             <ModalHeader onClose={() => setEstrategiaOpen(false)}><Layers size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Estratégia</h2></ModalHeader>
+            {selectedContainers.size > 0 && pepData && Array.from(selectedContainers).some(ct => pepData[ct]?.estrategia?.length) && (
+              <div className="mb-6">
+                <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-3">Estratégia gerada</p>
+                {Array.from(selectedContainers).map(ct => {
+                  const pep = pepData[ct];
+                  if (!pep?.estrategia?.length) return null;
+                  return (
+                    <div key={ct} className="mb-4">
+                      <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
+                      <div>{pep.estrategia.map((item, i) => renderPEPItem(item, i))}</div>
+                    </div>
+                  );
+                })}
+                <div className="border-t border-neutral-100 dark:border-[#262626] mt-4 pt-4" />
+              </div>
+            )}
             <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Posição no mercado</p>
             <div className="mb-6">
               <div className="flex justify-between items-center mb-3">

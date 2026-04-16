@@ -50,8 +50,22 @@ export interface GamificationLog {
   pontos: number;
 }
 
+export interface PEPItem {
+  tipo: string;
+  texto: string;
+  icone?: string;
+  acao?: string;
+}
+
+export interface PEPContainer {
+  plano: PEPItem[];
+  estrategia: PEPItem[];
+  pratica: PEPItem[];
+}
+
 export interface OmniData {
   negocio: {
+    id?: string;
     nome_fantasia: string;
     segmento: string;
     cidade: string;
@@ -74,6 +88,7 @@ export interface OmniData {
   gamificacao_log: GamificationLog[];
   pesquisa: { resumo: string };
   timeline?: TimelineEvent[];
+  pep?: Record<string, PEPContainer>;
 }
 
 export interface StorySlide {
