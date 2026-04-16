@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  Bookmark, ChevronRight, TrendingUp, Package,
+  Bookmark, ChevronRight, TrendingUp,
   Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
-  MapPin, Scale, Wrench, Handshake, Store, Zap,
+  MapPin, Scale, Store, Zap,
   Settings2, X
 } from 'lucide-react';
 
@@ -491,73 +491,6 @@ export default function App() {
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">{txt('leg_atenc')}</p>
             <p className="text-sm text-neutral-500 leading-relaxed">{txt('leg_desc')}</p>
-          </FeedCard>
-        </FeedSection>
-        </motion.div>
-
-        {/* Produtos */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title={txt('sec_prod')} icon={<Package size={18}/>}>
-          <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">{txt('prod_novo')}</p>
-            <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{data.fornecedores[0]?.produto_servico ?? 'Lançamentos em máquinas e produtos para cabelo'}</p>
-            <p className="text-xs text-neutral-500 mt-1">{data.fornecedores[0] ? `${data.fornecedores[0].nome} · R$ ${Number(data.fornecedores[0].preco_referencia||0).toFixed(0)}` : 'Novas tecnologias de finalização com menor tempo de serviço.'}</p>
-          </FeedCard>
-          {data.fornecedores.filter(f => f.produto_servico).slice(0, 4).map((f, i) => (
-            <FeedCard key={i}>
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate">{f.produto_servico}</p>
-                  <p className="text-xs text-neutral-500 truncate">{f.nome} · {f.cidade}</p>
-                </div>
-                <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 ml-3 flex-shrink-0">{Number(f.preco_referencia) > 0 ? `R$ ${Number(f.preco_referencia).toFixed(0)}` : '—'}</p>
-              </div>
-            </FeedCard>
-          ))}
-        </FeedSection>
-        </motion.div>
-
-        {/* Serviços */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title={txt('sec_serv')} icon={<Wrench size={18}/>}>
-          <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">{txt('serv_acao')}</p>
-            <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{data.praticas[0]?.titulo ?? 'Automação do Agendamento via WhatsApp'}</p>
-            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{data.praticas[0]?.conteudo ?? 'Confirmações automáticas reduzem no-show em até 35%.'}</p>
-          </FeedCard>
-          {data.praticas.slice(1, 4).map((p, i) => (
-            <FeedCard key={i}>
-              <div className="flex items-start gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{p.titulo}</p>
-                  <p className="text-xs text-neutral-500 mt-1 line-clamp-2">{p.conteudo}</p>
-                </div>
-                <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
-              </div>
-            </FeedCard>
-          ))}
-        </FeedSection>
-        </motion.div>
-
-        {/* Parceiros */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title={txt('sec_parc')} icon={<Handshake size={18}/>} count={`${data.fornecedores.length}`}>
-          <FeedCard>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-4">{txt('parc_label')} · {data.fornecedores.length} mapeados</p>
-            {data.fornecedores.map((f, i) => (
-              <div key={i} className="flex items-center justify-between py-2.5 border-b border-neutral-100 dark:border-[#262626] last:border-0">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate">{f.nome}</p>
-                  <p className="text-xs text-neutral-500 truncate">{f.produto_servico} · {f.cidade}{f.telefone ? ` · ${f.telefone}` : ''}</p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0 ml-3">
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{Number(f.preco_referencia) > 0 ? `R$ ${Number(f.preco_referencia).toFixed(0)}` : '—'}</p>
-                  <button onClick={() => toggleSave(`forn-${i}`, f.nome, 'Fornecedores', f.produto_servico)} className="p-1 text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer">
-                    <Bookmark size={16} fill={isSaved(`forn-${i}`) ? 'currentColor' : 'none'} />
-                  </button>
-                </div>
-              </div>
-            ))}
           </FeedCard>
         </FeedSection>
         </motion.div>
