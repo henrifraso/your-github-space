@@ -57,7 +57,7 @@ export function StoryViewer({ groups, startIndex, onClose }: { groups: StoryGrou
               <img src={BARBER_PHOTOS.profile} alt="perfil" className="w-full h-full object-cover" />
             </div>
             <div>
-              <p className="text-white text-xs font-bold leading-none">Estudio e Barbearia</p>
+              <p className="text-white text-xs font-bold leading-none">McDonald's</p>
               <p className="text-white/60 text-[10px]">{group.label}</p>
             </div>
           </div>
