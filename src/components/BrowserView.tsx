@@ -273,53 +273,41 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[300] flex flex-col">
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={onClose}
-          />
-
-          {/* Janela do browser */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 20 }}
-            transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-            className="relative m-auto w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl border border-[#262626] bg-[#0a0a0a] flex flex-col"
-            style={{ height: '82vh' }}
-          >
-            {/* Titlebar */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-[#111] border-b border-[#262626] flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <Globe size={14} className="text-[#3b82f6]" />
-                <span className="text-xs font-semibold text-neutral-300">
-                  {isElectron ? 'Navegador Omni' : 'Sincronizar'}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className="fixed inset-0 z-[300] flex flex-col bg-[#0a0a0a]"
+        >
+          {/* Titlebar */}
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-[#111] border-b border-[#262626] flex-shrink-0">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Globe size={14} className="text-[#3b82f6] flex-shrink-0" />
+              <span className="text-xs font-semibold text-neutral-300 flex-shrink-0">Sincronizar</span>
+              {isElectron && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#3b82f6]/20 text-[#60a5fa] font-medium flex-shrink-0">
+                  sem CORS
                 </span>
-                {isElectron && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#3b82f6]/20 text-[#60a5fa] font-medium">
-                    sem CORS
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/5 transition-all duration-200 cursor-pointer"
-              >
-                <X size={15} />
-              </button>
+              )}
             </div>
+            <button
+              onClick={onClose}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
+            >
+              <X size={13} />
+              Fechar
+            </button>
+          </div>
 
-            {/* Conteúdo: webview (Electron) ou iframe (browser) */}
-            <div className="flex-1 min-h-0">
-              {isElectron
-                ? <ElectronBrowser initialUrl={initialUrl} />
-                : <IframeBrowser initialUrl={initialUrl} />
-              }
-            </div>
-          </motion.div>
-        </div>
+          {/* Conteúdo: webview (Electron) ou iframe (browser) */}
+          <div className="flex-1 min-h-0">
+            {isElectron
+              ? <ElectronBrowser initialUrl={initialUrl} />
+              : <IframeBrowser initialUrl={initialUrl} />
+            }
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
