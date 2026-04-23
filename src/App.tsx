@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
   MapPin, Scale, Store, Zap,
-  Settings2, X
+  Settings2, X, Globe
 } from 'lucide-react';
 
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
@@ -80,6 +80,7 @@ import { FeedSection, FeedCard, PEPItemRow } from './components/FeedComponents';
 import { CircleProgress, PieChart } from './components/CircleProgress';
 import { StoryViewer } from './components/StoryViewer';
 import { ConcorrenteModal } from './components/ConcorrenteModal';
+import { BrowserView } from './components/BrowserView';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -107,6 +108,7 @@ export default function App() {
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<TimelineEvent | null>(null);
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
+  const [browserOpen, setBrowserOpen] = useState(false);
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
   const [photoSettings, setPhotoSettings] = useState<PhotoSettings>(() => {
@@ -346,6 +348,10 @@ export default function App() {
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
           <div className="flex items-center gap-0.5 sm:gap-1">
+            <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
+              <Globe size={18} className="sm:hidden" />
+              <Globe size={20} className="hidden sm:block" />
+            </button>
             <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
               <Settings2 size={18} className="sm:hidden" />
               <Settings2 size={20} className="hidden sm:block" />
@@ -787,6 +793,9 @@ export default function App() {
       <AnimatePresence>
         {selectedConcorrente && <ConcorrenteModal concorrente={selectedConcorrente} onClose={() => setSelectedConcorrente(null)} />}
       </AnimatePresence>
+
+      {/* Browser / Sincronizar */}
+      <BrowserView open={browserOpen} onClose={() => setBrowserOpen(false)} />
 
       {/* Modal Item Grid */}
       <AnimatePresence>
