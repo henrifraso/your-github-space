@@ -7,7 +7,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "deploy": "git push origin main && bash deploy.sh"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
