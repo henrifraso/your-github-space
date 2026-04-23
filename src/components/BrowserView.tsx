@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -262,7 +262,10 @@ interface BrowserViewProps {
 }
 
 export function BrowserView({ open, onClose, initialUrl = 'https://www.google.com' }: BrowserViewProps) {
-  // Fechar com Escape
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => { if (!open) setSyncing(false); }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -284,11 +287,24 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
           <div className="flex items-center gap-3 px-4 py-2.5 bg-[#111] border-b border-[#262626] flex-shrink-0">
             <div className="flex-1 min-w-0" />
             <button
-              onClick={onClose}
+              onClick={() => syncing ? onClose() : setSyncing(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
             >
-              <X size={13} />
-              Sincronizar
+              <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
+              <AnimatePresence>
+                {syncing && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="flex items-center gap-1 overflow-hidden whitespace-nowrap"
+                  >
+                    <X size={11} />
+                    Fechar
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
 
