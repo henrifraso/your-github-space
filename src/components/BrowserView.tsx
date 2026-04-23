@@ -192,11 +192,6 @@ function IframeBrowser({ initialUrl }: { initialUrl: string }) {
 
   return (
     <div className="flex flex-col w-full h-full">
-      {/* Aviso */}
-      <div className="px-3 py-2 bg-[#1a1a0a] border-b border-[#3a3a1a] text-xs text-[#f59e0b] flex items-center gap-2 flex-shrink-0">
-        <span>⚠️</span>
-        <span>Modo browser: alguns sites bloqueiam iframe. Use o app desktop para navegação completa.</span>
-      </div>
 
       {/* Barra de endereço */}
       <div className="flex items-center gap-2 px-3 py-2 bg-[#111] border-b border-[#262626] flex-shrink-0">
