@@ -39,12 +39,14 @@ function normalizeUrl(raw: string): string {
 // ── Navegador com <webview> — só funciona dentro do Electron ─────────────────
 function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
   const webviewRef = useRef<WebviewElement | null>(null);
-  const [url, setUrl] = useState(initialUrl);
+  // inputVal é só a barra de endereço — NÃO alimenta o src do webview.
+  // Navegações internas da página (pushState, redirects) atualizam a barra
+  // sem disparar re-render do webview, quebrando o loop.
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoFwd, setCanGoFwd] = useState(false);
-  const [pageTitle, setPageTitle] = useState('');
+  const pageTitleRef = useRef('');
 
   const refreshNav = useCallback(() => {
     const wv = webviewRef.current;
@@ -59,18 +61,19 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
 
     const onStart = () => setLoading(true);
     const onStop = () => { setLoading(false); refreshNav(); };
-    const onNavigate = (e: any) => {
-      const newUrl = e.url || e.target?.src || '';
-      setUrl(newUrl);
-      setInputVal(newUrl);
-      refreshNav();
 
+    // Só atualiza a barra de endereço — nunca o src do webview
+    const onNavigate = (e: any) => {
+      const newUrl = e.url || '';
+      if (newUrl) setInputVal(newUrl);
+      refreshNav();
       if (newUrl && window.electron) {
-        window.electron.captureNavigation({ url: newUrl, title: pageTitle, ts: Date.now() });
+        window.electron.captureNavigation({ url: newUrl, title: pageTitleRef.current, ts: Date.now() });
       }
     };
+
     const onTitle = (e: any) => {
-      setPageTitle(e.title || '');
+      pageTitleRef.current = e.title || '';
     };
 
     wv.addEventListener('did-start-loading', onStart);
@@ -86,13 +89,13 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
       wv.removeEventListener('did-navigate-in-page', onNavigate);
       wv.removeEventListener('page-title-updated', onTitle);
     };
-  }, [refreshNav, pageTitle]);
+  }, [refreshNav]); // sem pageTitle nas deps — usamos ref pra evitar re-attach de listeners
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
-    setUrl(resolved);
     setInputVal(resolved);
+    // loadURL direto no elemento — não passa pelo src/state do React
     webviewRef.current?.loadURL?.(resolved);
   }
 
@@ -138,7 +141,7 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
         </div>
 
         <a
-          href={url}
+          href={inputVal}
           target="_blank"
           rel="noopener noreferrer"
           className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
@@ -159,7 +162,7 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
         {/* @ts-ignore — webview aceita booleanos como atributos Chromium */}
         <webview
           ref={webviewRef as any}
-          src={url}
+          src={initialUrl}
           disablewebsecurity
           allowpopups
           style={{ width: '100%', height: '100%', display: 'flex' }}
