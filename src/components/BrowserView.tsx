@@ -282,15 +282,7 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
         >
           {/* Titlebar */}
           <div className="flex items-center gap-3 px-4 py-2.5 bg-[#111] border-b border-[#262626] flex-shrink-0">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Globe size={14} className="text-[#3b82f6] flex-shrink-0" />
-              <span className="text-xs font-semibold text-neutral-300 flex-shrink-0">Sincronizar</span>
-              {isElectron && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#3b82f6]/20 text-[#60a5fa] font-medium flex-shrink-0">
-                  sem CORS
-                </span>
-              )}
-            </div>
+            <div className="flex-1 min-w-0" />
             <button
               onClick={onClose}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
