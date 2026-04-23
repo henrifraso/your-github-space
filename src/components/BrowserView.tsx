@@ -291,9 +291,10 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
             >
               <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-              <AnimatePresence>
-                {syncing && (
+              <AnimatePresence mode="wait">
+                {syncing ? (
                   <motion.span
+                    key="fechar"
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
@@ -302,6 +303,17 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
                   >
                     <X size={11} />
                     Fechar
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="sincronizar"
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.18 }}
+                    className="overflow-hidden whitespace-nowrap"
+                  >
+                    Sincronizar
                   </motion.span>
                 )}
               </AnimatePresence>
