@@ -160,7 +160,7 @@ export function ChatDesktop({ wide }: { wide?: boolean }) {
   return (
     <div
       style={{ width: wide ? 'calc(50vw - 16px)' : '288px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden"
+      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
       <ChatBody />
     </div>
