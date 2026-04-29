@@ -343,7 +343,10 @@ export default function App() {
     <div className={dark ? 'dark' : ''}>
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3 lg:pr-[288px] xl:pr-[308px]">
+      <nav
+        style={{ paddingRight: scrolled ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+        className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3 lg:pr-[288px] xl:pr-[308px]"
+      >
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
           <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
             <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
@@ -372,7 +375,10 @@ export default function App() {
         </div>
       </nav>
 
-    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]">
+    <div
+      style={{ paddingRight: scrolled ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
+    >
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
         {/* Perfil — colapsa ao rolar */}
@@ -671,7 +677,7 @@ export default function App() {
       <BrowserView open={browserOpen} onClose={() => setBrowserOpen(false)} />
 
       {/* Chat */}
-      <ChatDesktop />
+      <ChatDesktop wide={scrolled} />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} />
 

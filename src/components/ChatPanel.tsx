@@ -156,9 +156,12 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
   );
 }
 
-export function ChatDesktop() {
+export function ChatDesktop({ wide }: { wide?: boolean }) {
   return (
-    <div className="fixed top-0 right-0 bottom-0 w-[288px] xl:w-[308px] z-[40] hidden lg:flex flex-col bg-white dark:bg-[#161616] border-l border-neutral-100 dark:border-[#262626] overflow-hidden pt-[72px]">
+    <div
+      style={{ width: wide ? '50vw' : '288px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      className="fixed top-0 right-0 bottom-0 z-[40] hidden lg:flex flex-col bg-white dark:bg-[#161616] border-l border-neutral-100 dark:border-[#262626] overflow-hidden pt-[72px]"
+    >
       <ChatBody />
     </div>
   );
