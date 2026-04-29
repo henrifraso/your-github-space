@@ -140,15 +140,38 @@ export function ChatDesktop() {
   );
 }
 
+function GamepadIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Body */}
+      <path d="M4.5 11C4.5 9.067 6.067 7.5 8 7.5H20C21.933 7.5 23.5 9.067 23.5 11V15.5C23.5 18.538 21.538 21.2 18.7 22.2L17.5 22.6C15.23 23.4 12.77 23.4 10.5 22.6L9.3 22.2C6.462 21.2 4.5 18.538 4.5 15.5V11Z" stroke="white" strokeWidth="1.6" strokeLinejoin="round"/>
+      {/* D-pad vertical */}
+      <path d="M9 13.5V16.5" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+      {/* D-pad horizontal */}
+      <path d="M7.5 15H10.5" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
+      {/* Button circle right */}
+      <circle cx="19" cy="13" r="1.1" fill="white"/>
+      {/* Button circle top */}
+      <circle cx="17" cy="11.2" r="1.1" fill="white"/>
+      {/* Button circle bottom */}
+      <circle cx="17" cy="14.8" r="1.1" fill="white"/>
+      {/* Button circle left */}
+      <circle cx="15" cy="13" r="1.1" fill="white"/>
+      {/* Center line hint */}
+      <path d="M13 10.5H15" stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.5"/>
+    </svg>
+  );
+}
+
 export function ChatFAB({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
       onClick={onClick}
       whileTap={{ scale: 0.92 }}
       className="fixed bottom-6 right-5 z-[170] rounded-full backdrop-blur-md bg-white/40 border border-white/50 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
-      style={{ width: 48, height: 48 }}
+      style={{ width: 60, height: 60 }}
     >
-      <ArrowUp size={17} strokeWidth={2} className="text-neutral-600 dark:text-neutral-400" />
+      <GamepadIcon />
     </motion.button>
   );
 }
