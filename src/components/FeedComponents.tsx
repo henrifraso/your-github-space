@@ -188,8 +188,9 @@ function AnimatedDots() {
   );
 }
 
-export function FeedCard({ onClick, containerType, onUtilizar, children }: {
+export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, children }: {
   onClick?: () => void;
+  onFullscreen?: () => void;
   containerType?: string;
   onUtilizar?: (containerType: string, selected: boolean) => void;
   children: React.ReactNode;
@@ -519,13 +520,20 @@ export function FeedCard({ onClick, containerType, onUtilizar, children }: {
     </>
   );
 
+  function handleCardClick() {
+    if (onFullscreen) { onFullscreen(); return; }
+    if (onClick) onClick();
+  }
+
+  const isClickable = !!(onClick || onFullscreen);
   const cls = "w-full bg-white dark:bg-[#161616] rounded-2xl border px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
     (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#262626] ") +
-    (onClick ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] active:scale-[0.99] cursor-pointer" : "");
+    (isClickable ? "hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] active:scale-[0.99] cursor-pointer" : "");
 
   return (
-    <div onClick={onClick} className={cls} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}>
+    <div onClick={isClickable ? handleCardClick : undefined} className={cls}
+      role={isClickable ? 'button' : undefined} tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={isClickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); } : undefined}>
       {cardContent}
     </div>
   );

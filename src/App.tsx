@@ -108,6 +108,12 @@ export default function App() {
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<TimelineEvent | null>(null);
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
+  type FullscreenContent =
+    | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
+    | { type: 'plano' }
+    | { type: 'estrategia' }
+    | { type: 'pratica' };
+  const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
   const [browserOpen, setBrowserOpen] = useState(false);
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
@@ -157,7 +163,7 @@ export default function App() {
     if (selected) {
       const negocioId = (data as any).negocio?.id ?? omniToken;
       if (negocioId) fetch('/api/interacoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ negocio_id: negocioId, container_tipo: containerType, tipo: 'utilizar' }) }).catch(() => {});
-      setPlanoOpen(true);
+      setFullscreenCard({ type: 'plano' });
     }
   };
 
@@ -442,7 +448,7 @@ export default function App() {
             </div>
             <MarketMapButton open={mapOpen} onToggle={() => setMapOpen(o => !o)} />
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-              {[[txt('btn_plano'), () => setPlanoOpen(true)], [txt('btn_estrat'), () => setEstrategiaOpen(true)], [txt('btn_prat'), () => setPraticaOpen(true)]].map(([label, fn]) => (
+              {[[txt('btn_plano'), () => setFullscreenCard({ type: 'plano' })], [txt('btn_estrat'), () => setFullscreenCard({ type: 'estrategia' })], [txt('btn_prat'), () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
                 <button key={label as string} onClick={fn as () => void}
                   className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
                   {label as string}
@@ -480,7 +486,7 @@ export default function App() {
             { label: txt('lbl_even'), containerType: 'eventos', color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
             { label: txt('lbl_rep'), containerType: undefined as string | undefined, color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
           ].map(item => (
-            <FeedCard key={item.label} onClick={item.onClick} containerType={item.containerType} onUtilizar={handleUtilizar}>
+            <FeedCard key={item.label} onClick={item.onClick} onFullscreen={() => setFullscreenCard({ label: item.label, color: item.color, titulo: item.titulo, detalhe: item.detalhe })} containerType={item.containerType} onUtilizar={handleUtilizar}>
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{color: item.color}}>{item.label}</p>
@@ -562,36 +568,6 @@ export default function App() {
         {mapOpen && <MarketMapContent open={mapOpen} onClose={() => setMapOpen(false)} competitors={data.concorrentes} onCompetitorClick={setSelectedConcorrente} />}
       </AnimatePresence>
 
-      {/* Modal Plano */}
-      <AnimatePresence>
-        {planoOpen && (
-          <BottomModal onClose={() => setPlanoOpen(false)}>
-            <ModalHeader onClose={() => setPlanoOpen(false)}><Trophy size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Plano de Ação</h2></ModalHeader>
-            {selectedContainers.size === 0 ? (
-              <div className="flex flex-col items-center justify-center h-36 gap-3 text-neutral-400">
-                <Trophy size={28} strokeWidth={1.5} />
-                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar seu Plano.</p>
-              </div>
-            ) : pepData ? (
-              Array.from(selectedContainers).map(ct => {
-                const pep = pepData[ct];
-                if (!pep?.plano?.length) return null;
-                return (
-                  <div key={ct} className="mb-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
-                    <div>{pep.plano.map((item, i) => renderPEPItem(item, i))}</div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
-                <span className="text-3xl">⏳</span>
-                <p className="text-sm text-center text-neutral-500">Plano ainda sendo gerado.</p>
-              </div>
-            )}
-          </BottomModal>
-        )}
-      </AnimatePresence>
 
       {/* Modal Evolução */}
       <AnimatePresence>
@@ -627,67 +603,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Modal Prática */}
-      <AnimatePresence>
-        {praticaOpen && (
-          <BottomModal onClose={() => setPraticaOpen(false)}>
-            <ModalHeader onClose={() => setPraticaOpen(false)}><Lightbulb size={18} className="text-[#0891b2]" /><h2 className="text-base font-bold">Prática</h2></ModalHeader>
-            {selectedContainers.size === 0 ? (
-              <div className="flex flex-col items-center justify-center h-36 gap-3 text-neutral-400">
-                <Lightbulb size={28} strokeWidth={1.5} />
-                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar sua Prática.</p>
-              </div>
-            ) : pepData ? (
-              Array.from(selectedContainers).map(ct => {
-                const pep = pepData[ct];
-                if (!pep?.pratica?.length) return null;
-                return (
-                  <div key={ct} className="mb-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#0891b2] mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
-                    <div>{pep.pratica.map((item, i) => renderPEPItem(item, i))}</div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
-                <span className="text-3xl">⏳</span>
-                <p className="text-sm text-center text-neutral-500">Prática ainda sendo gerada.</p>
-              </div>
-            )}
-          </BottomModal>
-        )}
-      </AnimatePresence>
-
-      {/* Modal Estratégia */}
-      <AnimatePresence>
-        {estrategiaOpen && (
-          <BottomModal onClose={() => setEstrategiaOpen(false)}>
-            <ModalHeader onClose={() => setEstrategiaOpen(false)}><Layers size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Estratégia</h2></ModalHeader>
-            {selectedContainers.size === 0 ? (
-              <div className="flex flex-col items-center justify-center h-36 gap-3 text-neutral-400">
-                <Layers size={28} strokeWidth={1.5} />
-                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar sua Estratégia.</p>
-              </div>
-            ) : pepData ? (
-              Array.from(selectedContainers).map(ct => {
-                const pep = pepData[ct];
-                if (!pep?.estrategia?.length) return null;
-                return (
-                  <div key={ct} className="mb-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6] mb-2">{CONTAINER_LABELS[ct] ?? ct}</p>
-                    <div>{pep.estrategia.map((item, i) => renderPEPItem(item, i))}</div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="flex flex-col items-center justify-center h-28 gap-2 text-neutral-400">
-                <span className="text-3xl">⏳</span>
-                <p className="text-sm text-center text-neutral-500">Estratégia ainda sendo gerada.</p>
-              </div>
-            )}
-          </BottomModal>
-        )}
-      </AnimatePresence>
 
       {/* Modal Empresa */}
       <AnimatePresence>
@@ -796,6 +711,80 @@ export default function App() {
 
       {/* Browser / Sincronizar */}
       <BrowserView open={browserOpen} onClose={() => setBrowserOpen(false)} />
+
+      {/* Fullscreen */}
+      <AnimatePresence>
+        {fullscreenCard && (() => {
+          const META: Record<string, { icon: React.ReactNode; title: string; color: string }> = {
+            plano:     { icon: <Trophy size={20} className="text-[#3b82f6]" />,   title: 'Plano de Ação',  color: '#3b82f6' },
+            estrategia:{ icon: <Layers size={20} className="text-[#3b82f6]" />,   title: 'Estratégia',     color: '#3b82f6' },
+            pratica:   { icon: <Lightbulb size={20} className="text-[#0891b2]" />,title: 'Prática',        color: '#0891b2' },
+          };
+
+          const renderPEPSection = (pepKey: 'plano' | 'estrategia' | 'pratica', emptyIcon: React.ReactNode) => {
+            if (selectedContainers.size === 0) return (
+              <div className="flex flex-col items-center justify-center h-48 gap-3 text-neutral-400">
+                {emptyIcon}
+                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar este conteúdo.</p>
+              </div>
+            );
+            if (!pepData) return (
+              <div className="flex flex-col items-center justify-center h-32 gap-2 text-neutral-400">
+                <span className="text-3xl">⏳</span>
+                <p className="text-sm text-center text-neutral-500">Ainda sendo gerado.</p>
+              </div>
+            );
+            return Array.from(selectedContainers).map(ct => {
+              const pep = pepData[ct];
+              const items = pep?.[pepKey];
+              if (!items?.length) return null;
+              return (
+                <div key={ct} className="mb-6">
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: fullscreenCard.type !== 'card' ? META[fullscreenCard.type]?.color : '#3b82f6' }}>{CONTAINER_LABELS[ct] ?? ct}</p>
+                  <div>{items.map((item, i) => renderPEPItem(item, i))}</div>
+                </div>
+              );
+            });
+          };
+
+          const headerLabel = fullscreenCard.type === 'card' ? fullscreenCard.label : META[fullscreenCard.type]?.title;
+          const headerColor = fullscreenCard.type === 'card' ? fullscreenCard.color : META[fullscreenCard.type]?.color;
+
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+              className="fixed inset-0 z-[190] bg-white dark:bg-[#0a0a0a] flex flex-col overflow-y-auto"
+            >
+              <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#262626]">
+                <div className="flex items-center gap-2">
+                  {fullscreenCard.type !== 'card' && META[fullscreenCard.type]?.icon}
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: headerColor }}>{headerLabel}</p>
+                </div>
+                <button
+                  onClick={() => setFullscreenCard(null)}
+                  className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+              <div className="flex-1 px-6 sm:px-8 py-8 max-w-3xl mx-auto w-full">
+                {fullscreenCard.type === 'card' ? (
+                  <>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-neutral-100 leading-snug mb-5">{fullscreenCard.titulo}</h2>
+                    <p className="text-sm sm:text-base text-neutral-500 leading-relaxed">{fullscreenCard.detalhe}</p>
+                  </>
+                ) : fullscreenCard.type === 'plano' ? renderPEPSection('plano', <Trophy size={32} strokeWidth={1.5} />)
+                  : fullscreenCard.type === 'estrategia' ? renderPEPSection('estrategia', <Layers size={32} strokeWidth={1.5} />)
+                  : renderPEPSection('pratica', <Lightbulb size={32} strokeWidth={1.5} />)
+                }
+              </div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
 
       {/* Modal Item Grid */}
       <AnimatePresence>

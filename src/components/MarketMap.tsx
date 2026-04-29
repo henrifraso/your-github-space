@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
+import { motion } from 'motion/react';
 import type { Competitor } from '../types';
-import { BottomModal, ModalHeader } from './BottomModal';
 import 'leaflet/dist/leaflet.css';
 
 // Coordenadas reais de São Paulo — Av. Paulista e entorno
@@ -39,17 +39,31 @@ export function MarketMapButton({ open, onToggle }: ButtonProps) {
 
 export function MarketMapContent({ open, onClose, competitors, onCompetitorClick }: ContentProps) {
   return (
-    <BottomModal onClose={onClose} height="90vh">
-      <ModalHeader onClose={onClose}>
-        <MapPin size={18} className="text-[#3b82f6]" />
-        <h2 className="text-base font-bold">Mapa do Mercado</h2>
-      </ModalHeader>
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 24 }}
+      transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+      className="fixed inset-0 z-[190] bg-white dark:bg-[#0a0a0a] flex flex-col"
+    >
+      <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#262626]">
+        <div className="flex items-center gap-2">
+          <MapPin size={18} className="text-[#3b82f6]" />
+          <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6]">Mapa do Mercado</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
+        >
+          <X size={22} />
+        </button>
+      </div>
 
-      <div style={{ height: 'calc(90vh - 120px)' }}>
+      <div className="flex-1 min-h-0">
         <LeafletMap competitors={competitors} onCompetitorClick={onCompetitorClick} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 border-t border-neutral-200 dark:border-[#262626] flex-shrink-0">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-6 py-3 border-t border-neutral-200 dark:border-[#262626] flex-shrink-0">
         {[
           { color: '#8e8e8e', label: 'Direto', filled: true },
           { color: '#8e8e8e', label: 'Indireto', filled: false },
@@ -68,7 +82,7 @@ export function MarketMapContent({ open, onClose, competitors, onCompetitorClick
           <span className="text-xs text-neutral-500">Você</span>
         </div>
       </div>
-    </BottomModal>
+    </motion.div>
   );
 }
 
