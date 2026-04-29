@@ -182,7 +182,7 @@ export default function App() {
   };
 
   const anyModalOpen = storyIndex !== null || evolucaoOpen || empresaOpen ||
-    fullscreenCard !== null || salvosOpen || mapOpen ||
+    fullscreenCard !== null || salvosOpen || mapOpen || chatOpen ||
     selectedConcorrente !== null || selectedTimelineEvent !== null || selectedItem !== null || difficultyOpen;
   const anyModalOpenRef = useRef(false);
   useEffect(() => { anyModalOpenRef.current = anyModalOpen; }, [anyModalOpen]);

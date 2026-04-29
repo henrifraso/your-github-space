@@ -210,7 +210,7 @@ export function ChatMobile({ open, onClose }: { open: boolean; onClose: () => vo
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed inset-0 z-[200] lg:hidden"
+          className="fixed inset-0 z-[200] lg:hidden bg-white dark:bg-[#0f0f0f]"
         >
           <ChatBody onClose={onClose} showClose />
         </motion.div>
