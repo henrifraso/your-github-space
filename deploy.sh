@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-SCOPE="team_VF7jdHwXKRwJ37xDke6CdKF0"
+SCOPE="smith4"
 ALIAS="os1app.vercel.app"
 
 echo "→ deploy em produção..."
 OUTPUT=$(vercel --prod --yes --scope "$SCOPE" 2>&1)
-echo "$OUTPUT" | grep -E "ready|Error" | head -3
+echo "$OUTPUT" | grep -E "ready|Error|Production|Aliased" | head -5
 
 PREVIEW_URL=$(echo "$OUTPUT" | grep -o 'your-github-space-[a-z0-9]*-smith4\.vercel\.app' | head -1)
 
