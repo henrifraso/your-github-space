@@ -113,7 +113,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
               onClick={() => { setStarted(true); setTimeout(() => inputRef.current?.focus(), 50); }}
-              className="w-full h-11 rounded-2xl bg-[#f2f6fc] dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-[#e8f0f9] dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="w-full h-11 rounded-2xl bg-[#f0f2f4] dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-[#e4e7ea] dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
               Inicializar
             </motion.button>
@@ -160,7 +160,7 @@ export function ChatDesktop({ wide }: { wide?: boolean }) {
   return (
     <div
       style={{ width: wide ? 'calc(50vw - 16px)' : '288px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f2f6fc] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden"
+      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden"
     >
       <ChatBody />
     </div>
@@ -213,7 +213,7 @@ export function ChatMobile({ open, onClose }: { open: boolean; onClose: () => vo
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed inset-0 z-[200] lg:hidden bg-[#f2f6fc] dark:bg-[#2b2b2b]"
+          className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b]"
         >
           <ChatBody onClose={onClose} showClose />
         </motion.div>
