@@ -8,14 +8,8 @@ interface Message {
   text: string;
 }
 
-const WELCOME: Message = {
-  id: 'welcome',
-  role: 'assistant',
-  text: 'Como posso ajudar com o seu negócio hoje?',
-};
-
 function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: boolean }) {
-  const [messages, setMessages] = useState<Message[]>([WELCOME]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -140,7 +134,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
 
 export function ChatDesktop() {
   return (
-    <div className="fixed top-0 right-0 bottom-0 w-[300px] xl:w-[320px] z-[40] hidden lg:block border-l border-neutral-100 dark:border-[#1f1f1f]">
+    <div className="fixed top-0 right-0 bottom-0 w-[300px] xl:w-[320px] z-[40] hidden lg:block border-l border-neutral-100 dark:border-[#262626]">
       <ChatBody />
     </div>
   );
@@ -151,10 +145,10 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
     <motion.button
       onClick={onClick}
       whileTap={{ scale: 0.92 }}
-      className="fixed bottom-6 right-5 z-[170] rounded-2xl bg-[#3b82f6] text-white shadow-lg shadow-blue-500/20 flex items-center justify-center lg:hidden cursor-pointer"
+      className="fixed bottom-6 right-5 z-[170] rounded-full backdrop-blur-md bg-white/40 border border-white/50 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
       style={{ width: 48, height: 48 }}
     >
-      <ArrowUp size={18} strokeWidth={2.5} />
+      <ArrowUp size={17} strokeWidth={2} className="text-neutral-600 dark:text-neutral-400" />
     </motion.button>
   );
 }
