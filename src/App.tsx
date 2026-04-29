@@ -343,10 +343,7 @@ export default function App() {
     <div className={dark ? 'dark' : ''}>
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav
-        style={{ paddingRight: scrolled ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-        className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3 lg:pr-[288px] xl:pr-[308px]"
-      >
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3 relative">
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
           <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
             <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
@@ -354,7 +351,8 @@ export default function App() {
             <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
-          <div className="flex items-center gap-0.5 sm:gap-1">
+          {/* Botões — mobile: no fluxo; desktop: absoluto acima do chat */}
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-0 lg:inset-y-0 lg:px-3">
             <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
               <Globe size={18} className="sm:hidden" />
               <Globe size={20} className="hidden sm:block" />
