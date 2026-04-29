@@ -95,6 +95,12 @@ export default function App() {
   const [difficultyOpen, setDifficultyOpen] = useState(false);
   const txt = (key: TextKey) => TEXTS[key][difficulty];
   const [scrolled, setScrolled] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 1024);
+  useEffect(() => {
+    const fn = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
   const touchStartY = useRef(0);
   const scrollCooldownRef = useRef(false);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
@@ -376,7 +382,7 @@ export default function App() {
       </nav>
 
     <div
-      style={{ paddingRight: scrolled ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      style={{ paddingRight: (scrolled && isDesktop) ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="min-h-screen bg-[#f3f3f3] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
     >
 
