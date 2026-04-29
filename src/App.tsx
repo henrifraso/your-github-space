@@ -361,7 +361,7 @@ export default function App() {
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
           {/* Botões — mobile: no fluxo; desktop: absoluto acima do chat */}
-          <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-4">
+          <div className="flex items-center lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-1">
             <button
               onClick={() => setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
@@ -870,55 +870,61 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Gaveta de Dificuldade */}
+      {/* Dificuldade — tela cheia */}
       <AnimatePresence>
         {difficultyOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              onClick={() => setDifficultyOpen(false)}
-              className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-              className="fixed bottom-0 left-0 right-0 z-[130] bg-[#f0f2f4] dark:bg-[#2d2d2d] rounded-t-2xl px-5 pt-5 pb-8 max-w-[935px] mx-auto"
-            >
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <Settings2 size={18} className="text-[#3b82f6]" />
-                  <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Dificuldade</h2>
-                </div>
-                <button onClick={() => setDifficultyOpen(false)} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer">
-                  <X size={18} />
-                </button>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+          >
+            <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
+              <div>
+                <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Nível de Linguagem</h1>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajuste como as informações são apresentadas</p>
               </div>
-              <div className="space-y-2">
-                {DIFF_ORDER.map((d) => {
+              <button
+                onClick={() => setDifficultyOpen(false)}
+                className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 px-4 sm:px-5 py-6 max-w-[935px] w-full mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {DIFF_ORDER.map((d, i) => {
                   const meta = DIFF_META[d];
                   const isSelected = difficulty === d;
                   return (
-                    <button
+                    <motion.button
                       key={d}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1], delay: i * 0.06 }}
                       onClick={() => { setDifficulty(d); setDifficultyOpen(false); }}
-                      className={`w-full flex items-center px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer text-left ${
+                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl border cursor-pointer text-left transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] ${
                         isSelected
-                          ? 'bg-[#3b82f6]/10 border-[#3b82f6] dark:border-[#3b82f6]'
+                          ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
                           : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
                       }`}
                     >
-                      <p className={`flex-1 text-sm font-semibold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg ${isSelected ? 'bg-[#3b82f6]/10' : 'bg-neutral-100 dark:bg-[#404040]'}`}>
+                        {meta.emoji}
+                      </div>
+                      <p className={`flex-1 text-sm font-bold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>
                       {isSelected && (
                         <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0">
                           <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         </div>
                       )}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
-            </motion.div>
-          </>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
