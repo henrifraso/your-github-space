@@ -118,7 +118,7 @@ export default function App() {
   const [photoHover, setPhotoHover] = useState(false);
   const [photoSettings, setPhotoSettings] = useState<PhotoSettings>(
     () => (window as any).__OMNI_DATA__?.photo_settings
-      ?? { src: '/profile-photo.jpg', x: 0, y: 0, zoom: 2, locked: true }
+      ?? { src: '/profile-photo.jpg', x: 0, y: 0, zoom: 1, locked: true }
   );
   const omniToken = useMemo(
     () => window.location.pathname.match(/\/client\/([^/]+)/)?.[1] ?? null,
