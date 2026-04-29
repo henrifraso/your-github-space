@@ -526,9 +526,9 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
   }
 
   const isClickable = !!(onClick || onFullscreen);
-  const cls = "w-full bg-white dark:bg-[#323232] rounded-2xl border px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+  const cls = "w-full bg-[#f2f6fc] dark:bg-[#323232] rounded-2xl border px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
     (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#414141] ") +
-    (isClickable ? "hover:bg-neutral-50 dark:hover:bg-[#353535] active:scale-[0.99] cursor-pointer" : "");
+    (isClickable ? "hover:bg-[#e8f0f9] dark:hover:bg-[#353535] active:scale-[0.99] cursor-pointer" : "");
 
   return (
     <div onClick={isClickable ? handleCardClick : undefined} className={cls}

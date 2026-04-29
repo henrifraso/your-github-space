@@ -462,7 +462,7 @@ export default function App() {
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
               {[[txt('btn_plano'), () => setFullscreenCard({ type: 'plano' })], [txt('btn_estrat'), () => setFullscreenCard({ type: 'estrategia' })], [txt('btn_prat'), () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
                 <button key={label as string} onClick={fn as () => void}
-                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-neutral-50 dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f2f6fc] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e8f0f9] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
                   {label as string}
                 </button>
               ))}
@@ -735,7 +735,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 24 }}
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-              className="fixed inset-0 z-[190] bg-white dark:bg-[#323232] flex flex-col overflow-y-auto"
+              className="fixed inset-0 z-[190] bg-[#f2f6fc] dark:bg-[#323232] flex flex-col overflow-y-auto"
             >
               <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
                 <div className="flex items-center gap-2">
@@ -802,7 +802,7 @@ export default function App() {
         {selectedItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedItem(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-white dark:bg-[#323232] rounded-2xl overflow-hidden shadow-2xl border border-neutral-100 dark:border-[#414141]">
+            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-[#f2f6fc] dark:bg-[#323232] rounded-2xl overflow-hidden shadow-2xl border border-neutral-100 dark:border-[#414141]">
               <div className="p-6 flex flex-col items-center text-center">
                 <div className="text-5xl mb-4">{gridItems.find(i => i.id === selectedItem.id)?.emoji}</div>
                 <h3 className="text-xl font-bold mb-1">{gridItems.find(i => i.id === selectedItem.id)?.title}</h3>
@@ -851,7 +851,7 @@ export default function App() {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-              className="fixed bottom-0 left-0 right-0 z-[130] bg-white dark:bg-[#2d2d2d] rounded-t-2xl px-5 pt-5 pb-8 max-w-[935px] mx-auto"
+              className="fixed bottom-0 left-0 right-0 z-[130] bg-[#f2f6fc] dark:bg-[#2d2d2d] rounded-t-2xl px-5 pt-5 pb-8 max-w-[935px] mx-auto"
             >
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
@@ -873,7 +873,7 @@ export default function App() {
                       className={`w-full flex items-center px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer text-left ${
                         isSelected
                           ? 'bg-[#3b82f6]/10 border-[#3b82f6] dark:border-[#3b82f6]'
-                          : 'bg-white dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-neutral-50 dark:hover:bg-[#353535]'
+                          : 'bg-[#f2f6fc] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e8f0f9] dark:hover:bg-[#353535]'
                       }`}
                     >
                       <p className={`flex-1 text-sm font-semibold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>

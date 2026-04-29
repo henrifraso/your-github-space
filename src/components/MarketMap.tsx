@@ -31,7 +31,7 @@ export function MarketMapButton({ open, onToggle }: ButtonProps) {
   return (
     <button
       onClick={onToggle}
-      className="w-full h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-neutral-50 dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
+      className="w-full h-9 md:h-11 flex items-center justify-center bg-[#f2f6fc] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e8f0f9] dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
       {open ? 'Fechar' : 'Mapa'}
     </button>
   );
@@ -44,7 +44,7 @@ export function MarketMapContent({ open, onClose, competitors, onCompetitorClick
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed inset-0 z-[190] bg-white dark:bg-[#323232] flex flex-col"
+      className="fixed inset-0 z-[190] bg-[#f2f6fc] dark:bg-[#323232] flex flex-col"
     >
       <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
         <div className="flex items-center gap-2">
