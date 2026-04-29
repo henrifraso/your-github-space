@@ -158,7 +158,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
 
 export function ChatDesktop() {
   return (
-    <div className="fixed top-[72px] right-4 bottom-4 w-[288px] xl:w-[308px] z-[40] hidden lg:flex flex-col bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] rounded-2xl overflow-hidden">
+    <div className="fixed top-0 right-0 bottom-0 w-[288px] xl:w-[308px] z-[40] hidden lg:flex flex-col bg-white dark:bg-[#161616] border-l border-neutral-100 dark:border-[#262626] overflow-hidden pt-[72px]">
       <ChatBody />
     </div>
   );
@@ -193,7 +193,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       whileTap={{ scale: 0.88, rotate: -12 }}
       transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-      className="fixed bottom-6 right-5 z-[170] rounded-full backdrop-blur-md bg-white/40 border border-white/50 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
+      className="fixed bottom-6 right-5 z-[170] rounded-full backdrop-blur-md bg-white/30 border border-white/40 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
       style={{ width: 72, height: 72 }}
     >
       <Rocket size={26} className="text-neutral-600 dark:text-neutral-300" strokeWidth={1.8} />
