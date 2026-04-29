@@ -63,7 +63,7 @@ export function PEPItemRow({
       <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
         <span className="text-[10px] font-bold text-[#3b82f6]">{stepIndex ?? ''}</span>
       </div>
-      <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-snug">{item.texto}</p>
+      <p className="text-sm text-neutral-700 dark:text-neutral-200 leading-snug">{item.texto}</p>
     </div>
   );
 
@@ -71,14 +71,14 @@ export function PEPItemRow({
   if (item.tipo === 'dado') return (
     <div className="flex items-start gap-2 py-1 pl-4">
       <span className="text-xs flex-shrink-0 mt-0.5">📊</span>
-      <p className="text-xs text-neutral-500 italic leading-relaxed">{item.texto}</p>
+      <p className="text-xs text-neutral-500 dark:text-neutral-300 italic leading-relaxed">{item.texto}</p>
     </div>
   );
 
   // ── Parágrafo narrativo (Estratégia) ──
   if (item.tipo === 'paragrafo') return (
     <div className="py-2.5 border-b border-neutral-100 dark:border-[#414141] last:border-0">
-      <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">{item.texto}</p>
+      <p className="text-sm text-neutral-700 dark:text-neutral-200 leading-relaxed">{item.texto}</p>
     </div>
   );
 
@@ -123,7 +123,7 @@ export function PEPItemRow({
                 <span className="text-xs text-neutral-400">Gerando...</span>
               </div>
             ) : (
-              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed bg-neutral-50 dark:bg-[#353535] rounded-xl p-3 border border-neutral-100 dark:border-[#414141]">
+              <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed bg-neutral-50 dark:bg-[#353535] rounded-xl p-3 border border-neutral-100 dark:border-[#414141]">
                 {content}
               </p>
             )}
@@ -142,8 +142,8 @@ export function FeedSection({ title, icon, count, badge, children }: {
       <div className="flex items-center gap-2.5 px-1 pt-1 sm:pt-2">
         <span className="text-neutral-400">{icon}</span>
         <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
-        {badge && <span className="ml-auto text-[11px] sm:text-xs font-semibold text-neutral-500 bg-neutral-100 dark:bg-[#353535] px-2 sm:px-2.5 py-0.5 rounded-full">{badge}</span>}
-        {count && !badge && <span className="ml-auto text-[11px] sm:text-xs text-neutral-500">{count}</span>}
+        {badge && <span className="ml-auto text-[11px] sm:text-xs font-semibold text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-[#353535] px-2 sm:px-2.5 py-0.5 rounded-full">{badge}</span>}
+        {count && !badge && <span className="ml-auto text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400">{count}</span>}
       </div>
       <div className="space-y-2.5 sm:space-y-3">
         {children}
@@ -318,8 +318,8 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 transition={{ duration: 0.2 }}>
                 <Rocket size={14} className="sm:hidden text-neutral-400 flex-shrink-0" />
                 <Rocket size={20} className="hidden sm:block text-neutral-400 flex-shrink-0" />
-                <span className="text-[10px] sm:text-sm text-neutral-500 font-medium whitespace-nowrap">Utilizar</span>
-                <span className="hidden sm:inline text-sm text-neutral-500">· {likes}</span>
+                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Utilizar</span>
+                <span className="hidden sm:inline text-sm text-neutral-500 dark:text-neutral-300">· {likes}</span>
               </motion.div>
             )}
             {utilStatus === 'loading' && (
@@ -342,7 +342,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 <Check size={16} className="sm:hidden text-[#3b82f6]" strokeWidth={2.5} />
                 <Check size={20} className="hidden sm:block text-[#3b82f6]" strokeWidth={2.5} />
                 <span className="text-[10px] sm:text-sm text-[#3b82f6] font-semibold whitespace-nowrap">Implementado</span>
-                <span className="hidden sm:inline text-sm text-neutral-500">· {likes}</span>
+                <span className="hidden sm:inline text-sm text-neutral-500 dark:text-neutral-300">· {likes}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -357,7 +357,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 transition={{ duration: 0.2 }}>
                 <MessageCircle size={14} className="sm:hidden text-neutral-400 flex-shrink-0" />
                 <MessageCircle size={20} className="hidden sm:block text-neutral-400 flex-shrink-0" />
-                <span className="text-[10px] sm:text-sm text-neutral-500 font-medium whitespace-nowrap">Perguntas</span>
+                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Perguntas</span>
               </motion.div>
             )}
             {pergStatus === 'picking' && (
@@ -403,7 +403,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 transition={{ duration: 0.2 }}>
                 <Lightbulb size={14} className="sm:hidden text-neutral-400 flex-shrink-0" />
                 <Lightbulb size={20} className="hidden sm:block text-neutral-400 flex-shrink-0" />
-                <span className="text-[10px] sm:text-sm text-neutral-500 font-medium whitespace-nowrap">Ideias</span>
+                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Ideias</span>
               </motion.div>
             )}
             {ideiaStatus === 'picking' && (
@@ -449,7 +449,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 transition={{ duration: 0.2 }}>
                 <Share2 size={14} className="sm:hidden text-neutral-400 flex-shrink-0" />
                 <Share2 size={20} className="hidden sm:block text-neutral-400 flex-shrink-0" />
-                <span className="text-[10px] sm:text-sm text-neutral-500 font-medium whitespace-nowrap">Compartilhar</span>
+                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Compartilhar</span>
               </motion.div>
             )}
             {shareStatus === 'loading' && (
