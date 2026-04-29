@@ -227,16 +227,18 @@ export function SectorFeed({ sector }: Props) {
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
     >
       {/* Banner do setor ativo */}
-      <motion.div
-        variants={fadeItem}
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-dashed"
-        style={{ borderColor: meta.color + '60', backgroundColor: meta.color + '0d' }}
-      >
-        <span style={{ color: meta.color }}>{meta.icon}</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold uppercase tracking-wide" style={{ color: meta.color }}>Feed de {meta.label}</p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">Notícias e alertas específicos para esta área</p>
-        </div>
+      <motion.div variants={fadeItem}>
+        <FeedCard>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.color + '18' }}>
+              <span style={{ color: meta.color }}>{meta.icon}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: meta.color }}>Feed de {meta.label}</p>
+              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug mt-0.5">Notícias e alertas específicos para esta área</p>
+            </div>
+          </div>
+        </FeedCard>
       </motion.div>
 
       <FeedContent />
