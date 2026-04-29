@@ -2,7 +2,7 @@
 set -e
 
 SCOPE="team_VF7jdHwXKRwJ37xDke6CdKF0"
-ALIAS="omni-lovable.vercel.app"
+ALIAS="os1app.vercel.app"
 
 echo "→ deploy em produção..."
 OUTPUT=$(vercel --prod --yes --scope "$SCOPE" 2>&1)
