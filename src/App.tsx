@@ -352,22 +352,26 @@ export default function App() {
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
           {/* Botões — mobile: no fluxo; desktop: absoluto acima do chat */}
-          <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-1.5">
-            <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-3">
+            <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
               <Globe size={18} className="sm:hidden" />
-              <Globe size={20} className="hidden sm:block" />
+              <Globe size={20} className="hidden sm:block lg:hidden" />
+              <Globe size={22} className="hidden lg:block" />
             </button>
-            <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
+            <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
               <Settings2 size={18} className="sm:hidden" />
-              <Settings2 size={20} className="hidden sm:block" />
+              <Settings2 size={20} className="hidden sm:block lg:hidden" />
+              <Settings2 size={22} className="hidden lg:block" />
             </button>
-            <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
+            <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               {dark ? <Sun size={18} className="sm:hidden" /> : <Moon size={18} className="sm:hidden" />}
-              {dark ? <Sun size={20} className="hidden sm:block" /> : <Moon size={20} className="hidden sm:block" />}
+              {dark ? <Sun size={20} className="hidden sm:block lg:hidden" /> : <Moon size={20} className="hidden sm:block lg:hidden" />}
+              {dark ? <Sun size={22} className="hidden lg:block" /> : <Moon size={22} className="hidden lg:block" />}
             </button>
-            <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
+            <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               <Bell size={18} className="sm:hidden" />
-              <Bell size={20} className="hidden sm:block" />
+              <Bell size={20} className="hidden sm:block lg:hidden" />
+              <Bell size={22} className="hidden lg:block" />
             </button>
           </div>
         </div>
