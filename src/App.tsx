@@ -362,11 +362,6 @@ export default function App() {
           </button>
           {/* Botões — mobile: no fluxo; desktop: absoluto acima do chat */}
           <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-4">
-            <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
-              <Globe size={18} className="sm:hidden" />
-              <Globe size={20} className="hidden sm:block lg:hidden" />
-              <Globe size={24} className="hidden lg:block" />
-            </button>
             <button
               onClick={() => setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
@@ -378,6 +373,11 @@ export default function App() {
               {activeSector !== 'geral' && (
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
+            </button>
+            <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
+              <Globe size={18} className="sm:hidden" />
+              <Globe size={20} className="hidden sm:block lg:hidden" />
+              <Globe size={24} className="hidden lg:block" />
             </button>
             <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
               <Settings2 size={18} className="sm:hidden" />
