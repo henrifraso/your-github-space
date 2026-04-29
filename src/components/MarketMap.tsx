@@ -31,7 +31,7 @@ export function MarketMapButton({ open, onToggle }: ButtonProps) {
   return (
     <button
       onClick={onToggle}
-      className="w-full h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
+      className="w-full h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#272727] border border-neutral-100 dark:border-[#363636] hover:bg-neutral-50 dark:hover:bg-[#2a2a2a] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
       {open ? 'Fechar' : 'Mapa'}
     </button>
   );
@@ -44,9 +44,9 @@ export function MarketMapContent({ open, onClose, competitors, onCompetitorClick
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed inset-0 z-[190] bg-white dark:bg-[#0a0a0a] flex flex-col"
+      className="fixed inset-0 z-[190] bg-white dark:bg-[#1b1b1b] flex flex-col"
     >
-      <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#262626]">
+      <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#363636]">
         <div className="flex items-center gap-2">
           <MapPin size={18} className="text-[#3b82f6]" />
           <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6]">Mapa do Mercado</p>
@@ -63,7 +63,7 @@ export function MarketMapContent({ open, onClose, competitors, onCompetitorClick
         <LeafletMap competitors={competitors} onCompetitorClick={onCompetitorClick} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-6 py-3 border-t border-neutral-200 dark:border-[#262626] flex-shrink-0">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-6 py-3 border-t border-neutral-200 dark:border-[#363636] flex-shrink-0">
         {[
           { color: '#8e8e8e', label: 'Direto', filled: true },
           { color: '#8e8e8e', label: 'Indireto', filled: false },

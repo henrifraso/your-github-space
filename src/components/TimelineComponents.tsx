@@ -18,7 +18,7 @@ const TIPO_BG: Record<string, string> = {
 export function TimelineCard({ event, onOpen }: { event: TimelineEvent; onOpen: () => void }) {
   return (
     <motion.div onClick={onOpen}
-      className="flex-shrink-0 w-[240px] md:w-auto rounded-2xl border border-neutral-200 dark:border-[#262626] bg-[#fafafa] dark:bg-[#161616] p-6 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50"
+      className="flex-shrink-0 w-[240px] md:w-auto rounded-2xl border border-neutral-200 dark:border-[#363636] bg-[#fafafa] dark:bg-[#272727] p-6 cursor-pointer transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50"
       whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-center gap-3 mb-4">

@@ -196,7 +196,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
-    document.body.style.backgroundColor = dark ? '#0a0a0a' : '#fafafa';
+    document.body.style.backgroundColor = dark ? '#1b1b1b' : '#fafafa';
   }, [dark]);
 
   useEffect(() => {
@@ -343,7 +343,7 @@ export default function App() {
     <div className={dark ? 'dark' : ''}>
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3 relative">
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#212121]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#363636] py-2.5 sm:py-3 relative">
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
           <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
             <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
@@ -379,7 +379,7 @@ export default function App() {
 
     <div
       style={{ paddingRight: scrolled ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
+      className="min-h-screen bg-[#f3f3f3] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
     >
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
@@ -458,7 +458,7 @@ export default function App() {
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
               {[[txt('btn_plano'), () => setFullscreenCard({ type: 'plano' })], [txt('btn_estrat'), () => setFullscreenCard({ type: 'estrategia' })], [txt('btn_prat'), () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
                 <button key={label as string} onClick={fn as () => void}
-                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-white dark:bg-[#272727] border border-neutral-100 dark:border-[#363636] hover:bg-neutral-50 dark:hover:bg-[#2a2a2a] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
                   {label as string}
                 </button>
               ))}
@@ -593,7 +593,7 @@ export default function App() {
                   <p className="text-xs text-neutral-500">/ {data.pontos_proximo} pts</p>
                 </div>
               </div>
-              <div className="w-full h-2 bg-neutral-100 dark:bg-[#262626] rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-neutral-100 dark:bg-[#363636] rounded-full overflow-hidden">
                 <motion.div initial={{ width: 0 }} animate={{ width: `${data.progresso_pct}%` }} transition={{ duration: 1, ease: 'easeOut' }} className="h-full bg-[#3b82f6] rounded-full" />
               </div>
               <p className="text-xs text-neutral-500 mt-2">{data.progresso_pct}% para o próximo nível</p>
@@ -601,7 +601,7 @@ export default function App() {
             <p className="text-xs font-bold text-neutral-500 uppercase tracking-widest mb-3">Histórico de Atividades</p>
             <div className="space-y-1">
               {data.gamificacao_log.map((log, i) => (
-                <div key={i} className="flex items-center justify-between py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+                <div key={i} className="flex items-center justify-between py-3 border-b border-neutral-100 dark:border-[#363636] last:border-0">
                   <span className="text-sm text-neutral-700 dark:text-neutral-300">{log.acao}</span>
                   <span className="text-sm font-bold text-[#3b82f6]">+{log.pontos} pts</span>
                 </div>
@@ -619,7 +619,7 @@ export default function App() {
             <ModalHeader onClose={() => setEmpresaOpen(false)}><Info size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Empresa</h2></ModalHeader>
             <div className="space-y-0">
               {[{label:'Nome',value:data.negocio.nome_fantasia},{label:'Segmento',value:data.negocio.segmento},{label:'Cidade',value:`${data.negocio.cidade}, ${data.negocio.estado}`},{label:'Telefone',value:data.negocio.telefone},{label:'Nível',value:`${data.nivel_label} (Nível ${data.negocio.nivel})`},{label:'Pontos',value:`${data.negocio.pontos} pts`},{label:'Semana',value:data.semana_label}].map((item, i) => (
-                <div key={i} className="flex justify-between items-center py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+                <div key={i} className="flex justify-between items-center py-3 border-b border-neutral-100 dark:border-[#363636] last:border-0">
                   <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">{item.label}</span>
                   <span className="text-sm font-medium text-neutral-800 dark:text-neutral-300">{item.value}</span>
                 </div>
@@ -648,7 +648,7 @@ export default function App() {
             ) : (
               <div className="space-y-1">
                 {savedItems.map((item) => (
-                  <div key={item.id} className="flex items-start justify-between gap-3 py-3 border-b border-neutral-100 dark:border-[#262626] last:border-0">
+                  <div key={item.id} className="flex items-start justify-between gap-3 py-3 border-b border-neutral-100 dark:border-[#363636] last:border-0">
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-neutral-500 uppercase tracking-wide mb-0.5">{item.section}</p>
                       <p className="text-sm font-semibold leading-snug">{item.title}</p>
@@ -731,9 +731,9 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 24 }}
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-              className="fixed inset-0 z-[190] bg-white dark:bg-[#0a0a0a] flex flex-col overflow-y-auto"
+              className="fixed inset-0 z-[190] bg-white dark:bg-[#1b1b1b] flex flex-col overflow-y-auto"
             >
-              <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#262626]">
+              <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#363636]">
                 <div className="flex items-center gap-2">
                   {fullscreenCard.type !== 'card' && META[fullscreenCard.type]?.icon}
                   <p className="text-xs font-bold uppercase tracking-widest" style={{ color: headerColor }}>{headerLabel}</p>
@@ -775,7 +775,7 @@ export default function App() {
                           ))}
                         </div>
                       </div>
-                      <div className="pt-6 border-t border-neutral-100 dark:border-[#262626] space-y-1">
+                      <div className="pt-6 border-t border-neutral-100 dark:border-[#363636] space-y-1">
                         {circle.descricao.split('\n').map((linha, i) => (
                           <p key={i} className={`text-sm leading-relaxed ${i === 0 ? 'text-neutral-800 dark:text-neutral-300 font-medium' : 'text-neutral-500'}`}>{linha}</p>
                         ))}
@@ -798,12 +798,12 @@ export default function App() {
         {selectedItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedItem(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-white dark:bg-[#161616] rounded-2xl overflow-hidden shadow-2xl border border-neutral-100 dark:border-[#262626]">
+            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-white dark:bg-[#272727] rounded-2xl overflow-hidden shadow-2xl border border-neutral-100 dark:border-[#363636]">
               <div className="p-6 flex flex-col items-center text-center">
                 <div className="text-5xl mb-4">{gridItems.find(i => i.id === selectedItem.id)?.emoji}</div>
                 <h3 className="text-xl font-bold mb-1">{gridItems.find(i => i.id === selectedItem.id)?.title}</h3>
                 <p className="text-neutral-500 text-xs uppercase tracking-widest font-bold mb-8">{gridItems.find(i => i.id === selectedItem.id)?.subtitle}</p>
-                <div className="w-full space-y-5 text-left bg-neutral-50 dark:bg-[#0a0a0a] p-5 rounded-xl border border-neutral-100 dark:border-[#262626]">
+                <div className="w-full space-y-5 text-left bg-neutral-50 dark:bg-[#1b1b1b] p-5 rounded-xl border border-neutral-100 dark:border-[#363636]">
                   {selectedItem.type === 'competitor' && (<>
                     <div className="flex justify-between items-center"><span className="text-neutral-500 text-sm">Nota Google</span><span className="font-bold text-[#f9ce34]">⭐ {selectedItem.content.nota_google}</span></div>
                     <div className="flex justify-between items-center"><span className="text-neutral-500 text-sm">Faixa de Preço</span><span className="font-bold text-[#3b82f6]">{selectedItem.content.faixa_preco}</span></div>
@@ -823,7 +823,7 @@ export default function App() {
                   {selectedItem.type === 'level' && (
                     <div className="space-y-5">
                       <div className="flex justify-between items-end"><span className="text-neutral-500 text-sm font-medium">Progresso de Nível</span><span className="text-lg font-bold">{data.progresso_pct}%</span></div>
-                      <div className="w-full h-1.5 bg-neutral-100 dark:bg-[#262626] rounded-full overflow-hidden"><div className="h-full bg-neutral-800 dark:bg-neutral-100" style={{ width: `${data.progresso_pct}%` }} /></div>
+                      <div className="w-full h-1.5 bg-neutral-100 dark:bg-[#363636] rounded-full overflow-hidden"><div className="h-full bg-neutral-800 dark:bg-neutral-100" style={{ width: `${data.progresso_pct}%` }} /></div>
                       <p className="text-xs text-neutral-500 text-center font-medium">Faltam {data.pontos_proximo - data.negocio.pontos} pontos para o próximo nível!</p>
                     </div>
                   )}
@@ -847,7 +847,7 @@ export default function App() {
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-              className="fixed bottom-0 left-0 right-0 z-[130] bg-white dark:bg-[#111111] rounded-t-2xl px-5 pt-5 pb-8 max-w-[935px] mx-auto"
+              className="fixed bottom-0 left-0 right-0 z-[130] bg-white dark:bg-[#212121] rounded-t-2xl px-5 pt-5 pb-8 max-w-[935px] mx-auto"
             >
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
@@ -870,7 +870,7 @@ export default function App() {
                       className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all duration-200 cursor-pointer text-left ${
                         isSelected
                           ? 'bg-[#3b82f6]/10 border-[#3b82f6] dark:border-[#3b82f6]'
-                          : 'bg-white dark:bg-[#161616] border-neutral-100 dark:border-[#262626] hover:bg-neutral-50 dark:hover:bg-[#1a1a1a]'
+                          : 'bg-white dark:bg-[#272727] border-neutral-100 dark:border-[#363636] hover:bg-neutral-50 dark:hover:bg-[#2a2a2a]'
                       }`}
                     >
                       <span className="text-xl">{meta.emoji}</span>
