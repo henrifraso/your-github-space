@@ -372,7 +372,7 @@ export default function App() {
         </div>
       </nav>
 
-    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[300px] xl:pr-[340px]">
+    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[316px] xl:pr-[336px]">
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
         {/* Perfil — colapsa ao rolar */}

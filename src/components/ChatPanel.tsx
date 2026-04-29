@@ -42,7 +42,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-[#0f0f0f]">
+    <div className="flex flex-col h-full">
 
       {/* Close — mobile only */}
       {showClose && onClose && (
@@ -134,7 +134,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
 
 export function ChatDesktop() {
   return (
-    <div className="fixed top-0 right-0 bottom-0 w-[300px] xl:w-[320px] z-[40] hidden lg:block border-l border-neutral-100 dark:border-[#262626]">
+    <div className="fixed top-[72px] right-4 bottom-4 w-[288px] xl:w-[308px] z-[40] hidden lg:flex flex-col bg-white dark:bg-[#161616] border border-neutral-100 dark:border-[#262626] rounded-2xl overflow-hidden">
       <ChatBody />
     </div>
   );
