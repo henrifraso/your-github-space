@@ -2,11 +2,10 @@ import React from 'react';
 import { motion } from 'motion/react';
 import {
   Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale,
-  ChevronRight, AlertTriangle, CheckCircle2, Clock
+  ChevronRight, CheckCircle2, Clock
 } from 'lucide-react';
 import { FeedSection, FeedCard } from './FeedComponents';
 import type { SectorId } from './SectorSwitcher';
-import { SECTORS } from './SectorSwitcher';
 
 const fadeItem = {
   hidden: { opacity: 0, y: 16 },
@@ -41,7 +40,7 @@ function MarketingFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Campanhas Ativas" icon={<Megaphone size={18}/>}>
+        <FeedSection title="O que mudou em Marketing" icon={<Megaphone size={18}/>}>
           <SimpleCard color="#ec4899" tag="Campanha Sazonal" title="McFlurry Páscoa — lançamento 13/abr" detail="Kit ovo de Páscoa + McFlurry representa 18% do faturamento no período. Prazo para ativar ponto de venda: esta semana." badge={{ label: 'URGENTE', type: 'warn' }} />
           <SimpleCard color="#ec4899" tag="App Méqui" title="Desconto 30% off em combos via app — vigente até 30/abr" detail="Cupom MEQUIAPP30 impulsiona +22% de downloads na semana. Comunicar em todos os pontos de contato." badge={{ label: 'ATIVA', type: 'ok' }} />
           <SimpleCard color="#ec4899" tag="Kids" title="Nova campanha Méqui Kids — material disponível no portal" detail="Novos brinquedos McLanche Feliz com coleção Anime 2025. Retirar kits de montagem na fornecedora até sexta." />
@@ -68,7 +67,7 @@ function VendasFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Resultados da Semana" icon={<TrendingUp size={18}/>}>
+        <FeedSection title="O que mudou em Vendas" icon={<TrendingUp size={18}/>}>
           <SimpleCard color="#10b981" tag="Ticket Médio" title="R$ 42 por cliente · +8% vs semana passada" detail="Combos são o principal driver de crescimento. Upsell de bebidas cresceu 14% após treinamento de atendimento." badge={{ label: '+8%', type: 'ok' }} />
           <SimpleCard color="#10b981" tag="Horário de Pico" title="11h–14h responde por 58% das vendas diárias" detail="Turnover de mesa em 7 min no pico. Considerar reforço de 2 atendentes na faixa das 12h." />
           <SimpleCard color="#10b981" tag="Meta Mensal" title="Combo Big Mac: 88% da meta — faltam 12%" detail="17 dias restantes no mês. Ritmo atual é suficiente se mantido. Alerta: feriadão de Tiradentes reduz fluxo em ~20%." badge={{ label: '88%', type: 'info' }} />
@@ -95,7 +94,7 @@ function FinanceiroFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Fiscal & Impostos" icon={<Banknote size={18}/>}>
+        <FeedSection title="O que mudou em Financeiro" icon={<Banknote size={18}/>}>
           <SimpleCard color="#f59e0b" tag="SIMPLES Nacional" title="Guia Abr/2026 vence em 20 dias — valor estimado R$ 4.240" detail="Regime: Simples Nacional Anexo I (alimentos). Alíquota efetiva 6.8%. Contador: confirmar com escritório até sexta." badge={{ label: 'PENDENTE', type: 'warn' }} />
           <SimpleCard color="#f59e0b" tag="NFe" title="Emissão de notas: 100% em dia · 0 rejeições no mês" detail="Certificado digital A1 vence em Out/2026. Renovação pode ser feita com 60 dias de antecedência." badge={{ label: 'OK', type: 'ok' }} />
           <SimpleCard color="#f59e0b" tag="SPED" title="EFD-ICMS/IPI entrega: em dia · próximo arquivo Mai/2026" detail="Obrigação acessória transmitida via SPED até dia 15 de cada mês. Conferir lançamentos de entradas com fornecedores." />
@@ -116,7 +115,7 @@ function RhFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Escala & Equipe" icon={<Users size={18}/>}>
+        <FeedSection title="O que mudou em RH" icon={<Users size={18}/>}>
           <SimpleCard color="#8b5cf6" tag="Cobertura de Turno" title="2 faltas não cobertas — turno domingo 08h–14h" detail="Equipe atual: 18 funcionários ativos. Banco de horas disponível para 3 colaboradores voluntários." badge={{ label: 'ATENÇÃO', type: 'warn' }} />
           <SimpleCard color="#8b5cf6" tag="Novas Contratações" title="3 contratados em período de experiência — 60 dias em Mai/2026" detail="Ana Costa, Pedro Lima e Juliana Reis — avaliação de performance agendada para 12/mai. Confirmar documentação até lá." badge={{ label: 'PRAZO', type: 'info' }} />
         </FeedSection>
@@ -124,14 +123,14 @@ function RhFeed() {
 
       <motion.div variants={fadeItem}>
         <FeedSection title="Treinamentos" icon={<ChevronRight size={18}/>}>
-          <SimpleCard color="#8b5cf6" tag="Higiene & Segurança" title="3 colaboradores pendentes no módulo de higiene alimentar" detail="Módulo obrigatório ANVISA. Prazo: antes da próxima auditoria (Mai/2026). Plataforma: https://treinamentos.mcdonalds.com.br" badge={{ label: 'PENDENTE', type: 'warn' }} />
+          <SimpleCard color="#8b5cf6" tag="Higiene & Segurança" title="3 colaboradores pendentes no módulo de higiene alimentar" detail="Módulo obrigatório ANVISA. Prazo: antes da próxima auditoria (Mai/2026)." badge={{ label: 'PENDENTE', type: 'warn' }} />
           <SimpleCard color="#8b5cf6" tag="Atendimento" title="Treinamento de upsell concluído — 14 funcionários certificados" detail="NPS interno subiu 8 pontos após o treinamento em março. Próximo módulo: Gestão de Reclamações (Jun/2026)." badge={{ label: 'CONCLUÍDO', type: 'ok' }} />
         </FeedSection>
       </motion.div>
 
       <motion.div variants={fadeItem}>
         <FeedSection title="Legislação Trabalhista" icon={<Scale size={18}/>}>
-          <SimpleCard color="#8b5cf6" tag="Convenção Coletiva 2025" title="Reajuste salarial 6.5% vigente desde Jan/2026 — já aplicado" detail="Piso da categoria: R$ 1.680. Horas extras: 50% (segunda a sábado), 100% (domingos e feriados). Conferir folha de pagamento." badge={{ label: 'EM DIA', type: 'ok' }} />
+          <SimpleCard color="#8b5cf6" tag="Convenção Coletiva 2025" title="Reajuste salarial 6.5% vigente desde Jan/2026 — já aplicado" detail="Piso da categoria: R$ 1.680. Horas extras: 50% (seg–sáb), 100% (domingos e feriados). Conferir folha de pagamento." badge={{ label: 'EM DIA', type: 'ok' }} />
         </FeedSection>
       </motion.div>
     </>
@@ -142,7 +141,7 @@ function OperacoesFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Qualidade & Equipamentos" icon={<Settings2 size={18}/>}>
+        <FeedSection title="O que mudou em Operações" icon={<Settings2 size={18}/>}>
           <SimpleCard color="#06b6d4" tag="Manutenção" title="Fritureiro #2 — temperatura irregular detectada ontem" detail="Temperatura oscilando entre 168°C e 182°C (padrão: 175°C ±3°C). Acionar assistência técnica antes do turno de amanhã." badge={{ label: 'ALERTA', type: 'warn' }} />
           <SimpleCard color="#06b6d4" tag="Câmara Fria" title="Câmara #1: -18°C · Câmara #2: -17.4°C — dentro do padrão" detail="Registros de temperatura dos últimos 7 dias dentro da faixa ANVISA. Calibração do sensor agendada para próxima semana." badge={{ label: 'OK', type: 'ok' }} />
           <SimpleCard color="#06b6d4" tag="Limpeza" title="Check de limpeza diário: 6/7 itens aprovados — pendente banheiro masculino" detail="Vistoria de abertura identificou falha no banheiro masculino. Corrigido às 08h15. Registrar no app de qualidade." />
@@ -163,7 +162,7 @@ function EstoqueFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Alertas de Estoque" icon={<Package size={18}/>}>
+        <FeedSection title="O que mudou em Estoque" icon={<Package size={18}/>}>
           <SimpleCard color="#84cc16" tag="CRÍTICO" title="Embalagens Big Mac: estoque para 2 dias — repor urgente" detail="Consumo médio: 340 unidades/dia. Saldo atual: 680 unidades. Solicitar pedido emergencial ao fornecedor Pactiv." badge={{ label: 'CRÍTICO', type: 'warn' }} />
           <SimpleCard color="#84cc16" tag="Atenção" title="Batata congelada McCain: estoque 60% — pedir nesta semana" detail="Pedido quinzenal com 7 dias de lead time. Prazo ideal para pedido: até quinta-feira." badge={{ label: 'ATENÇÃO', type: 'info' }} />
           <SimpleCard color="#84cc16" tag="OK" title="Bebidas e sucos: estoque para 12 dias" detail="Coca-Cola FEMSA: entrega confirmada para terça-feira. Nenhuma ação necessária." badge={{ label: 'OK', type: 'ok' }} />
@@ -184,7 +183,7 @@ function JuridicoFeed() {
   return (
     <>
       <motion.div variants={fadeItem}>
-        <FeedSection title="Compliance & Regulatório" icon={<Scale size={18}/>}>
+        <FeedSection title="O que mudou em Jurídico" icon={<Scale size={18}/>}>
           <SimpleCard color="#f97316" tag="Vigilância Sanitária" title="Status regulatório: preparado para auditoria Q2/2026" detail="Alvará sanitário vigente até Dez/2026. Laudo de controle de pragas: renovar até 30/abr (prazo em 15 dias)." badge={{ label: 'ATENÇÃO', type: 'warn' }} />
           <SimpleCard color="#f97316" tag="PROCON" title="0 reclamações ativas no Procon SP nos últimos 90 dias" detail="Nenhuma notificação pendente. Monitoramento via sistema SINDEC em dia." badge={{ label: 'LIMPO', type: 'ok' }} />
           <SimpleCard color="#f97316" tag="ANVISA" title="RDC 216/2004 — conformidade verificada em Mar/2026" detail="Próxima auditoria interna: 05/mai. Registros de higiene e rastreabilidade disponíveis para inspeção." badge={{ label: 'CONFORME', type: 'ok' }} />
@@ -216,7 +215,6 @@ const SECTOR_FEEDS: Record<Exclude<SectorId, 'geral'>, React.ComponentType> = {
 };
 
 export function SectorFeed({ sector }: Props) {
-  const meta = SECTORS.find(s => s.id === sector)!;
   const FeedContent = SECTOR_FEEDS[sector];
 
   return (
@@ -226,21 +224,6 @@ export function SectorFeed({ sector }: Props) {
       animate="visible"
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
     >
-      {/* Banner do setor ativo */}
-      <motion.div variants={fadeItem}>
-        <FeedCard>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: meta.color + '18' }}>
-              <span style={{ color: meta.color }}>{meta.icon}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: meta.color }}>Feed de {meta.label}</p>
-              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug mt-0.5">Notícias e alertas específicos para esta área</p>
-            </div>
-          </div>
-        </FeedCard>
-      </motion.div>
-
       <FeedContent />
     </motion.div>
   );
