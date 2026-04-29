@@ -81,6 +81,7 @@ import { CircleProgress, PieChart } from './components/CircleProgress';
 import { StoryViewer } from './components/StoryViewer';
 import { ConcorrenteModal } from './components/ConcorrenteModal';
 import { BrowserView } from './components/BrowserView';
+import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -104,6 +105,7 @@ export default function App() {
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<TimelineEvent | null>(null);
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -339,7 +341,7 @@ export default function App() {
 
   return (
     <div className={dark ? 'dark' : ''}>
-    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans">
+    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[300px] xl:pr-[340px]">
 
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3">
@@ -666,6 +668,11 @@ export default function App() {
 
       {/* Browser / Sincronizar */}
       <BrowserView open={browserOpen} onClose={() => setBrowserOpen(false)} />
+
+      {/* Chat */}
+      <ChatDesktop />
+      <ChatFAB onClick={() => setChatOpen(true)} />
+      <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} />
 
       {/* Fullscreen */}
       <AnimatePresence>
