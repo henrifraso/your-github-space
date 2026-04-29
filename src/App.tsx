@@ -352,7 +352,7 @@ export default function App() {
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
           {/* Botões — mobile: no fluxo; desktop: absoluto acima do chat */}
-          <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-0 lg:inset-y-0 lg:px-3">
+          <div className="flex items-center gap-0.5 sm:gap-1 lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-1.5">
             <button onClick={() => setBrowserOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Sincronizar">
               <Globe size={18} className="sm:hidden" />
               <Globe size={20} className="hidden sm:block" />
