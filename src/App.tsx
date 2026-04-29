@@ -858,7 +858,6 @@ export default function App() {
                   <X size={18} />
                 </button>
               </div>
-              <p className="text-xs text-neutral-500 mb-4">Escolha como os dados são apresentados — de linguagem simples a técnica.</p>
               <div className="space-y-2">
                 {DIFF_ORDER.map((d) => {
                   const meta = DIFF_META[d];
@@ -867,17 +866,13 @@ export default function App() {
                     <button
                       key={d}
                       onClick={() => { setDifficulty(d); setDifficultyOpen(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl border transition-all duration-200 cursor-pointer text-left ${
+                      className={`w-full flex items-center px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer text-left ${
                         isSelected
                           ? 'bg-[#3b82f6]/10 border-[#3b82f6] dark:border-[#3b82f6]'
                           : 'bg-white dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-neutral-50 dark:hover:bg-[#353535]'
                       }`}
                     >
-                      <span className="text-xl">{meta.emoji}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-semibold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>
-                        <p className="text-xs text-neutral-500 mt-0.5">{meta.desc}</p>
-                      </div>
+                      <p className={`flex-1 text-sm font-semibold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>
                       {isSelected && (
                         <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0">
                           <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
