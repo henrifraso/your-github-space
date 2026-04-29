@@ -59,7 +59,7 @@ export function PEPItemRow({
 
   // ── Passo numerado (Prática) ──
   if (item.tipo === 'passo') return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-[#363636] last:border-0">
+    <div className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-[#414141] last:border-0">
       <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
         <span className="text-[10px] font-bold text-[#3b82f6]">{stepIndex ?? ''}</span>
       </div>
@@ -77,7 +77,7 @@ export function PEPItemRow({
 
   // ── Parágrafo narrativo (Estratégia) ──
   if (item.tipo === 'paragrafo') return (
-    <div className="py-2.5 border-b border-neutral-100 dark:border-[#363636] last:border-0">
+    <div className="py-2.5 border-b border-neutral-100 dark:border-[#414141] last:border-0">
       <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">{item.texto}</p>
     </div>
   );
@@ -123,7 +123,7 @@ export function PEPItemRow({
                 <span className="text-xs text-neutral-400">Gerando...</span>
               </div>
             ) : (
-              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed bg-neutral-50 dark:bg-[#2a2a2a] rounded-xl p-3 border border-neutral-100 dark:border-[#363636]">
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed bg-neutral-50 dark:bg-[#353535] rounded-xl p-3 border border-neutral-100 dark:border-[#414141]">
                 {content}
               </p>
             )}
@@ -142,7 +142,7 @@ export function FeedSection({ title, icon, count, badge, children }: {
       <div className="flex items-center gap-2.5 px-1 pt-1 sm:pt-2">
         <span className="text-neutral-400">{icon}</span>
         <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
-        {badge && <span className="ml-auto text-[11px] sm:text-xs font-semibold text-neutral-500 bg-neutral-100 dark:bg-[#2a2a2a] px-2 sm:px-2.5 py-0.5 rounded-full">{badge}</span>}
+        {badge && <span className="ml-auto text-[11px] sm:text-xs font-semibold text-neutral-500 bg-neutral-100 dark:bg-[#353535] px-2 sm:px-2.5 py-0.5 rounded-full">{badge}</span>}
         {count && !badge && <span className="ml-auto text-[11px] sm:text-xs text-neutral-500">{count}</span>}
       </div>
       <div className="space-y-2.5 sm:space-y-3">
@@ -307,7 +307,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
   const cardContent = (
     <>
       <div>{children}</div>
-      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#363636] flex items-center justify-between min-h-[32px] sm:min-h-[40px]">
+      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#414141] flex items-center justify-between min-h-[32px] sm:min-h-[40px]">
 
         {/* ── Utilizar ── */}
         <button onClick={handleLike} disabled={utilStatus === 'loading'} className="flex items-center gap-1 sm:gap-2 overflow-hidden cursor-pointer">
@@ -526,9 +526,9 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
   }
 
   const isClickable = !!(onClick || onFullscreen);
-  const cls = "w-full bg-white dark:bg-[#272727] rounded-2xl border px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
-    (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#363636] ") +
-    (isClickable ? "hover:bg-neutral-50 dark:hover:bg-[#2a2a2a] active:scale-[0.99] cursor-pointer" : "");
+  const cls = "w-full bg-white dark:bg-[#323232] rounded-2xl border px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+    (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#414141] ") +
+    (isClickable ? "hover:bg-neutral-50 dark:hover:bg-[#353535] active:scale-[0.99] cursor-pointer" : "");
 
   return (
     <div onClick={isClickable ? handleCardClick : undefined} className={cls}

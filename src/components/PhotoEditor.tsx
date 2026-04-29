@@ -114,7 +114,7 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
       <motion.div
         initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative w-full md:max-w-sm bg-[#fafafa] dark:bg-[#272727] rounded-t-2xl md:rounded-2xl p-6 border border-transparent dark:border-[#363636]"
+        className="relative w-full md:max-w-sm bg-[#fafafa] dark:bg-[#323232] rounded-t-2xl md:rounded-2xl p-6 border border-transparent dark:border-[#414141]"
       >
         <ModalHeader onClose={onClose}>
           <Camera size={18} className="text-[#3b82f6]" />
@@ -142,14 +142,14 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
 
           <div className="flex items-center gap-3 w-full">
             <button onClick={() => changeZoom(-0.1)}
-              className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#2a2a2a] flex items-center justify-center text-neutral-800 dark:text-white transition-all duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-800/50 cursor-pointer">
+              className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#353535] flex items-center justify-center text-neutral-800 dark:text-white transition-all duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-800/50 cursor-pointer">
               <Minus size={16} />
             </button>
             <input type="range" min={MIN_ZOOM} max={MAX_ZOOM} step={0.05} value={zoom}
               onChange={e => { const next = Number(e.target.value); setZoom(next); setPos(p => ({ x: clamp(p.x, next), y: clamp(p.y, next) })); }}
               className="flex-1 accent-[#3b82f6]" />
             <button onClick={() => changeZoom(0.1)}
-              className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#2a2a2a] flex items-center justify-center text-neutral-800 dark:text-white transition-all duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-800/50 cursor-pointer">
+              className="w-8 h-8 rounded-xl bg-neutral-100 dark:bg-[#353535] flex items-center justify-center text-neutral-800 dark:text-white transition-all duration-200 hover:bg-neutral-200 dark:hover:bg-neutral-800/50 cursor-pointer">
               <Plus size={16} />
             </button>
             <span className="text-xs text-neutral-500 w-8 text-right">{zoom.toFixed(1)}×</span>
@@ -157,7 +157,7 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
 
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
           <button onClick={() => fileRef.current?.click()}
-            className="w-full h-11 rounded-xl border border-neutral-200 dark:border-[#363636] text-sm font-semibold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+            className="w-full h-11 rounded-xl border border-neutral-200 dark:border-[#414141] text-sm font-semibold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
             <Camera size={16} />
             Escolher nova foto
           </button>

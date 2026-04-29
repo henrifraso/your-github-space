@@ -21,7 +21,7 @@ function ScoreBar({ label, nota }: { label: string; nota: number }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-neutral-500 w-20 flex-shrink-0">{label}</span>
-      <div className="flex-1 h-1.5 rounded-full bg-neutral-100 dark:bg-[#363636] overflow-hidden">
+      <div className="flex-1 h-1.5 rounded-full bg-neutral-100 dark:bg-[#414141] overflow-hidden">
         <motion.div className="h-full rounded-full" style={{ backgroundColor: text }}
           initial={{ width: 0 }} animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }} />
@@ -45,7 +45,7 @@ export function ConcorrenteModal({ concorrente, onClose }: { concorrente: Compet
       <motion.div
         initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="relative w-full md:max-w-md bg-[#fafafa] dark:bg-[#272727] rounded-t-2xl md:rounded-2xl overflow-y-auto border border-transparent dark:border-[#363636]"
+        className="relative w-full md:max-w-md bg-[#fafafa] dark:bg-[#323232] rounded-t-2xl md:rounded-2xl overflow-y-auto border border-transparent dark:border-[#414141]"
         style={{ maxHeight: '88vh' }}>
 
         {/* Header */}
@@ -162,7 +162,7 @@ export function ConcorrenteModal({ concorrente, onClose }: { concorrente: Compet
           )}
 
           {/* Faixa de Preço */}
-          <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-[#363636]">
+          <div className="flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-[#414141]">
             <span className="text-xs text-neutral-500">Faixa de preço</span>
             <span className="text-sm font-bold text-neutral-800 dark:text-neutral-200">{concorrente.faixa_preco}</span>
           </div>

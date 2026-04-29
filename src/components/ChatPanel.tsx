@@ -50,7 +50,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
         <div className="flex justify-end px-5 pt-5 flex-shrink-0">
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#2a2a2a] transition-all duration-200 cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-[#353535] transition-all duration-200 cursor-pointer"
           >
             <X size={16} />
           </button>
@@ -71,7 +71,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               max-w-[88%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed
               ${msg.role === 'user'
                 ? 'bg-[#3b82f6] text-white rounded-br-sm'
-                : 'bg-neutral-100 dark:bg-[#2c2c2c] text-neutral-700 dark:text-neutral-300 rounded-bl-sm'
+                : 'bg-neutral-100 dark:bg-[#373737] text-neutral-700 dark:text-neutral-300 rounded-bl-sm'
               }
             `}>
               {msg.text}
@@ -86,7 +86,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-start"
           >
-            <div className="bg-neutral-100 dark:bg-[#2c2c2c] rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1">
+            <div className="bg-neutral-100 dark:bg-[#373737] rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1">
               {[0, 1, 2].map(i => (
                 <motion.span
                   key={i}
@@ -113,7 +113,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
               onClick={() => { setStarted(true); setTimeout(() => inputRef.current?.focus(), 50); }}
-              className="w-full h-11 rounded-2xl bg-white dark:bg-[#363636] border border-neutral-200 dark:border-[#434343] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-neutral-50 dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="w-full h-11 rounded-2xl bg-white dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-neutral-50 dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
               Inicializar
             </motion.button>
@@ -124,7 +124,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
-              className="flex items-end gap-2 bg-neutral-50 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#363636] rounded-2xl px-4 py-3 focus-within:border-neutral-300 dark:focus-within:border-[#363636] transition-colors duration-200"
+              className="flex items-end gap-2 bg-neutral-50 dark:bg-[#353535] border border-neutral-200 dark:border-[#414141] rounded-2xl px-4 py-3 focus-within:border-neutral-300 dark:focus-within:border-[#414141] transition-colors duration-200"
             >
               <textarea
                 ref={inputRef}
@@ -143,7 +143,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || loading}
-                className="w-7 h-7 rounded-xl bg-[#3b82f6] disabled:bg-neutral-200 dark:disabled:bg-[#363636] flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:bg-[#2563eb] active:scale-90 cursor-pointer disabled:cursor-default mb-0.5"
+                className="w-7 h-7 rounded-xl bg-[#3b82f6] disabled:bg-neutral-200 dark:disabled:bg-[#414141] flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:bg-[#2563eb] active:scale-90 cursor-pointer disabled:cursor-default mb-0.5"
               >
                 <ArrowUp size={13} className="text-white" strokeWidth={2.5} />
               </button>
@@ -160,7 +160,7 @@ export function ChatDesktop({ wide }: { wide?: boolean }) {
   return (
     <div
       style={{ width: wide ? 'calc(50vw - 16px)' : '288px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-white dark:bg-[#272727] border border-neutral-100 dark:border-[#363636] rounded-2xl overflow-hidden"
+      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-white dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden"
     >
       <ChatBody />
     </div>
@@ -213,7 +213,7 @@ export function ChatMobile({ open, onClose }: { open: boolean; onClose: () => vo
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed inset-0 z-[200] lg:hidden bg-white dark:bg-[#1f1f1f]"
+          className="fixed inset-0 z-[200] lg:hidden bg-white dark:bg-[#2b2b2b]"
         >
           <ChatBody onClose={onClose} showClose />
         </motion.div>

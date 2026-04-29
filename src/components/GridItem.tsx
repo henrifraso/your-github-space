@@ -18,7 +18,7 @@ export const GridItem = ({ title, emoji, imageUrl, likes = 0, comments = 0, onCl
   <motion.div
     layoutId={layoutId}
     onClick={onClick}
-    className="relative aspect-square bg-[#fafafa] dark:bg-[#272727] border border-neutral-200 dark:border-[#363636] rounded-2xl cursor-pointer group overflow-hidden transition-all duration-200"
+    className="relative aspect-square bg-[#fafafa] dark:bg-[#323232] border border-neutral-200 dark:border-[#414141] rounded-2xl cursor-pointer group overflow-hidden transition-all duration-200"
     whileHover={{ scale: 1.02 }}
     transition={{ duration: 0.2 }}
   >

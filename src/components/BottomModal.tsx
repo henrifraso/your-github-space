@@ -17,7 +17,7 @@ export function BottomModal({ onClose, zIndex = 150, maxWidth = 'md:max-w-lg', h
       <motion.div
         initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 350, mass: 0.8 }}
-        className={`relative w-full ${maxWidth} bg-[#fafafa] dark:bg-[#272727] rounded-t-2xl md:rounded-2xl p-5 sm:p-6 overflow-y-auto border border-transparent dark:border-[#363636]`}
+        className={`relative w-full ${maxWidth} bg-[#fafafa] dark:bg-[#323232] rounded-t-2xl md:rounded-2xl p-5 sm:p-6 overflow-y-auto border border-transparent dark:border-[#414141]`}
         style={{ height }}
       >
         {children}
