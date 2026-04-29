@@ -97,13 +97,9 @@ export default function App() {
   const touchStartY = useRef(0);
   const scrollCooldownRef = useRef(false);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
-  const [planoOpen, setPlanoOpen] = useState(false);
   const [evolucaoOpen, setEvolucaoOpen] = useState(false);
   const [empresaOpen, setEmpresaOpen] = useState(false);
-  const [circlePopupIdx, setCirclePopupIdx] = useState<number | null>(null);
   const [salvosOpen, setSalvosOpen] = useState(false);
-  const [estrategiaOpen, setEstrategiaOpen] = useState(false);
-  const [praticaOpen, setPraticaOpen] = useState(false);
   const [selectedConcorrente, setSelectedConcorrente] = useState<Competitor | null>(null);
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<TimelineEvent | null>(null);
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
@@ -112,7 +108,8 @@ export default function App() {
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
     | { type: 'estrategia' }
-    | { type: 'pratica' };
+    | { type: 'pratica' }
+    | { type: 'destaque'; idx: number };
   const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
   const [browserOpen, setBrowserOpen] = useState(false);
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
@@ -182,8 +179,8 @@ export default function App() {
     }
   };
 
-  const anyModalOpen = storyIndex !== null || planoOpen || evolucaoOpen || empresaOpen ||
-    circlePopupIdx !== null || salvosOpen || estrategiaOpen || praticaOpen || mapOpen ||
+  const anyModalOpen = storyIndex !== null || evolucaoOpen || empresaOpen ||
+    fullscreenCard !== null || salvosOpen || mapOpen ||
     selectedConcorrente !== null || selectedTimelineEvent !== null || selectedItem !== null || difficultyOpen;
   const anyModalOpenRef = useRef(false);
   useEffect(() => { anyModalOpenRef.current = anyModalOpen; }, [anyModalOpen]);
@@ -460,7 +457,7 @@ export default function App() {
           {/* Destaques */}
           <section className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar px-4 sm:px-5 pt-1 pb-2 md:justify-between">
             {circleData.map((c, i) => (
-              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setCirclePopupIdx(i)} />
+              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
             ))}
           </section>
 
@@ -621,48 +618,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Modal Gráfico Pizza */}
-      <AnimatePresence>
-        {circlePopupIdx !== null && (() => {
-          const circle = circleData[circlePopupIdx];
-          return (
-            <BottomModal onClose={() => setCirclePopupIdx(null)} zIndex={160}>
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: circle.color }} />
-                  <h2 className="text-neutral-800 dark:text-white font-bold text-base">{circle.label}</h2>
-                  <span className="text-sm font-bold ml-1" style={{ color: circle.color }}>{circle.pct}%</span>
-                </div>
-                <button onClick={() => setCirclePopupIdx(null)} className="text-neutral-400 hover:text-neutral-600 dark:hover:text-white p-2 rounded-xl transition-all duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              </div>
-              <div className="flex flex-col md:flex-row items-center gap-5">
-                <div className="flex-shrink-0"><PieChart segments={circle.slices} /></div>
-                <div className="flex flex-col gap-3 min-w-0">
-                  {circle.slices.map((s, i) => {
-                    const total = circle.slices.reduce((acc, x) => acc + x.value, 0);
-                    return (
-                      <div key={i} className="flex items-start gap-2">
-                        <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0 mt-0.5" style={{ backgroundColor: s.color }} />
-                        <div>
-                          <p className="text-neutral-800 dark:text-neutral-300 text-xs leading-tight">{s.label}</p>
-                          <p className="text-neutral-500 text-xs">{Math.round((s.value / total) * 100)}%</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="mt-5 pt-4 border-t border-neutral-200 dark:border-[#262626]">
-                {circle.descricao.split('\n').map((linha, i) => (
-                  <p key={i} className={`text-xs leading-relaxed ${i === 0 ? 'text-neutral-800 dark:text-neutral-300 font-medium mb-1' : 'text-neutral-500'}`}>{linha}</p>
-                ))}
-              </div>
-            </BottomModal>
-          );
-        })()}
-      </AnimatePresence>
 
       {/* Modal Salvos */}
       <AnimatePresence>
@@ -747,8 +702,12 @@ export default function App() {
             });
           };
 
-          const headerLabel = fullscreenCard.type === 'card' ? fullscreenCard.label : META[fullscreenCard.type]?.title;
-          const headerColor = fullscreenCard.type === 'card' ? fullscreenCard.color : META[fullscreenCard.type]?.color;
+          const headerLabel = fullscreenCard.type === 'card' ? fullscreenCard.label
+            : fullscreenCard.type === 'destaque' ? circleData[fullscreenCard.idx].label
+            : META[fullscreenCard.type]?.title;
+          const headerColor = fullscreenCard.type === 'card' ? fullscreenCard.color
+            : fullscreenCard.type === 'destaque' ? circleData[fullscreenCard.idx].color
+            : META[fullscreenCard.type]?.color;
 
           return (
             <motion.div
@@ -776,7 +735,39 @@ export default function App() {
                     <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-neutral-100 leading-snug mb-5">{fullscreenCard.titulo}</h2>
                     <p className="text-sm sm:text-base text-neutral-500 leading-relaxed">{fullscreenCard.detalhe}</p>
                   </>
-                ) : fullscreenCard.type === 'plano' ? renderPEPSection('plano', <Trophy size={32} strokeWidth={1.5} />)
+                ) : fullscreenCard.type === 'destaque' ? (() => {
+                  const circle = circleData[fullscreenCard.idx];
+                  const total = circle.slices.reduce((acc, x) => acc + x.value, 0);
+                  return (
+                    <>
+                      <div className="flex items-center gap-3 mb-8">
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: circle.color }} />
+                        <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 dark:text-neutral-100">{circle.label}</h2>
+                        <span className="text-xl font-bold" style={{ color: circle.color }}>{circle.pct}%</span>
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 mb-8">
+                        <div className="flex-shrink-0"><PieChart segments={circle.slices} /></div>
+                        <div className="flex flex-col gap-3 w-full">
+                          {circle.slices.map((s, i) => (
+                            <div key={i} className="flex items-start gap-3">
+                              <div className="w-3 h-3 rounded-sm flex-shrink-0 mt-0.5" style={{ backgroundColor: s.color }} />
+                              <div>
+                                <p className="text-sm text-neutral-800 dark:text-neutral-300 leading-tight">{s.label}</p>
+                                <p className="text-xs text-neutral-500">{Math.round((s.value / total) * 100)}%</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="pt-6 border-t border-neutral-100 dark:border-[#262626] space-y-1">
+                        {circle.descricao.split('\n').map((linha, i) => (
+                          <p key={i} className={`text-sm leading-relaxed ${i === 0 ? 'text-neutral-800 dark:text-neutral-300 font-medium' : 'text-neutral-500'}`}>{linha}</p>
+                        ))}
+                      </div>
+                    </>
+                  );
+                })()
+                : fullscreenCard.type === 'plano' ? renderPEPSection('plano', <Trophy size={32} strokeWidth={1.5} />)
                   : fullscreenCard.type === 'estrategia' ? renderPEPSection('estrategia', <Layers size={32} strokeWidth={1.5} />)
                   : renderPEPSection('pratica', <Lightbulb size={32} strokeWidth={1.5} />)
                 }
