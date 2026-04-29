@@ -200,7 +200,7 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
-    document.body.style.backgroundColor = dark ? '#181818' : '#eef2f7';
+    document.body.style.backgroundColor = dark ? '#181818' : '#d5e3f0';
   }, [dark]);
 
   useEffect(() => {
@@ -383,7 +383,7 @@ export default function App() {
 
     <div
       style={{ paddingRight: (scrolled && isDesktop) ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="min-h-screen bg-[#eef2f7] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
+      className="min-h-screen bg-[#d5e3f0] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
     >
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
