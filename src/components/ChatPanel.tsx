@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowUp } from 'lucide-react';
+import { X, ArrowUp, Rocket } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Message {
@@ -167,11 +167,12 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
       onClick={onClick}
-      whileTap={{ scale: 0.92 }}
+      whileTap={{ scale: 0.88, rotate: -12 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 18 }}
       className="fixed bottom-6 right-5 z-[170] rounded-full backdrop-blur-md bg-white/40 border border-white/50 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
-      style={{ width: 60, height: 60 }}
+      style={{ width: 72, height: 72 }}
     >
-      <GamepadIcon />
+      <Rocket size={26} className="text-neutral-600 dark:text-neutral-300" strokeWidth={1.8} />
     </motion.button>
   );
 }
