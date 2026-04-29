@@ -113,7 +113,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
               onClick={() => { setStarted(true); setTimeout(() => inputRef.current?.focus(), 50); }}
-              className="w-full h-11 rounded-2xl bg-neutral-800 dark:bg-neutral-100 text-white dark:text-neutral-900 text-[13px] font-semibold tracking-wide hover:bg-neutral-700 dark:hover:bg-neutral-200 active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="w-full h-11 rounded-2xl bg-white dark:bg-[#262626] border border-neutral-200 dark:border-[#333333] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-neutral-50 dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
               Inicializar
             </motion.button>
