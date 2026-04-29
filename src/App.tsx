@@ -341,9 +341,8 @@ export default function App() {
 
   return (
     <div className={dark ? 'dark' : ''}>
-    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[300px] xl:pr-[340px]">
 
-      {/* Navbar */}
+      {/* Navbar — fora do container com padding para o border-b ser full width */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#262626] py-2.5 sm:py-3">
         <div className="max-w-[935px] mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
           <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
@@ -372,6 +371,8 @@ export default function App() {
           </div>
         </div>
       </nav>
+
+    <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#080808] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[300px] xl:pr-[340px]">
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
         {/* Perfil — colapsa ao rolar */}
