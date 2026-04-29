@@ -12,6 +12,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -103,29 +104,52 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
 
       {/* Input */}
       <div className="px-4 pb-4 flex-shrink-0">
-        <div className="flex items-end gap-2 bg-neutral-50 dark:bg-[#161616] border border-neutral-200 dark:border-[#262626] rounded-2xl px-4 py-3 focus-within:border-neutral-300 dark:focus-within:border-[#363636] transition-colors duration-200">
-          <textarea
-            ref={inputRef}
-            rows={1}
-            value={input}
-            onChange={e => {
-              setInput(e.target.value);
-              e.target.style.height = 'auto';
-              e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
-            }}
-            onKeyDown={handleKey}
-            placeholder="Escreva uma mensagem..."
-            className="flex-1 bg-transparent text-[13px] text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-600 outline-none resize-none leading-relaxed"
-            style={{ minHeight: '20px', maxHeight: '120px' }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || loading}
-            className="w-7 h-7 rounded-xl bg-[#3b82f6] disabled:bg-neutral-200 dark:disabled:bg-[#262626] flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:bg-[#2563eb] active:scale-90 cursor-pointer disabled:cursor-default mb-0.5"
-          >
-            <ArrowUp size={13} className="text-white" strokeWidth={2.5} />
-          </button>
-        </div>
+        <AnimatePresence mode="wait">
+          {!started ? (
+            <motion.button
+              key="inicializar"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => { setStarted(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+              className="w-full h-11 rounded-2xl bg-neutral-800 dark:bg-neutral-100 text-white dark:text-neutral-900 text-[13px] font-semibold tracking-wide hover:bg-neutral-700 dark:hover:bg-neutral-200 active:scale-[0.98] transition-all duration-200 cursor-pointer"
+            >
+              Inicializar
+            </motion.button>
+          ) : (
+            <motion.div
+              key="input"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-end gap-2 bg-neutral-50 dark:bg-[#1a1a1a] border border-neutral-200 dark:border-[#262626] rounded-2xl px-4 py-3 focus-within:border-neutral-300 dark:focus-within:border-[#363636] transition-colors duration-200"
+            >
+              <textarea
+                ref={inputRef}
+                rows={1}
+                value={input}
+                onChange={e => {
+                  setInput(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                }}
+                onKeyDown={handleKey}
+                placeholder="Escreva uma mensagem..."
+                className="flex-1 bg-transparent text-[13px] text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-600 outline-none resize-none leading-relaxed"
+                style={{ minHeight: '20px', maxHeight: '120px' }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || loading}
+                className="w-7 h-7 rounded-xl bg-[#3b82f6] disabled:bg-neutral-200 dark:disabled:bg-[#262626] flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:bg-[#2563eb] active:scale-90 cursor-pointer disabled:cursor-default mb-0.5"
+              >
+                <ArrowUp size={13} className="text-white" strokeWidth={2.5} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
     </div>
