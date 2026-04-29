@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera,
   MapPin, Scale, Store, Zap,
-  Settings2, X, Globe
+  Settings2, X, Globe, LayoutGrid
 } from 'lucide-react';
 
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
@@ -86,6 +86,9 @@ import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
 import type { PhotoSettings } from './components/PhotoEditor';
+import { SectorSwitcherModal, SECTORS } from './components/SectorSwitcher';
+import type { SectorId } from './components/SectorSwitcher';
+import { SectorFeed } from './components/SectorFeed';
 
 export default function App() {
   const [data, setData] = useState<OmniData>(MOCK_DATA);
@@ -120,6 +123,8 @@ export default function App() {
     | { type: 'destaque'; idx: number };
   const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
   const [browserOpen, setBrowserOpen] = useState(false);
+  const [sectorOpen, setSectorOpen] = useState(false);
+  const [activeSector, setActiveSector] = useState<SectorId>('geral');
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
   const [photoSettings, setPhotoSettings] = useState<PhotoSettings>(
@@ -187,7 +192,7 @@ export default function App() {
 
   const anyModalOpen = storyIndex !== null || evolucaoOpen || empresaOpen ||
     fullscreenCard !== null || salvosOpen || mapOpen || chatOpen ||
-    selectedConcorrente !== null || selectedTimelineEvent !== null || selectedItem !== null || difficultyOpen;
+    selectedConcorrente !== null || selectedTimelineEvent !== null || selectedItem !== null || difficultyOpen || sectorOpen;
   const anyModalOpenRef = useRef(false);
   useEffect(() => { anyModalOpenRef.current = anyModalOpen; }, [anyModalOpen]);
 
@@ -362,6 +367,18 @@ export default function App() {
               <Globe size={20} className="hidden sm:block lg:hidden" />
               <Globe size={24} className="hidden lg:block" />
             </button>
+            <button
+              onClick={() => setSectorOpen(true)}
+              className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
+              title="Trocar feed por área"
+            >
+              <LayoutGrid size={18} className={`sm:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
+              <LayoutGrid size={20} className={`hidden sm:block lg:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
+              <LayoutGrid size={24} className={`hidden lg:block ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
+              {activeSector !== 'geral' && (
+                <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
+              )}
+            </button>
             <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
               <Settings2 size={18} className="sm:hidden" />
               <Settings2 size={20} className="hidden sm:block lg:hidden" />
@@ -480,8 +497,11 @@ export default function App() {
         </div>
       </main>
 
-      {/* Feed */}
-      <motion.div
+      {/* Feed de setor específico */}
+      {activeSector !== 'geral' && <SectorFeed sector={activeSector} />}
+
+      {/* Feed geral */}
+      {activeSector === 'geral' && <motion.div
         className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-6 sm:space-y-8 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
@@ -558,7 +578,7 @@ export default function App() {
         </FeedSection>
         </motion.div>
 
-      </motion.div>
+      </motion.div>}
 
       {/* Stories */}
       {storyIndex !== null && <StoryViewer groups={stories} startIndex={storyIndex} onClose={() => setStoryIndex(null)} />}
@@ -836,6 +856,17 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Sector Switcher */}
+      <AnimatePresence>
+        {sectorOpen && (
+          <SectorSwitcherModal
+            active={activeSector}
+            onSelect={setActiveSector}
+            onClose={() => setSectorOpen(false)}
+          />
         )}
       </AnimatePresence>
 
