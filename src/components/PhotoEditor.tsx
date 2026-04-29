@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Camera, Check, Minus, Plus } from 'lucide-react';
+import { Camera, Check, Minus, Plus, Lock } from 'lucide-react';
 import { ModalHeader } from './BottomModal';
 
 export interface PhotoSettings {
@@ -8,6 +8,7 @@ export interface PhotoSettings {
   x: number;
   y: number;
   zoom: number;
+  locked?: boolean;
 }
 
 const LS_KEY = 'omni_profile_photo';
@@ -105,6 +106,13 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
     onClose();
   };
 
+  const handleLock = () => {
+    const s: PhotoSettings = { src, x: pos.x, y: pos.y, zoom, locked: true };
+    savePhotoSettings(s);
+    onSave(s);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-[300] flex items-end md:items-center justify-center">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -166,6 +174,13 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
             <Check size={16} />
             Salvar
           </button>
+
+          <button onClick={handleLock}
+            className="w-full h-11 rounded-xl bg-neutral-800 dark:bg-neutral-900 text-white text-sm font-semibold flex items-center justify-center gap-2 hover:bg-neutral-700 dark:hover:bg-neutral-800 transition-all duration-200 cursor-pointer border border-neutral-700">
+            <Lock size={15} />
+            Salvar e bloquear foto
+          </button>
+          <p className="text-[11px] text-neutral-400 text-center -mt-2">Após bloquear, a foto não poderá ser alterada pelo app.</p>
         </div>
       </motion.div>
     </div>

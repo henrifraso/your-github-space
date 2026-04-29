@@ -398,10 +398,10 @@ export default function App() {
                 </svg>
                 <div className="w-full h-full rounded-full overflow-hidden p-[3px] md:p-[5px]">
                   <div
-                    className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
-                    onMouseEnter={() => setPhotoHover(true)}
+                    className={`w-full h-full rounded-full overflow-hidden relative ${photoSettings.locked ? '' : 'cursor-pointer'}`}
+                    onMouseEnter={() => { if (!photoSettings.locked) setPhotoHover(true); }}
                     onMouseLeave={() => setPhotoHover(false)}
-                    onClick={() => setPhotoEditorOpen(true)}
+                    onClick={() => { if (!photoSettings.locked) setPhotoEditorOpen(true); }}
                   >
                     <img
                       src={photoSettings.src || BARBER_PHOTOS.profile}
@@ -412,7 +412,7 @@ export default function App() {
                         transformOrigin: 'center',
                       }}
                     />
-                    {photoHover && (
+                    {photoHover && !photoSettings.locked && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full transition-opacity duration-200">
                         <Camera size={20} className="text-white" />
                       </div>
