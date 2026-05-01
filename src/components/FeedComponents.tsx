@@ -158,14 +158,14 @@ const IDEIAS_STEPS    = ['Pensando...', 'Conectando...', 'Criando...', 'Finaliza
 const SHARE_STEPS     = ['Preparando...', 'Gerando link...', 'Pronto!'];
 
 const PERGUNTAS_OPCOES = [
-  { key: 'o-que', label: 'O que fazer', color: '#3b82f6' },
-  { key: 'como',  label: 'Como fazer',  color: '#3b82f6' },
-  { key: 'onde',  label: 'Onde fazer',  color: '#3b82f6' },
+  { key: 'o-que', label: 'O que fazer', color: '#64748b' },
+  { key: 'como',  label: 'Como fazer',  color: '#64748b' },
+  { key: 'onde',  label: 'Onde fazer',  color: '#64748b' },
 ];
 
 const IDEIAS_OPCOES = [
-  { key: 'simples',      label: 'Ideia simples',      color: '#7c3aed' },
-  { key: 'elaborada',    label: 'Ideia elaborada',    color: '#a855f7' },
+  { key: 'simples',   label: 'Exemplo simples',   color: '#64748b' },
+  { key: 'elaborada', label: 'Exemplo elaborado', color: '#64748b' },
 ];
 
 const DOT_COLORS = ['#3b82f6', '#60a5fa', '#93c5fd'];
@@ -284,7 +284,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
     setPergStatus('loading');
   }
 
-  function handleIdeias(e: React.MouseEvent) {
+  function handleExemplos(e: React.MouseEvent) {
     e.stopPropagation();
     if (ideiaStatus === 'idle') setIdeiaStatus('picking');
     else if (ideiaStatus === 'picking') setIdeiaStatus('idle');
@@ -364,9 +364,9 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
               <motion.div key="p-pick" className="flex items-center gap-1 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <MessageCircle size={14} className="sm:hidden text-[#3b82f6] flex-shrink-0" fill="rgba(59,130,246,0.12)" />
-                <MessageCircle size={20} className="hidden sm:block text-[#3b82f6] flex-shrink-0" fill="rgba(59,130,246,0.12)" />
-                <span className="text-[10px] sm:text-sm text-[#3b82f6] font-medium whitespace-nowrap">Perguntas</span>
+                <MessageCircle size={14} className="sm:hidden text-neutral-400 dark:text-neutral-300 flex-shrink-0" />
+                <MessageCircle size={20} className="hidden sm:block text-neutral-400 dark:text-neutral-300 flex-shrink-0" />
+                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Perguntas</span>
               </motion.div>
             )}
             {pergStatus === 'loading' && (
@@ -374,7 +374,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                 <AnimatedDots />
                 <AnimatePresence mode="wait">
-                  <motion.span key={pergStep} className="hidden sm:inline text-sm text-[#3b82f6] font-medium truncate"
+                  <motion.span key={pergStep} className="hidden sm:inline text-sm text-neutral-500 dark:text-neutral-300 font-medium truncate"
                     initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}>
                     {PERGUNTAS_STEPS[pergStep]}
@@ -394,8 +394,8 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
           </AnimatePresence>
         </button>
 
-        {/* ── Ideias ── */}
-        <button onClick={handleIdeias} disabled={ideiaStatus === 'loading'} className="flex items-center justify-center gap-1 sm:gap-2 overflow-hidden cursor-pointer">
+        {/* ── Exemplos ── */}
+        <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="flex items-center justify-center gap-1 sm:gap-2 overflow-hidden cursor-pointer">
           <AnimatePresence mode="wait">
             {ideiaStatus === 'idle' && (
               <motion.div key="i-idle" className="flex items-center gap-1 sm:gap-2"
@@ -403,16 +403,16 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 transition={{ duration: 0.2 }}>
                 <Lightbulb size={14} className="sm:hidden text-neutral-400 dark:text-white flex-shrink-0" />
                 <Lightbulb size={20} className="hidden sm:block text-neutral-400 dark:text-white flex-shrink-0" />
-                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Ideias</span>
+                <span className="text-[10px] sm:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Exemplos</span>
               </motion.div>
             )}
             {ideiaStatus === 'picking' && (
               <motion.div key="i-pick" className="flex items-center gap-1 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Lightbulb size={14} className="sm:hidden text-[#a855f7] flex-shrink-0" fill="rgba(168,85,247,0.12)" />
-                <Lightbulb size={20} className="hidden sm:block text-[#a855f7] flex-shrink-0" fill="rgba(168,85,247,0.12)" />
-                <span className="text-[10px] sm:text-sm text-[#a855f7] font-medium whitespace-nowrap">Ideias</span>
+                <Lightbulb size={14} className="sm:hidden text-slate-500 dark:text-neutral-300 flex-shrink-0" />
+                <Lightbulb size={20} className="hidden sm:block text-slate-500 dark:text-neutral-300 flex-shrink-0" />
+                <span className="text-[10px] sm:text-sm text-slate-500 dark:text-neutral-300 font-medium whitespace-nowrap">Exemplos</span>
               </motion.div>
             )}
             {ideiaStatus === 'loading' && (
@@ -420,7 +420,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
                 <AnimatedDots />
                 <AnimatePresence mode="wait">
-                  <motion.span key={ideiaStep} className="hidden sm:inline text-sm text-[#a855f7] font-medium truncate"
+                  <motion.span key={ideiaStep} className="hidden sm:inline text-sm text-slate-500 dark:text-neutral-300 font-medium truncate"
                     initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}>
                     {IDEIAS_STEPS[ideiaStep]}
@@ -485,8 +485,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                   initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: i * 0.06, duration: 0.2, ease: 'easeOut' }}
                   onClick={e => handlePergChoice(e, op.label)}
-                  style={{ color: op.color, borderColor: op.color + '30', backgroundColor: op.color + '08' }}
-                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-xl py-2.5 sm:py-2 transition-all duration-200 hover:opacity-80 active:scale-95 cursor-pointer">
+                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-xl py-2.5 sm:py-2 transition-all duration-200 hover:opacity-80 active:scale-95 cursor-pointer text-neutral-600 dark:text-neutral-100 border-neutral-300 dark:border-neutral-500 bg-neutral-100 dark:bg-neutral-600/30">
                   {op.label}
                 </motion.button>
               ))}
@@ -495,7 +494,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
         )}
       </AnimatePresence>
 
-      {/* ── Picker de Ideias ── */}
+      {/* ── Picker de Exemplos ── */}
       <AnimatePresence>
         {ideiaStatus === 'picking' && (
           <motion.div
@@ -508,8 +507,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
                   initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: i * 0.06, duration: 0.2, ease: 'easeOut' }}
                   onClick={e => handleIdeiaChoice(e, op.label)}
-                  style={{ color: op.color, borderColor: op.color + '30', backgroundColor: op.color + '08' }}
-                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-xl py-2.5 sm:py-2 transition-all duration-200 hover:opacity-80 active:scale-95 cursor-pointer">
+                  className="flex-1 text-[11px] sm:text-xs font-semibold border rounded-xl py-2.5 sm:py-2 transition-all duration-200 hover:opacity-80 active:scale-95 cursor-pointer text-neutral-600 dark:text-neutral-100 border-neutral-300 dark:border-neutral-500 bg-neutral-100 dark:bg-neutral-600/30">
                   {op.label}
                 </motion.button>
               ))}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowUp, Rocket } from 'lucide-react';
+import { X, ArrowUp, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface Message {
@@ -112,7 +112,7 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
-              onClick={() => { setStarted(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+              onClick={() => {}}
               className="w-full h-11 rounded-2xl bg-[#f0f2f4] dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-[#e4e7ea] dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
               Inicializar
@@ -196,10 +196,10 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       whileTap={{ scale: 0.88, rotate: -12 }}
       transition={{ type: 'spring', stiffness: 500, damping: 18 }}
-      className="fixed bottom-6 right-5 z-[170] rounded-full backdrop-blur-md bg-white/30 border border-white/40 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
-      style={{ width: 72, height: 72 }}
+      className="fixed right-5 z-[170] rounded-full backdrop-blur-md bg-white/30 border border-white/40 dark:bg-black/30 dark:border-white/10 flex items-center justify-center lg:hidden cursor-pointer"
+      style={{ width: 72, height: 72, bottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
     >
-      <Rocket size={26} className="text-neutral-600 dark:text-neutral-300" strokeWidth={1.8} />
+      <LayoutDashboard size={24} className="text-neutral-600 dark:text-neutral-300" strokeWidth={1.8} />
     </motion.button>
   );
 }

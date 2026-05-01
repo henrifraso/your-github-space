@@ -69,7 +69,7 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
           </motion.span>
         </div>
       </div>
-      <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold text-neutral-500 tracking-tight text-center leading-tight w-full max-w-[60px] sm:max-w-none">{label}</span>
+      <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold text-neutral-500 dark:text-neutral-200 tracking-tight text-center leading-tight w-full max-w-[60px] sm:max-w-none">{label}</span>
     </div>
   );
 }

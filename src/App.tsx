@@ -7,7 +7,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Bookmark, ChevronRight, TrendingUp,
   Lightbulb, Trophy, ChevronDown,
-  Moon, Sun, Layers, Info, Bell, Camera,
+  Moon, Sun, Layers, Info, Bell, Camera, Plus,
   MapPin, Scale, Store, Zap,
   Settings2, X, Globe, LayoutGrid
 } from 'lucide-react';
@@ -367,9 +367,9 @@ export default function App() {
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
               title="Trocar feed por área"
             >
-              <LayoutGrid size={18} className={`sm:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
-              <LayoutGrid size={20} className={`hidden sm:block lg:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
-              <LayoutGrid size={24} className={`hidden lg:block ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
+              <Plus size={22} className={`sm:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
+              <Plus size={22} className={`hidden sm:block lg:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
+              <Plus size={30} className={`hidden lg:block ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
               {activeSector !== 'geral' && (
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
@@ -502,23 +502,30 @@ export default function App() {
 
       {/* Feed geral */}
       {activeSector === 'geral' && <motion.div
-        className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-6 sm:space-y-8 px-4 sm:px-5"
+        className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } } }}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
       >
 
-        {/* O que mudou */}
+        {/* Título */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title={txt('sec_mudou')} icon={<TrendingUp size={18}/>}>
-          {[
-            { label: txt('lbl_conc'), containerType: 'concorrencia', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
-            { label: txt('lbl_merc'), containerType: 'mercado', color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
-            { label: txt('lbl_econ'), containerType: 'economia', color: '#3b82f6', titulo: `Ticket médio R$ 38–52 · Nota média ★ ${notaMediaNum} na região`, detalhe: 'Poder de compra estável na Paulista. Combos e promoções de app são o principal driver de decisão.', onClick: undefined },
-            { label: txt('lbl_even'), containerType: 'eventos', color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
-            { label: txt('lbl_rep'), containerType: undefined as string | undefined, color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
-          ].map(item => (
-            <FeedCard key={item.label} onClick={item.onClick} onFullscreen={() => setFullscreenCard({ label: item.label, color: item.color, titulo: item.titulo, detalhe: item.detalhe })} containerType={item.containerType} onUtilizar={handleUtilizar}>
+          <div className="flex items-center gap-2.5 px-1 pt-1 sm:pt-2">
+            <span className="text-neutral-400"><TrendingUp size={18}/></span>
+            <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">{txt('sec_mudou')}</h3>
+          </div>
+        </motion.div>
+
+        {/* Cards 1–5: O que mudou */}
+        {[
+          { label: txt('lbl_conc'), containerType: 'concorrencia', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
+          { label: txt('lbl_merc'), containerType: 'mercado', color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
+          { label: txt('lbl_econ'), containerType: 'economia', color: '#3b82f6', titulo: `Ticket médio R$ 38–52 · Nota média ★ ${notaMediaNum} na região`, detalhe: 'Poder de compra estável na Paulista. Combos e promoções de app são o principal driver de decisão.', onClick: undefined },
+          { label: txt('lbl_even'), containerType: 'eventos', color: '#3b82f6', titulo: 'Páscoa 13–20/abr · Dia das Mães 11/mai · Festa Junina Jun', detalhe: data.previsao_clima[0] ? `Clima SP: ${data.previsao_clima[0].icone} ${data.previsao_clima[0].temp_max}° — ${data.previsao_clima[0].dia_label}` : 'Prepare campanhas e lançamentos sazonais com antecedência.', onClick: undefined },
+          { label: txt('lbl_rep'), containerType: undefined as string | undefined, color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
+        ].map(item => (
+          <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
+            <FeedCard onClick={item.onClick} onFullscreen={() => setFullscreenCard({ label: item.label, color: item.color, titulo: item.titulo, detalhe: item.detalhe })} containerType={item.containerType} onUtilizar={handleUtilizar}>
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{color: item.color}}>{item.label}</p>
@@ -528,19 +535,21 @@ export default function App() {
                 <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
               </div>
             </FeedCard>
-          ))}
-        </FeedSection>
-        </motion.div>
+          </motion.div>
+        ))}
 
-        {/* Geografia */}
+        {/* Card 6: Região */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title={txt('sec_geo')} icon={<MapPin size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">{txt('geo_regiao')}</p>
             <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Av. Paulista, {data.negocio.cidade} — {difficulty === 'muito_facil' ? 'lugar com muita gente passando' : difficulty === 'facil' ? 'área movimentada com forte concorrência' : difficulty === 'dificil' ? 'corredor de alto tráfego com densidade competitiva elevada' : difficulty === 'muito_dificil' ? 'high-density corridor com intense competitive pressure' : 'alto fluxo e forte concorrência no corredor'}</p>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{difficulty === 'muito_facil' ? 'Muita gente passa por aqui todo dia. Horários cheios: 11h–14h e 18h–21h. Público: trabalhadores, turistas e moradores.' : difficulty === 'muito_dificil' ? '+500k people/day. Peak hours: 11h–14h, 18h–21h. Demographics: corporate professionals, tourists, local residents.' : 'Corredor com +500 mil pessoas/dia. Pico de movimento: 11h–14h e 18h–21h. Público: executivos, turistas e moradores da região.'}</p>
           </FeedCard>
-          {data.previsao_clima.length > 0 && (
+        </motion.div>
+
+        {/* Card 7: Clima */}
+        {data.previsao_clima.length > 0 && (
+          <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard>
               <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">{txt('geo_clima')}</p>
               <div className="flex gap-4 overflow-x-auto no-scrollbar">
@@ -553,13 +562,11 @@ export default function App() {
                 ))}
               </div>
             </FeedCard>
-          )}
-        </FeedSection>
-        </motion.div>
+          </motion.div>
+        )}
 
-        {/* Legislação */}
+        {/* Card 8: Legislação */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-        <FeedSection title={txt('sec_leg')} icon={<Scale size={18}/>}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">{txt('leg_conf')}</p>
             <div className="grid grid-cols-2 gap-4">
@@ -571,11 +578,23 @@ export default function App() {
               ))}
             </div>
           </FeedCard>
+        </motion.div>
+
+        {/* Card 9: Alertas */}
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
           <FeedCard>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">{txt('leg_atenc')}</p>
             <p className="text-sm text-neutral-500 leading-relaxed">{txt('leg_desc')}</p>
           </FeedCard>
-        </FeedSection>
+        </motion.div>
+
+        {/* Card 10: Tendências */}
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
+          <FeedCard>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Tendências</p>
+            <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Frango crispy e combos personalizáveis lideram pedidos em SP</p>
+            <p className="text-xs text-neutral-500 mt-1 leading-relaxed">Clientes buscam opções sem glúten e proteína vegetal. Pedidos via app crescem 22% — customização é o diferencial competitivo do momento.</p>
+          </FeedCard>
         </motion.div>
 
       </motion.div>}
@@ -717,12 +736,7 @@ export default function App() {
           };
 
           const renderPEPSection = (pepKey: 'plano' | 'estrategia' | 'pratica', emptyIcon: React.ReactNode) => {
-            if (selectedContainers.size === 0) return (
-              <div className="flex flex-col items-center justify-center h-48 gap-3 text-neutral-400">
-                {emptyIcon}
-                <p className="text-sm text-center text-neutral-500">Toque em <strong>Utilizar</strong> em um card do feed para gerar este conteúdo.</p>
-              </div>
-            );
+            if (selectedContainers.size === 0) return null;
             if (!pepData) return (
               <div className="flex flex-col items-center justify-center h-32 gap-2 text-neutral-400">
                 <span className="text-3xl">⏳</span>
