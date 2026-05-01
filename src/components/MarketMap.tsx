@@ -24,15 +24,15 @@ function ratingColor(nota: number | string) {
   return '#ef4444';
 }
 
-interface ButtonProps { open: boolean; onToggle: () => void; }
+interface ButtonProps { bioOpen: boolean; onHome: () => void; onMap: () => void; }
 interface ContentProps { open: boolean; onClose: () => void; competitors: Competitor[]; onCompetitorClick?: (c: Competitor) => void; }
 
-export function MarketMapButton({ open, onToggle }: ButtonProps) {
+export function MarketMapButton({ bioOpen, onHome, onMap }: ButtonProps) {
   return (
     <button
-      onClick={onToggle}
-      className="w-full h-9 md:h-11 flex items-center justify-center bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
-      {open ? 'Fechar' : 'Mapa'}
+      onClick={bioOpen ? onMap : onHome}
+      className="w-full h-9 md:h-11 flex items-center justify-center gap-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
+      {bioOpen ? 'Concorrentes' : 'Perfil'}
     </button>
   );
 }

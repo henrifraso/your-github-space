@@ -1,6 +1,176 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowUp, LayoutDashboard } from 'lucide-react';
+import { X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target, Send, Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp, Map, Plus, Globe, Settings2, Moon, Sun, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+
+type Phase = 'init' | 'expanded' | 'selected';
+type MainKey = 'pesquisar' | 'executar' | 'aprender';
+
+const MAIN_BTNS: { key: MainKey; label: string; Icon: React.ElementType }[] = [
+  { key: 'pesquisar', label: 'Pesquisar', Icon: Search    },
+  { key: 'executar',  label: 'Executar',  Icon: Zap       },
+  { key: 'aprender',  label: 'Aprender',  Icon: BookOpen  },
+];
+
+const SUB_BTNS: Record<MainKey, { key: string; label: string; Icon: React.ElementType }[]> = {
+  pesquisar: [
+    { key: 's1', label: '', Icon: BarChart2  },
+    { key: 's2', label: '', Icon: BarChart2  },
+    { key: 's3', label: '', Icon: BarChart2  },
+    { key: 's4', label: '', Icon: BarChart2  },
+    { key: 's5', label: '', Icon: BarChart2  },
+  ],
+  executar: [
+    { key: 'e1', label: '', Icon: BarChart2  },
+    { key: 'e2', label: '', Icon: BarChart2  },
+    { key: 'e3', label: '', Icon: BarChart2  },
+    { key: 'e4', label: '', Icon: BarChart2  },
+    { key: 'e5', label: '', Icon: BarChart2  },
+  ],
+  aprender: [
+    { key: 'a1', label: '', Icon: BarChart2  },
+    { key: 'a2', label: '', Icon: BarChart2  },
+    { key: 'a3', label: '', Icon: BarChart2  },
+    { key: 'a4', label: '', Icon: BarChart2  },
+    { key: 'a5', label: '', Icon: BarChart2  },
+  ],
+};
+
+function InitializerButtons() {
+  const [phase,      setPhase]      = useState<Phase>('init');
+  const [activeMain, setActiveMain] = useState<MainKey | null>(null);
+  const [activeSub,  setActiveSub]  = useState<string | null>(null);
+
+  function handleMain(key: MainKey) {
+    setActiveMain(key);
+    setActiveSub(null);
+    setPhase('selected');
+  }
+
+  function handleReset() {
+    setPhase('init');
+    setActiveMain(null);
+    setActiveSub(null);
+  }
+
+  const subIdle   = "flex-1 min-w-[28%] flex flex-col items-center justify-center gap-1 h-10 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2 bg-transparent border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] dark:hover:text-[#3b82f6]";
+  const subActive = "flex-1 min-w-[28%] flex flex-col items-center justify-center gap-1 h-10 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2 bg-[#3b82f6] border-[#3b82f6] text-white";
+
+  return (
+    <div className="flex flex-col gap-2">
+      <AnimatePresence mode="wait">
+
+        {/* — INIT — */}
+        {phase === 'init' && (
+          <motion.button
+            key="init"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            whileTap={{ scale: 1.05 }}
+            onClick={() => setPhase('expanded')}
+            className="w-full h-11 rounded-2xl bg-[#f0f2f4] dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-[#e4e7ea] dark:hover:bg-[#2e2e2e] transition-all duration-200 cursor-pointer"
+          >
+            Inicializar
+          </motion.button>
+        )}
+
+        {/* — EXPANDED: 3 botões — */}
+        {phase === 'expanded' && (
+          <motion.div
+            key="expanded"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-2"
+          >
+            <div className="flex sm:flex-row flex-col gap-1.5">
+              {MAIN_BTNS.map((btn, i) => {
+                const offset = (i - 1) * 28;
+                return (
+                  <motion.button
+                    key={btn.key}
+                    initial={{ opacity: 0, x: offset }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.35, delay: i * 0.05, ease: 'easeOut' }}
+                    onClick={() => handleMain(btn.key)}
+                    className="flex-1 flex flex-col items-center justify-center gap-1 h-11 rounded-2xl border text-[11px] sm:text-xs font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer bg-[#f0f2f4] dark:bg-[#414141] border-neutral-200 dark:border-[#4e4e4e] text-neutral-700 dark:text-neutral-200 hover:bg-[#3b82f6] hover:text-white hover:border-[#3b82f6]"
+                  >
+                    <btn.Icon size={14} />
+                    <span>{btn.label}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+            <div className="flex justify-center gap-4">
+              <button onClick={handleReset} className="text-[10px] text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-200 cursor-pointer">
+                ✕ fechar
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* — SELECTED: sub-botões acima + botão ativo — */}
+        {phase === 'selected' && activeMain && (
+          <motion.div
+            key={`selected-${activeMain}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-2"
+          >
+            {/* Sub-botões — aparecem acima */}
+            <div className="flex flex-wrap gap-1.5">
+              {SUB_BTNS[activeMain].map((sub, i) => (
+                <motion.button
+                  key={sub.key}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 14 }}
+                  transition={{ duration: 0.25, delay: i * 0.08, ease: 'easeOut' }}
+                  onClick={() => setActiveSub(sub.key)}
+                  className={activeSub === sub.key ? subActive : subIdle}
+                >
+                  <sub.Icon size={12} />
+                  <span>{sub.label}</span>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Botão principal selecionado */}
+            {(() => {
+              const btn = MAIN_BTNS.find(b => b.key === activeMain)!;
+              return (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  onClick={() => setPhase('expanded')}
+                  className="w-full flex items-center justify-center gap-2 h-11 rounded-2xl border text-[12px] font-semibold transition-all duration-200 cursor-pointer bg-[#3b82f6] border-[#3b82f6] text-white hover:bg-[#2563eb]"
+                >
+                  <btn.Icon size={14} />
+                  <span>{btn.label}</span>
+                </motion.button>
+              );
+            })()}
+
+            <div className="flex justify-center gap-4">
+              <button onClick={() => setPhase('expanded')} className="text-[10px] text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-200 cursor-pointer">
+                ← voltar
+              </button>
+              <button onClick={handleReset} className="text-[10px] text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-200 cursor-pointer">
+                ✕ fechar
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+      </AnimatePresence>
+    </div>
+  );
+}
 
 interface Message {
   id: string;
@@ -106,17 +276,15 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
       <div className="px-4 pb-4 flex-shrink-0">
         <AnimatePresence mode="wait">
           {!started ? (
-            <motion.button
+            <motion.div
               key="inicializar"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
-              onClick={() => {}}
-              className="w-full h-11 rounded-2xl bg-[#f0f2f4] dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-[#e4e7ea] dark:hover:bg-[#2e2e2e] active:scale-[0.98] transition-all duration-200 cursor-pointer"
             >
-              Inicializar
-            </motion.button>
+              <InitializerButtons />
+            </motion.div>
           ) : (
             <motion.div
               key="input"
@@ -156,12 +324,44 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
   );
 }
 
-export function ChatDesktop({ wide }: { wide?: boolean }) {
+interface ChatDesktopProps {
+  wide?: boolean;
+  dark?: boolean;
+  onToggleDark?: () => void;
+  onSector?: () => void;
+  onBrowser?: () => void;
+  onDifficulty?: () => void;
+  activeSector?: string;
+}
+
+export function ChatDesktop({ wide, dark, onToggleDark, onSector, onBrowser, onDifficulty, activeSector }: ChatDesktopProps) {
+  const btnCls = "cursor-pointer text-neutral-400 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
-      style={{ width: wide ? 'calc(50vw - 16px)' : '288px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      style={{ width: wide ? 'calc(50vw - 16px)' : '380px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
+      {/* Header com ícones */}
+      <div className="flex items-center justify-between gap-8 px-6 pt-5 pb-2 flex-shrink-0">
+        <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
+          <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
+          {activeSector && activeSector !== 'geral' && (
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
+          )}
+        </button>
+        <button onClick={onBrowser} className={btnCls} title="Sincronizar">
+          <Globe size={22} />
+        </button>
+        <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
+          <Settings2 size={22} />
+        </button>
+        <button onClick={onToggleDark} className={btnCls}>
+          {dark ? <Sun size={22} /> : <Moon size={22} />}
+        </button>
+        <button className={btnCls}>
+          <Bell size={22} />
+        </button>
+      </div>
       <ChatBody />
     </div>
   );

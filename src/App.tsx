@@ -114,6 +114,8 @@ export default function App() {
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<TimelineEvent | null>(null);
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
+  const [bioOpen, setBioOpen] = useState(false);
+  const [destaqueOpen, setDestaqueOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
@@ -227,12 +229,12 @@ export default function App() {
       document.body.style.overflow = 'hidden';
       const onWheel = (e: WheelEvent) => {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
-        if (e.deltaY > 5) setScrolled(true);
+        if (e.deltaY > 5) { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
       };
       const onTouchStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
       const onTouchMove = (e: TouchEvent) => {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
-        if (touchStartY.current - e.touches[0].clientY > 15) setScrolled(true);
+        if (touchStartY.current - e.touches[0].clientY > 15) { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
       };
       window.addEventListener('wheel', onWheel);
       window.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -360,8 +362,8 @@ export default function App() {
             <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
-          {/* Botões — mobile: no fluxo; desktop: absoluto acima do chat */}
-          <div className="flex items-center lg:absolute lg:right-6 lg:inset-y-0 lg:px-2 lg:gap-1">
+          {/* Botões — mobile/tablet apenas; desktop fica no topo do chat */}
+          <div className="flex items-center lg:hidden">
             <button
               onClick={() => setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
@@ -400,7 +402,7 @@ export default function App() {
 
     <div
       style={{ paddingRight: (scrolled && isDesktop) ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[288px] xl:pr-[308px]"
+      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[380px] xl:pr-[396px]"
     >
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
@@ -409,7 +411,7 @@ export default function App() {
         <div style={{ overflow: 'hidden' }}>
 
           {/* Foto + bio + botões */}
-          <section className="mb-6 sm:mb-8 md:mb-10 px-4 sm:px-5">
+          <section className="mb-1 sm:mb-2 md:mb-4 px-4 sm:px-5">
             <div className="flex flex-row gap-3 sm:gap-4 md:gap-24 items-center mb-4 sm:mb-5">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -428,10 +430,8 @@ export default function App() {
                 </svg>
                 <div className="w-full h-full rounded-full overflow-hidden p-[3px] md:p-[5px]">
                   <div
-                    className={`w-full h-full rounded-full overflow-hidden relative ${photoSettings.locked ? '' : 'cursor-pointer'}`}
-                    onMouseEnter={() => { if (!photoSettings.locked) setPhotoHover(true); }}
-                    onMouseLeave={() => setPhotoHover(false)}
-                    onClick={() => { if (!photoSettings.locked) setPhotoEditorOpen(true); }}
+                    className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
+                    onClick={() => setDestaqueOpen(d => !d)}
                   >
                     <img
                       src={photoSettings.src || BARBER_PHOTOS.profile}
@@ -442,18 +442,13 @@ export default function App() {
                         transformOrigin: 'center',
                       }}
                     />
-                    {photoHover && !photoSettings.locked && (
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-full transition-opacity duration-200">
-                        <Camera size={20} className="text-white" />
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
                 <div className="flex gap-3 sm:gap-4 md:gap-10 text-[11px] sm:text-xs md:text-base">
                   <span><strong>{gridItems.length}</strong> {txt('stat_opor')}</span>
-                  <span><strong>{data.concorrentes.length}</strong> {txt('stat_conc')}</span>
+                  <span><strong>{data.concorrentes.length}</strong> Oponentes</span>
                   <span><strong>{data.negocio.nivel}</strong> {txt('stat_nivel')}</span>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
@@ -475,23 +470,36 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <MarketMapButton open={mapOpen} onToggle={() => setMapOpen(o => !o)} />
-            <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-              {[[txt('btn_plano'), () => setFullscreenCard({ type: 'plano' })], [txt('btn_estrat'), () => setFullscreenCard({ type: 'estrategia' })], [txt('btn_prat'), () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
-                <button key={label as string} onClick={fn as () => void}
-                  className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
-                  {label as string}
-                </button>
-              ))}
-            </div>
+            <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
+            {bioOpen && (
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
+                {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
+                  <button key={label as string} onClick={fn as () => void}
+                    className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                    {label as string}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Destaques */}
-          <section className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar px-4 sm:px-5 pt-1 pb-2 md:justify-between">
-            {circleData.map((c, i) => (
-              <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
-            ))}
-          </section>
+          <AnimatePresence>
+            {destaqueOpen && (
+              <motion.section
+                key="destaques"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar px-4 sm:px-5 pt-1 pb-2 md:justify-between overflow-hidden"
+              >
+                {circleData.map((c, i) => (
+                  <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
+                ))}
+              </motion.section>
+            )}
+          </AnimatePresence>
 
         </div>
         </div>
@@ -502,7 +510,7 @@ export default function App() {
 
       {/* Feed geral */}
       {activeSector === 'geral' && <motion.div
-        className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
+        className="max-w-[935px] mx-auto mt-1 sm:mt-2 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
@@ -525,7 +533,7 @@ export default function App() {
           { label: txt('lbl_rep'), containerType: undefined as string | undefined, color: '#3b82f6', titulo: `Nota média ★ ${notaMediaNum} · ${data.concorrentes.filter(c=>Number(c.nota_google)>=4.5).length} concorrentes acima de 4,5`, detalhe: 'Avaliações no Google e iFood são o principal critério de escolha. Responda reviews negativos em até 24h.', onClick: undefined },
         ].map(item => (
           <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-            <FeedCard onClick={item.onClick} onFullscreen={() => setFullscreenCard({ label: item.label, color: item.color, titulo: item.titulo, detalhe: item.detalhe })} containerType={item.containerType} onUtilizar={handleUtilizar}>
+            <FeedCard locked>
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{color: item.color}}>{item.label}</p>
@@ -540,7 +548,7 @@ export default function App() {
 
         {/* Card 6: Região */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <FeedCard>
+          <FeedCard locked>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">{txt('geo_regiao')}</p>
             <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Av. Paulista, {data.negocio.cidade} — {difficulty === 'muito_facil' ? 'lugar com muita gente passando' : difficulty === 'facil' ? 'área movimentada com forte concorrência' : difficulty === 'dificil' ? 'corredor de alto tráfego com densidade competitiva elevada' : difficulty === 'muito_dificil' ? 'high-density corridor com intense competitive pressure' : 'alto fluxo e forte concorrência no corredor'}</p>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{difficulty === 'muito_facil' ? 'Muita gente passa por aqui todo dia. Horários cheios: 11h–14h e 18h–21h. Público: trabalhadores, turistas e moradores.' : difficulty === 'muito_dificil' ? '+500k people/day. Peak hours: 11h–14h, 18h–21h. Demographics: corporate professionals, tourists, local residents.' : 'Corredor com +500 mil pessoas/dia. Pico de movimento: 11h–14h e 18h–21h. Público: executivos, turistas e moradores da região.'}</p>
@@ -550,7 +558,7 @@ export default function App() {
         {/* Card 7: Clima */}
         {data.previsao_clima.length > 0 && (
           <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-            <FeedCard>
+            <FeedCard locked>
               <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">{txt('geo_clima')}</p>
               <div className="flex gap-4 overflow-x-auto no-scrollbar">
                 {data.previsao_clima.map((w, i) => (
@@ -567,7 +575,7 @@ export default function App() {
 
         {/* Card 8: Legislação */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <FeedCard>
+          <FeedCard locked>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-3">{txt('leg_conf')}</p>
             <div className="grid grid-cols-2 gap-4">
               {[{label:'Vigilância sanitária',valor:'OK'},{label:'Alvará municipal',valor:'OK'},{label:'ANVISA alimentos',valor:'2025'},{label:'CVS-5 manipulação',valor:'Jan/25'}].map(s => (
@@ -582,7 +590,7 @@ export default function App() {
 
         {/* Card 9: Alertas */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <FeedCard>
+          <FeedCard locked>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-1">{txt('leg_atenc')}</p>
             <p className="text-sm text-neutral-500 leading-relaxed">{txt('leg_desc')}</p>
           </FeedCard>
@@ -590,7 +598,7 @@ export default function App() {
 
         {/* Card 10: Tendências */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <FeedCard>
+          <FeedCard locked>
             <p className="text-xs font-bold uppercase tracking-wider text-[#3b82f6] mb-2">Tendências</p>
             <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Frango crispy e combos personalizáveis lideram pedidos em SP</p>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">Clientes buscam opções sem glúten e proteína vegetal. Pedidos via app crescem 22% — customização é o diferencial competitivo do momento.</p>
@@ -722,7 +730,15 @@ export default function App() {
       <BrowserView open={browserOpen} onClose={() => setBrowserOpen(false)} />
 
       {/* Chat */}
-      <ChatDesktop wide={scrolled} />
+      <ChatDesktop
+        wide={scrolled}
+        dark={dark}
+        onToggleDark={() => setDark(d => !d)}
+        onSector={() => setSectorOpen(true)}
+        onBrowser={() => setBrowserOpen(true)}
+        onDifficulty={() => setDifficultyOpen(true)}
+        activeSector={activeSector}
+      />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} />
 

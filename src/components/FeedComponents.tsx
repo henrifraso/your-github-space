@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Rocket, MessageCircle, Share2, Check, Lightbulb, ChevronDown } from 'lucide-react';
+import { Rocket, MessageCircle, Share2, Check, Lightbulb, ChevronDown, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // ─── PEP Item Row ─────────────────────────────────────────────────────────────
@@ -188,11 +188,12 @@ function AnimatedDots() {
   );
 }
 
-export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, children }: {
+export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, locked, children }: {
   onClick?: () => void;
   onFullscreen?: () => void;
   containerType?: string;
   onUtilizar?: (containerType: string, selected: boolean) => void;
+  locked?: boolean;
   children: React.ReactNode;
 }) {
   const [utilStatus,   setUtilStatus]   = useState<UtilStatus>('idle');
@@ -523,15 +524,17 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, chi
     if (onClick) onClick();
   }
 
-  const isClickable = !!(onClick || onFullscreen);
-  const cls = "w-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border shadow-[0_2px_12px_rgba(0,0,0,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+  const isClickable = !locked && !!(onClick || onFullscreen);
+  const cls = "relative w-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border shadow-[0_2px_12px_rgba(0,0,0,0.09)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
     (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#414141] ") +
+    (locked ? "cursor-default hover:bg-[#e4e7ea] dark:hover:bg-[#353535] " : "") +
     (isClickable ? "hover:bg-[#e4e7ea] dark:hover:bg-[#353535] active:scale-[0.99] cursor-pointer" : "");
 
   return (
     <div onClick={isClickable ? handleCardClick : undefined} className={cls}
       role={isClickable ? 'button' : undefined} tabIndex={isClickable ? 0 : undefined}
       onKeyDown={isClickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); } : undefined}>
+
       {cardContent}
     </div>
   );
