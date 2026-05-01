@@ -342,7 +342,7 @@ export function ChatDesktop({ wide, dark, onToggleDark, onSector, onBrowser, onD
       className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
       {/* Header com ícones */}
-      <div className="flex items-center justify-between gap-8 px-6 pt-5 pb-2 flex-shrink-0">
+      <div className="flex items-center justify-between gap-8 px-6 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
         <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
           <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
           {activeSector && activeSector !== 'geral' && (
