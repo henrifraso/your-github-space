@@ -69,7 +69,7 @@ function InitializerButtons() {
             transition={{ duration: 0.25, ease: 'easeOut' }}
             whileTap={{ scale: 1.05 }}
             onClick={() => setPhase('expanded')}
-            className="w-full h-11 rounded-2xl bg-[#f0f2f4] dark:bg-[#414141] border border-neutral-200 dark:border-[#4e4e4e] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-[#e4e7ea] dark:hover:bg-[#2e2e2e] transition-all duration-200 cursor-pointer"
+            className="w-full h-11 rounded-2xl bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-neutral-200 dark:hover:bg-[#353535] transition-all duration-200 cursor-pointer"
           >
             Inicializar
           </motion.button>

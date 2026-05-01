@@ -307,11 +307,12 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
 
   const cardContent = (
     <>
-      <div>{children}</div>
-      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#414141] flex items-center justify-between min-h-[32px] sm:min-h-[40px]">
+      <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl p-3 sm:p-4">{children}</div>
+      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#414141] flex gap-1.5">
 
         {/* ── Utilizar ── */}
-        <button onClick={handleLike} disabled={utilStatus === 'loading'} className="flex items-center gap-1 sm:gap-2 overflow-hidden cursor-pointer">
+        <div className="flex-1 bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <button onClick={handleLike} disabled={utilStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {utilStatus === 'idle' && (
               <motion.div key="u-idle" className="flex items-center gap-1 sm:gap-2"
@@ -348,9 +349,11 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
             )}
           </AnimatePresence>
         </button>
+        </div>
 
         {/* ── Perguntas ── */}
-        <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="flex items-center justify-center gap-1 sm:gap-2 overflow-hidden cursor-pointer">
+        <div className="flex-1 bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {pergStatus === 'idle' && (
               <motion.div key="p-idle" className="flex items-center gap-1 sm:gap-2"
@@ -394,9 +397,11 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
             )}
           </AnimatePresence>
         </button>
+        </div>
 
         {/* ── Exemplos ── */}
-        <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="flex items-center justify-center gap-1 sm:gap-2 overflow-hidden cursor-pointer">
+        <div className="flex-1 bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {ideiaStatus === 'idle' && (
               <motion.div key="i-idle" className="flex items-center gap-1 sm:gap-2"
@@ -440,9 +445,11 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
             )}
           </AnimatePresence>
         </button>
+        </div>
 
         {/* ── Compartilhar ── */}
-        <button onClick={handleShare} disabled={shareStatus === 'loading'} className="flex items-center justify-end gap-1 sm:gap-2 overflow-hidden cursor-pointer">
+        <div className="flex-1 bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <button onClick={handleShare} disabled={shareStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {shareStatus === 'idle' && (
               <motion.div key="sh-idle" className="flex items-center gap-1 sm:gap-2"
@@ -470,6 +477,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
             )}
           </AnimatePresence>
         </button>
+        </div>
 
       </div>
 
@@ -477,7 +485,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
       <AnimatePresence>
         {pergStatus === 'picking' && (
           <motion.div
-            initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+            initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 6 }}
             exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex gap-2">
@@ -499,7 +507,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
       <AnimatePresence>
         {ideiaStatus === 'picking' && (
           <motion.div
-            initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
+            initial={{ opacity: 0, height: 0, marginTop: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: 6 }}
             exit={{ opacity: 0, height: 0, marginTop: 0 }} transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
             className="overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex gap-2">
@@ -534,7 +542,6 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
     <div onClick={isClickable ? handleCardClick : undefined} className={cls}
       role={isClickable ? 'button' : undefined} tabIndex={isClickable ? 0 : undefined}
       onKeyDown={isClickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); } : undefined}>
-
       {cardContent}
     </div>
   );

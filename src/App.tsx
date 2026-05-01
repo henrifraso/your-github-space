@@ -407,11 +407,21 @@ export default function App() {
 
       <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
         {/* Perfil — colapsa ao rolar */}
-        <div style={{ display: 'grid', gridTemplateRows: scrolled ? '0fr' : '1fr', opacity: scrolled ? 0 : 1, transition: 'grid-template-rows 0.4s cubic-bezier(0.25,0.1,0.25,1), opacity 0.3s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
-        <div style={{ overflow: 'hidden' }}>
+        <motion.div
+          initial={false}
+          animate={{
+            height: scrolled ? 0 : 'auto',
+            opacity: scrolled ? 0 : 1,
+          }}
+          transition={{
+            height: { duration: 0.38, ease: [0.4, 0, 0.2, 1] },
+            opacity: { duration: 0.22, ease: [0.4, 0, 0.2, 1] },
+          }}
+          style={{ overflow: 'hidden', pointerEvents: scrolled ? 'none' : 'auto' }}
+        >
 
           {/* Foto + bio + botões */}
-          <section className="mb-1 sm:mb-2 md:mb-4 px-4 sm:px-5">
+          <section className="mb-0 px-4 sm:px-5">
             <div className="flex flex-row gap-3 sm:gap-4 md:gap-24 items-center mb-4 sm:mb-5">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -446,10 +456,20 @@ export default function App() {
                 </div>
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
-                <div className="flex gap-3 sm:gap-4 md:gap-10 text-[11px] sm:text-xs md:text-base">
+                <div className="flex gap-3 sm:gap-4 md:gap-10 items-center text-[11px] sm:text-xs md:text-base">
                   <span><strong>{gridItems.length}</strong> {txt('stat_opor')}</span>
                   <span><strong>{data.concorrentes.length}</strong> Oponentes</span>
                   <span><strong>{data.negocio.nivel}</strong> {txt('stat_nivel')}</span>
+                  {!bioOpen && (
+                    <button
+                      onClick={() => setBioOpen(true)}
+                      className="hidden lg:inline-flex ml-auto items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
+                    >
+                      <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
+                      <span>Saiba mais</span>
+                      <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
+                    </button>
+                  )}
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
@@ -501,8 +521,7 @@ export default function App() {
             )}
           </AnimatePresence>
 
-        </div>
-        </div>
+        </motion.div>
       </main>
 
       {/* Feed de setor específico */}
@@ -510,21 +529,13 @@ export default function App() {
 
       {/* Feed geral */}
       {activeSector === 'geral' && <motion.div
-        className="max-w-[935px] mx-auto mt-1 sm:mt-2 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
+        className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
       >
 
-        {/* Título */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <div className="flex items-center gap-2.5 px-1 pt-1 sm:pt-2">
-            <span className="text-neutral-400"><TrendingUp size={18}/></span>
-            <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">{txt('sec_mudou')}</h3>
-          </div>
-        </motion.div>
-
-        {/* Cards 1–5: O que mudou */}
+        {/* Cards 1–5 */}
         {[
           { label: txt('lbl_conc'), containerType: 'concorrencia', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
           { label: txt('lbl_merc'), containerType: 'mercado', color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
@@ -603,6 +614,15 @@ export default function App() {
             <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">Frango crispy e combos personalizáveis lideram pedidos em SP</p>
             <p className="text-xs text-neutral-500 mt-1 leading-relaxed">Clientes buscam opções sem glúten e proteína vegetal. Pedidos via app crescem 22% — customização é o diferencial competitivo do momento.</p>
           </FeedCard>
+        </motion.div>
+
+        {/* Carregar mais */}
+        <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
+          <button className="w-full py-4 flex items-center justify-between px-4 md:px-5 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-2xl text-sm font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer active:scale-[0.99]">
+            <ChevronDown size={14} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
+            <span>Mais feed</span>
+            <ChevronDown size={14} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
+          </button>
         </motion.div>
 
       </motion.div>}
