@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapPin, X } from 'lucide-react';
+import { MapPin, X, ChevronDown } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Competitor } from '../types';
 import 'leaflet/dist/leaflet.css';
@@ -32,7 +32,7 @@ export function MarketMapButton({ bioOpen, onHome, onMap }: ButtonProps) {
     <button
       onClick={bioOpen ? onMap : onHome}
       className="w-full h-9 md:h-11 flex items-center justify-center gap-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer">
-      {bioOpen ? 'Concorrentes' : 'Perfil'}
+      {bioOpen ? 'Concorrentes' : 'Saiba mais'}
     </button>
   );
 }
