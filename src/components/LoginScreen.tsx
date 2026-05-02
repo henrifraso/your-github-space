@@ -252,7 +252,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         whileHover={{ boxShadow: '0 8px 48px rgba(0,0,0,0.12)', y: -2 }}
         whileTap={{ scale: 0.993 }}
         transition2={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-        className="w-full max-w-[760px] bg-white rounded-3xl border border-stone-100 shadow-[0_4px_32px_rgba(0,0,0,0.06)] px-10 py-11 flex flex-col items-center gap-5 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40"
+        className="w-full max-w-[760px] bg-white rounded-2xl border border-stone-100 shadow-[0_4px_32px_rgba(0,0,0,0.06)] px-10 py-4 flex flex-col items-center gap-2 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40"
         style={{ transition: 'box-shadow 0.25s ease, transform 0.25s ease' }}
       >
         <RotatingPhrase />
