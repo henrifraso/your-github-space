@@ -239,7 +239,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
           Um único lugar.
         </h1>
         <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1">
-          Toda sua empresa.
+          Milhões de possibilidades.
         </h2>
       </motion.div>
 
