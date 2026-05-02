@@ -144,20 +144,20 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {/* Lupa — z-10 garante que fica na frente do motion.div do texto */}
+        {/* Lupa — idle */}
         {loginPhase === 'idle' && (
           <Search
             size={26}
             strokeWidth={1.4}
             className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10"
-            style={{ color: '#d6d3d1' }}
+            style={{ color: '#d6d3d1', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))' }}
           />
         )}
 
-        {/* Idle — typewriter, posição absoluta para garantir left-to-right */}
+        {/* Idle — typewriter */}
         {loginPhase === 'idle' && (
           <div style={{ position: 'absolute', left: 24, right: 56, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-            <span style={{ color: '#d6d3d1', fontSize: '15px', fontWeight: 400 }}>
+            <span style={{ color: '#d6d3d1', fontSize: '15px', fontWeight: 400, textShadow: '0 1px 3px rgba(0,0,0,0.22)' }}>
               {typed}
             </span>
             {typed.length < FULL_TEXT.length && (
@@ -186,6 +186,7 @@ function RippleButton({
                 onKeyDown={handleKeyDown}
                 placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
                 className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
+                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)' }}
                 onClick={e => e.stopPropagation()}
               />
             </motion.div>
@@ -200,6 +201,7 @@ function RippleButton({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.28 }}
               className="text-[15px] sm:text-base font-normal text-stone-600"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)' }}
             >
               meu perfil
             </motion.span>
@@ -209,7 +211,7 @@ function RippleButton({
         {/* Lupa nas fases de login */}
         {loginPhase !== 'idle' && (
           <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Search size={18} strokeWidth={1.5} className="text-stone-400" />
+            <Search size={18} strokeWidth={1.5} className="text-stone-400" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))' }} />
           </div>
         )}
       </motion.button>
