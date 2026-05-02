@@ -155,25 +155,9 @@ function RippleButton({
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={{ duration: 0.12, ease: 'easeIn' }}
           >
-            <motion.span
-              animate={
-                enterState === 'hidden' ? { opacity: 0 }
-                : enterState === 'pulse' ? { opacity: [0.75, 0.28, 0.75] }
-                : { opacity: 1 }
-              }
-              transition={enterState === 'pulse'
-                ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.5, 1] }
-                : { duration: 0 }}
-              className="text-[13px] font-light tracking-[0.14em] text-stone-500 select-none"
-            >
-              {enterState === 'hidden'
-                ? 'Como?'
-                : enterState === 'typing'
-                ? (typedCount === 0 ? ' ' : ENTER_TEXT.slice(0, typedCount))
-                : 'Enter'
-              }
-              {enterState === 'typing' && typedCount > 0 && <span className="enter-cursor">|</span>}
-            </motion.span>
+            <span className="como-text text-[13px] font-light tracking-[0.14em] text-stone-500 select-none">
+              Como?
+            </span>
           </motion.div>
         )}
 
