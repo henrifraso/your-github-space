@@ -140,24 +140,32 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
+        {/* Lupa — sempre presente no idle, fora do AnimatePresence */}
+        {loginPhase === 'idle' && (
+          <Search
+            size={18}
+            strokeWidth={1.5}
+            className="text-stone-400 absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+        )}
+
         <AnimatePresence mode="wait">
           {/* Idle — typewriter */}
           {loginPhase === 'idle' && (
             <motion.div
               key="idle"
-              className="flex items-center w-full"
+              className="w-full pr-10"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <span className="flex-1 text-stone-300 text-[15px] sm:text-base font-normal leading-snug min-h-[1.4em]">
+              <span className="text-stone-300 text-[15px] sm:text-base font-normal leading-snug">
                 {typed}
                 {typed.length < FULL_TEXT.length && (
                   <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
                 )}
               </span>
-              <Search size={18} strokeWidth={1.5} className="text-stone-400 flex-shrink-0 ml-4" />
             </motion.div>
           )}
 
