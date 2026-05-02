@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X, Search, Zap, BookOpen, BarChart2, RefreshCw, Sliders,
   Share2, ChevronRight, AlertTriangle, TrendingUp, Info, Shield,
   CheckSquare, Target, MessageSquare, LayoutList, Loader2,
+  ExternalLink, Star, Wrench, Package, Handshake, BadgeDollarSign, Sparkles,
 } from 'lucide-react';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
@@ -40,6 +41,18 @@ export interface IntelligenceCard {
 type ActionType = 'pesquisar' | 'executar' | 'aprender' | 'simular' | 'regenerar' | 'estender';
 type Dificuldade = 'muito_facil' | 'facil' | 'dificil' | 'muito_dificil';
 type ExecutarTipo = 'campanha' | 'checklist' | 'mensagem' | 'plano' | 'simulacao' | 'tarefa';
+
+interface Shortcut {
+  id: string;
+  titulo: string;
+  descricao: string;
+  tipo: string;
+  url: string;
+  url_label: string;
+  _score: number;
+  _rotulos: string[];
+  patrocinado: boolean;
+}
 
 const DIFICULDADE_LABELS: Record<Dificuldade, string> = {
   muito_facil: 'Muito Fácil',
@@ -79,6 +92,19 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
   const [loading, setLoading]           = useState(false);
   const [executarStep, setExecutarStep] = useState<'choose' | 'result'>('choose');
   const [executarTipo, setExecutarTipo] = useState<ExecutarTipo>('checklist');
+  const [shortcuts, setShortcuts]       = useState<Shortcut[]>([]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('omni_token') || '';
+    fetch('/api/shortcuts/para-card', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ card_id: card.id, limit: 5 }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.shortcuts) setShortcuts(data.shortcuts); })
+      .catch(() => {});
+  }, [card.id]);
 
   // Conteúdo na dificuldade selecionada
   const v = card.versoes?.[dificuldade];
@@ -227,6 +253,16 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Seção de Atalhos */}
+          {shortcuts.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-3">Atalhos para este insight</p>
+              <div className="flex flex-col gap-2">
+                {shortcuts.map(s => <ShortcutCard key={s.id} shortcut={s} />)}
+              </div>
+            </div>
+          )}
 
           <div className="h-8" />
         </div>
@@ -422,6 +458,62 @@ function JsonResult({ r }: { r: Record<string, unknown> }) {
           </p>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Atalhos ──────────────────────────────────────────────────────────────────
+
+const ROTULO_CONFIG: Record<string, { label: string; className: string }> = {
+  melhor_escolha: { label: 'Melhor escolha', className: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-800' },
+  boa_alternativa: { label: 'Boa alternativa', className: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800' },
+  parceiro_os1: { label: 'Parceiro OS¹', className: 'bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800' },
+  patrocinado: { label: 'Patrocinado', className: 'bg-amber-500/10 text-amber-700 dark:text-amber-500 border-amber-200 dark:border-amber-800' },
+};
+
+const TIPO_ICON_MAP: Record<string, React.ReactNode> = {
+  acao_nativa:          <Sparkles size={14} className="text-blue-500" />,
+  ferramenta_externa:   <Wrench    size={14} className="text-neutral-500" />,
+  fornecedor:           <Package   size={14} className="text-orange-500" />,
+  parceiro_patrocinado: <Handshake size={14} className="text-violet-500" />,
+  servico_recomendado:  <Star      size={14} className="text-amber-500" />,
+};
+
+function ShortcutCard({ shortcut: s }: { shortcut: Shortcut }) {
+  return (
+    <div className="flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-[#242424] border border-neutral-200 dark:border-[#2e2e2e] hover:border-neutral-300 dark:hover:border-[#3a3a3a] transition-colors">
+      {/* Ícone do tipo */}
+      <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-neutral-100 dark:bg-[#2e2e2e] flex items-center justify-center mt-0.5">
+        {TIPO_ICON_MAP[s.tipo] || <Wrench size={14} className="text-neutral-400" />}
+      </div>
+
+      {/* Conteúdo */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 leading-snug">{s.titulo}</p>
+          {s.url && (
+            <a href={s.url} target="_blank" rel="noopener noreferrer"
+              className="flex-shrink-0 flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer whitespace-nowrap">
+              {s.url_label} <ExternalLink size={11} />
+            </a>
+          )}
+        </div>
+        <p className="text-xs text-neutral-500 dark:text-neutral-500 leading-relaxed mb-2">{s.descricao}</p>
+        {s._rotulos?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {s._rotulos.map(r => {
+              const cfg = ROTULO_CONFIG[r];
+              if (!cfg) return null;
+              return (
+                <span key={r} className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border ${cfg.className}`}>
+                  {r === 'patrocinado' && <BadgeDollarSign size={10} className="mr-1" />}
+                  {cfg.label}
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
