@@ -75,11 +75,11 @@ function RippleButton({
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
-    controls.start({ opacity: 1, filter: 'blur(0px)', y: -200, scaleX: 1 }, { duration: 0.60, ease: 'easeOut' });
+    controls.start({ opacity: 1, filter: 'blur(0px)', y: -500, scaleX: 1 }, { duration: 0.60, ease: 'easeOut' });
     const t1 = setTimeout(() =>
-      controls.start({ y: -60 }, { duration: 0.85, ease: [0.25, 0.46, 0.45, 0.94] }), 750);
+      controls.start({ y: -60 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] }), 750);
     const t2 = setTimeout(() =>
-      controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1680);
+      controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1900);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -132,7 +132,7 @@ function RippleButton({
     <div className="w-full max-w-[760px] z-20 relative">
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)', y: -200, scaleX: 1 }}
+        initial={{ opacity: 0, filter: 'blur(14px)', y: -500, scaleX: 1 }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
