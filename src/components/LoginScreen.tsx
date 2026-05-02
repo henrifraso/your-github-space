@@ -140,12 +140,12 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {/* Lupa — sempre presente no idle, fora do AnimatePresence */}
+        {/* Lupa — z-10 garante que fica na frente do motion.div do texto */}
         {loginPhase === 'idle' && (
           <Search
             size={18}
             strokeWidth={1.5}
-            className="text-stone-400 absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="text-stone-500 absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10"
           />
         )}
 
