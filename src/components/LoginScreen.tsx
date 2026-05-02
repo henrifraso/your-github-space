@@ -151,22 +151,15 @@ function RippleButton({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <span className="flex-1 text-stone-600 text-[15px] sm:text-base font-normal leading-snug min-h-[1.4em]">
+              <span className="flex-1 text-stone-300 text-[15px] sm:text-base font-normal leading-snug min-h-[1.4em]">
                 {typed}
                 {!typingDone && (
                   <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
                 )}
               </span>
-              {typingDone && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4 }}
-                  className="flex-shrink-0 ml-4"
-                >
-                  <Search size={18} strokeWidth={1.5} className="text-stone-400" />
-                </motion.div>
-              )}
+              <div className="flex-shrink-0 ml-4" style={{ opacity: typingDone ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+                <Search size={18} strokeWidth={1.5} className="text-stone-400" />
+              </div>
             </motion.div>
           )}
 
