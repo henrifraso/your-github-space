@@ -75,9 +75,13 @@ function RippleButton({
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
-    controls.start({ opacity: 1, filter: 'blur(0px)', y: -150, scaleX: 1.45 }, { duration: 0.45, ease: 'easeOut' });
+    // mesma fórmula do exitY — container começa exatamente onde vai ao ser clicado
+    const rect = btnRef.current!.getBoundingClientRect();
+    const loginY = -rect.top + 32;
+    controls.set({ y: loginY, scaleX: 1.45 });
+    controls.start({ opacity: 1, filter: 'blur(0px)', y: loginY, scaleX: 1.45 }, { duration: 0.40, ease: 'easeOut' });
     const t1 = setTimeout(() =>
-      controls.start({ y: 0, scaleX: 1 }, { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] }), 550);
+      controls.start({ y: 0, scaleX: 1 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] }), 520);
     return () => { clearTimeout(t1); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -130,7 +134,7 @@ function RippleButton({
     <div className="w-full max-w-[760px] z-20 relative">
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)', y: -150, scaleX: 1.45 }}
+        initial={{ opacity: 0, filter: 'blur(14px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
