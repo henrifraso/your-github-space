@@ -229,16 +229,45 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%)' }} />
 
       {/* Headline */}
+      <style>{`
+        @keyframes glass-sweep {
+          0%   { background-position: 150% center; }
+          100% { background-position: -50% center; }
+        }
+        .shimmer-dark {
+          background: linear-gradient(105deg,
+            #0C0A09 0%, #0C0A09 38%,
+            #c8c0b8 48%, #ffffff 52%, #c8c0b8 56%,
+            #0C0A09 62%, #0C0A09 100%);
+          background-size: 250% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: glass-sweep 5s ease-in-out infinite;
+        }
+        .shimmer-light {
+          background: linear-gradient(105deg,
+            #a8a29e 0%, #a8a29e 38%,
+            #e8e5e2 48%, #ffffff 52%, #e8e5e2 56%,
+            #a8a29e 62%, #a8a29e 100%);
+          background-size: 250% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: glass-sweep 5s ease-in-out infinite;
+          animation-delay: 0.6s;
+        }
+      `}</style>
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, delay: 0.08, ease: [0.4, 0, 0.2, 1] }}
         className="text-center mb-4 sm:mb-10"
       >
-        <h1 className="text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1] whitespace-nowrap">
+        <h1 className="shimmer-dark text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight leading-[1.1] whitespace-nowrap">
           Um único lugar.
         </h1>
-        <h2 className="text-[clamp(1.4rem,4.2vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1 whitespace-nowrap">
+        <h2 className="shimmer-light text-[clamp(1.4rem,4.2vw,3.6rem)] font-extralight tracking-tight leading-[1.1] mt-1 whitespace-nowrap">
           Milhões de possibilidades.
         </h2>
       </motion.div>
