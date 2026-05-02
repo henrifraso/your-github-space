@@ -366,7 +366,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={exiting
               ? { duration: 0.20, ease: 'easeIn' }
-              : { duration: 0.55, delay: 0.75, ease: 'easeOut' }}
+              : { duration: 0.55, delay: 1.30, ease: 'easeOut' }}
             className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
@@ -376,7 +376,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={exiting
               ? { duration: 0.20, ease: 'easeIn' }
-              : { duration: 0.55, delay: 1.25, ease: 'easeOut' }}
+              : { duration: 0.55, delay: 1.75, ease: 'easeOut' }}
             className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
           >
             Milhões de possibilidades.
