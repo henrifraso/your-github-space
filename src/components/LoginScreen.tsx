@@ -294,22 +294,17 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   }
 
   const [loginPhase,   setLoginPhase]   = useState<'idle'|'user'|'pass'|'profile'>('idle');
-  const [transitioning, setTransitioning] = useState(false);
-  const [gifFading,     setGifFading]     = useState(false);
-  const [gifKey,        setGifKey]        = useState(0);
+  const [intro,        setIntro]        = useState(true);   // vídeo de abertura ativo
+  const [introFading,  setIntroFading]  = useState(false);  // vídeo saindo
+
+  function handleVideoEnd() {
+    setIntroFading(true);
+    setTimeout(() => setIntro(false), 900);
+  }
 
   function handleContainerTap() {
-    if (transitioning || loginPhase !== 'idle') return;
-    setTransitioning(true);
-    setGifFading(false);
-    setGifKey(k => k + 1);
-    // Muda imediatamente para login — container fica no centro
+    if (loginPhase !== 'idle') return;
     setLoginPhase('user');
-    // Inicia fade-out após 2.5s
-    const t2 = setTimeout(() => setGifFading(true), 2500);
-    // Remove overlay após fade completar
-    const t3 = setTimeout(() => setTransitioning(false), 3200);
-    return () => { clearTimeout(t2); clearTimeout(t3); };
   }
 
   async function handleFinalLogin() {
@@ -352,32 +347,30 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Gradiente que respira */}
       <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.05) 0%, transparent 70%)' }} />
 
-      {/* Container — centrado, frases dentro */}
-      <RippleButton
-        onTap={handleContainerTap}
-        loginPhase={loginPhase}
-        onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
-        onProfileClick={handleFinalLogin}
-      />
+      {/* Container — oculto durante o intro, aparece depois */}
+      {!intro && (
+        <RippleButton
+          onTap={handleContainerTap}
+          loginPhase={loginPhase}
+          onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
+          onProfileClick={handleFinalLogin}
+        />
+      )}
 
-      {/* Overlay vídeo — blend mode screen: preto = transparente, branco aparece */}
-      {transitioning && (
+      {/* Intro — vídeo de abertura fullscreen */}
+      {intro && (
         <div
-          className="fixed inset-0 z-[200] pointer-events-none overflow-hidden"
-          style={{
-            opacity: gifFading ? 0 : 1,
-            transition: 'opacity 700ms ease-out',
-          }}
+          className="fixed inset-0 z-[200] pointer-events-none overflow-hidden bg-black"
+          style={{ opacity: introFading ? 0 : 1, transition: 'opacity 900ms ease-out' }}
         >
           <video
-            key={gifKey}
             src="/transition.mp4"
             autoPlay
             muted
             playsInline
-            loop
+            onEnded={handleVideoEnd}
             className="w-full h-full object-cover"
-            style={{ mixBlendMode: 'screen', display: 'block' }}
+            style={{ display: 'block' }}
           />
         </div>
       )}
