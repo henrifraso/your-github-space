@@ -153,25 +153,19 @@ function RippleButton({
           />
         )}
 
+        {/* Idle — typewriter, posição absoluta para garantir left-to-right */}
+        {loginPhase === 'idle' && (
+          <div style={{ position: 'absolute', left: 24, right: 56, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <span style={{ color: '#d6d3d1', fontSize: '15px', fontWeight: 400 }}>
+              {typed}
+            </span>
+            {typed.length < FULL_TEXT.length && (
+              <span className="inline-block w-[1.5px] h-[1em] bg-stone-300 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
+            )}
+          </div>
+        )}
+
         <AnimatePresence mode="wait">
-          {/* Idle — typewriter linha única */}
-          {loginPhase === 'idle' && (
-            <motion.div
-              key="idle"
-              className="w-full pr-10"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <span className="text-stone-500 text-[15px] sm:text-base font-normal whitespace-nowrap overflow-hidden">
-                {typed}
-                {typed.length < FULL_TEXT.length && (
-                  <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
-                )}
-              </span>
-            </motion.div>
-          )}
 
           {/* Input */}
           {(loginPhase === 'user' || loginPhase === 'pass') && (
