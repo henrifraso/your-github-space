@@ -391,9 +391,12 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         {/* h1 surge durante a 1ª descida, h2 durante a 2ª */}
         <motion.h1
           initial={{ opacity: 0 }}
-          animate={{ opacity: exiting ? 0 : 1 }}
+          animate={{ opacity: exiting ? 0 : 1, y: exiting ? -14 : 0 }}
           transition={exiting
-            ? { duration: 0.25, ease: 'easeIn' }
+            ? {
+                opacity: { duration: 0.16, delay: 0.15, ease: 'easeIn' },
+                y:       { duration: 0.30, delay: 0.10, ease: [0.16, 1, 0.3, 1] },
+              }
             : { duration: 0.62, delay: 0.68, ease: 'easeOut' }}
           className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1]"
         >
@@ -401,9 +404,12 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         </motion.h1>
         <motion.h2
           initial={{ opacity: 0 }}
-          animate={{ opacity: exiting ? 0 : 1 }}
+          animate={{ opacity: exiting ? 0 : 1, y: exiting ? -14 : 0 }}
           transition={exiting
-            ? { duration: 0.25, delay: 0.06, ease: 'easeIn' }
+            ? {
+                opacity: { duration: 0.16, delay: 0.06, ease: 'easeIn' },
+                y:       { duration: 0.30, delay: 0.02, ease: [0.16, 1, 0.3, 1] },
+              }
             : { duration: 0.62, delay: 1.55, ease: 'easeOut' }}
           className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1"
         >
