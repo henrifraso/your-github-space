@@ -58,7 +58,7 @@ async function apiConsent(token: string, negocioId: string) {
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick,
+  onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick, onHeadlinesReady,
 }: {
   onTap: (yToTop: number) => void;
   exiting: boolean;
@@ -66,6 +66,7 @@ function RippleButton({
   loginPhase: 'idle' | 'user' | 'pass' | 'profile';
   onNextPhase: () => void;
   onProfileClick: () => void;
+  onHeadlinesReady: () => void;
 }) {
   const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
   const [inputVal, setInputVal] = useState('');
@@ -75,14 +76,27 @@ function RippleButton({
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
-    // mesma fórmula do exitY — container começa exatamente onde vai ao ser clicado
     const rect = btnRef.current!.getBoundingClientRect();
     const loginY = -rect.top + 32;
     controls.set({ y: loginY, scaleX: 1.45 });
     controls.start({ opacity: 1, filter: 'blur(0px)', y: loginY, scaleX: 1.45 }, { duration: 0.40, ease: 'easeOut' });
+
+    // phase 2: desce e encolhe
     const t1 = setTimeout(() =>
       controls.start({ y: 0, scaleX: 1 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] }), 520);
-    return () => { clearTimeout(t1); };
+
+    // revela frases exatamente quando container cruza y=-120 (zona das headlines)
+    // baseado no loginY real do dispositivo — sem delay fixo
+    const PHASE2_START = 520;
+    const PHASE2_DURATION = 1100;
+    const THRESHOLD = -120;
+    const totalDist = Math.abs(loginY);
+    const distToThreshold = totalDist + THRESHOLD; // loginY até -120
+    const ratio = totalDist > 0 ? Math.max(0, distToThreshold / totalDist) : 0;
+    const tHeadlines = PHASE2_START + ratio * PHASE2_DURATION;
+    const t2 = setTimeout(() => onHeadlinesReady(), tHeadlines);
+
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
@@ -295,9 +309,10 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
-  const [exiting,    setExiting]    = useState(false);
-  const [exitY,      setExitY]      = useState(0);
-  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
+  const [exiting,        setExiting]        = useState(false);
+  const [exitY,          setExitY]          = useState(0);
+  const [loginPhase,     setLoginPhase]     = useState<'idle'|'user'|'pass'|'profile'>('idle');
+  const [headlinesReady, setHeadlinesReady] = useState(false);
 
   function handleExitStart(yToTop: number) {
     if (exiting) return;
@@ -350,20 +365,16 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
           <motion.h1
             initial={{ opacity: 0 }}
-            animate={{ opacity: exiting ? 0 : 1 }}
-            transition={exiting
-              ? { duration: 0.20, ease: 'easeIn' }
-              : { duration: 0.08, delay: 1.30 }}
+            animate={{ opacity: exiting ? 0 : (headlinesReady ? 1 : 0) }}
+            transition={exiting ? { duration: 0.20, ease: 'easeIn' } : { duration: 0 }}
             className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
           </motion.h1>
           <motion.h2
             initial={{ opacity: 0 }}
-            animate={{ opacity: exiting ? 0 : 1 }}
-            transition={exiting
-              ? { duration: 0.20, ease: 'easeIn' }
-              : { duration: 0.08, delay: 1.48 }}
+            animate={{ opacity: exiting ? 0 : (headlinesReady ? 1 : 0) }}
+            transition={exiting ? { duration: 0.20, ease: 'easeIn' } : { duration: 0 }}
             className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
           >
             Milhões de possibilidades.
@@ -378,6 +389,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         loginPhase={loginPhase}
         onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
         onProfileClick={handleFinalLogin}
+        onHeadlinesReady={() => setHeadlinesReady(true)}
       />
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
