@@ -197,18 +197,6 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Subtle background texture */}
       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%)' }} />
 
-      {/* Logo mark */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="mb-10"
-      >
-        <div className="w-6 h-6 rounded-lg bg-[#0C0A09] flex items-center justify-center">
-          <span className="text-white text-[10px] font-bold tracking-tighter leading-none">OS</span>
-        </div>
-      </motion.div>
-
       {/* Headline */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
