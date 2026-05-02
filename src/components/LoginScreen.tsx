@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useAnimation, useMotionValue, animate as mvAnimate, MotionValue } from 'motion/react';
+import { motion, AnimatePresence, useAnimation } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -58,15 +58,12 @@ async function apiConsent(token: string, negocioId: string) {
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick, containerY,
+  onTap, loginPhase, onNextPhase, onProfileClick,
 }: {
-  onTap: (yToTop: number) => void;
-  exiting: boolean;
-  exitY: number;
+  onTap: () => void;
   loginPhase: 'idle' | 'user' | 'pass' | 'profile';
   onNextPhase: () => void;
   onProfileClick: () => void;
-  containerY: MotionValue<number>;
 }) {
   const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
   const [inputVal, setInputVal] = useState('');
@@ -74,27 +71,19 @@ function RippleButton({
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
 
-  // ── Animação de entrada — fade in do centro ───────────────────────────────
+  // Fade in do centro ao montar
   useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Sobe quando exiting dispara ────────────────────────────────────────────
-  useEffect(() => {
-    if (!exiting) return;
-    mvAnimate(containerY, exitY, { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] });
-    controls.start({ scaleX: 1.45 }, { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] });
-  }, [exiting, exitY]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Foca input e limpa valor quando loginPhase muda ──────────────────────
+  // Foca input e limpa ao mudar de fase
   useEffect(() => {
     if (loginPhase === 'idle') return;
     setInputVal('');
     setTimeout(() => inputRef.current?.focus(), 60);
   }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Enter global para fase 'profile' (sem input na tela) ─────────────────
-  // Guard de 300ms para não capturar o mesmo Enter que ativou a fase
+  // Enter para fase 'profile'
   useEffect(() => {
     if (loginPhase !== 'profile') return;
     const activatedAt = Date.now();
@@ -106,13 +95,13 @@ function RippleButton({
   }, [loginPhase, onProfileClick]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (exiting) return;
+    if (loginPhase !== 'idle') return;
     const rect = btnRef.current!.getBoundingClientRect();
     const id = Date.now();
     setRipples(r => [...r, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
     setTimeout(() => setRipples(r => r.filter(rp => rp.id !== id)), 700);
-    onTap(-rect.top + 32);
-  }, [exiting, onTap]);
+    onTap();
+  }, [loginPhase, onTap]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return;
@@ -131,7 +120,7 @@ function RippleButton({
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
         className="relative w-full rounded-2xl border border-white/70 px-6 py-4 min-h-[54px] flex items-center overflow-hidden outline-none"
-        style={{ y: containerY, cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        style={{ cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)' }}
       >
         {ripples.map(rp => (
           <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
@@ -139,7 +128,7 @@ function RippleButton({
         ))}
 
         <AnimatePresence mode="wait">
-          {/* Idle — frases dentro do container */}
+          {/* Idle — frases */}
           {loginPhase === 'idle' && (
             <motion.div
               key="idle"
@@ -157,7 +146,7 @@ function RippleButton({
             </motion.div>
           )}
 
-          {/* Login — input + lupa */}
+          {/* Input */}
           {(loginPhase === 'user' || loginPhase === 'pass') && (
             <motion.div
               key={loginPhase}
@@ -180,7 +169,7 @@ function RippleButton({
             </motion.div>
           )}
 
-          {/* Profile */}
+          {/* Perfil */}
           {loginPhase === 'profile' && (
             <motion.span
               key="profile"
@@ -195,12 +184,9 @@ function RippleButton({
           )}
         </AnimatePresence>
 
-        {/* Lupa — fases de login */}
+        {/* Lupa nas fases de login */}
         {loginPhase !== 'idle' && (
-          <div
-            className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ opacity: exiting ? 0 : 1, transition: 'opacity 0.15s' }}
-          >
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
             <Search size={18} strokeWidth={1.5} className="text-stone-400" />
           </div>
         )}
@@ -307,17 +293,23 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
-  const [exiting,    setExiting]    = useState(false);
-  const [exitY,      setExitY]      = useState(0);
-  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
+  const [loginPhase,   setLoginPhase]   = useState<'idle'|'user'|'pass'|'profile'>('idle');
+  const [transitioning, setTransitioning] = useState(false);
+  const [gifFading,     setGifFading]     = useState(false);
+  const [gifKey,        setGifKey]        = useState(0);
 
-  const containerY = useMotionValue(0);
-
-  function handleExitStart(yToTop: number) {
-    if (exiting) return;
-    setExitY(yToTop);
-    setExiting(true);
-    setTimeout(() => setLoginPhase('user'), 720);
+  function handleContainerTap() {
+    if (transitioning || loginPhase !== 'idle') return;
+    setTransitioning(true);
+    setGifFading(false);
+    setGifKey(k => k + 1);
+    // Frame escuro do GIF: ~1650ms — muda para login
+    const t1 = setTimeout(() => setLoginPhase('user'), 1650);
+    // Inicia o fade-out do overlay quando o GIF começa a clarear
+    const t2 = setTimeout(() => setGifFading(true), 1800);
+    // Remove o overlay após o fade completar
+    const t3 = setTimeout(() => setTransitioning(false), 2400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }
 
   async function handleFinalLogin() {
@@ -360,16 +352,33 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Gradiente que respira */}
       <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.05) 0%, transparent 70%)' }} />
 
-      {/* Portal container */}
+      {/* Container — centrado, frases dentro */}
       <RippleButton
-        onTap={handleExitStart}
-        exiting={exiting}
-        exitY={exitY}
+        onTap={handleContainerTap}
         loginPhase={loginPhase}
         onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
         onProfileClick={handleFinalLogin}
-        containerY={containerY}
       />
+
+      {/* Overlay GIF — cobre a tela ao clicar */}
+      {transitioning && (
+        <div
+          className="fixed inset-0 z-[200] pointer-events-none overflow-hidden"
+          style={{
+            opacity: gifFading ? 0 : 1,
+            transition: 'opacity 600ms ease-out',
+          }}
+          onTransitionEnd={() => { if (gifFading) setTransitioning(false); }}
+        >
+          <img
+            key={gifKey}
+            src="/transition.gif"
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ display: 'block' }}
+          />
+        </div>
+      )}
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
       <AnimatePresence>
