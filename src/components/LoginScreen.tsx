@@ -215,7 +215,7 @@ function RippleButton({
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-center overflow-hidden outline-none"
+        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-start overflow-hidden outline-none"
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: 'rgba(255,255,255,0.55)',
@@ -233,7 +233,6 @@ function RippleButton({
           <motion.div
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={{ duration: 0.12, ease: 'easeIn' }}
-            className="w-full"
           >
             <motion.span
               animate={enterState === 'pulse' ? { opacity: [0.75, 0.28, 0.75] } : {}}
