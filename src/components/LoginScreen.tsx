@@ -112,7 +112,7 @@ function RotatingCta() {
     <motion.p
       animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 4 }}
       transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-      className="text-stone-400 text-[11px] font-light tracking-widest uppercase select-none"
+      className="text-stone-400 text-[15px] sm:text-base font-light tracking-wide select-none whitespace-nowrap"
     >
       {CTA_PHRASES[idx]}
     </motion.p>
@@ -255,8 +255,6 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         className="w-full max-w-[760px] bg-white rounded-2xl border border-stone-100 shadow-[0_4px_32px_rgba(0,0,0,0.06)] px-10 py-4 flex flex-col items-center gap-2 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40"
         style={{ transition: 'box-shadow 0.25s ease, transform 0.25s ease' }}
       >
-        <RotatingPhrase />
-
         <RotatingCta />
       </motion.button>
 
