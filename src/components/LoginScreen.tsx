@@ -349,15 +349,21 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Headline — estática, container desce por cima */}
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
           <motion.h1
+            initial={{ opacity: 0 }}
             animate={{ opacity: exiting ? 0 : 1 }}
-            transition={{ duration: 0.20, ease: 'easeIn' }}
+            transition={exiting
+              ? { duration: 0.20, ease: 'easeIn' }
+              : { duration: 0.08, delay: 1.30 }}
             className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
           </motion.h1>
           <motion.h2
+            initial={{ opacity: 0 }}
             animate={{ opacity: exiting ? 0 : 1 }}
-            transition={{ duration: 0.20, ease: 'easeIn' }}
+            transition={exiting
+              ? { duration: 0.20, ease: 'easeIn' }
+              : { duration: 0.08, delay: 1.48 }}
             className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
           >
             Milhões de possibilidades.
