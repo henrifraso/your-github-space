@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, ArrowRight } from 'lucide-react';
 
@@ -119,6 +119,112 @@ function RotatingCta() {
   );
 }
 
+// ── DotGrid ───────────────────────────────────────────────────────────────────
+function DotGrid() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const mouse = useRef({ x: -9999, y: -9999 });
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const GAP = 28;
+    let cols = 0, rows = 0, raf = 0;
+
+    const resize = () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      cols = Math.ceil(canvas.width  / GAP) + 1;
+      rows = Math.ceil(canvas.height / GAP) + 1;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      const src = 'touches' in e ? e.touches[0] : e;
+      mouse.current = { x: src.clientX, y: src.clientY };
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: true });
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const mx = mouse.current.x, my = mouse.current.y;
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          const x = c * GAP, y = r * GAP;
+          const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
+          const influence = Math.max(0, 1 - dist / 160);
+          const radius = 1 + influence * 2;
+          const alpha = 0.12 + influence * 0.5;
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(14,10,9,${alpha})`;
+          ctx.fill();
+        }
+      }
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchmove', onMove);
+    };
+  }, []);
+
+  return <canvas ref={ref} className="absolute inset-0 pointer-events-none" style={{ opacity: 0.6 }} />;
+}
+
+// ── RippleButton ──────────────────────────────────────────────────────────────
+function RippleButton({ onTap }: { onTap: () => void }) {
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = btnRef.current!.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = Date.now();
+    setRipples(r => [...r, { id, x, y }]);
+    setTimeout(() => setRipples(r => r.filter(rp => rp.id !== id)), 700);
+    onTap();
+  }, [onTap]);
+
+  return (
+    <motion.button
+      ref={btnRef}
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.65, delay: 0.38, ease: [0.16, 1, 0.3, 1] }}
+      onClick={handleClick}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.994 }}
+      className="relative w-full max-w-[760px] rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-center cursor-pointer overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 z-10"
+      style={{
+        background: 'rgba(255,255,255,0.55)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: '0 4px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+        transition: 'box-shadow 0.25s ease, transform 0.25s ease',
+      }}
+    >
+      {ripples.map(rp => (
+        <span
+          key={rp.id}
+          className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
+          style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }}
+        />
+      ))}
+      <RotatingCta />
+    </motion.button>
+  );
+}
+
 // ── PasswordField ─────────────────────────────────────────────────────────────
 function PasswordField({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   const [show, setShow] = useState(false);
@@ -223,40 +329,53 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#FAFAF9' }}>
 
-      {/* Subtle background texture */}
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%)' }} />
+      {/* Plus Jakarta Sans */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-      {/* Headline */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, delay: 0.08, ease: [0.4, 0, 0.2, 1] }}
-        className="text-center mb-4 sm:mb-10"
-      >
-        <h1 className="text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1] whitespace-nowrap">
+        @keyframes bg-breathe {
+          0%, 100% { opacity: 0.5; }
+          50%       { opacity: 1; }
+        }
+        @keyframes ripple-out {
+          0%   { transform: scale(0); opacity: 0.35; }
+          100% { transform: scale(4); opacity: 0; }
+        }
+        .ripple-circle {
+          animation: ripple-out 0.7s ease-out forwards;
+        }
+      `}</style>
+
+      {/* Gradiente que respira */}
+      <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.07) 0%, transparent 70%)' }} />
+
+      {/* Grid de pontos com reação ao cursor */}
+      <DotGrid />
+
+      {/* Headline — stagger pronunciado */}
+      <div className="text-center mb-4 sm:mb-10 relative z-10">
+        <motion.h1
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1] whitespace-nowrap"
+        >
           Um único lugar.
-        </h1>
-        <h2 className="text-[clamp(1.4rem,4.2vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1 whitespace-nowrap">
+        </motion.h1>
+        <motion.h2
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          className="text-[clamp(1.4rem,4.2vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1 whitespace-nowrap"
+        >
           Milhões de possibilidades.
-        </h2>
-      </motion.div>
+        </motion.h2>
+      </div>
 
-      {/* Portal container */}
-      <motion.button
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, delay: 0.18, ease: [0.4, 0, 0.2, 1] }}
-        onClick={() => setStep('auth')}
-        whileHover={{ boxShadow: '0 8px 48px rgba(0,0,0,0.12)', y: -2 }}
-        whileTap={{ scale: 0.993 }}
-        transition2={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-        className="w-full max-w-[760px] bg-white rounded-2xl border border-stone-100 shadow-[0_4px_32px_rgba(0,0,0,0.06)] px-10 py-4 flex flex-col items-center gap-2 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40"
-        style={{ transition: 'box-shadow 0.25s ease, transform 0.25s ease' }}
-      >
-        <RotatingCta />
-      </motion.button>
+      {/* Portal container — glassmorphism + ripple */}
+      <RippleButton onTap={() => setStep('auth')} />
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
       <AnimatePresence>
