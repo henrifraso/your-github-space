@@ -75,11 +75,11 @@ function RippleButton({
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
-    controls.start({ opacity: 1, filter: 'blur(0px)', y: -80, scaleX: 1 }, { duration: 0.60, ease: 'easeOut' });
+    controls.start({ opacity: 1, filter: 'blur(0px)', y: -200, scaleX: 1 }, { duration: 0.60, ease: 'easeOut' });
     const t1 = setTimeout(() =>
-      controls.start({ y: -42 }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 600);
+      controls.start({ y: -60 }, { duration: 0.85, ease: [0.25, 0.46, 0.45, 0.94] }), 750);
     const t2 = setTimeout(() =>
-      controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1480);
+      controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1680);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -132,7 +132,7 @@ function RippleButton({
     <div className="w-full max-w-[760px] z-20 relative">
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)', y: -80, scaleX: 1 }}
+        initial={{ opacity: 0, filter: 'blur(14px)', y: -200, scaleX: 1 }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
@@ -359,33 +359,28 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Gradiente que respira */}
       <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.14) 0%, transparent 70%)' }} />
 
-      {/* Headline — mesma largura do container, left-aligned */}
+      {/* Headline — estática, container desce por cima */}
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
-        {/* h1 surge durante a 1ª descida, h2 durante a 2ª */}
-        <div style={{ overflow: 'hidden' }}>
           <motion.h1
-            initial={{ y: '105%' }}
-            animate={{ y: exiting ? '105%' : '0%' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: exiting ? 0 : 1 }}
             transition={exiting
-              ? { duration: 0.22, delay: 0.14, ease: [0.4, 0, 1, 1] }
-              : { duration: 0.58, delay: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
+              ? { duration: 0.20, ease: 'easeIn' }
+              : { duration: 0.50, delay: 0.15, ease: 'easeOut' }}
             className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
           </motion.h1>
-        </div>
-        <div style={{ overflow: 'hidden' }} className="mt-1">
           <motion.h2
-            initial={{ y: '105%' }}
-            animate={{ y: exiting ? '105%' : '0%' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: exiting ? 0 : 1 }}
             transition={exiting
-              ? { duration: 0.22, delay: 0.06, ease: [0.4, 0, 1, 1] }
-              : { duration: 0.58, delay: 1.44, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1]"
+              ? { duration: 0.20, ease: 'easeIn' }
+              : { duration: 0.50, delay: 0.55, ease: 'easeOut' }}
+            className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
           >
             Milhões de possibilidades.
           </motion.h2>
-        </div>
       </div>
 
       {/* Portal container — glassmorphism + parallax */}
