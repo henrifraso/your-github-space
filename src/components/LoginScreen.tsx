@@ -303,12 +303,12 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     setTransitioning(true);
     setGifFading(false);
     setGifKey(k => k + 1);
-    // Frame escuro do GIF: ~1650ms — muda para login
-    const t1 = setTimeout(() => setLoginPhase('user'), 1650);
-    // Inicia o fade-out do overlay quando o GIF começa a clarear
-    const t2 = setTimeout(() => setGifFading(true), 1800);
-    // Remove o overlay após o fade completar
-    const t3 = setTimeout(() => setTransitioning(false), 2400);
+    // Container muda para login enquanto a imagem cobre a tela
+    const t1 = setTimeout(() => setLoginPhase('user'), 600);
+    // Inicia o fade-out da imagem
+    const t2 = setTimeout(() => setGifFading(true), 800);
+    // Remove overlay após fade
+    const t3 = setTimeout(() => setTransitioning(false), 1500);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }
 
@@ -372,7 +372,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         >
           <img
             key={gifKey}
-            src="/transition.gif"
+            src="/transition.jpeg"
             alt=""
             className="w-full h-full object-cover"
             style={{ display: 'block' }}
