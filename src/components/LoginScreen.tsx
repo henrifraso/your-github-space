@@ -75,12 +75,10 @@ function RippleButton({
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
-    controls.start({ opacity: 1, filter: 'blur(0px)', y: -500, scaleX: 1 }, { duration: 0.60, ease: 'easeOut' });
+    controls.start({ opacity: 1, filter: 'blur(0px)', y: -150, scaleX: 1.45 }, { duration: 0.45, ease: 'easeOut' });
     const t1 = setTimeout(() =>
-      controls.start({ y: -60 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] }), 750);
-    const t2 = setTimeout(() =>
-      controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1900);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+      controls.start({ y: 0, scaleX: 1 }, { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] }), 550);
+    return () => { clearTimeout(t1); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
@@ -132,7 +130,7 @@ function RippleButton({
     <div className="w-full max-w-[760px] z-20 relative">
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)', y: -500, scaleX: 1 }}
+        initial={{ opacity: 0, filter: 'blur(14px)', y: -150, scaleX: 1.45 }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
@@ -150,23 +148,19 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {loginPhase === 'idle' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: exiting ? 0 : 1 }}
-            transition={exiting
-              ? { duration: 0.12, ease: 'easeIn' }
-              : { duration: 0.35, delay: 2.10 }}
-            className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
-          >
-            <Search size={15} strokeWidth={1.6} className="text-stone-300" />
-          </motion.div>
-        )}
+        {/* Lupa permanente — canto direito em todas as fases */}
+        <motion.div
+          animate={{ opacity: exiting ? 0 : 1 }}
+          transition={{ duration: 0.12, ease: 'easeIn' }}
+          className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
+        >
+          <Search size={18} strokeWidth={1.5} className="text-stone-400" />
+        </motion.div>
 
         {(loginPhase === 'user' || loginPhase === 'pass') && (
           <motion.div
             key={loginPhase}
-            className="w-full"
+            className="w-full pr-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
