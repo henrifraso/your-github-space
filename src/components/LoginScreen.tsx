@@ -131,11 +131,14 @@ function RippleButton({
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
-  const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
-  const [inputVal, setInputVal] = useState('');
+  const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
+  const [inputVal,   setInputVal]   = useState('');
+  const [enterState, setEnterState] = useState<'hidden' | 'typing' | 'pulse'>('hidden');
+  const [typedCount, setTypedCount] = useState(0);
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
+  const ENTER_TEXT = 'Enter';
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
@@ -144,8 +147,20 @@ function RippleButton({
       controls.start({ y: -42 }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 600);
     const t2 = setTimeout(() =>
       controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1480);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t3 = setTimeout(() => setEnterState('typing'), 2120);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Typewriter do "Enter" ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (enterState !== 'typing') return;
+    if (typedCount >= ENTER_TEXT.length) {
+      const t = setTimeout(() => setEnterState('pulse'), 250);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setTypedCount(c => c + 1), 130);
+    return () => clearTimeout(t);
+  }, [enterState, typedCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
   useEffect(() => {
@@ -218,10 +233,18 @@ function RippleButton({
           <motion.div
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={{ duration: 0.12, ease: 'easeIn' }}
+            className="w-full"
           >
-            <span className="font-sans text-[13px] font-light tracking-[0.22em] text-stone-400 uppercase select-none">
-              Enter
-            </span>
+            <motion.span
+              animate={enterState === 'pulse' ? { opacity: [0.75, 0.28, 0.75] } : {}}
+              transition={enterState === 'pulse'
+                ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.5, 1] }
+                : {}}
+              className="font-sans text-[13px] font-light tracking-[0.14em] text-stone-500 select-none"
+            >
+              {ENTER_TEXT.slice(0, typedCount)}
+              {enterState === 'typing' && <span className="enter-cursor">|</span>}
+            </motion.span>
           </motion.div>
         )}
 
@@ -403,6 +426,15 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         }
         .ripple-circle {
           animation: ripple-out 0.7s ease-out forwards;
+        }
+        @keyframes cursor-blink {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0; }
+        }
+        .enter-cursor {
+          animation: cursor-blink 0.65s step-end infinite;
+          margin-left: 1px;
+          font-weight: 300;
         }
       `}</style>
 
