@@ -293,14 +293,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
-  const [loginPhase,   setLoginPhase]   = useState<'idle'|'user'|'pass'|'profile'>('idle');
-  const [intro,        setIntro]        = useState(true);   // vídeo de abertura ativo
-  const [introFading,  setIntroFading]  = useState(false);  // vídeo saindo
-
-  function handleVideoEnd() {
-    setIntroFading(true);
-    setTimeout(() => setIntro(false), 900);
-  }
+  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
 
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
@@ -347,33 +340,13 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Gradiente que respira */}
       <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.05) 0%, transparent 70%)' }} />
 
-      {/* Container — oculto durante o intro, aparece depois */}
-      {!intro && (
-        <RippleButton
-          onTap={handleContainerTap}
-          loginPhase={loginPhase}
-          onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
-          onProfileClick={handleFinalLogin}
-        />
-      )}
-
-      {/* Intro — vídeo de abertura fullscreen */}
-      {intro && (
-        <div
-          className="fixed inset-0 z-[200] pointer-events-none overflow-hidden bg-black"
-          style={{ opacity: introFading ? 0 : 1, transition: 'opacity 900ms ease-out' }}
-        >
-          <video
-            src="/transition.mp4"
-            autoPlay
-            muted
-            playsInline
-            onEnded={handleVideoEnd}
-            className="w-full h-full object-cover"
-            style={{ display: 'block' }}
-          />
-        </div>
-      )}
+      {/* Container — centrado, frases dentro */}
+      <RippleButton
+        onTap={handleContainerTap}
+        loginPhase={loginPhase}
+        onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
+        onProfileClick={handleFinalLogin}
+      />
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
       <AnimatePresence>
