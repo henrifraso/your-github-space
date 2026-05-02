@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'motion/react';
-import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Step = 'landing' | 'auth' | 'business' | 'consent';
@@ -211,19 +211,34 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {loginPhase === 'idle' && <RotatingCta />}
+        {loginPhase === 'idle' && (
+          <motion.div
+            animate={{ opacity: exiting ? 0 : 1 }}
+            transition={{ duration: 0.12, ease: 'easeIn' }}
+          >
+            <RotatingCta />
+          </motion.div>
+        )}
 
         {(loginPhase === 'user' || loginPhase === 'pass') && (
-          <input
-            ref={inputRef}
-            type={loginPhase === 'pass' ? 'password' : 'text'}
-            value={inputVal}
-            onChange={e => setInputVal(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
-            className="bg-transparent outline-none border-none w-full text-center text-[15px] sm:text-base font-light tracking-wide text-stone-700 placeholder-stone-400 caret-stone-500"
-            onClick={e => e.stopPropagation()}
-          />
+          <motion.div
+            key={loginPhase}
+            className="w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+          >
+            <input
+              ref={inputRef}
+              type={loginPhase === 'pass' ? 'password' : 'text'}
+              value={inputVal}
+              onChange={e => setInputVal(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
+              className="bg-transparent outline-none border-none w-full text-center text-[15px] sm:text-base font-light tracking-wide text-stone-700 placeholder-stone-400 caret-stone-500"
+              onClick={e => e.stopPropagation()}
+            />
+          </motion.div>
         )}
 
         {loginPhase === 'profile' && (
@@ -231,10 +246,9 @@ function RippleButton({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            onKeyDown={handleKeyDown as any}
-            className="flex items-center gap-2 text-[15px] sm:text-base font-light tracking-wide text-stone-700"
+            className="text-[15px] sm:text-base font-light tracking-wide text-stone-700"
           >
-            meu perfil <ArrowRight size={15} className="text-stone-400" />
+            meu perfil
           </motion.span>
         )}
       </motion.button>
