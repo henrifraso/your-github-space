@@ -71,7 +71,7 @@ function InitializerButtons() {
             onClick={() => setPhase('expanded')}
             className="w-full h-11 rounded-2xl bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-neutral-200 dark:hover:bg-[#353535] transition-all duration-200 cursor-pointer"
           >
-            Inicializar
+            Área de trabalho
           </motion.button>
         )}
 
