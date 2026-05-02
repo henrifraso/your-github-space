@@ -11,25 +11,6 @@ interface Business { id: string; nome: string; segmento: string; cidade: string;
 export interface Props { onAuthenticated: (token: string, negocioId: string) => void; }
 
 // ── Phrases ───────────────────────────────────────────────────────────────────
-const PHRASES = [
-  'Comece com apenas um toque.',
-  'Entre na sua operação em um só lugar.',
-  'O sistema aprende enquanto você trabalha.',
-  'Navegue e deixe o sistema entender sua empresa.',
-  'Tudo começa aqui.',
-  'Sua empresa em um único fluxo.',
-  'O centro da sua operação começa aqui.',
-];
-
-const CTA_PHRASES = [
-  'Algo esperando por você.',
-  'Seu painel está pronto.',
-  'Tudo em ordem. Continue.',
-  'Novidades desde a última vez.',
-  'Sua operação está ativa.',
-  'Pronto quando você estiver.',
-];
-
 // ── API ───────────────────────────────────────────────────────────────────────
 async function apiLogin(email: string, password: string) {
   try {
@@ -75,51 +56,6 @@ async function apiConsent(token: string, negocioId: string) {
   try { await fetch('/api/sync/consent', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ negocio_id: negocioId, consent_version: '1.0' }) }); } catch {}
 }
 
-// ── RotatingPhrase ────────────────────────────────────────────────────────────
-function RotatingPhrase() {
-  const [idx, setIdx] = useState(0);
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => { setIdx(i => (i + 1) % PHRASES.length); setVisible(true); }, 500);
-    }, 3800);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <motion.p
-      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 6 }}
-      transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
-      className="text-stone-400 text-[15px] sm:text-base font-light tracking-wide select-none"
-    >
-      {PHRASES[idx]}
-    </motion.p>
-  );
-}
-
-// ── RotatingCta ───────────────────────────────────────────────────────────────
-function RotatingCta() {
-  const [idx, setIdx] = useState(() => Math.floor(Math.random() * CTA_PHRASES.length));
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const t = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => { setIdx(i => (i + 1) % CTA_PHRASES.length); setVisible(true); }, 400);
-    }, 4200);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <motion.p
-      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 4 }}
-      transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-      className="text-stone-400 text-[15px] sm:text-base font-light tracking-wide select-none whitespace-nowrap"
-    >
-      {CTA_PHRASES[idx]}
-    </motion.p>
-  );
-}
-
-
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
   onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick,
@@ -131,14 +67,11 @@ function RippleButton({
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
-  const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
-  const [inputVal,   setInputVal]   = useState('');
-  const [enterState, setEnterState] = useState<'hidden' | 'typing' | 'pulse'>('hidden');
-  const [typedCount, setTypedCount] = useState(0);
+  const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
+  const [inputVal, setInputVal] = useState('');
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
-  const ENTER_TEXT = 'Como?';
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
@@ -147,20 +80,8 @@ function RippleButton({
       controls.start({ y: -42 }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 600);
     const t2 = setTimeout(() =>
       controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1480);
-    const t3 = setTimeout(() => setEnterState('typing'), 2120);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Typewriter do "Enter" ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (enterState !== 'typing') return;
-    if (typedCount >= ENTER_TEXT.length) {
-      const t = setTimeout(() => setEnterState('pulse'), 250);
-      return () => clearTimeout(t);
-    }
-    const t = setTimeout(() => setTypedCount(c => c + 1), 130);
-    return () => clearTimeout(t);
-  }, [enterState, typedCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
   useEffect(() => {
@@ -435,14 +356,19 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         .ripple-circle {
           animation: ripple-out 0.7s ease-out forwards;
         }
-        @keyframes cursor-blink {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0; }
+        @keyframes como-fadein {
+          from { opacity: 0; }
+          to   { opacity: 0.72; }
         }
-        .enter-cursor {
-          animation: cursor-blink 0.65s step-end infinite;
-          margin-left: 1px;
-          font-weight: 300;
+        @keyframes como-pulse {
+          0%, 100% { opacity: 0.72; }
+          50%      { opacity: 0.28; }
+        }
+        .como-text {
+          opacity: 0;
+          animation:
+            como-fadein 0.45s ease-out 2.15s forwards,
+            como-pulse  2.8s ease-in-out 2.60s infinite;
         }
       `}</style>
 
