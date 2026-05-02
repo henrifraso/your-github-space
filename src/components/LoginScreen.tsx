@@ -65,28 +65,39 @@ function RippleButton({
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
-  const FULL_TEXT = 'Um único lugar. Milhões de possibilidades...';
+  const LINE1 = 'Um único lugar.';
+  const LINE2 = 'Milhões de possibilidades.';
   const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
   const [inputVal, setInputVal] = useState('');
-  const [typed,    setTyped]    = useState('');
-  const typedRef = useRef(0);
+  const [line1,    setLine1]    = useState('');
+  const [line2,    setLine2]    = useState('');
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
 
-  // Fade in + inicia typewriter
+  // Fade in + typewriter duas linhas em sequência
   useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
-    const delay = setTimeout(() => {
-      const interval = setInterval(() => {
-        typedRef.current += 1;
-        const next = FULL_TEXT.slice(0, typedRef.current);
-        setTyped(next);
-        if (typedRef.current >= FULL_TEXT.length) clearInterval(interval);
-      }, 38);
-      return () => clearInterval(interval);
+    let i = 0;
+    let j = 0;
+    let int2: ReturnType<typeof setInterval>;
+    const t0 = setTimeout(() => {
+      const int1 = setInterval(() => {
+        i++;
+        setLine1(LINE1.slice(0, i));
+        if (i >= LINE1.length) {
+          clearInterval(int1);
+          const t1 = setTimeout(() => {
+            int2 = setInterval(() => {
+              j++;
+              setLine2(LINE2.slice(0, j));
+              if (j >= LINE2.length) clearInterval(int2);
+            }, 38);
+          }, 280);
+        }
+      }, 60);
     }, 400);
-    return () => clearTimeout(delay);
+    return () => { clearTimeout(t0); clearInterval(int2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Foca input e limpa ao mudar de fase
@@ -150,22 +161,30 @@ function RippleButton({
         )}
 
         <AnimatePresence mode="wait">
-          {/* Idle — typewriter */}
+          {/* Idle — typewriter duas linhas */}
           {loginPhase === 'idle' && (
             <motion.div
               key="idle"
-              className="w-full pr-10"
+              className="w-full pr-10 flex flex-col gap-0.5"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <span className="text-stone-300 text-[15px] sm:text-base font-normal leading-snug">
-                {typed}
-                {typed.length < FULL_TEXT.length && (
+              <span className="text-stone-400 text-[15px] sm:text-base font-medium leading-snug">
+                {line1}
+                {line1.length < LINE1.length && (
                   <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
                 )}
               </span>
+              {line1.length >= LINE1.length && (
+                <span className="text-stone-300 text-[13px] sm:text-sm font-normal leading-snug">
+                  {line2}
+                  {line2.length < LINE2.length && (
+                    <span className="inline-block w-[1.5px] h-[0.9em] bg-stone-300 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
+                  )}
+                </span>
+              )}
             </motion.div>
           )}
 
