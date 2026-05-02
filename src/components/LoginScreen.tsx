@@ -66,32 +66,52 @@ function RippleButton({
   onProfileClick: () => void;
 }) {
   const FULL_TEXT = 'Um único lugar. Milhões de possibilidades.';
-  const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
-  const [inputVal, setInputVal] = useState('');
-  const [typed,    setTyped]    = useState('');
-  const iRef     = useRef(0);
-  const btnRef   = useRef<HTMLButtonElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const controls = useAnimation();
+  const PHASE_TEXT: Record<string, string> = { user: 'usuário', pass: 'senha', profile: 'meu perfil' };
+  const CURSOR_STYLE = { animation: 'cursor-blink 0.9s step-end infinite' };
+  const TEXT_SHADOW  = { textShadow: '0 1px 3px rgba(0,0,0,0.22)' };
 
-  // Fade in + typewriter linha única
+  const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
+  const [inputVal,   setInputVal]   = useState('');
+  const [typed,      setTyped]      = useState('');      // idle typewriter
+  const [phaseTyped, setPhaseTyped] = useState('');      // fase typewriter
+  const iRef      = useRef(0);
+  const phaseRef  = useRef(0);
+  const btnRef    = useRef<HTMLButtonElement>(null);
+  const inputRef  = useRef<HTMLInputElement>(null);
+  const controls  = useAnimation();
+
+  // Fade in + typewriter idle
   useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
     const t0 = setTimeout(() => {
-      const interval = setInterval(() => {
+      const iv = setInterval(() => {
         iRef.current += 1;
         setTyped(FULL_TEXT.slice(0, iRef.current));
-        if (iRef.current >= FULL_TEXT.length) clearInterval(interval);
+        if (iRef.current >= FULL_TEXT.length) clearInterval(iv);
       }, 48);
     }, 400);
     return () => clearTimeout(t0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Foca input e limpa ao mudar de fase
+  // Typewriter por fase (user / pass / profile)
   useEffect(() => {
     if (loginPhase === 'idle') return;
+    const target = PHASE_TEXT[loginPhase] ?? '';
+    phaseRef.current = 0;
+    setPhaseTyped('');
     setInputVal('');
-    setTimeout(() => inputRef.current?.focus(), 60);
+    const t = setTimeout(() => {
+      const iv = setInterval(() => {
+        phaseRef.current += 1;
+        setPhaseTyped(target.slice(0, phaseRef.current));
+        if (phaseRef.current >= target.length) {
+          clearInterval(iv);
+          if (loginPhase !== 'profile') setTimeout(() => inputRef.current?.focus(), 60);
+        }
+      }, 55);
+      return () => clearInterval(iv);
+    }, 80);
+    return () => clearTimeout(t);
   }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Enter para fase 'profile'
@@ -160,52 +180,48 @@ function RippleButton({
           </div>
         )}
 
-        <AnimatePresence mode="wait">
-
-          {/* Input */}
-          {(loginPhase === 'user' || loginPhase === 'pass') && (
-            <motion.div
-              key={loginPhase}
-              className="flex items-center w-full pr-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-            >
-              <input
-                ref={inputRef}
-                type={loginPhase === 'pass' ? 'password' : 'text'}
-                value={inputVal}
-                onChange={e => setInputVal(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
-                className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)' }}
-                onClick={e => e.stopPropagation()}
-              />
-            </motion.div>
-          )}
-
-          {/* Perfil */}
-          {loginPhase === 'profile' && (
-            <motion.span
-              key="profile"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.28 }}
-              className="text-[15px] sm:text-base font-normal text-stone-600"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)' }}
-            >
-              meu perfil
-            </motion.span>
-          )}
-        </AnimatePresence>
+        {/* Fases user/pass/profile — typewriter + input */}
+        {loginPhase !== 'idle' && (() => {
+          const target   = PHASE_TEXT[loginPhase] ?? '';
+          const isDone   = phaseTyped.length >= target.length;
+          const isInput  = loginPhase === 'user' || loginPhase === 'pass';
+          return (
+            <div style={{ position: 'absolute', left: 24, right: 48, top: '50%', transform: 'translateY(-50%)', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              {/* typewriter enquanto digita */}
+              {!isDone && (
+                <span style={{ color: '#d6d3d1', fontSize: '15px', fontWeight: 400, ...TEXT_SHADOW }}>
+                  {phaseTyped}
+                  <span className="inline-block w-[1.5px] h-[1em] bg-stone-300 ml-[1px] align-middle" style={CURSOR_STYLE} />
+                </span>
+              )}
+              {/* input aparece após terminar (user/pass) */}
+              {isDone && isInput && (
+                <input
+                  ref={inputRef}
+                  type={loginPhase === 'pass' ? 'password' : 'text'}
+                  value={inputVal}
+                  onChange={e => setInputVal(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={target}
+                  className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
+                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)' }}
+                  onClick={e => e.stopPropagation()}
+                />
+              )}
+              {/* "meu perfil" — só texto */}
+              {isDone && !isInput && (
+                <span style={{ color: '#78716c', fontSize: '15px', fontWeight: 400, ...TEXT_SHADOW }}>
+                  {target}
+                </span>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Lupa nas fases de login */}
         {loginPhase !== 'idle' && (
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Search size={18} strokeWidth={1.5} className="text-stone-400" style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))' }} />
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <Search size={22} strokeWidth={1.4} style={{ color: '#d6d3d1', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))' }} />
           </div>
         )}
       </motion.button>
