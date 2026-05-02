@@ -202,12 +202,11 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="mb-10 flex items-center gap-2"
+        className="mb-10"
       >
         <div className="w-6 h-6 rounded-lg bg-[#0C0A09] flex items-center justify-center">
           <span className="text-white text-[10px] font-bold tracking-tighter leading-none">OS</span>
         </div>
-        <span className="text-stone-300 text-xs font-light tracking-widest uppercase">Sistema Operacional</span>
       </motion.div>
 
       {/* Headline */}
