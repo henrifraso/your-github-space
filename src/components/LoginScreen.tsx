@@ -236,15 +236,6 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         className="w-full max-w-[760px] bg-white rounded-3xl border border-stone-100 shadow-[0_4px_32px_rgba(0,0,0,0.06)] px-10 py-11 flex flex-col items-center gap-5 cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40"
         style={{ transition: 'box-shadow 0.25s ease, transform 0.25s ease' }}
       >
-        {/* Pulse dot */}
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3b82f6] opacity-40" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3b82f6]" />
-          </span>
-          <span className="text-[11px] font-medium tracking-widest uppercase text-stone-300">Sistema ativo</span>
-        </div>
-
         <RotatingPhrase />
 
         <div className="flex items-center gap-2 text-stone-300 group-hover:text-stone-500 transition-colors duration-300">
