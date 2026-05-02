@@ -114,7 +114,7 @@ export default function App() {
 function AuthenticatedApp() {
   const [data, setData] = useState<OmniData>(MOCK_DATA);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
-  const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
+  const [dark] = useState(true);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => (localStorage.getItem('difficulty') as Difficulty) ?? 'normal');
   const [difficultyOpen, setDifficultyOpen] = useState(false);
   const txt = (key: TextKey) => TEXTS[key][difficulty];
@@ -421,11 +421,6 @@ function AuthenticatedApp() {
               <Settings2 size={18} className="sm:hidden" />
               <Settings2 size={20} className="hidden sm:block lg:hidden" />
               <Settings2 size={24} className="hidden lg:block" />
-            </button>
-            <button onClick={() => setDark(d => !d)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
-              {dark ? <Sun size={18} className="sm:hidden" /> : <Moon size={18} className="sm:hidden" />}
-              {dark ? <Sun size={20} className="hidden sm:block lg:hidden" /> : <Moon size={20} className="hidden sm:block lg:hidden" />}
-              {dark ? <Sun size={24} className="hidden lg:block" /> : <Moon size={24} className="hidden lg:block" />}
             </button>
             <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               <Bell size={18} className="sm:hidden" />

@@ -155,7 +155,7 @@ function RippleButton({
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={{ duration: 0.12, ease: 'easeIn' }}
           >
-            <span className="como-text text-[13px] font-light tracking-[0.14em] text-stone-500 select-none">
+            <span className="como-text text-[17px] font-light tracking-[0.12em] text-stone-700 select-none">
               Como?
             </span>
           </motion.div>
@@ -342,11 +342,11 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         }
         @keyframes como-fadein {
           from { opacity: 0; }
-          to   { opacity: 0.72; }
+          to   { opacity: 1; }
         }
         @keyframes como-pulse {
-          0%, 100% { opacity: 0.72; }
-          50%      { opacity: 0.28; }
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.4; }
         }
         .como-text {
           opacity: 0;
@@ -357,7 +357,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       `}</style>
 
       {/* Gradiente que respira */}
-      <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.14) 0%, transparent 70%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.05) 0%, transparent 70%)' }} />
 
       {/* Headline — estática, container desce por cima */}
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
