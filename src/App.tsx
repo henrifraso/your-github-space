@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Moon, Sun, Layers, Info, Bell, Camera, Plus,
   MapPin, Scale, Store, Zap,
-  Settings2, X, Globe, LayoutGrid
+  Settings2, X, Globe, LayoutGrid, Power
 } from 'lucide-react';
 
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
@@ -74,7 +74,7 @@ const TEXTS: Record<TextKey, Record<Difficulty, string>> = {
 import { motion, AnimatePresence } from 'motion/react';
 
 import LoginScreen from './components/LoginScreen';
-import { getAuthState, setAuthState } from './hooks/useAuth';
+import { getAuthState, setAuthState, clearAuthState } from './hooks/useAuth';
 import type { OmniData, Competitor, TimelineEvent } from './types';
 import { MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
 import { BottomModal, ModalHeader } from './components/BottomModal';
@@ -368,8 +368,22 @@ export default function App() {
     return ns.length ? (ns.reduce((a, b) => a + b, 0) / ns.length).toFixed(1) : '—';
   })();
 
+  function handleLogout() {
+    clearAuthState();
+    window.location.reload();
+  }
+
   return (
     <div className={dark ? 'dark' : ''}>
+
+      {/* Botão de deslogar — canto superior direito */}
+      <button
+        onClick={handleLogout}
+        title="Sair"
+        className="fixed top-3 right-4 z-[999] p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/8 transition-all duration-200 cursor-pointer active:scale-90"
+      >
+        <Power size={18} />
+      </button>
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">

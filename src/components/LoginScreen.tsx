@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useAnimation } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, ArrowRight } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -119,109 +119,122 @@ function RotatingCta() {
   );
 }
 
-// ── DotGrid ───────────────────────────────────────────────────────────────────
-function DotGrid() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const mouse = useRef({ x: -9999, y: -9999 });
-
-  useEffect(() => {
-    const canvas = ref.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const GAP = 28;
-    let cols = 0, rows = 0, raf = 0;
-
-    const resize = () => {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
-      cols = Math.ceil(canvas.width  / GAP) + 1;
-      rows = Math.ceil(canvas.height / GAP) + 1;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    const onMove = (e: MouseEvent | TouchEvent) => {
-      const src = 'touches' in e ? e.touches[0] : e;
-      mouse.current = { x: src.clientX, y: src.clientY };
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onMove, { passive: true });
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const mx = mouse.current.x, my = mouse.current.y;
-      for (let c = 0; c < cols; c++) {
-        for (let r = 0; r < rows; r++) {
-          const x = c * GAP, y = r * GAP;
-          const dist = Math.sqrt((x - mx) ** 2 + (y - my) ** 2);
-          const influence = Math.max(0, 1 - dist / 160);
-          const radius = 1 + influence * 2;
-          const alpha = 0.12 + influence * 0.5;
-          ctx.beginPath();
-          ctx.arc(x, y, radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(14,10,9,${alpha})`;
-          ctx.fill();
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('touchmove', onMove);
-    };
-  }, []);
-
-  return <canvas ref={ref} className="absolute inset-0 pointer-events-none" style={{ opacity: 0.6 }} />;
-}
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
-function RippleButton({ onTap }: { onTap: () => void }) {
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
-  const btnRef = useRef<HTMLButtonElement>(null);
+function RippleButton({
+  onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick,
+}: {
+  onTap: (yToTop: number) => void;
+  exiting: boolean;
+  exitY: number;
+  loginPhase: 'idle' | 'user' | 'pass' | 'profile';
+  onNextPhase: () => void;
+  onProfileClick: () => void;
+}) {
+  const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
+  const [inputVal, setInputVal] = useState('');
+  const btnRef   = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const controls = useAnimation();
+
+  // ── Animação de entrada (3 fases) ──────────────────────────────────────────
+  useEffect(() => {
+    controls.start({ opacity: 1, filter: 'blur(0px)', y: -80, scaleX: 1 }, { duration: 0.60, ease: 'easeOut' });
+    const t1 = setTimeout(() =>
+      controls.start({ y: -42 }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 600);
+    const t2 = setTimeout(() =>
+      controls.start({ y: 0   }, { duration: 0.60, ease: [0.25, 0.46, 0.45, 0.94] }), 1480);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Sobe quando exiting dispara ────────────────────────────────────────────
+  useEffect(() => {
+    if (!exiting) return;
+    controls.start({ scaleX: 1.45, y: exitY }, { duration: 0.68, ease: [0.16, 1, 0.3, 1] });
+  }, [exiting, exitY]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Foca input e limpa valor quando loginPhase muda ──────────────────────
+  useEffect(() => {
+    if (loginPhase === 'idle') return;
+    setInputVal('');
+    setTimeout(() => inputRef.current?.focus(), 60);
+  }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Enter global para fase 'profile' (sem input na tela) ─────────────────
+  useEffect(() => {
+    if (loginPhase !== 'profile') return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter') onProfileClick(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [loginPhase, onProfileClick]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (exiting) return;
     const rect = btnRef.current!.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
     const id = Date.now();
-    setRipples(r => [...r, { id, x, y }]);
+    setRipples(r => [...r, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
     setTimeout(() => setRipples(r => r.filter(rp => rp.id !== id)), 700);
-    onTap();
-  }, [onTap]);
+    onTap(-rect.top + 32);
+  }, [exiting, onTap]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter') return;
+    if (loginPhase === 'profile') { onProfileClick(); return; }
+    if (inputVal.trim()) onNextPhase();
+  }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
+
+  const isLogin = loginPhase !== 'idle';
 
   return (
-    <motion.button
-      ref={btnRef}
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.65, delay: 0.38, ease: [0.16, 1, 0.3, 1] }}
-      onClick={handleClick}
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.994 }}
-      className="relative w-full max-w-[760px] rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-center cursor-pointer overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[#3b82f6]/40 z-10"
-      style={{
-        background: 'rgba(255,255,255,0.55)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        boxShadow: '0 4px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
-        transition: 'box-shadow 0.25s ease, transform 0.25s ease',
-      }}
-    >
-      {ripples.map(rp => (
-        <span
-          key={rp.id}
-          className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
-          style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }}
-        />
-      ))}
-      <RotatingCta />
-    </motion.button>
+    <div className="w-full max-w-[760px] z-20 relative">
+      <motion.button
+        ref={btnRef}
+        initial={{ opacity: 0, filter: 'blur(14px)', y: -80, scaleX: 1 }}
+        animate={controls}
+        onClick={handleClick}
+        whileTap={!isLogin ? { scale: 0.994 } : {}}
+        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-center overflow-hidden outline-none"
+        style={{
+          cursor: isLogin ? 'default' : 'pointer',
+          background: 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+        }}
+      >
+        {ripples.map(rp => (
+          <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
+            style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
+        ))}
+
+        {loginPhase === 'idle' && <RotatingCta />}
+
+        {(loginPhase === 'user' || loginPhase === 'pass') && (
+          <input
+            ref={inputRef}
+            type={loginPhase === 'pass' ? 'password' : 'text'}
+            value={inputVal}
+            onChange={e => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
+            className="bg-transparent outline-none border-none w-full text-center text-[15px] sm:text-base font-light tracking-wide text-stone-700 placeholder-stone-400 caret-stone-500"
+            onClick={e => e.stopPropagation()}
+          />
+        )}
+
+        {loginPhase === 'profile' && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.28 }}
+            onKeyDown={handleKeyDown as any}
+            className="flex items-center gap-2 text-[15px] sm:text-base font-light tracking-wide text-stone-700"
+          >
+            meu perfil <ArrowRight size={15} className="text-stone-400" />
+          </motion.span>
+        )}
+      </motion.button>
+    </div>
   );
 }
 
@@ -280,6 +293,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [selectedBiz, setSelectedBiz] = useState('');
 
+
   function resetForm() { setNome(''); setEmail(''); setPassword(''); setConfirmPassword(''); setError(''); }
 
   async function handleAuth(e: React.FormEvent) {
@@ -322,6 +336,27 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
+  const [exiting,    setExiting]    = useState(false);
+  const [exitY,      setExitY]      = useState(0);
+  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
+
+  function handleExitStart(yToTop: number) {
+    if (exiting) return;
+    setExitY(yToTop);
+    setExiting(true);
+    setTimeout(() => setLoginPhase('user'), 720);
+  }
+
+  async function handleFinalLogin() {
+    let tkn = `demo.${Date.now()}`;
+    try {
+      const r = await apiLogin('admin@mcdonalds-os1.test', 'Teste123!');
+      tkn = r.access_token;
+    } catch {}
+    await apiSelectBusiness(tkn, 'mcdo-paulista');
+    onAuthenticated(tkn, 'mcdo-paulista');
+  }
+
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 16 },
     visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] } },
@@ -329,7 +364,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#FAFAF9' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-x-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#FAFAF9' }}>
 
       {/* Plus Jakarta Sans */}
       <style>{`
@@ -351,31 +386,40 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Gradiente que respira */}
       <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.07) 0%, transparent 70%)' }} />
 
-      {/* Grid de pontos com reação ao cursor */}
-      <DotGrid />
-
-      {/* Headline — stagger pronunciado */}
-      <div className="text-center mb-4 sm:mb-10 relative z-10">
+      {/* Headline — mesma largura do container, left-aligned */}
+      <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
+        {/* h1 surge durante a 1ª descida, h2 durante a 2ª */}
         <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1] whitespace-nowrap"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: exiting ? 0 : 1 }}
+          transition={exiting
+            ? { duration: 0.25, ease: 'easeIn' }
+            : { duration: 0.62, delay: 0.68, ease: 'easeOut' }}
+          className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1]"
         >
           Um único lugar.
         </motion.h1>
         <motion.h2
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="text-[clamp(1.4rem,4.2vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1 whitespace-nowrap"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: exiting ? 0 : 1 }}
+          transition={exiting
+            ? { duration: 0.25, delay: 0.06, ease: 'easeIn' }
+            : { duration: 0.62, delay: 1.55, ease: 'easeOut' }}
+          className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1"
         >
           Milhões de possibilidades.
         </motion.h2>
       </div>
 
-      {/* Portal container — glassmorphism + ripple */}
-      <RippleButton onTap={() => setStep('auth')} />
+      {/* Portal container — glassmorphism + parallax */}
+      <RippleButton
+        onTap={handleExitStart}
+        exiting={exiting}
+        exitY={exitY}
+        loginPhase={loginPhase}
+        onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
+        onProfileClick={handleFinalLogin}
+      />
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
       <AnimatePresence>
