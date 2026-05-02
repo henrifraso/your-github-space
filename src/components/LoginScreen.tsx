@@ -339,7 +339,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-x-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#FAFAF9' }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-x-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#0C0A09' }}>
 
       {/* Plus Jakarta Sans */}
       <style>{`
@@ -373,7 +373,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       `}</style>
 
       {/* Gradiente que respira */}
-      <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.07) 0%, transparent 70%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.14) 0%, transparent 70%)' }} />
 
       {/* Headline — mesma largura do container, left-aligned */}
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
@@ -385,7 +385,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
             transition={exiting
               ? { duration: 0.22, delay: 0.14, ease: [0.4, 0, 1, 1] }
               : { duration: 0.58, delay: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1]"
+            className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
           </motion.h1>
@@ -397,7 +397,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
             transition={exiting
               ? { duration: 0.22, delay: 0.06, ease: [0.4, 0, 1, 1] }
               : { duration: 0.58, delay: 1.44, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-stone-400 leading-[1.1]"
+            className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1]"
           >
             Milhões de possibilidades.
           </motion.h2>
