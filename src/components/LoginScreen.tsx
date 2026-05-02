@@ -136,7 +136,7 @@ function RippleButton({
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-center overflow-hidden outline-none"
+        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 min-h-[54px] flex items-center justify-center overflow-hidden outline-none"
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: 'rgba(255,255,255,0.55)',
@@ -351,21 +351,15 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Headline — estática, container desce por cima */}
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
           <motion.h1
-            initial={{ opacity: 0 }}
             animate={{ opacity: exiting ? 0 : 1 }}
-            transition={exiting
-              ? { duration: 0.20, ease: 'easeIn' }
-              : { duration: 0.55, delay: 1.30, ease: 'easeOut' }}
+            transition={{ duration: 0.20, ease: 'easeIn' }}
             className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
           </motion.h1>
           <motion.h2
-            initial={{ opacity: 0 }}
             animate={{ opacity: exiting ? 0 : 1 }}
-            transition={exiting
-              ? { duration: 0.20, ease: 'easeIn' }
-              : { duration: 0.55, delay: 1.75, ease: 'easeOut' }}
+            transition={{ duration: 0.20, ease: 'easeIn' }}
             className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
           >
             Milhões de possibilidades.
