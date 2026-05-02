@@ -138,7 +138,7 @@ function RippleButton({
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
-  const ENTER_TEXT = 'Enter';
+  const ENTER_TEXT = 'Como?';
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
   useEffect(() => {
@@ -215,13 +215,13 @@ function RippleButton({
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-start overflow-hidden outline-none"
+        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 flex items-center justify-center overflow-hidden outline-none"
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: 'rgba(255,255,255,0.55)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '0 4px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+          boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)',
         }}
       >
         {ripples.map(rp => (
@@ -243,10 +243,10 @@ function RippleButton({
               transition={enterState === 'pulse'
                 ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.5, 1] }
                 : { duration: 0 }}
-              className="font-sans text-[13px] font-light tracking-[0.14em] text-stone-500 select-none"
+              className="text-[13px] font-light tracking-[0.14em] text-stone-500 select-none"
             >
               {enterState === 'hidden'
-                ? 'Enter'
+                ? 'Como?'
                 : enterState === 'typing'
                 ? (typedCount === 0 ? ' ' : ENTER_TEXT.slice(0, typedCount))
                 : 'Enter'
@@ -271,7 +271,7 @@ function RippleButton({
               onChange={e => setInputVal(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
-              className="font-sans bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-light text-stone-700 placeholder-stone-400 caret-stone-500"
+              className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
               onClick={e => e.stopPropagation()}
             />
           </motion.div>
@@ -282,7 +282,7 @@ function RippleButton({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            className="font-sans text-[15px] sm:text-base font-light text-stone-700"
+            className="text-[15px] sm:text-base font-normal text-stone-600"
           >
             meu perfil
           </motion.span>
