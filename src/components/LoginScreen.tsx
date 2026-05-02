@@ -155,7 +155,7 @@ function RippleButton({
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={{ duration: 0.12, ease: 'easeIn' }}
           >
-            <span className="como-text text-[17px] font-light tracking-[0.12em] text-stone-700 select-none">
+            <span className="como-text text-[15px] sm:text-base font-normal text-stone-300 select-none">
               Como?
             </span>
           </motion.div>
