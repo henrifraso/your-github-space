@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform, animate as mvAnimate, MotionValue } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
 
@@ -75,11 +75,15 @@ function RippleButton({
   const controls = useAnimation();
 
   // ── Animação de entrada (3 fases) ──────────────────────────────────────────
-  useEffect(() => {
+  // Posiciona ANTES do paint para que o rect seja o natural (y=0)
+  useLayoutEffect(() => {
     const rect = btnRef.current!.getBoundingClientRect();
     const loginY = -rect.top + 32;
     containerY.set(loginY);
     controls.set({ scaleX: 1.45 });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.40, ease: 'easeOut' });
     const t1 = setTimeout(() => {
       mvAnimate(containerY, 0, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] });
@@ -148,14 +152,12 @@ function RippleButton({
         ))}
 
         {/* Lupa permanente — canto direito em todas as fases */}
-        <motion.div
-          initial={{ opacity: 1 }}
-          animate={{ opacity: exiting ? 0 : 1 }}
-          transition={{ duration: 0.15 }}
+        <div
           className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ opacity: exiting ? 0 : 1, transition: 'opacity 0.15s' }}
         >
           <Search size={18} strokeWidth={1.5} className="text-stone-400" />
-        </motion.div>
+        </div>
 
         {(loginPhase === 'user' || loginPhase === 'pass') && (
           <motion.div
@@ -296,7 +298,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
 
   // containerY atualizado em tempo real pelo RippleButton via mvAnimate
-  const containerY   = useMotionValue(-9999);
+  const containerY   = useMotionValue(0);
   const exitFade     = useMotionValue(1);
   // headline visível somente quando container cruzou y=-120 E não está em exit
   const headlineOpacity = useTransform(
