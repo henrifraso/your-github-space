@@ -303,13 +303,13 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     setTransitioning(true);
     setGifFading(false);
     setGifKey(k => k + 1);
-    // Container muda para login enquanto a imagem cobre a tela
-    const t1 = setTimeout(() => setLoginPhase('user'), 600);
-    // Inicia o fade-out da imagem
-    const t2 = setTimeout(() => setGifFading(true), 800);
-    // Remove overlay após fade
-    const t3 = setTimeout(() => setTransitioning(false), 1500);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    // Muda imediatamente para login — container fica no centro
+    setLoginPhase('user');
+    // Inicia fade-out após 2.5s
+    const t2 = setTimeout(() => setGifFading(true), 2500);
+    // Remove overlay após fade completar
+    const t3 = setTimeout(() => setTransitioning(false), 3200);
+    return () => { clearTimeout(t2); clearTimeout(t3); };
   }
 
   async function handleFinalLogin() {
@@ -360,22 +360,24 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         onProfileClick={handleFinalLogin}
       />
 
-      {/* Overlay GIF — cobre a tela ao clicar */}
+      {/* Overlay vídeo — blend mode screen: preto = transparente, branco aparece */}
       {transitioning && (
         <div
           className="fixed inset-0 z-[200] pointer-events-none overflow-hidden"
           style={{
             opacity: gifFading ? 0 : 1,
-            transition: 'opacity 600ms ease-out',
+            transition: 'opacity 700ms ease-out',
           }}
-          onTransitionEnd={() => { if (gifFading) setTransitioning(false); }}
         >
-          <img
+          <video
             key={gifKey}
-            src="/transition.jpeg"
-            alt=""
+            src="/transition.mp4"
+            autoPlay
+            muted
+            playsInline
+            loop
             className="w-full h-full object-cover"
-            style={{ display: 'block' }}
+            style={{ mixBlendMode: 'screen', display: 'block' }}
           />
         </div>
       )}
