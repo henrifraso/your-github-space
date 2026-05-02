@@ -71,33 +71,43 @@ function RippleButton({
   const [inputVal, setInputVal] = useState('');
   const [line1,    setLine1]    = useState('');
   const [line2,    setLine2]    = useState('');
+  const [typeDone, setTypeDone] = useState(false);
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
 
-  // Fade in + typewriter duas linhas em sequência
+  // Fade in + typewriter duas linhas em sequência + pulso ao terminar
   useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
     let i = 0;
     let j = 0;
     let int2: ReturnType<typeof setInterval>;
+    let t1: ReturnType<typeof setTimeout>;
     const t0 = setTimeout(() => {
       const int1 = setInterval(() => {
         i++;
         setLine1(LINE1.slice(0, i));
         if (i >= LINE1.length) {
           clearInterval(int1);
-          const t1 = setTimeout(() => {
+          t1 = setTimeout(() => {
             int2 = setInterval(() => {
               j++;
               setLine2(LINE2.slice(0, j));
-              if (j >= LINE2.length) clearInterval(int2);
+              if (j >= LINE2.length) {
+                clearInterval(int2);
+                // pulso suave ao terminar
+                setTimeout(() => {
+                  setTypeDone(true);
+                  controls.start({ scaleX: 1.015, transition: { duration: 0.25, ease: 'easeOut' } })
+                    .then(() => controls.start({ scaleX: 1, transition: { duration: 0.35, ease: 'easeOut' } }));
+                }, 120);
+              }
             }, 38);
           }, 280);
         }
-      }, 60);
+      }, 55);
     }, 400);
-    return () => { clearTimeout(t0); clearInterval(int2); };
+    return () => { clearTimeout(t0); clearTimeout(t1); clearInterval(int2); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Foca input e limpa ao mudar de fase
@@ -161,24 +171,24 @@ function RippleButton({
         )}
 
         <AnimatePresence mode="wait">
-          {/* Idle — typewriter duas linhas */}
+          {/* Idle — typewriter duas linhas, alinhado à esquerda */}
           {loginPhase === 'idle' && (
             <motion.div
               key="idle"
-              className="w-full pr-10 flex flex-col gap-0.5"
+              className="w-full pr-10 flex flex-col items-start gap-0.5 text-left"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <span className="text-stone-400 text-[15px] sm:text-base font-medium leading-snug">
+              <span className="block text-stone-500 text-[15px] sm:text-base font-medium leading-snug">
                 {line1}
                 {line1.length < LINE1.length && (
                   <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
                 )}
               </span>
               {line1.length >= LINE1.length && (
-                <span className="text-stone-300 text-[13px] sm:text-sm font-normal leading-snug">
+                <span className="block text-stone-400 text-[13px] sm:text-sm font-normal leading-snug">
                   {line2}
                   {line2.length < LINE2.length && (
                     <span className="inline-block w-[1.5px] h-[0.9em] bg-stone-300 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
