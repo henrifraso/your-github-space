@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'motion/react';
-import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Step = 'landing' | 'auth' | 'business' | 'consent';
@@ -152,12 +152,14 @@ function RippleButton({
 
         {loginPhase === 'idle' && (
           <motion.div
+            initial={{ opacity: 0 }}
             animate={{ opacity: exiting ? 0 : 1 }}
-            transition={{ duration: 0.12, ease: 'easeIn' }}
+            transition={exiting
+              ? { duration: 0.12, ease: 'easeIn' }
+              : { duration: 0.35, delay: 2.10 }}
+            className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
           >
-            <span className="como-text text-[15px] sm:text-base font-normal text-stone-300 select-none">
-              Como?
-            </span>
+            <Search size={15} strokeWidth={1.6} className="text-stone-300" />
           </motion.div>
         )}
 
@@ -340,20 +342,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         .ripple-circle {
           animation: ripple-out 0.7s ease-out forwards;
         }
-        @keyframes como-fadein {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-        @keyframes como-pulse {
-          0%, 100% { opacity: 1; }
-          50%      { opacity: 0.4; }
-        }
-        .como-text {
-          opacity: 0;
-          animation:
-            como-fadein 0.45s ease-out 2.15s forwards,
-            como-pulse  2.8s ease-in-out 2.60s infinite;
-        }
+
       `}</style>
 
       {/* Gradiente que respira */}
