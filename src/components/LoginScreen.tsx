@@ -81,13 +81,7 @@ function RippleButton({
       const interval = setInterval(() => {
         iRef.current += 1;
         setTyped(FULL_TEXT.slice(0, iRef.current));
-        if (iRef.current >= FULL_TEXT.length) {
-          clearInterval(interval);
-          setTimeout(() => {
-            controls.start({ scaleX: 1.015, transition: { duration: 0.25, ease: 'easeOut' } })
-              .then(() => controls.start({ scaleX: 1, transition: { duration: 0.35, ease: 'easeOut' } }));
-          }, 120);
-        }
+        if (iRef.current >= FULL_TEXT.length) clearInterval(interval);
       }, 48);
     }, 400);
     return () => clearTimeout(t0);
