@@ -73,6 +73,8 @@ const TEXTS: Record<TextKey, Record<Difficulty, string>> = {
 };
 import { motion, AnimatePresence } from 'motion/react';
 
+import LoginScreen from './components/LoginScreen';
+import { getAuthState, setAuthState } from './hooks/useAuth';
 import type { OmniData, Competitor, TimelineEvent } from './types';
 import { MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
 import { BottomModal, ModalHeader } from './components/BottomModal';
@@ -91,6 +93,19 @@ import type { SectorId } from './components/SectorSwitcher';
 import { SectorFeed } from './components/SectorFeed';
 
 export default function App() {
+  const [auth, setAuth] = useState(() => getAuthState());
+
+  if (!auth.isAuthenticated) {
+    return (
+      <LoginScreen
+        onAuthenticated={(token, negocioId) => {
+          setAuthState(token, negocioId);
+          setAuth({ token, negocioId, isAuthenticated: true });
+        }}
+      />
+    );
+  }
+
   const [data, setData] = useState<OmniData>(MOCK_DATA);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
