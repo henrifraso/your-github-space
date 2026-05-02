@@ -216,7 +216,9 @@ function RippleButton({
             animate={{ opacity: exiting ? 0 : 1 }}
             transition={{ duration: 0.12, ease: 'easeIn' }}
           >
-            <RotatingCta />
+            <span className="font-sans text-[13px] font-light tracking-[0.22em] text-stone-400 uppercase select-none">
+              Enter
+            </span>
           </motion.div>
         )}
 
@@ -235,7 +237,7 @@ function RippleButton({
               onChange={e => setInputVal(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
-              className="bg-transparent outline-none border-none w-full text-center text-[15px] sm:text-base font-light tracking-wide text-stone-700 placeholder-stone-400 caret-stone-500"
+              className="font-sans bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-light text-stone-700 placeholder-stone-400 caret-stone-500"
               onClick={e => e.stopPropagation()}
             />
           </motion.div>
@@ -246,7 +248,7 @@ function RippleButton({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            className="text-[15px] sm:text-base font-light tracking-wide text-stone-700"
+            className="font-sans text-[15px] sm:text-base font-light text-stone-700"
           >
             meu perfil
           </motion.span>
