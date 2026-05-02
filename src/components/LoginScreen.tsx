@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'motion/react';
+import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform, animate as mvAnimate, MotionValue } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ async function apiConsent(token: string, negocioId: string) {
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick, onHeadlinesReady,
+  onTap, exiting, exitY, loginPhase, onNextPhase, onProfileClick, containerY,
 }: {
   onTap: (yToTop: number) => void;
   exiting: boolean;
@@ -66,7 +66,7 @@ function RippleButton({
   loginPhase: 'idle' | 'user' | 'pass' | 'profile';
   onNextPhase: () => void;
   onProfileClick: () => void;
-  onHeadlinesReady: () => void;
+  containerY: MotionValue<number>;
 }) {
   const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
   const [inputVal, setInputVal] = useState('');
@@ -78,34 +78,21 @@ function RippleButton({
   useEffect(() => {
     const rect = btnRef.current!.getBoundingClientRect();
     const loginY = -rect.top + 32;
-    controls.set({ y: loginY, scaleX: 1.45 });
-    controls.start({ opacity: 1, filter: 'blur(0px)', y: loginY, scaleX: 1.45 }, { duration: 0.40, ease: 'easeOut' });
-
-    // phase 2: desce e encolhe
-    const t1 = setTimeout(() =>
-      controls.start({ y: 0, scaleX: 1 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] }), 520);
-
-    // revela frases exatamente quando container cruza y=-120 (zona das headlines)
-    // baseado no loginY real do dispositivo — sem delay fixo
-    const PHASE2_START = 520;
-    const PHASE2_DURATION = 1100;
-    const THRESHOLD = -120;
-    const totalDist = Math.abs(loginY);
-    const distToThreshold = totalDist + THRESHOLD; // loginY até -120
-    const ratio = totalDist > 0 ? Math.max(0, distToThreshold / totalDist) : 0;
-    const tHeadlines = PHASE2_START + ratio * PHASE2_DURATION;
-    const t2 = setTimeout(() => onHeadlinesReady(), tHeadlines);
-
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    containerY.set(loginY);
+    controls.set({ scaleX: 1.45 });
+    controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.40, ease: 'easeOut' });
+    const t1 = setTimeout(() => {
+      mvAnimate(containerY, 0, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] });
+      controls.start({ scaleX: 1 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] });
+    }, 520);
+    return () => { clearTimeout(t1); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
   useEffect(() => {
     if (!exiting) return;
-    controls.start(
-      { scaleX: 1.45, y: exitY },
-      { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] },
-    );
+    mvAnimate(containerY, exitY, { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] });
+    controls.start({ scaleX: 1.45 }, { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] });
   }, [exiting, exitY]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Foca input e limpa valor quando loginPhase muda ──────────────────────
@@ -148,18 +135,12 @@ function RippleButton({
     <div className="w-full max-w-[760px] z-20 relative">
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)' }}
+        initial={{ opacity: 0, filter: 'blur(14px)', scaleX: 1.45 }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
         className="relative w-full rounded-2xl border border-white/70 px-10 py-4 min-h-[54px] flex items-center justify-center overflow-hidden outline-none"
-        style={{
-          cursor: isLogin ? 'default' : 'pointer',
-          background: 'rgba(255,255,255,0.55)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)',
-        }}
+        style={{ y: containerY, cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)' }}
       >
         {ripples.map(rp => (
           <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
@@ -168,8 +149,9 @@ function RippleButton({
 
         {/* Lupa permanente — canto direito em todas as fases */}
         <motion.div
+          initial={{ opacity: 1 }}
           animate={{ opacity: exiting ? 0 : 1 }}
-          transition={{ duration: 0.12, ease: 'easeIn' }}
+          transition={{ duration: 0.15 }}
           className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
         >
           <Search size={18} strokeWidth={1.5} className="text-stone-400" />
@@ -309,10 +291,21 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
-  const [exiting,        setExiting]        = useState(false);
-  const [exitY,          setExitY]          = useState(0);
-  const [loginPhase,     setLoginPhase]     = useState<'idle'|'user'|'pass'|'profile'>('idle');
-  const [headlinesReady, setHeadlinesReady] = useState(false);
+  const [exiting,    setExiting]    = useState(false);
+  const [exitY,      setExitY]      = useState(0);
+  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
+
+  // containerY atualizado em tempo real pelo RippleButton via mvAnimate
+  const containerY   = useMotionValue(-9999);
+  const exitFade     = useMotionValue(1);
+  // headline visível somente quando container cruzou y=-120 E não está em exit
+  const headlineOpacity = useTransform(
+    [containerY as MotionValue<number>, exitFade as MotionValue<number>],
+    ([cy, ef]: number[]) => (cy > -120 ? 1 : 0) * ef
+  );
+  useEffect(() => {
+    if (exiting) mvAnimate(exitFade, 0, { duration: 0.20 });
+  }, [exiting]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleExitStart(yToTop: number) {
     if (exiting) return;
@@ -364,17 +357,13 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Headline — estática, container desce por cima */}
       <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
           <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: exiting ? 0 : (headlinesReady ? 1 : 0) }}
-            transition={exiting ? { duration: 0.20, ease: 'easeIn' } : { duration: 0 }}
+            style={{ opacity: headlineOpacity }}
             className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
           >
             Um único lugar.
           </motion.h1>
           <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: exiting ? 0 : (headlinesReady ? 1 : 0) }}
-            transition={exiting ? { duration: 0.20, ease: 'easeIn' } : { duration: 0 }}
+            style={{ opacity: headlineOpacity }}
             className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
           >
             Milhões de possibilidades.
@@ -389,7 +378,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         loginPhase={loginPhase}
         onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
         onProfileClick={handleFinalLogin}
-        onHeadlinesReady={() => setHeadlinesReady(true)}
+        containerY={containerY}
       />
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
