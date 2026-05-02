@@ -149,7 +149,8 @@ function RippleButton({
           <Search
             size={26}
             strokeWidth={1.4}
-            className="text-stone-500 absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+            className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10"
+            style={{ color: '#d6d3d1' }}
           />
         )}
 
