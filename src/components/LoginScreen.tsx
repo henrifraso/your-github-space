@@ -66,10 +66,10 @@ function RippleButton({
   onProfileClick: () => void;
 }) {
   const FULL_TEXT = 'Um único lugar. Milhões de possibilidades...';
-  const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
-  const [inputVal,   setInputVal]   = useState('');
-  const [typed,      setTyped]      = useState('');
-  const [typingDone, setTypingDone] = useState(false);
+  const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
+  const [inputVal, setInputVal] = useState('');
+  const [typed,    setTyped]    = useState('');
+  const typedRef = useRef(0);
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
@@ -77,12 +77,12 @@ function RippleButton({
   // Fade in + inicia typewriter
   useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
-    let i = 0;
     const delay = setTimeout(() => {
       const interval = setInterval(() => {
-        i++;
-        setTyped(FULL_TEXT.slice(0, i));
-        if (i >= FULL_TEXT.length) { clearInterval(interval); setTypingDone(true); }
+        typedRef.current += 1;
+        const next = FULL_TEXT.slice(0, typedRef.current);
+        setTyped(next);
+        if (typedRef.current >= FULL_TEXT.length) clearInterval(interval);
       }, 38);
       return () => clearInterval(interval);
     }, 400);
@@ -157,9 +157,7 @@ function RippleButton({
                   <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
                 )}
               </span>
-              <div className="flex-shrink-0 ml-4" style={{ opacity: typingDone ? 1 : 0, transition: 'opacity 0.4s ease' }}>
-                <Search size={18} strokeWidth={1.5} className="text-stone-400" />
-              </div>
+              <Search size={18} strokeWidth={1.5} className="text-stone-400 flex-shrink-0 ml-4" />
             </motion.div>
           )}
 
