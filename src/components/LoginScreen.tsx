@@ -161,9 +161,13 @@ function RippleButton({
   }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Enter global para fase 'profile' (sem input na tela) ─────────────────
+  // Guard de 300ms para não capturar o mesmo Enter que ativou a fase
   useEffect(() => {
     if (loginPhase !== 'profile') return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter') onProfileClick(); };
+    const activatedAt = Date.now();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && Date.now() - activatedAt > 300) onProfileClick();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [loginPhase, onProfileClick]);

@@ -102,7 +102,7 @@ export default function App() {
       <LoginScreen
         onAuthenticated={(token, negocioId) => {
           setAuthState(token, negocioId);
-          setAuth({ token, negocioId, isAuthenticated: true });
+          window.location.reload();
         }}
       />
     );
