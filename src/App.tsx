@@ -102,12 +102,16 @@ export default function App() {
       <LoginScreen
         onAuthenticated={(token, negocioId) => {
           setAuthState(token, negocioId);
-          window.location.reload();
+          setAuth({ token, negocioId, isAuthenticated: true });
         }}
       />
     );
   }
 
+  return <AuthenticatedApp />;
+}
+
+function AuthenticatedApp() {
   const [data, setData] = useState<OmniData>(MOCK_DATA);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
   const [dark, setDark] = useState(() => localStorage.getItem('theme') === 'dark');
