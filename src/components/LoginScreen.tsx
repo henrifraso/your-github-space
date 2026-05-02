@@ -61,12 +61,12 @@ function RippleButton({
   onTap, loginPhase, onNextPhase, onProfileClick,
 }: {
   onTap: () => void;
-  loginPhase: 'idle' | 'user' | 'pass' | 'profile';
+  loginPhase: 'idle' | 'user' | 'pass';
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
   const FULL_TEXT = 'Um único lugar. Milhões de possibilidades.';
-  const PHASE_TEXT: Record<string, string> = { user: 'usuário', pass: 'senha', profile: 'meu perfil' };
+  const PHASE_TEXT: Record<string, string> = { user: 'Usuário', pass: 'Senha' };
   const CURSOR_STYLE = { animation: 'cursor-blink 0.9s step-end infinite' };
   const TEXT_SHADOW  = { textShadow: '0 1px 3px rgba(0,0,0,0.22)' };
 
@@ -76,9 +76,21 @@ function RippleButton({
   const [phaseTyped, setPhaseTyped] = useState('');      // fase typewriter
   const iRef      = useRef(0);
   const phaseRef  = useRef(0);
-  const btnRef    = useRef<HTMLButtonElement>(null);
-  const inputRef  = useRef<HTMLInputElement>(null);
-  const controls  = useAnimation();
+  const btnRef      = useRef<HTMLButtonElement>(null);
+  const inputRef    = useRef<HTMLInputElement>(null);
+  const controls    = useAnimation();
+  const lupaControls = useAnimation();
+
+  const typingDone = typed.length >= FULL_TEXT.length;
+
+  // Shake da lupa: imediato ao terminar o typewriter, depois a cada 3s
+  useEffect(() => {
+    if (!typingDone || loginPhase !== 'idle') return;
+    const shake = () => lupaControls.start({ x: [0, -3, 3, -3, 3, -2, 2, -2, 2, -1, 1, 0], transition: { duration: 0.6, ease: 'easeInOut' } });
+    shake();
+    const iv = setInterval(shake, 3000);
+    return () => clearInterval(iv);
+  }, [typingDone, loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fade in + typewriter idle
   useEffect(() => {
@@ -93,7 +105,7 @@ function RippleButton({
     return () => clearTimeout(t0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Typewriter por fase (user / pass / profile)
+  // Typewriter por fase (user / pass)
   useEffect(() => {
     if (loginPhase === 'idle') return;
     const target = PHASE_TEXT[loginPhase] ?? '';
@@ -106,24 +118,12 @@ function RippleButton({
         setPhaseTyped(target.slice(0, phaseRef.current));
         if (phaseRef.current >= target.length) {
           clearInterval(iv);
-          if (loginPhase !== 'profile') setTimeout(() => inputRef.current?.focus(), 60);
         }
       }, 55);
       return () => clearInterval(iv);
     }, 80);
     return () => clearTimeout(t);
   }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Enter para fase 'profile'
-  useEffect(() => {
-    if (loginPhase !== 'profile') return;
-    const activatedAt = Date.now();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && Date.now() - activatedAt > 300) onProfileClick();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [loginPhase, onProfileClick]);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     if (loginPhase !== 'idle') return;
@@ -136,8 +136,16 @@ function RippleButton({
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return;
-    if (loginPhase === 'profile') { onProfileClick(); return; }
-    if (inputVal.trim()) onNextPhase();
+    if (!inputVal.trim()) return;
+    if (loginPhase === 'user') { onNextPhase(); return; }
+    if (loginPhase === 'pass') { onProfileClick(); return; }
+  }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
+
+  const handleLupaClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!inputVal.trim()) return;
+    if (loginPhase === 'user') { onNextPhase(); return; }
+    if (loginPhase === 'pass') { onProfileClick(); return; }
   }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
 
   const isLogin = loginPhase !== 'idle';
@@ -158,24 +166,23 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {/* Lupa — idle */}
+        {/* Lupa — idle (treme a cada 5s após typewriter terminar) */}
         {loginPhase === 'idle' && (
-          <Search
-            size={26}
-            strokeWidth={1.4}
-            className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10"
-            style={{ color: '#d6d3d1', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))' }}
-          />
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <motion.div animate={lupaControls}>
+              <Search size={26} strokeWidth={1.4} style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }} />
+            </motion.div>
+          </div>
         )}
 
         {/* Idle — typewriter */}
         {loginPhase === 'idle' && (
-          <div style={{ position: 'absolute', left: 24, right: 56, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-            <span style={{ color: '#d6d3d1', fontSize: '15px', fontWeight: 400, textShadow: '0 1px 3px rgba(0,0,0,0.22)' }}>
+          <div style={{ position: 'absolute', left: 24, right: 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, textShadow: '0 1px 3px rgba(0,0,0,0.10)' }}>
               {typed}
             </span>
             {typed.length < FULL_TEXT.length && (
-              <span className="inline-block w-[1.5px] h-[1em] bg-stone-300 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
+              <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
             )}
           </div>
         )}
@@ -183,19 +190,18 @@ function RippleButton({
         {/* Fases user/pass/profile — typewriter + input */}
         {loginPhase !== 'idle' && (() => {
           const target   = PHASE_TEXT[loginPhase] ?? '';
-          const isDone   = phaseTyped.length >= target.length;
-          const isInput  = loginPhase === 'user' || loginPhase === 'pass';
+          const isDone = phaseTyped.length >= target.length;
           return (
-            <div style={{ position: 'absolute', left: 24, right: 48, top: '50%', transform: 'translateY(-50%)', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              {/* typewriter enquanto digita */}
+            <div style={{ position: 'absolute', left: 24, right: 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
               {!isDone && (
-                <span style={{ color: '#d6d3d1', fontSize: '15px', fontWeight: 400, ...TEXT_SHADOW }}>
+                <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, ...TEXT_SHADOW }}>
                   {phaseTyped}
-                  <span className="inline-block w-[1.5px] h-[1em] bg-stone-300 ml-[1px] align-middle" style={CURSOR_STYLE} />
+                  {phaseTyped.length > 0 && (
+                    <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={CURSOR_STYLE} />
+                  )}
                 </span>
               )}
-              {/* input aparece após terminar (user/pass) */}
-              {isDone && isInput && (
+              {isDone && (
                 <input
                   ref={inputRef}
                   type={loginPhase === 'pass' ? 'password' : 'text'}
@@ -203,26 +209,24 @@ function RippleButton({
                   onChange={e => setInputVal(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={target}
-                  className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
-                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)' }}
+                  className="bg-transparent outline-none border-none w-full text-left font-normal text-stone-700 placeholder-[#44403c] caret-stone-400"
+                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)', fontSize: '16px' }}
                   onClick={e => e.stopPropagation()}
                 />
-              )}
-              {/* "meu perfil" — só texto */}
-              {isDone && !isInput && (
-                <span style={{ color: '#78716c', fontSize: '15px', fontWeight: 400, ...TEXT_SHADOW }}>
-                  {target}
-                </span>
               )}
             </div>
           );
         })()}
 
-        {/* Lupa nas fases de login */}
+        {/* Lupa nas fases de login — clicável para avançar */}
         {loginPhase !== 'idle' && (
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-            <Search size={22} strokeWidth={1.4} style={{ color: '#d6d3d1', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.25))' }} />
-          </div>
+          <Search
+            size={26}
+            strokeWidth={1.4}
+            className="absolute right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
+            style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }}
+            onClick={handleLupaClick}
+          />
         )}
       </motion.button>
     </div>
@@ -327,7 +331,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
-  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
+  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'>('idle');
 
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
@@ -351,7 +355,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-x-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#0C0A09' }}>
+    <div className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#000000' }}>
 
       {/* Plus Jakarta Sans */}
       <style>{`
@@ -368,6 +372,16 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         .ripple-circle {
           animation: ripple-out 0.7s ease-out forwards;
         }
+        input[type="password"]::-webkit-credentials-auto-fill-button,
+        input[type="password"]::-webkit-strong-password-auto-fill-button,
+        input[type="password"]::-webkit-contacts-auto-fill-button {
+          visibility: hidden;
+          pointer-events: none;
+          position: absolute;
+        }
+        input::-ms-reveal,
+        input::-ms-clear { display: none; }
+
         @keyframes cursor-blink {
           0%, 100% { opacity: 1; }
           50%       { opacity: 0; }
@@ -381,7 +395,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       <RippleButton
         onTap={handleContainerTap}
         loginPhase={loginPhase}
-        onNextPhase={() => setLoginPhase(p => p === 'user' ? 'pass' : 'profile')}
+        onNextPhase={() => setLoginPhase('pass')}
         onProfileClick={handleFinalLogin}
       />
 

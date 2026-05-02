@@ -229,7 +229,7 @@ function AuthenticatedApp() {
 
   useEffect(() => {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
-    document.body.style.backgroundColor = dark ? '#181818' : '#dcdfe2';
+    document.body.style.backgroundColor = dark ? '#000000' : '#dcdfe2';
   }, [dark]);
 
   useEffect(() => {
