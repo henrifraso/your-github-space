@@ -91,6 +91,8 @@ import type { PhotoSettings } from './components/PhotoEditor';
 import { SectorSwitcherModal, SECTORS } from './components/SectorSwitcher';
 import type { SectorId } from './components/SectorSwitcher';
 import { SectorFeed } from './components/SectorFeed';
+import { WorkspacePanel } from './components/WorkspacePanel';
+import type { IntelligenceCard } from './components/WorkspacePanel';
 
 export default function App() {
   const [auth, setAuth] = useState(() => getAuthState());
@@ -137,7 +139,8 @@ export default function App() {
     | { type: 'plano' }
     | { type: 'estrategia' }
     | { type: 'pratica' }
-    | { type: 'destaque'; idx: number };
+    | { type: 'destaque'; idx: number }
+    | { type: 'workspace'; card: IntelligenceCard };
   const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
   const [browserOpen, setBrowserOpen] = useState(false);
   const [sectorOpen, setSectorOpen] = useState(false);
@@ -779,7 +782,10 @@ export default function App() {
 
       {/* Fullscreen */}
       <AnimatePresence>
-        {fullscreenCard && (() => {
+        {fullscreenCard?.type === 'workspace' && (
+          <WorkspacePanel card={fullscreenCard.card} onClose={() => setFullscreenCard(null)} />
+        )}
+        {fullscreenCard && fullscreenCard.type !== 'workspace' && (() => {
           const META: Record<string, { icon: React.ReactNode; title: string; color: string }> = {
             plano:     { icon: <Trophy size={20} className="text-[#3b82f6]" />,   title: 'Plano de Ação',  color: '#3b82f6' },
             estrategia:{ icon: <Layers size={20} className="text-[#3b82f6]" />,   title: 'Estratégia',     color: '#3b82f6' },
