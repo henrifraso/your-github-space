@@ -153,7 +153,7 @@ function RippleButton({
             >
               <span className="flex-1 text-stone-300 text-[15px] sm:text-base font-normal leading-snug min-h-[1.4em]">
                 {typed}
-                {!typingDone && (
+                {typed.length < FULL_TEXT.length && (
                   <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
                 )}
               </span>
