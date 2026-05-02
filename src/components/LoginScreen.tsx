@@ -65,21 +65,22 @@ function RippleButton({
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
-  const FULL_TEXT = 'Um único lugar. Milhões de possibilidades.';
+  const FULL_TEXT = 'Um lugar único. Milhões de possibilidades.';
   const PHASE_TEXT: Record<string, string> = { user: 'Usuário', pass: 'Senha' };
   const CURSOR_STYLE = { animation: 'cursor-blink 0.9s step-end infinite' };
   const TEXT_SHADOW  = { textShadow: '0 1px 3px rgba(0,0,0,0.22)' };
 
   const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
   const [inputVal,   setInputVal]   = useState('');
-  const [typed,      setTyped]      = useState('');      // idle typewriter
-  const [phaseTyped, setPhaseTyped] = useState('');      // fase typewriter
-  const [kbHeight,   setKbHeight]   = useState(0);       // altura do teclado mobile
-  const iRef      = useRef(0);
-  const phaseRef  = useRef(0);
-  const btnRef      = useRef<HTMLButtonElement>(null);
-  const inputRef    = useRef<HTMLInputElement>(null);
-  const controls    = useAnimation();
+  const [typed,      setTyped]      = useState('');
+  const [phaseTyped, setPhaseTyped] = useState('');
+  const [kbHeight,   setKbHeight]   = useState(0);
+  const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 640);
+  const iRef         = useRef(0);
+  const phaseRef     = useRef(0);
+  const btnRef       = useRef<HTMLButtonElement>(null);
+  const inputRef     = useRef<HTMLInputElement>(null);
+  const controls     = useAnimation();
   const lupaControls = useAnimation();
 
   const typingDone = typed.length >= FULL_TEXT.length;
@@ -102,7 +103,7 @@ function RippleButton({
         setTyped(FULL_TEXT.slice(0, iRef.current));
         if (iRef.current >= FULL_TEXT.length) clearInterval(iv);
       }, 48);
-    }, 400);
+    }, 200);
     return () => clearTimeout(t0);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -149,6 +150,12 @@ function RippleButton({
     if (loginPhase === 'pass') { onProfileClick(); return; }
   }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
 
+  useEffect(() => {
+    const handle = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handle);
+    return () => window.removeEventListener('resize', handle);
+  }, []);
+
   // Detecta abertura do teclado via visualViewport
   // Usa baseline fixo do mount — no iOS, window.innerHeight também encolhe com o teclado
   const baseVH = useRef(0);
@@ -166,6 +173,9 @@ function RippleButton({
 
   const isLogin = loginPhase !== 'idle';
   const kbOpen  = kbHeight > 0;
+
+  const lupaSize   = isMobile ? 19 : 26;
+  const lupaStroke = isMobile ? 2.3 : 1.4;
 
   return (
     <motion.div
@@ -189,72 +199,74 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {/* Lupa — idle (treme a cada 5s após typewriter terminar) */}
-        {loginPhase === 'idle' && (
-          <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-            <motion.div animate={lupaControls}>
-              <Search size={26} strokeWidth={1.4} style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }} />
-            </motion.div>
-          </div>
-        )}
+        {(<>
+          {/* Lupa idle — treme após typewriter */}
+          {loginPhase === 'idle' && (
+            <div className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 pointer-events-none z-10`}>
+              <motion.div animate={lupaControls}>
+                <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }} />
+              </motion.div>
+            </div>
+          )}
 
-        {/* Idle — typewriter */}
-        {loginPhase === 'idle' && (
-          <div style={{ position: 'absolute', left: 24, right: 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-            <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, textShadow: '0 1px 3px rgba(0,0,0,0.10)' }}>
-              {typed}
-            </span>
-            {typed.length < FULL_TEXT.length && (
-              <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
-            )}
-          </div>
-        )}
-
-        {/* Fases user/pass/profile — typewriter + input */}
-        {loginPhase !== 'idle' && (() => {
-          const target   = PHASE_TEXT[loginPhase] ?? '';
-          const isDone = phaseTyped.length >= target.length;
-          return (
-            <div style={{ position: 'absolute', left: 24, right: 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              {!isDone && (
-                <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, ...TEXT_SHADOW }}>
-                  {phaseTyped}
-                  {phaseTyped.length > 0 && (
-                    <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={CURSOR_STYLE} />
-                  )}
-                </span>
-              )}
-              {isDone && (
-                <input
-                  ref={inputRef}
-                  type={loginPhase === 'pass' ? 'password' : 'text'}
-                  autoComplete={loginPhase === 'pass' ? 'current-password' : 'username'}
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  value={inputVal}
-                  onChange={e => setInputVal(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={target}
-                  className="bg-transparent outline-none border-none w-full text-left font-normal text-stone-700 placeholder-[#44403c] caret-stone-400"
-                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)', fontSize: '16px', touchAction: 'manipulation' }}
-                  onClick={e => e.stopPropagation()}
-                />
+          {/* Idle — typewriter */}
+          {loginPhase === 'idle' && (
+            <div style={{ position: 'absolute', left: 24, right: isMobile ? 48 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, textShadow: '0 1px 3px rgba(0,0,0,0.10)' }}>
+                {typed}
+              </span>
+              {typed.length < FULL_TEXT.length && (
+                <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
               )}
             </div>
-          );
-        })()}
+          )}
 
-        {/* Lupa nas fases de login — clicável para avançar */}
-        {loginPhase !== 'idle' && (
-          <Search
-            size={26}
-            strokeWidth={1.4}
-            className="absolute right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
-            style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }}
-            onClick={handleLupaClick}
-          />
-        )}
+          {/* Fases user/pass — typewriter + input */}
+          {loginPhase !== 'idle' && (() => {
+            const target = PHASE_TEXT[loginPhase] ?? '';
+            const isDone = phaseTyped.length >= target.length;
+            return (
+              <div style={{ position: 'absolute', left: 24, right: isMobile ? 48 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                {!isDone && (
+                  <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, ...TEXT_SHADOW }}>
+                    {phaseTyped}
+                    {phaseTyped.length > 0 && (
+                      <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={CURSOR_STYLE} />
+                    )}
+                  </span>
+                )}
+                {isDone && (
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    autoComplete={loginPhase === 'pass' ? 'new-password' : 'username'}
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    value={inputVal}
+                    onChange={e => setInputVal(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={target}
+                    className="bg-transparent outline-none border-none w-full text-left font-normal text-stone-700 placeholder-[#44403c] caret-stone-400"
+                    style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)', fontSize: '16px', touchAction: 'manipulation', ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
+                    onClick={e => e.stopPropagation()}
+                  />
+                )}
+              </div>
+            );
+          })()}
+
+          {/* Lupa fases login — clicável */}
+          {loginPhase !== 'idle' && (
+            <Search
+              size={lupaSize}
+              strokeWidth={lupaStroke}
+              className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 z-10 cursor-pointer`}
+              style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }}
+              onClick={handleLupaClick}
+            />
+          )}
+        </>)}
       </motion.button>
     </motion.div>
   );
@@ -399,20 +411,22 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         .ripple-circle {
           animation: ripple-out 0.7s ease-out forwards;
         }
-        input[type="password"]::-webkit-credentials-auto-fill-button,
-        input[type="password"]::-webkit-strong-password-auto-fill-button,
-        input[type="password"]::-webkit-contacts-auto-fill-button {
-          visibility: hidden;
-          pointer-events: none;
-          position: absolute;
+        input::-webkit-credentials-auto-fill-button,
+        input::-webkit-strong-password-auto-fill-button,
+        input::-webkit-contacts-auto-fill-button {
+          visibility: hidden !important;
+          pointer-events: none !important;
+          display: none !important;
         }
         input::-ms-reveal,
-        input::-ms-clear { display: none; }
+        input::-ms-clear { display: none !important; }
 
         @keyframes cursor-blink {
           0%, 100% { opacity: 1; }
           50%       { opacity: 0; }
         }
+
+
       `}</style>
 
       {/* Gradiente que respira */}
