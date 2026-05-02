@@ -65,15 +65,28 @@ function RippleButton({
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
-  const [ripples,  setRipples]  = useState<{ id: number; x: number; y: number }[]>([]);
-  const [inputVal, setInputVal] = useState('');
+  const FULL_TEXT = 'Um único lugar. Milhões de possibilidades...';
+  const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
+  const [inputVal,   setInputVal]   = useState('');
+  const [typed,      setTyped]      = useState('');
+  const [typingDone, setTypingDone] = useState(false);
   const btnRef   = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
 
-  // Fade in do centro ao montar
+  // Fade in + inicia typewriter
   useEffect(() => {
     controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
+    let i = 0;
+    const delay = setTimeout(() => {
+      const interval = setInterval(() => {
+        i++;
+        setTyped(FULL_TEXT.slice(0, i));
+        if (i >= FULL_TEXT.length) { clearInterval(interval); setTypingDone(true); }
+      }, 38);
+      return () => clearInterval(interval);
+    }, 400);
+    return () => clearTimeout(delay);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Foca input e limpa ao mudar de fase
@@ -119,7 +132,7 @@ function RippleButton({
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl border border-white/70 px-6 py-4 min-h-[54px] flex items-center overflow-hidden outline-none"
+        className="relative w-full rounded-2xl border border-white/70 px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
         style={{ cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)' }}
       >
         {ripples.map(rp => (
@@ -128,21 +141,32 @@ function RippleButton({
         ))}
 
         <AnimatePresence mode="wait">
-          {/* Idle — frases */}
+          {/* Idle — typewriter */}
           {loginPhase === 'idle' && (
             <motion.div
               key="idle"
-              className="flex items-center justify-between w-full"
+              className="flex items-center w-full"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+              transition={{ duration: 0.2 }}
             >
-              <div className="flex flex-col items-start leading-none gap-1">
-                <span className="text-stone-700 font-semibold text-[15px] sm:text-base leading-tight">Um único lugar.</span>
-                <span className="text-stone-400 font-light text-[13px] sm:text-sm leading-tight">Milhões de possibilidades.</span>
-              </div>
-              <Search size={18} strokeWidth={1.5} className="text-stone-400 flex-shrink-0 ml-4" />
+              <span className="flex-1 text-stone-600 text-[15px] sm:text-base font-normal leading-snug min-h-[1.4em]">
+                {typed}
+                {!typingDone && (
+                  <span className="inline-block w-[1.5px] h-[1em] bg-stone-400 ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
+                )}
+              </span>
+              {typingDone && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4 }}
+                  className="flex-shrink-0 ml-4"
+                >
+                  <Search size={18} strokeWidth={1.5} className="text-stone-400" />
+                </motion.div>
+              )}
             </motion.div>
           )}
 
@@ -334,7 +358,10 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         .ripple-circle {
           animation: ripple-out 0.7s ease-out forwards;
         }
-
+        @keyframes cursor-blink {
+          0%, 100% { opacity: 1; }
+          50%       { opacity: 0; }
+        }
       `}</style>
 
       {/* Gradiente que respira */}
