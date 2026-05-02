@@ -21,6 +21,15 @@ const PHRASES = [
   'O centro da sua operação começa aqui.',
 ];
 
+const CTA_PHRASES = [
+  'Algo esperando por você.',
+  'Seu painel está pronto.',
+  'Tudo em ordem. Continue.',
+  'Novidades desde a última vez.',
+  'Sua operação está ativa.',
+  'Pronto quando você estiver.',
+];
+
 // ── API ───────────────────────────────────────────────────────────────────────
 async function apiLogin(email: string, password: string) {
   try {
@@ -84,6 +93,28 @@ function RotatingPhrase() {
       className="text-stone-400 text-[15px] sm:text-base font-light tracking-wide select-none"
     >
       {PHRASES[idx]}
+    </motion.p>
+  );
+}
+
+// ── RotatingCta ───────────────────────────────────────────────────────────────
+function RotatingCta() {
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * CTA_PHRASES.length));
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const t = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => { setIdx(i => (i + 1) % CTA_PHRASES.length); setVisible(true); }, 400);
+    }, 4200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <motion.p
+      animate={{ opacity: visible ? 1 : 0, y: visible ? 0 : 4 }}
+      transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+      className="text-stone-400 text-[11px] font-light tracking-widest uppercase select-none"
+    >
+      {CTA_PHRASES[idx]}
     </motion.p>
   );
 }
@@ -226,21 +257,8 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       >
         <RotatingPhrase />
 
-        <div className="flex items-center gap-2 text-stone-300 group-hover:text-stone-500 transition-colors duration-300">
-          <span className="text-xs font-medium tracking-wide">Entrar na plataforma</span>
-          <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-300" />
-        </div>
+        <RotatingCta />
       </motion.button>
-
-      {/* Hint */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.45, duration: 0.4 }}
-        className="mt-6 text-[11px] text-stone-300 tracking-wide"
-      >
-        Toque para acessar seu painel
-      </motion.p>
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
       <AnimatePresence>
