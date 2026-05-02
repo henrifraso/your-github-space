@@ -233,7 +233,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, delay: 0.08, ease: [0.4, 0, 0.2, 1] }}
-        className="text-center mb-10"
+        className="text-center mb-4 sm:mb-10"
       >
         <h1 className="text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1] whitespace-nowrap">
           Um único lugar.
