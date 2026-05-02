@@ -150,11 +150,14 @@ function RippleButton({
   }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
 
   // Detecta abertura do teclado via visualViewport
+  // Usa baseline fixo do mount — no iOS, window.innerHeight também encolhe com o teclado
+  const baseVH = useRef(0);
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
+    baseVH.current = vv.height;
     const handle = () => {
-      const delta = window.innerHeight - vv.height;
+      const delta = baseVH.current - vv.height;
       setKbHeight(delta > 120 ? delta : 0);
     };
     vv.addEventListener('resize', handle);
