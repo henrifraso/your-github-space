@@ -159,7 +159,7 @@ function RippleButton({
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
         className="relative w-full rounded-2xl border border-white/70 px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
-        style={{ cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)' }}
+        style={{ cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)', touchAction: 'manipulation' }}
       >
         {ripples.map(rp => (
           <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
@@ -205,12 +205,16 @@ function RippleButton({
                 <input
                   ref={inputRef}
                   type={loginPhase === 'pass' ? 'password' : 'text'}
+                  autoComplete={loginPhase === 'pass' ? 'current-password' : 'username'}
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   value={inputVal}
                   onChange={e => setInputVal(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={target}
                   className="bg-transparent outline-none border-none w-full text-left font-normal text-stone-700 placeholder-[#44403c] caret-stone-400"
-                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)', fontSize: '16px' }}
+                  style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)', fontSize: '16px', touchAction: 'manipulation' }}
                   onClick={e => e.stopPropagation()}
                 />
               )}
