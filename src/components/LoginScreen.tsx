@@ -74,6 +74,7 @@ function RippleButton({
   const [inputVal,   setInputVal]   = useState('');
   const [typed,      setTyped]      = useState('');      // idle typewriter
   const [phaseTyped, setPhaseTyped] = useState('');      // fase typewriter
+  const [kbHeight,   setKbHeight]   = useState(0);       // altura do teclado mobile
   const iRef      = useRef(0);
   const phaseRef  = useRef(0);
   const btnRef      = useRef<HTMLButtonElement>(null);
@@ -148,10 +149,29 @@ function RippleButton({
     if (loginPhase === 'pass') { onProfileClick(); return; }
   }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
 
+  // Detecta abertura do teclado via visualViewport
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handle = () => {
+      const delta = window.innerHeight - vv.height;
+      setKbHeight(delta > 120 ? delta : 0);
+    };
+    vv.addEventListener('resize', handle);
+    return () => vv.removeEventListener('resize', handle);
+  }, []);
+
   const isLogin = loginPhase !== 'idle';
+  const kbOpen  = kbHeight > 0;
 
   return (
-    <div className="w-full max-w-[760px] z-20 relative">
+    <motion.div
+      className="w-full max-w-[760px] z-20 relative"
+      animate={kbOpen
+        ? { scale: 0.82, y: -(kbHeight * 0.38) }
+        : { scale: 1,    y: 0 }}
+      transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+    >
       <motion.button
         ref={btnRef}
         initial={{ opacity: 0, filter: 'blur(14px)' }}
@@ -233,7 +253,7 @@ function RippleButton({
           />
         )}
       </motion.button>
-    </div>
+    </motion.div>
   );
 }
 
