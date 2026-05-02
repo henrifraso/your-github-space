@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform, animate as mvAnimate, MotionValue } from 'motion/react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useAnimation, useMotionValue, animate as mvAnimate, MotionValue } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -74,22 +74,9 @@ function RippleButton({
   const inputRef = useRef<HTMLInputElement>(null);
   const controls = useAnimation();
 
-  // ── Animação de entrada (3 fases) ──────────────────────────────────────────
-  // Posiciona ANTES do paint para que o rect seja o natural (y=0)
-  useLayoutEffect(() => {
-    const rect = btnRef.current!.getBoundingClientRect();
-    const loginY = -rect.top + 32;
-    containerY.set(loginY);
-    controls.set({ scaleX: 1.45 });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
+  // ── Animação de entrada — fade in do centro ───────────────────────────────
   useEffect(() => {
-    controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.40, ease: 'easeOut' });
-    const t1 = setTimeout(() => {
-      mvAnimate(containerY, 0, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] });
-      controls.start({ scaleX: 1 }, { duration: 1.10, ease: [0.25, 0.46, 0.45, 0.94] });
-    }, 520);
-    return () => { clearTimeout(t1); };
+    controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
@@ -139,11 +126,11 @@ function RippleButton({
     <div className="w-full max-w-[760px] z-20 relative">
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)', scaleX: 1.45 }}
+        initial={{ opacity: 0, filter: 'blur(14px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl border border-white/70 px-10 py-4 min-h-[54px] flex items-center justify-center overflow-hidden outline-none"
+        className="relative w-full rounded-2xl border border-white/70 px-6 py-4 min-h-[54px] flex items-center overflow-hidden outline-none"
         style={{ y: containerY, cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)' }}
       >
         {ripples.map(rp => (
@@ -151,44 +138,71 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {/* Lupa permanente — canto direito em todas as fases */}
-        <div
-          className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
-          style={{ opacity: exiting ? 0 : 1, transition: 'opacity 0.15s' }}
-        >
-          <Search size={18} strokeWidth={1.5} className="text-stone-400" />
-        </div>
+        <AnimatePresence mode="wait">
+          {/* Idle — frases dentro do container */}
+          {loginPhase === 'idle' && (
+            <motion.div
+              key="idle"
+              className="flex items-center justify-between w-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
+              <div className="flex flex-col items-start leading-none gap-1">
+                <span className="text-stone-700 font-semibold text-[15px] sm:text-base leading-tight">Um único lugar.</span>
+                <span className="text-stone-400 font-light text-[13px] sm:text-sm leading-tight">Milhões de possibilidades.</span>
+              </div>
+              <Search size={18} strokeWidth={1.5} className="text-stone-400 flex-shrink-0 ml-4" />
+            </motion.div>
+          )}
 
-        {(loginPhase === 'user' || loginPhase === 'pass') && (
-          <motion.div
-            key={loginPhase}
-            className="w-full pr-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-          >
-            <input
-              ref={inputRef}
-              type={loginPhase === 'pass' ? 'password' : 'text'}
-              value={inputVal}
-              onChange={e => setInputVal(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
-              className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
-              onClick={e => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
+          {/* Login — input + lupa */}
+          {(loginPhase === 'user' || loginPhase === 'pass') && (
+            <motion.div
+              key={loginPhase}
+              className="flex items-center w-full pr-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+            >
+              <input
+                ref={inputRef}
+                type={loginPhase === 'pass' ? 'password' : 'text'}
+                value={inputVal}
+                onChange={e => setInputVal(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={loginPhase === 'user' ? 'usuário' : 'senha'}
+                className="bg-transparent outline-none border-none w-full text-left text-[15px] sm:text-base font-normal text-stone-700 placeholder-stone-300 caret-stone-400"
+                onClick={e => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
 
-        {loginPhase === 'profile' && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.28 }}
-            className="text-[15px] sm:text-base font-normal text-stone-600"
+          {/* Profile */}
+          {loginPhase === 'profile' && (
+            <motion.span
+              key="profile"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28 }}
+              className="text-[15px] sm:text-base font-normal text-stone-600"
+            >
+              meu perfil
+            </motion.span>
+          )}
+        </AnimatePresence>
+
+        {/* Lupa — fases de login */}
+        {loginPhase !== 'idle' && (
+          <div
+            className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ opacity: exiting ? 0 : 1, transition: 'opacity 0.15s' }}
           >
-            meu perfil
-          </motion.span>
+            <Search size={18} strokeWidth={1.5} className="text-stone-400" />
+          </div>
         )}
       </motion.button>
     </div>
@@ -297,17 +311,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [exitY,      setExitY]      = useState(0);
   const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'|'profile'>('idle');
 
-  // containerY atualizado em tempo real pelo RippleButton via mvAnimate
-  const containerY   = useMotionValue(0);
-  const exitFade     = useMotionValue(1);
-  // headline visível somente quando container cruzou y=-120 E não está em exit
-  const headlineOpacity = useTransform(
-    [containerY as MotionValue<number>, exitFade as MotionValue<number>],
-    ([cy, ef]: number[]) => (cy > -120 ? 1 : 0) * ef
-  );
-  useEffect(() => {
-    if (exiting) mvAnimate(exitFade, 0, { duration: 0.20 });
-  }, [exiting]); // eslint-disable-line react-hooks/exhaustive-deps
+  const containerY = useMotionValue(0);
 
   function handleExitStart(yToTop: number) {
     if (exiting) return;
@@ -356,23 +360,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Gradiente que respira */}
       <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.05) 0%, transparent 70%)' }} />
 
-      {/* Headline — estática, container desce por cima */}
-      <div className="max-w-[760px] w-full mb-3 sm:mb-5 relative z-10 text-center">
-          <motion.h1
-            style={{ opacity: headlineOpacity }}
-            className="text-[clamp(1.8rem,3.5vw,3.2rem)] font-semibold tracking-tight text-[#F5F3F0] leading-[1.1]"
-          >
-            Um único lugar.
-          </motion.h1>
-          <motion.h2
-            style={{ opacity: headlineOpacity }}
-            className="text-[clamp(1.4rem,3.2vw,3.2rem)] font-extralight tracking-tight text-white/35 leading-[1.1] mt-1"
-          >
-            Milhões de possibilidades.
-          </motion.h2>
-      </div>
-
-      {/* Portal container — glassmorphism + parallax */}
+      {/* Portal container */}
       <RippleButton
         onTap={handleExitStart}
         exiting={exiting}
