@@ -235,10 +235,10 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         transition={{ duration: 0.55, delay: 0.08, ease: [0.4, 0, 0.2, 1] }}
         className="text-center mb-10"
       >
-        <h1 className="text-[clamp(2.2rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1]">
+        <h1 className="text-[clamp(1.6rem,5vw,4rem)] font-semibold tracking-tight text-[#0C0A09] leading-[1.1] whitespace-nowrap">
           Um único lugar.
         </h1>
-        <h2 className="text-[clamp(2rem,4.5vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1">
+        <h2 className="text-[clamp(1.4rem,4.2vw,3.6rem)] font-extralight tracking-tight text-stone-400 leading-[1.1] mt-1 whitespace-nowrap">
           Milhões de possibilidades.
         </h2>
       </motion.div>
