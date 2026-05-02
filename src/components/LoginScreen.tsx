@@ -150,7 +150,10 @@ function RippleButton({
   // ── Sobe quando exiting dispara ────────────────────────────────────────────
   useEffect(() => {
     if (!exiting) return;
-    controls.start({ scaleX: 1.45, y: exitY }, { duration: 0.68, ease: [0.16, 1, 0.3, 1] });
+    controls.start(
+      { scaleX: 1.45, y: exitY },
+      { duration: 1.05, ease: [0.25, 0.46, 0.45, 0.94] },
+    );
   }, [exiting, exitY]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Foca input e limpa valor quando loginPhase muda ──────────────────────
