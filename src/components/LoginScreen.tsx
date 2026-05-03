@@ -81,7 +81,6 @@ function RippleButton({
 }) {
   const FULL_TEXT    = 'Um lugar único. Milhões de possibilidades.';
   const MOBILE_TEXTS = ['Um lugar único.', 'Milhões de possibilidades.'] as const;
-  const PHASE_TEXT: Record<string, string> = { user: 'Usuário', pass: 'Senha' };
   const CURSOR_STYLE = { animation: 'cursor-blink 0.9s step-end infinite' };
   const TEXT_SHADOW  = { textShadow: '0 1px 4px rgba(0,0,0,0.38), 0 0 2px rgba(0,0,0,0.18)' };
   const LUPA_SHADOW  = 'drop-shadow(0 2px 6px rgba(28,23,18,0.5)) drop-shadow(0 0 2px rgba(28,23,18,0.22))';
@@ -98,7 +97,7 @@ function RippleButton({
   const [mobileTypingPhase, setMobileTypingPhase] = useState<0|1>(0);
   const iRef            = useRef(0);
   const phaseRef        = useRef(0);
-  const animatedPhases  = useRef(new Set<string>());
+  const animCancelRef   = useRef<(() => void) | null>(null);
   const btnRef          = useRef<HTMLButtonElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const controls        = useAnimation();
@@ -204,22 +203,18 @@ function RippleButton({
     return () => clearInterval(iv);
   }, [typingDone, loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Typewriter por fase (user / pass)
-  useEffect(() => {
-    if (loginPhase === 'idle') { animatedPhases.current.clear(); return; }
-    if (animatedPhases.current.has(loginPhase)) return;
-    animatedPhases.current.add(loginPhase);
-
-    const label = PHASE_TEXT[loginPhase] ?? '';
-    const fake  = loginPhase === 'user' ? 'usuario'   : 'senha';
-    const real  = loginPhase === 'user' ? '@mcdonalds' : 'Teste123!';
+  // Animação imperativa — chamada diretamente dos handlers, sem useEffect
+  const startPhaseAnim = useCallback((phase: 'user' | 'pass') => {
+    animCancelRef.current?.();
+    const label = phase === 'user' ? 'Usuário' : 'Senha';
+    const fake  = phase === 'user' ? 'usuario'   : 'senha';
+    const real  = phase === 'user' ? '@mcdonalds' : 'Teste123!';
     phaseRef.current = 0;
     setPhaseTyped('');
     setInputVal('');
-
     let cancelled = false;
+    animCancelRef.current = () => { cancelled = true; };
     const ok = () => !cancelled;
-
     const t0 = setTimeout(() => {
       if (!ok()) return;
       const iv = setInterval(() => {
@@ -229,7 +224,6 @@ function RippleButton({
         if (phaseRef.current >= label.length) clearInterval(iv);
       }, 55);
     }, 80);
-
     const t1 = setTimeout(() => {
       if (!ok()) return;
       let i = 0;
@@ -264,9 +258,8 @@ function RippleButton({
         }
       }, 55);
     }, 80 + label.length * 55 + 120);
-
     return () => { cancelled = true; clearTimeout(t0); clearTimeout(t1); };
-  }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     if (loginPhase !== 'idle') return;
@@ -275,21 +268,22 @@ function RippleButton({
     setRipples(r => [...r, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
     setTimeout(() => setRipples(r => r.filter(rp => rp.id !== id)), 700);
     onTap();
-  }, [loginPhase, onTap]);
+    startPhaseAnim('user');
+  }, [loginPhase, onTap, startPhaseAnim]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return;
     if (!inputVal.trim()) return;
-    if (loginPhase === 'user') { onNextPhase(); return; }
+    if (loginPhase === 'user') { onNextPhase(); startPhaseAnim('pass'); return; }
     if (loginPhase === 'pass') { onProfileClick(); return; }
-  }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
+  }, [inputVal, loginPhase, onNextPhase, onProfileClick, startPhaseAnim]);
 
   const handleLupaClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (!inputVal.trim()) return;
-    if (loginPhase === 'user') { onNextPhase(); return; }
+    if (loginPhase === 'user') { onNextPhase(); startPhaseAnim('pass'); return; }
     if (loginPhase === 'pass') { onProfileClick(); return; }
-  }, [inputVal, loginPhase, onNextPhase, onProfileClick]);
+  }, [inputVal, loginPhase, onNextPhase, onProfileClick, startPhaseAnim]);
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 640);
@@ -393,7 +387,7 @@ function RippleButton({
 
           {/* Fases user/pass — typewriter + input */}
           {loginPhase !== 'idle' && (() => {
-            const target = PHASE_TEXT[loginPhase] ?? '';
+            const target = loginPhase === 'user' ? 'Usuário' : 'Senha';
             const isDone = phaseTyped.length >= target.length;
             return (
               <div style={{ position: 'absolute', left: 24, right: isMobile ? 84 : 80, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
