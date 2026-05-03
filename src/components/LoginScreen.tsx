@@ -312,7 +312,7 @@ function RippleButton({
         y: started && kbOpen ? (loginPhase !== 'idle' ? -(kbHeight * 0.46) : -(kbHeight * 0.38)) : 0,
       }}
       transition={{
-        opacity: { duration: 0.55, delay: 0.15, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 0, delay: 0 }, // snap instantâneo — revelado pelo overlay
         scale:   { type: 'spring', damping: 30, stiffness: 320 },
         y:       { type: 'spring', damping: 30, stiffness: 320 },
       }}
@@ -321,8 +321,8 @@ function RippleButton({
       <motion.button
         ref={btnRef}
         initial={{ clipPath: isMobile
-          ? 'inset(calc(50% - 42px) calc(50% - 42px) round 20px)'
-          : 'inset(calc(50% - 42px) calc(50% - 42px) round 20px)' }}
+          ? 'inset(calc(50% - 42px) calc(50% - 42px) round 42px)'
+          : 'inset(calc(50% - 42px) calc(50% - 42px) round 42px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
@@ -532,13 +532,13 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
   // ── GIF intro — 3 loops × 5040ms = 15120ms ──────────────────────────────
-  const GIF_DURATION = 15120;
+  const GIF_DURATION = 10080; // 2 loops × 5040ms
   const [gifStarted, setGifStarted] = useState(false); // RippleButton pode iniciar
   const [gifVisible, setGifVisible]  = useState(true);  // overlay no DOM
 
   useEffect(() => {
     const t1 = setTimeout(() => setGifStarted(true), GIF_DURATION);
-    const t2 = setTimeout(() => setGifVisible(false), GIF_DURATION + 500);
+    const t2 = setTimeout(() => setGifVisible(false), GIF_DURATION + 800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
@@ -623,7 +623,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       />
 
       {/* ── GIF Intro Overlay ─────────────────────────────────────────────── */}
-      <AnimatePresence onExitComplete={() => setGifVisible(false)}>
+      <AnimatePresence>
         {!gifStarted && (
           <motion.div
             key="gif-overlay"
