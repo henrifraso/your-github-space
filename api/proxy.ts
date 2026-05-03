@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { buildTracker } from './tracker';
 
 const STRIP_HEADERS = new Set([
   'x-frame-options',
@@ -27,27 +26,64 @@ function proxify(url: string, base: string, origin: string): string {
   }
 }
 
+function buildTracker(origin: string): string {
+  return `<script>(function(){
+var o=${JSON.stringify(origin)};
+function loading(){try{parent.postMessage({type:'omni-loading'},'*')}catch(e){}}
+function nav(u){try{parent.postMessage({type:'omni-nav',url:u},'*')}catch(e){}}
+var pp=history.pushState,pr=history.replaceState;
+history.pushState=function(){pp.apply(this,arguments);nav(location.href)};
+history.replaceState=function(){pr.apply(this,arguments);nav(location.href)};
+addEventListener('popstate',function(){nav(location.href)});
+function fixForm(f){
+  if(!f||f.nodeName!=='FORM')return false;
+  if((f.getAttribute('method')||'get').toLowerCase()!=='get')return false;
+  try{
+    var pa=new URL(f.action),orig=pa.searchParams.get('url');
+    if(!orig)return false;
+    var fd=new URLSearchParams(new FormData(f));
+    loading();
+    window.location.href=o+'/api/proxy?url='+encodeURIComponent(orig.split('?')[0]+'?'+fd.toString());
+    return true;
+  }catch(ex){return false;}
+}
+document.addEventListener('submit',function(e){if(fixForm(e.target))e.preventDefault();},true);
+var os=HTMLFormElement.prototype.submit;
+HTMLFormElement.prototype.submit=function(){if(!fixForm(this))os.call(this);};
+var ors=HTMLFormElement.prototype.requestSubmit;
+if(ors)HTMLFormElement.prototype.requestSubmit=function(s){if(!fixForm(this))ors.call(this,s);};
+document.addEventListener('click',function(e){
+  var el=e.target;
+  while(el&&el.nodeName!=='A')el=el.parentElement;
+  if(!el)return;
+  var href=el.getAttribute('href');
+  if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
+  try{
+    var abs=new URL(href,location.href).href;
+    loading();
+    if(href.indexOf('/api/proxy')===-1){
+      e.preventDefault();
+      window.location.href=o+'/api/proxy?url='+encodeURIComponent(abs);
+    }
+  }catch(ex){}
+},true);
+})();</script>`;
+}
 
 function rewriteHtml(html: string, pageUrl: string, origin: string): string {
-  const tracker = buildTracker();
+  const tracker = buildTracker(origin);
 
   html = /<head/i.test(html)
     ? html.replace(/(<head[^>]*>)/i, '$1' + tracker)
     : tracker + html;
 
-  // Rewrite href/src/action (double quotes)
   html = html.replace(/(\s(?:href|src|action|data-src|poster)=")([^"]+)(")/g, (_, a, url, b) =>
     url.startsWith('/api/proxy') ? _ : a + proxify(url, pageUrl, origin) + b
   );
-  // Rewrite href/src/action (single quotes)
   html = html.replace(/(\s(?:href|src|action|data-src|poster)=')([^']+)(')/g, (_, a, url, b) =>
     url.startsWith('/api/proxy') ? _ : a + proxify(url, pageUrl, origin) + b
   );
-
-  // Strip target="_blank" so links open inside the iframe
   html = html.replace(/\starget=["']_blank["']/gi, '');
-
-  // Remove meta tags with X-Frame-Options or CSP
   html = html.replace(/<meta[^>]+(?:x-frame-options|content-security-policy)[^>]*>/gi, '');
 
   return html;
@@ -67,6 +103,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try { targetUrl = new URL(rawUrl); } catch {
     return res.status(400).send('Invalid URL');
   }
+  void targetUrl;
 
   const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
   const origin = `${proto}://${req.headers.host}`;
@@ -87,7 +124,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const ct = upstream.headers.get('content-type') || 'application/octet-stream';
 
-    // Forward safe headers
     for (const [k, v] of upstream.headers.entries()) {
       if (!STRIP_HEADERS.has(k.toLowerCase())) res.setHeader(k, v);
     }
@@ -106,12 +142,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.send(rewriteCss(css, rawUrl, origin));
     }
 
-    // Binary passthrough (images, fonts, JS, etc.)
     const buf = Buffer.from(await upstream.arrayBuffer());
     res.setHeader('Content-Type', ct);
     return res.send(buf);
 
   } catch (err) {
+    clearTimeout(timer);
     return res.status(502).send(`Proxy error: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
