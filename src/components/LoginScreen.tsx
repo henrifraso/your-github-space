@@ -209,7 +209,7 @@ function RippleButton({
     const target = PHASE_TEXT[loginPhase] ?? '';
     phaseRef.current = 0;
     setPhaseTyped('');
-    setInputVal('');
+    setInputVal(loginPhase === 'user' ? '@mcdonalds' : 'Teste123!');
     const t = setTimeout(() => {
       const iv = setInterval(() => {
         phaseRef.current += 1;
