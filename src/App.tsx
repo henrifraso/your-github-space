@@ -381,13 +381,15 @@ function AuthenticatedApp() {
     <div className={dark ? 'dark' : ''}>
 
       {/* Botão de deslogar — canto superior direito (desktop only) */}
-      <button
-        onClick={handleLogout}
-        title="Sair"
-        className="fixed top-3 right-4 z-[999] hidden lg:flex items-center justify-center p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition-all duration-200 cursor-pointer active:scale-90"
-      >
-        <Power size={18} />
-      </button>
+      {!browserOpen && (
+        <button
+          onClick={handleLogout}
+          title="Sair"
+          className="fixed top-3 right-4 z-[999] hidden lg:flex items-center justify-center p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition-all duration-200 cursor-pointer active:scale-90"
+        >
+          <Power size={18} />
+        </button>
+      )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
       <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
