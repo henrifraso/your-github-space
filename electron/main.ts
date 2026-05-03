@@ -33,20 +33,19 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
-  // Expõe info da janela para o renderer
-  ipcMain.handle('get-platform', () => process.platform);
-
-  ipcMain.on('navigation-captured', (_e, data) => {
-    // Persiste histórico de navegação se necessário
-    console.log('[nav]', data.url);
-  });
-
-  ipcMain.handle('save-offline', async (_e, _key, _data) => {
-    return { ok: true };
-  });
-
   return win;
 }
+
+// Handlers IPC registrados uma única vez — fora de createWindow
+ipcMain.handle('get-platform', () => process.platform);
+
+ipcMain.on('navigation-captured', (_e, data) => {
+  console.log('[nav]', data.url);
+});
+
+ipcMain.handle('save-offline', async (_e, _key, _data) => {
+  return { ok: true };
+});
 
 app.whenReady().then(() => {
   if (process.platform === 'darwin') {
