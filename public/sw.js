@@ -1,9 +1,9 @@
-importScripts('/controller/controller.sw.js');
-
+// Scramjet removido — SW se desregistra e recarrega clientes
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch', async e => {
-  if ($scramjetController.shouldRoute(e)) {
-    e.respondWith($scramjetController.route(e));
-  }
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    self.registration.unregister()
+      .then(() => self.clients.matchAll())
+      .then(clients => clients.forEach(c => c.navigate(c.url)))
+  );
 });

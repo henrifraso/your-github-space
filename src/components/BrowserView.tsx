@@ -140,6 +140,15 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
 
 // ── Navegador com iframe + proxy server-side — browser normal ─────────────────
 function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
+  // Garante que nenhum SW antigo (Scramjet) interfere nos requests do proxy
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      });
+    }
+  }, []);
+
   // iframeUrl controla quando o iframe remonta (só muda via navigate())
   // url/inputVal são só a barra de endereço (atualizam via onLoad/postMessage)
   const [iframeUrl, setIframeUrl] = useState(initialUrl);
