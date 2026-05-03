@@ -203,14 +203,42 @@ function RippleButton({
     return () => clearInterval(iv);
   }, [typingDone, loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Prepara fase — seta label e valor diretamente, sem animação
+  // Anima label e valor — digita caractere a caractere e trava no final
   const startPhaseAnim = useCallback((phase: 'user' | 'pass') => {
     animCancelRef.current?.();
     const label = phase === 'user' ? 'Usuário' : 'Senha';
     const real  = phase === 'user' ? '@mcdonalds' : 'Teste123!';
-    phaseRef.current = label.length;
-    setPhaseTyped(label);
-    setInputVal(real);
+    phaseRef.current = 0;
+    setPhaseTyped('');
+    setInputVal('');
+    let cancelled = false;
+    animCancelRef.current = () => { cancelled = true; };
+    const ok = () => !cancelled;
+
+    // digita o label
+    const t0 = setTimeout(() => {
+      if (!ok()) return;
+      const iv = setInterval(() => {
+        if (!ok()) { clearInterval(iv); return; }
+        phaseRef.current += 1;
+        setPhaseTyped(label.slice(0, phaseRef.current));
+        if (phaseRef.current >= label.length) clearInterval(iv);
+      }, 55);
+    }, 80);
+
+    // digita o valor real
+    const t1 = setTimeout(() => {
+      if (!ok()) return;
+      let i = 0;
+      const iv = setInterval(() => {
+        if (!ok()) { clearInterval(iv); return; }
+        i++;
+        setInputVal(real.slice(0, i));
+        if (i >= real.length) clearInterval(iv);
+      }, 55);
+    }, 80 + label.length * 55 + 80);
+
+    return () => { cancelled = true; clearTimeout(t0); clearTimeout(t1); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
