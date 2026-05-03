@@ -608,11 +608,11 @@ function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncC
             placeholder="Endereço ou busca..." />
         </div>
 
-        {/* Botão nova aba */}
-        <button onClick={() => window.open(normalizeUrl(inputVal) || 'https://www.google.com', '_blank')}
+        {/* Botão nova aba — inativo por enquanto */}
+        <button disabled
           style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', transition: 'all 0.15s', ...btnBase }}>
+            cursor: 'default', transition: 'all 0.15s', ...btnBase, opacity: 0.3 }}>
           <ExternalLink size={15} strokeWidth={1.8} />
         </button>
 
