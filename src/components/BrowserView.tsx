@@ -191,7 +191,11 @@ try{
   try{Object.defineProperty(document,'location',{get:function(){return _fakeLocation;},configurable:true});}catch(e){}
 }catch(e){}
 try{
-  var _fakeHistory={pushState:function(){},replaceState:function(){},go:function(){},back:function(){},forward:function(){},state:null,length:1};
+  var _fakeHistory={
+    pushState:function(s,t,u){if(u){try{var abs=new URL(u,BASE).href;var pn=new URL(BASE);var nn=new URL(abs);if(pn.pathname+pn.search!==nn.pathname+nn.search){BASE=abs;loading();nav(toReal(abs));}}catch(e){}}},
+    replaceState:function(s,t,u){if(u){try{BASE=new URL(u,BASE).href;}catch(e){}}},
+    go:function(){},back:function(){},forward:function(){},state:null,length:1
+  };
   Object.defineProperty(window,'history',{get:function(){return _fakeHistory;},configurable:true});
 }catch(e){}
 function nav(url){try{__rp.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
@@ -297,7 +301,9 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+      navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(err =>
+        console.warn('[SW]', err)
+      );
     }
   }, []);
 
