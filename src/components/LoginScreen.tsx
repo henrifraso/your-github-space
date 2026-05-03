@@ -98,6 +98,7 @@ function RippleButton({
   const [mobileTypingPhase, setMobileTypingPhase] = useState<0|1>(0);
   const iRef            = useRef(0);
   const phaseRef        = useRef(0);
+  const animVersion     = useRef(0);
   const btnRef          = useRef<HTMLButtonElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const controls        = useAnimation();
@@ -213,38 +214,42 @@ function RippleButton({
     setPhaseTyped('');
     setInputVal('');
 
-    const tids: ReturnType<typeof setTimeout>[]  = [];
-    const ivids: ReturnType<typeof setInterval>[] = [];
-    const st = (fn: () => void, ms: number) => { const id = setTimeout(fn, ms);  tids.push(id);  return id; };
-    const si = (fn: () => void, ms: number) => { const id = setInterval(fn, ms); ivids.push(id); return id; };
+    const v = ++animVersion.current;
+    const ok = () => animVersion.current === v;
 
-    // Label typewriter
-    st(() => {
-      const iv = si(() => {
+    const t0 = setTimeout(() => {
+      if (!ok()) return;
+      const iv = setInterval(() => {
+        if (!ok()) { clearInterval(iv); return; }
         phaseRef.current += 1;
         setPhaseTyped(label.slice(0, phaseRef.current));
         if (phaseRef.current >= label.length) clearInterval(iv);
       }, 55);
     }, 80);
 
-    // Input: escreve fake → apaga → escreve real
-    st(() => {
+    const t1 = setTimeout(() => {
+      if (!ok()) return;
       let i = 0;
-      const typeIv = si(() => {
+      const typeIv = setInterval(() => {
+        if (!ok()) { clearInterval(typeIv); return; }
         i++;
         setInputVal(fake.slice(0, i));
         if (i >= fake.length) {
           clearInterval(typeIv);
-          st(() => {
+          setTimeout(() => {
+            if (!ok()) return;
             let j = fake.length;
-            const eraseIv = si(() => {
+            const eraseIv = setInterval(() => {
+              if (!ok()) { clearInterval(eraseIv); return; }
               j--;
               setInputVal(fake.slice(0, j));
               if (j <= 0) {
                 clearInterval(eraseIv);
-                st(() => {
+                setTimeout(() => {
+                  if (!ok()) return;
                   let k = 0;
-                  const realIv = si(() => {
+                  const realIv = setInterval(() => {
+                    if (!ok()) { clearInterval(realIv); return; }
                     k++;
                     setInputVal(real.slice(0, k));
                     if (k >= real.length) clearInterval(realIv);
@@ -257,7 +262,7 @@ function RippleButton({
       }, 55);
     }, 80 + label.length * 55 + 120);
 
-    return () => { tids.forEach(clearTimeout); ivids.forEach(clearInterval); };
+    return () => { clearTimeout(t0); clearTimeout(t1); };
   }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
