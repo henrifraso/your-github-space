@@ -233,12 +233,12 @@ function RippleButton({
   const isLogin = loginPhase !== 'idle';
   const kbOpen  = kbHeight > 0;
 
-  const lupaSize   = isMobile ? 19 : 26;
-  const lupaStroke = isMobile ? 2.3 : 1.4;
+  const lupaSize   = isMobile ? 30 : 26;
+  const lupaStroke = isMobile ? 1.8 : 1.4;
 
   return (
     <motion.div
-      className="w-full max-w-[760px] z-20 relative"
+      className="w-full max-w-[340px] sm:max-w-[760px] z-20 relative"
       animate={kbOpen
         ? { scale: 0.82, y: -(kbHeight * 0.38) }
         : { scale: 1,    y: 0 }}
@@ -247,11 +247,13 @@ function RippleButton({
 
       <motion.button
         ref={btnRef}
-        initial={{ clipPath: 'inset(calc(50% - 28px) calc(50% - 28px) round 16px)' }}
+        initial={{ clipPath: isMobile
+          ? 'inset(calc(50% - 120px) calc(50% - 120px) round 20px)'
+          : 'inset(calc(50% - 60px) calc(50% - 60px) round 16px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
-        className="login-btn relative w-full rounded-2xl px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
+        className="login-btn relative w-full rounded-2xl px-6 py-5 min-h-[280px] sm:min-h-[160px] flex items-center overflow-hidden outline-none"
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: '#F5F1EA',
@@ -292,8 +294,8 @@ function RippleButton({
 
           {/* Idle — typewriter */}
           {loginPhase === 'idle' && (
-            <div style={{ position: 'absolute', left: 24, right: isMobile ? 48 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#1C1712', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ position: 'absolute', left: 24, right: isMobile ? 56 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              <span style={{ color: '#1C1712', fontSize: isMobile ? '19px' : '20px', fontWeight: 400, fontFamily: "'Inter', sans-serif" }}>
                 {typed}
               </span>
               {typed.length < FULL_TEXT.length && (
@@ -307,9 +309,9 @@ function RippleButton({
             const target = PHASE_TEXT[loginPhase] ?? '';
             const isDone = phaseTyped.length >= target.length;
             return (
-              <div style={{ position: 'absolute', left: 24, right: isMobile ? 48 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              <div style={{ position: 'absolute', left: 24, right: isMobile ? 56 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                 {!isDone && (
-                  <span style={{ color: '#1C1712', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}>
+                  <span style={{ color: '#1C1712', fontSize: isMobile ? '19px' : '20px', fontWeight: 400, fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}>
                     {phaseTyped}
                     {phaseTyped.length > 0 && (
                       <span className="inline-block w-[1.5px] h-[1em] bg-[#B8913A] ml-[1px] align-middle" style={CURSOR_STYLE} />
@@ -329,7 +331,7 @@ function RippleButton({
                     onKeyDown={handleKeyDown}
                     placeholder={target}
                     className="bg-transparent outline-none border-none w-full text-left"
-                    style={{ color: '#1C1712', fontFamily: "'Inter', sans-serif", fontSize: '16px', caretColor: '#B8913A', touchAction: 'manipulation', ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
+                    style={{ color: '#1C1712', fontFamily: "'Inter', sans-serif", fontSize: isMobile ? '19px' : '20px', caretColor: '#B8913A', touchAction: 'manipulation', ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
                     onClick={e => e.stopPropagation()}
                   />
                 )}
