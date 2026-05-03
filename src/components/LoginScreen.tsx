@@ -634,6 +634,16 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       {/* Vignette */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 75% 65% at 50% 50%, transparent 38%, rgba(0,0,0,0.5) 100%)' }} />
 
+      {/* Lista de espera — invisível por enquanto */}
+      <div className="w-full max-w-[340px] sm:max-w-[760px] z-20 mb-3" style={{ opacity: 0, pointerEvents: 'none' }}>
+        <div className="w-full rounded-[20px] px-6 py-4 text-center"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: "'Inter', sans-serif" }}>
+            Lista de espera
+          </p>
+        </div>
+      </div>
+
       {/* Container — centrado, frases dentro */}
       <RippleButton
         onTap={handleContainerTap}
