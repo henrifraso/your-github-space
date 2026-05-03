@@ -203,62 +203,14 @@ function RippleButton({
     return () => clearInterval(iv);
   }, [typingDone, loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Animação imperativa — chamada diretamente dos handlers, sem useEffect
+  // Prepara fase — seta label e valor diretamente, sem animação
   const startPhaseAnim = useCallback((phase: 'user' | 'pass') => {
     animCancelRef.current?.();
     const label = phase === 'user' ? 'Usuário' : 'Senha';
-    const fake  = phase === 'user' ? 'usuario'   : 'senha';
     const real  = phase === 'user' ? '@mcdonalds' : 'Teste123!';
-    phaseRef.current = 0;
-    setPhaseTyped('');
-    setInputVal('');
-    let cancelled = false;
-    animCancelRef.current = () => { cancelled = true; };
-    const ok = () => !cancelled;
-    const t0 = setTimeout(() => {
-      if (!ok()) return;
-      const iv = setInterval(() => {
-        if (!ok()) { clearInterval(iv); return; }
-        phaseRef.current += 1;
-        setPhaseTyped(label.slice(0, phaseRef.current));
-        if (phaseRef.current >= label.length) clearInterval(iv);
-      }, 55);
-    }, 80);
-    const t1 = setTimeout(() => {
-      if (!ok()) return;
-      let i = 0;
-      const typeIv = setInterval(() => {
-        if (!ok()) { clearInterval(typeIv); return; }
-        i++;
-        setInputVal(fake.slice(0, i));
-        if (i >= fake.length) {
-          clearInterval(typeIv);
-          setTimeout(() => {
-            if (!ok()) return;
-            let j = fake.length;
-            const eraseIv = setInterval(() => {
-              if (!ok()) { clearInterval(eraseIv); return; }
-              j--;
-              setInputVal(fake.slice(0, j));
-              if (j <= 0) {
-                clearInterval(eraseIv);
-                setTimeout(() => {
-                  if (!ok()) return;
-                  let k = 0;
-                  const realIv = setInterval(() => {
-                    if (!ok()) { clearInterval(realIv); return; }
-                    k++;
-                    setInputVal(real.slice(0, k));
-                    if (k >= real.length) clearInterval(realIv);
-                  }, 52);
-                }, 140);
-              }
-            }, 32);
-          }, 380);
-        }
-      }, 55);
-    }, 80 + label.length * 55 + 120);
-    return () => { cancelled = true; clearTimeout(t0); clearTimeout(t1); };
+    phaseRef.current = label.length;
+    setPhaseTyped(label);
+    setInputVal(real);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
