@@ -513,9 +513,15 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     setTimeout(() => setGifStarted(true), 10000);
   }
 
-  // GIF cacheado: img.complete=true no mount → onLoad nunca dispara → detecta aqui
+  // Força restart do GIF a partir do frame 0 — browser cacheado continua de onde parou
   useEffect(() => {
-    if (gifImgRef.current?.complete) startGifTimer();
+    const img = gifImgRef.current;
+    if (!img) return;
+    const src = img.src;
+    img.src = '';
+    img.src = src;
+    // Após reset: se já estava completo (cacheado), dispara timer imediatamente
+    if (img.complete) startGifTimer();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Congela o GIF no frame exato ao disparar — canvas captura o frame atual antes do primeiro paint
