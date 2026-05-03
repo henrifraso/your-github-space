@@ -76,37 +76,25 @@ function RippleButton({
   const [phaseTyped, setPhaseTyped] = useState('');
   const [kbHeight,   setKbHeight]   = useState(0);
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 640);
-  const [introDone,  setIntroDone]  = useState(false);
-  const [isSpinning, setIsSpinning] = useState(true);
-  const [lupaInitX,  setLupaInitX]  = useState<number | null>(null);
-  const iRef         = useRef(0);
-  const phaseRef     = useRef(0);
-  const btnRef       = useRef<HTMLButtonElement>(null);
-  const inputRef     = useRef<HTMLInputElement>(null);
-  const controls     = useAnimation();
-  const lupaControls = useAnimation();
+  const [introDone,       setIntroDone]       = useState(false);
+  const [isSpinning,      setIsSpinning]      = useState(true);
+  const [introLupaVisible, setIntroLupaVisible] = useState(true);
+  const [idleLupaVisible,  setIdleLupaVisible]  = useState(false);
+  const iRef            = useRef(0);
+  const phaseRef        = useRef(0);
+  const btnRef          = useRef<HTMLButtonElement>(null);
+  const inputRef        = useRef<HTMLInputElement>(null);
+  const controls        = useAnimation();
+  const lupaControls    = useAnimation(); // intro lupa (spin Phase A)
+  const lupaIdleControls = useAnimation(); // idle lupa (shake)
 
   const typingDone = typed.length >= FULL_TEXT.length;
 
-  // Calcula x inicial da lupa — monta o elemento antes de iniciar o intro
+  // ── Intro: dois elementos com crossfade — sem dependência de offsetWidth ──
   useEffect(() => {
-    if (!btnRef.current) return;
-    const w    = btnRef.current.offsetWidth;
-    const rPad = window.innerWidth < 640 ? 16 : 24;
-    const lSz  = window.innerWidth < 640 ? 19 : 26;
-    setLupaInitX(-(w / 2 - rPad - lSz / 2));
-  }, []);
-
-  // ── Intro: só começa após lupaInitX estar pronto (lupa já montada no DOM) ──
-  useEffect(() => {
-    if (lupaInitX === null) return;
     let alive = true;
     async function runIntro() {
-      // Aguarda 1 frame para Framer Motion subscrever a lupa ao controller
-      await new Promise<void>(r => requestAnimationFrame(() => r()));
-      if (!alive) return;
-
-      // Phase A: container gira + lupa contra-rotaciona (já centrada via initial)
+      // Phase A: container gira + lupa intro contra-rotaciona (já centrada no DOM)
       await Promise.all([
         controls.start({
           rotate: 360 * 2,
@@ -120,14 +108,12 @@ function RippleButton({
       if (!alive) return;
       setIsSpinning(false);
 
-      // Phase B: expande + lupa desliza do centro para right-4
+      // Phase B: crossfade 150ms (intro → idle) + expansão do container
+      setIntroLupaVisible(false);
+      setIdleLupaVisible(true);
       controls.start({
         clipPath: 'circle(200% at 50% 50%)',
         transition: { duration: 5.5, ease: [0.16, 1, 0.3, 1] },
-      });
-      lupaControls.start({
-        x: 0,
-        transition: { duration: 2.6, ease: [0.16, 1, 0.3, 1] },
       });
 
       await new Promise<void>(r => setTimeout(r, 1500));
@@ -136,7 +122,7 @@ function RippleButton({
     }
     runIntro();
     return () => { alive = false; };
-  }, [lupaInitX]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Typewriter idle — só após intro
   useEffect(() => {
@@ -151,10 +137,10 @@ function RippleButton({
     return () => clearTimeout(t0);
   }, [introDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Shake da lupa: imediato ao terminar o typewriter, depois a cada 3s
+  // Shake da lupa idle: imediato ao terminar o typewriter, depois a cada 3s
   useEffect(() => {
     if (!typingDone || loginPhase !== 'idle') return;
-    const shake = () => lupaControls.start({ x: [0, -3, 3, -3, 3, -2, 2, -2, 2, -1, 1, 0], transition: { duration: 0.6, ease: 'easeInOut' } });
+    const shake = () => lupaIdleControls.start({ x: [0, -3, 3, -3, 3, -2, 2, -2, 2, -1, 1, 0], transition: { duration: 0.6, ease: 'easeInOut' } });
     shake();
     const iv = setInterval(shake, 3000);
     return () => clearInterval(iv);
@@ -259,13 +245,26 @@ function RippleButton({
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {/* Lupa única — monta centrada (lupaInitX) e desliza para right-4 na expansão */}
-        {loginPhase === 'idle' && lupaInitX !== null && (
-          <div className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 pointer-events-none z-10`}>
+        {/* Lupa intro — centrada, visível durante Phase A/B, crossfade para idle */}
+        {loginPhase === 'idle' && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
+            style={{ opacity: introLupaVisible ? 1 : 0, transition: 'opacity 150ms ease' }}>
             <motion.div
               animate={lupaControls}
-              initial={{ x: lupaInitX }}
               style={isSpinning ? { animation: 'intro-lupa-glow 0.5s 0.6s ease-in-out infinite' } : { filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.3))' }}
+            >
+              <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#B8913A' }} />
+            </motion.div>
+          </div>
+        )}
+
+        {/* Lupa idle — fixada à direita, aparece via crossfade após Phase B */}
+        {loginPhase === 'idle' && (
+          <div className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 pointer-events-none z-10`}
+            style={{ opacity: idleLupaVisible ? 1 : 0, transition: 'opacity 150ms ease' }}>
+            <motion.div
+              animate={lupaIdleControls}
+              style={{ filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.3))' }}
             >
               <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#B8913A' }} />
             </motion.div>
