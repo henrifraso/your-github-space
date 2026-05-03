@@ -612,7 +612,7 @@ function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncC
         <button disabled
           style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'default', transition: 'all 0.15s', ...btnBase, opacity: 0.3 }}>
+            cursor: 'default', transition: 'all 0.15s', ...btnBase }}>
           <ExternalLink size={15} strokeWidth={1.8} />
         </button>
 
