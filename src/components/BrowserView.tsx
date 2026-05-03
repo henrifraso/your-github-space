@@ -159,21 +159,68 @@ function rewriteHtmlClient(html: string, pageUrl: string): string {
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
   html = html.replace(/(\s(?:href|src|action|data-src|poster)=')([^']+)(')/g,
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
-  // Tracker: só intercepta cliques em links — NÃO intercepta pushState/replaceState
-  // (SPA do Google dispara replaceState → parent re-fetcha → loop infinito)
+  const pageOrigin = (() => { try { return new URL(pageUrl).origin; } catch { return ''; } })();
   const tracker = `<script>(function(){
+var BASE=${JSON.stringify(pageUrl)};
+var BASE_ORIGIN=${JSON.stringify(pageOrigin)};
 function nav(url){try{parent.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
 function loading(){try{parent.postMessage({type:'omni-loading'},'*')}catch(e){}}
-function real(href){
-  try{var u=new URL(href,location.href);var p=u.searchParams.get('url');return p||u.href;}
-  catch(e){return href;}
+function toReal(u){
+  try{
+    var abs=new URL(u,BASE).href;
+    var p=new URL(abs).searchParams.get('url');
+    return p||abs;
+  }catch(e){return u;}
 }
+function intercept(u){
+  if(!u)return false;
+  try{
+    var abs=new URL(u,BASE).href;
+    if(abs.includes('/api/proxy?url='))return false; // já é proxy — ignorar
+    nav(toReal(abs));
+    return true;
+  }catch(e){return false;}
+}
+// Intercepta location.assign e location.replace
+try{
+  var lp=Location.prototype;
+  var oa=lp.assign.bind(location);
+  lp.assign=function(u){if(!intercept(u))oa(u);};
+  var or=lp.replace.bind(location);
+  lp.replace=function(u){if(!intercept(u))or(u);};
+}catch(e){}
+// Intercepta location.href setter
+try{
+  var ld=Object.getOwnPropertyDescriptor(Location.prototype,'href')||
+         Object.getOwnPropertyDescriptor(Object.getPrototypeOf(location),'href');
+  if(ld&&ld.set){
+    var oh=ld.set;
+    Object.defineProperty(Location.prototype,'href',{
+      get:ld.get,
+      set:function(u){if(!intercept(u))oh.call(this,u);},
+      configurable:true
+    });
+  }
+}catch(e){}
+// Intercepta submit de formulários GET
+document.addEventListener('submit',function(e){
+  var f=e.target;
+  if(!f||f.nodeName!=='FORM')return;
+  if((f.getAttribute('method')||'get').toLowerCase()!=='get')return;
+  try{
+    var action=toReal(f.getAttribute('action')||'');
+    var fd=new URLSearchParams(new FormData(f));
+    var url=action.split('?')[0]+'?'+fd.toString();
+    e.preventDefault();loading();nav(url);
+  }catch(ex){}
+},true);
+// Intercepta cliques em links <a>
 document.addEventListener('click',function(e){
   var el=e.target;while(el&&el.nodeName!=='A')el=el.parentElement;
   if(!el)return;
   var href=el.getAttribute('href');
   if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
-  e.preventDefault();e.stopPropagation();loading();nav(real(href));
+  e.preventDefault();e.stopPropagation();loading();nav(toReal(href));
 },true);
 })();</script>`;
   return /<head/i.test(html)
