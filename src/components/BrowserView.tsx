@@ -70,14 +70,27 @@ function loadScript(src: string): Promise<void> {
 }
 
 async function getActiveServiceWorker(reg: ServiceWorkerRegistration): Promise<ServiceWorker> {
+  // Já controla a página — retorna imediatamente
   if (navigator.serviceWorker.controller) return navigator.serviceWorker.controller;
+
+  // Aguarda o SW ativar (install → waiting → activating → activated)
   const sw = reg.active ?? reg.installing ?? reg.waiting;
   if (!sw) throw new Error('No service worker available');
-  if (sw.state === 'activated') return sw;
-  return new Promise((resolve, reject) => {
-    sw.addEventListener('statechange', function handler() {
-      if (sw.state === 'activated') { sw.removeEventListener('statechange', handler); resolve(sw); }
-      if (sw.state === 'redundant') { sw.removeEventListener('statechange', handler); reject(new Error('SW became redundant')); }
+  if (sw.state !== 'activated') {
+    await new Promise<void>((resolve, reject) => {
+      sw.addEventListener('statechange', function handler() {
+        if (sw.state === 'activated') { sw.removeEventListener('statechange', handler); resolve(); }
+        if (sw.state === 'redundant') { sw.removeEventListener('statechange', handler); reject(new Error('SW became redundant')); }
+      });
+    });
+  }
+
+  // Após ativar, clients.claim() no SW deve assumir controle — aguarda controllerchange
+  if (navigator.serviceWorker.controller) return navigator.serviceWorker.controller;
+  return new Promise(resolve => {
+    navigator.serviceWorker.addEventListener('controllerchange', function handler() {
+      navigator.serviceWorker.removeEventListener('controllerchange', handler);
+      resolve(navigator.serviceWorker.controller!);
     });
   });
 }
