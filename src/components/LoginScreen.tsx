@@ -311,7 +311,11 @@ function RippleButton({
         scale: started && kbOpen ? (loginPhase !== 'idle' ? 1 : 0.82) : 1,
         y: started && kbOpen ? (loginPhase !== 'idle' ? -(kbHeight * 0.46) : -(kbHeight * 0.38)) : 0,
       }}
-      transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+      transition={{
+        opacity: { duration: 0.55, delay: 0.15, ease: [0.16, 1, 0.3, 1] },
+        scale:   { type: 'spring', damping: 30, stiffness: 320 },
+        y:       { type: 'spring', damping: 30, stiffness: 320 },
+      }}
     >
 
       <motion.button
@@ -619,13 +623,15 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       />
 
       {/* ── GIF Intro Overlay ─────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {gifVisible && (
+      <AnimatePresence onExitComplete={() => setGifVisible(false)}>
+        {!gifStarted && (
           <motion.div
             key="gif-overlay"
-            className="fixed inset-0 z-[200] bg-black flex items-center justify-center pointer-events-none"
-            animate={{ opacity: gifStarted ? 0 : 1 }}
-            transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed inset-0 z-[200] bg-black"
+            style={{ pointerEvents: 'auto' }}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: [0.4, 0, 1, 1] }}
           >
             <img
               src="/intro.gif"
@@ -633,6 +639,32 @@ export default function LoginScreen({ onAuthenticated }: Props) {
               className="w-full h-full object-cover"
               draggable={false}
             />
+            {/* Grain cinematográfico sobre o GIF */}
+            <div className="absolute inset-0 pointer-events-none" style={{
+              opacity: 0.035,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+              backgroundSize: '200px 200px',
+            }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Pulso de luz — círculo do GIF "vira" lupa ────────────────────── */}
+      <AnimatePresence>
+        {gifStarted && gifVisible && (
+          <motion.div
+            key="light-pulse"
+            className="fixed inset-0 z-[199] pointer-events-none flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.28, 0] }}
+            transition={{ duration: 0.9, times: [0, 0.25, 1], ease: 'easeOut' }}
+          >
+            <div style={{
+              width: 120, height: 120,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
+              filter: 'blur(18px)',
+            }} />
           </motion.div>
         )}
       </AnimatePresence>
