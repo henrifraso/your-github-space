@@ -76,6 +76,9 @@ function RippleButton({
   const [phaseTyped, setPhaseTyped] = useState('');
   const [kbHeight,   setKbHeight]   = useState(0);
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 640);
+  const [introDone,  setIntroDone]  = useState(false);
+  const [isSpinning, setIsSpinning] = useState(true);
+  const [lupaInitX,  setLupaInitX]  = useState<number | null>(null);
   const iRef         = useRef(0);
   const phaseRef     = useRef(0);
   const btnRef       = useRef<HTMLButtonElement>(null);
@@ -85,6 +88,69 @@ function RippleButton({
 
   const typingDone = typed.length >= FULL_TEXT.length;
 
+  // Calcula x inicial da lupa — monta o elemento antes de iniciar o intro
+  useEffect(() => {
+    if (!btnRef.current) return;
+    const w    = btnRef.current.offsetWidth;
+    const rPad = window.innerWidth < 640 ? 16 : 24;
+    const lSz  = window.innerWidth < 640 ? 19 : 26;
+    setLupaInitX(-(w / 2 - rPad - lSz / 2));
+  }, []);
+
+  // ── Intro: só começa após lupaInitX estar pronto (lupa já montada no DOM) ──
+  useEffect(() => {
+    if (lupaInitX === null) return;
+    let alive = true;
+    async function runIntro() {
+      // Aguarda 1 frame para Framer Motion subscrever a lupa ao controller
+      await new Promise<void>(r => requestAnimationFrame(() => r()));
+      if (!alive) return;
+
+      // Phase A: container gira + lupa contra-rotaciona (já centrada via initial)
+      await Promise.all([
+        controls.start({
+          rotate: 360 * 2,
+          transition: { duration: 3, ease: 'linear' },
+        }),
+        lupaControls.start({
+          rotate: -(360 * 2),
+          transition: { duration: 3, ease: 'linear' },
+        }),
+      ]);
+      if (!alive) return;
+      setIsSpinning(false);
+
+      // Phase B: expande + lupa desliza do centro para right-4
+      controls.start({
+        clipPath: 'circle(200% at 50% 50%)',
+        transition: { duration: 5.5, ease: [0.16, 1, 0.3, 1] },
+      });
+      lupaControls.start({
+        x: 0,
+        transition: { duration: 2.6, ease: [0.16, 1, 0.3, 1] },
+      });
+
+      await new Promise<void>(r => setTimeout(r, 1500));
+      if (!alive) return;
+      setIntroDone(true);
+    }
+    runIntro();
+    return () => { alive = false; };
+  }, [lupaInitX]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Typewriter idle — só após intro
+  useEffect(() => {
+    if (!introDone) return;
+    const t0 = setTimeout(() => {
+      const iv = setInterval(() => {
+        iRef.current += 1;
+        setTyped(FULL_TEXT.slice(0, iRef.current));
+        if (iRef.current >= FULL_TEXT.length) clearInterval(iv);
+      }, 48);
+    }, 30);
+    return () => clearTimeout(t0);
+  }, [introDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Shake da lupa: imediato ao terminar o typewriter, depois a cada 3s
   useEffect(() => {
     if (!typingDone || loginPhase !== 'idle') return;
@@ -93,19 +159,6 @@ function RippleButton({
     const iv = setInterval(shake, 3000);
     return () => clearInterval(iv);
   }, [typingDone, loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fade in + typewriter idle
-  useEffect(() => {
-    controls.start({ opacity: 1, filter: 'blur(0px)' }, { duration: 0.55, ease: 'easeOut' });
-    const t0 = setTimeout(() => {
-      const iv = setInterval(() => {
-        iRef.current += 1;
-        setTyped(FULL_TEXT.slice(0, iRef.current));
-        if (iRef.current >= FULL_TEXT.length) clearInterval(iv);
-      }, 48);
-    }, 200);
-    return () => clearTimeout(t0);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Typewriter por fase (user / pass)
   useEffect(() => {
@@ -185,38 +238,50 @@ function RippleButton({
         : { scale: 1,    y: 0 }}
       transition={{ type: 'spring', damping: 30, stiffness: 320 }}
     >
+
       <motion.button
         ref={btnRef}
-        initial={{ opacity: 0, filter: 'blur(14px)' }}
+        initial={{ clipPath: 'circle(34px at 50% 50%)' }}
         animate={controls}
         onClick={handleClick}
-        whileTap={!isLogin ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl border border-white/70 px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
-        style={{ cursor: isLogin ? 'default' : 'pointer', background: 'rgba(255,255,255,0.55)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', boxShadow: '0 8px 48px rgba(0,0,0,0.18), 0 2px 12px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.9)', touchAction: 'manipulation' }}
+        whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
+        className="relative w-full rounded-2xl px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
+        style={{
+          cursor: isLogin ? 'default' : 'pointer',
+          background: '#F5F1EA',
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px rgba(245,241,234,0.06)',
+          touchAction: 'manipulation',
+        }}
       >
         {ripples.map(rp => (
           <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
         ))}
 
-        {(<>
-          {/* Lupa idle — treme após typewriter */}
-          {loginPhase === 'idle' && (
-            <div className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 pointer-events-none z-10`}>
-              <motion.div animate={lupaControls}>
-                <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }} />
-              </motion.div>
-            </div>
-          )}
+        {/* Lupa única — monta centrada (lupaInitX) e desliza para right-4 na expansão */}
+        {loginPhase === 'idle' && lupaInitX !== null && (
+          <div className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 pointer-events-none z-10`}>
+            <motion.div
+              animate={lupaControls}
+              initial={{ x: lupaInitX }}
+              style={isSpinning ? { animation: 'intro-lupa-glow 0.5s 0.6s ease-in-out infinite' } : { filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.3))' }}
+            >
+              <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#B8913A' }} />
+            </motion.div>
+          </div>
+        )}
+
+        {introDone && (<>
 
           {/* Idle — typewriter */}
           {loginPhase === 'idle' && (
             <div style={{ position: 'absolute', left: 24, right: isMobile ? 48 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, textShadow: '0 1px 3px rgba(0,0,0,0.10)' }}>
+              <span style={{ color: '#1C1712', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, fontFamily: "'Inter', sans-serif" }}>
                 {typed}
               </span>
               {typed.length < FULL_TEXT.length && (
-                <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
+                <span className="inline-block w-[1.5px] h-[1em] bg-[#B8913A] ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
               )}
             </div>
           )}
@@ -228,10 +293,10 @@ function RippleButton({
             return (
               <div style={{ position: 'absolute', left: 24, right: isMobile ? 48 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                 {!isDone && (
-                  <span style={{ color: '#44403c', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, ...TEXT_SHADOW }}>
+                  <span style={{ color: '#1C1712', fontSize: 'clamp(12.5px, 3.3vw, 17px)', fontWeight: 400, fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}>
                     {phaseTyped}
                     {phaseTyped.length > 0 && (
-                      <span className="inline-block w-[1.5px] h-[1em] bg-[#44403c] ml-[1px] align-middle" style={CURSOR_STYLE} />
+                      <span className="inline-block w-[1.5px] h-[1em] bg-[#B8913A] ml-[1px] align-middle" style={CURSOR_STYLE} />
                     )}
                   </span>
                 )}
@@ -247,8 +312,8 @@ function RippleButton({
                     onChange={e => setInputVal(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={target}
-                    className="bg-transparent outline-none border-none w-full text-left font-normal text-stone-700 placeholder-[#44403c] caret-stone-400"
-                    style={{ textShadow: '0 1px 3px rgba(0,0,0,0.18)', fontSize: '16px', touchAction: 'manipulation', ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
+                    className="bg-transparent outline-none border-none w-full text-left"
+                    style={{ color: '#1C1712', fontFamily: "'Inter', sans-serif", fontSize: '16px', caretColor: '#B8913A', touchAction: 'manipulation', ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
                     onClick={e => e.stopPropagation()}
                   />
                 )}
@@ -262,12 +327,13 @@ function RippleButton({
               size={lupaSize}
               strokeWidth={lupaStroke}
               className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 z-10 cursor-pointer`}
-              style={{ color: '#44403c', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.15))' }}
+              style={{ color: '#B8913A', filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.25))' }}
               onClick={handleLupaClick}
             />
           )}
         </>)}
       </motion.button>
+
     </motion.div>
   );
 }
@@ -394,43 +460,36 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", background: '#000000' }}>
+    <div className="fixed inset-0 flex flex-col items-center justify-center px-4 overflow-hidden" style={{ fontFamily: "system-ui, sans-serif", background: '#000000' }}>
 
-      {/* Plus Jakarta Sans */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-
-        @keyframes bg-breathe {
-          0%, 100% { opacity: 0.5; }
-          50%       { opacity: 1; }
-        }
         @keyframes ripple-out {
           0%   { transform: scale(0); opacity: 0.35; }
           100% { transform: scale(4); opacity: 0; }
         }
-        .ripple-circle {
-          animation: ripple-out 0.7s ease-out forwards;
-        }
+        .ripple-circle { animation: ripple-out 0.7s ease-out forwards; }
+
         input::-webkit-credentials-auto-fill-button,
         input::-webkit-strong-password-auto-fill-button,
         input::-webkit-contacts-auto-fill-button {
-          visibility: hidden !important;
-          pointer-events: none !important;
-          display: none !important;
+          visibility: hidden !important; pointer-events: none !important; display: none !important;
         }
-        input::-ms-reveal,
-        input::-ms-clear { display: none !important; }
+        input::-ms-reveal, input::-ms-clear { display: none !important; }
 
         @keyframes cursor-blink {
           0%, 100% { opacity: 1; }
           50%       { opacity: 0; }
         }
-
-
+        @keyframes intro-lupa-glow {
+          0%, 100% { filter: drop-shadow(0 0 2px rgba(184,145,58,0.15)); }
+          50%      { filter: drop-shadow(0 0 14px rgba(184,145,58,0.9)); }
+        }
       `}</style>
 
-      {/* Gradiente que respira */}
-      <div className="absolute inset-0 pointer-events-none" style={{ animation: 'bg-breathe 6s ease-in-out infinite', backgroundImage: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.05) 0%, transparent 70%)' }} />
+      {/* Grain overlay */}
+      <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.032, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`, backgroundSize: '200px 200px' }} />
+      {/* Vignette */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 75% 65% at 50% 50%, transparent 38%, rgba(0,0,0,0.5) 100%)' }} />
 
       {/* Container — centrado, frases dentro */}
       <RippleButton
