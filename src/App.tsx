@@ -453,8 +453,8 @@ function AuthenticatedApp() {
             opacity: scrolled ? 0 : 1,
           }}
           transition={{
-            height: { duration: 0.38, ease: [0.4, 0, 0.2, 1] },
-            opacity: { duration: 0.22, ease: [0.4, 0, 0.2, 1] },
+            height: { type: 'spring', stiffness: 260, damping: 32, mass: 1 },
+            opacity: { duration: 0.25, ease: [0.4, 0, 0.2, 1] },
           }}
           style={{ overflow: 'hidden', pointerEvents: scrolled ? 'none' : 'auto' }}
         >
@@ -786,7 +786,11 @@ function AuthenticatedApp() {
       </AnimatePresence>
 
       {/* Browser / Sincronizar */}
-      <BrowserView open={browserOpen} onClose={() => setBrowserOpen(false)} />
+      <BrowserView
+        open={browserOpen}
+        onClose={() => setBrowserOpen(false)}
+        onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
+      />
 
       {/* Chat */}
       <ChatDesktop
