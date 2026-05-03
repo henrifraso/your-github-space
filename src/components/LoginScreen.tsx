@@ -151,13 +151,13 @@ function RippleButton({
 
       setIntroLupaVisible(false);
       idleLupaOpacity.set(1);
-      animate(idleLupaX, [0, tX], { duration: 5.5, ease: [0.16, 1, 0.3, 1] });
+      animate(idleLupaX, [0, tX], { duration: 4.0, ease: [0.16, 1, 0.3, 1] });
 
       const finalRound = 20;
-      const introTimer = setTimeout(() => { if (alive) setIntroDone(true); }, 4400);
+      const introTimer = setTimeout(() => { if (alive) setIntroDone(true); }, 3200);
       await controls.start({
         clipPath: `inset(0% 0% 0% 0% round ${finalRound}px)`,
-        transition: { duration: 5.5, ease: [0.16, 1, 0.3, 1] },
+        transition: { duration: 4.0, ease: [0.16, 1, 0.3, 1] },
       });
       clearTimeout(introTimer);
       if (!alive) return;
