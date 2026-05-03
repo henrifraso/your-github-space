@@ -541,7 +541,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
   // ── GIF intro — 2 loops, circle retorna ao centro no frame 124 (4960ms/loop)
-  const GIF_LOOP_MS = 9960;
+  const GIF_LOOP_MS = 4960; // 1 loop — circle retorna ao centro no frame 124
   const [gifStarted, setGifStarted] = useState(false);
   const [gifVisible, setGifVisible]  = useState(true);
   const gifT1 = useRef<ReturnType<typeof setTimeout>>();
