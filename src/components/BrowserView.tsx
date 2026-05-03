@@ -535,30 +535,30 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
+      <div className="flex items-center gap-2 px-4 py-3 flex-shrink-0"
         style={{
           background: lm ? '#EDE8DF' : '#111',
-          borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
+          borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #1f1f1f',
         }}>
-        <div className="flex-1 flex items-center rounded-lg px-3 py-1.5 gap-2"
+        <div className="flex-1 flex items-center gap-2.5 px-4 rounded-[16px]"
           style={{
-            background: lm ? 'rgba(28,23,18,0.06)' : '#1a1a1a',
-            border: lm ? '1px solid rgba(28,23,18,0.12)' : '1px solid #333',
+            background: lm ? 'rgba(28,23,18,0.06)' : 'rgba(255,255,255,0.04)',
+            border: lm ? '1px solid rgba(28,23,18,0.12)' : '1px solid rgba(255,255,255,0.08)',
+            minHeight: 52,
           }}>
-          <Globe size={12} style={{ color: lm ? '#7a6f64' : '#737373', flexShrink: 0 }} />
+          <Globe size={13} style={{ color: lm ? '#9a8f84' : '#555', flexShrink: 0 }} />
           <input value={inputVal} onChange={e => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
-            className="flex-1 bg-transparent text-xs outline-none min-w-0"
-            style={{ color: lm ? '#1C1712' : '#e5e5e5' }}
+            className="flex-1 bg-transparent outline-none min-w-0"
+            style={{ color: lm ? '#1C1712' : '#d4d4d4', fontSize: 13 }}
             placeholder="Endereço ou busca..." />
         </div>
         <button onClick={() => navigate(inputVal)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer"
+          className="flex items-center justify-center flex-shrink-0 rounded-[16px] transition-all duration-150 cursor-pointer"
           style={lm
-            ? { background: 'rgba(28,23,18,0.08)', color: '#1C1712' }
-            : { background: '#3b82f6', color: '#fff' }}>
-          <ArrowRight size={12} />
-          Ir
+            ? { background: 'rgba(28,23,18,0.07)', border: '1px solid rgba(28,23,18,0.12)', color: '#1C1712', width: 52, height: 52 }
+            : { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', color: '#a3a3a3', width: 52, height: 52 }}>
+          <ArrowRight size={16} />
         </button>
       </div>
 
