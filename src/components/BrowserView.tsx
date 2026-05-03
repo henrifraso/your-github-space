@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw } from 'lucide-react';
+import { libcurl as _libcurl } from 'libcurl.js';
 
 declare global {
   interface Window {
@@ -161,10 +162,33 @@ function rewriteHtmlClient(html: string, pageUrl: string): string {
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
   const pageOrigin = (() => { try { return new URL(pageUrl).origin; } catch { return ''; } })();
   const tracker = `<script>(function(){
+// ── Guarda referência real do parent ANTES de sobrescrever ──────────────────
+var __rp=window.parent;
+// ── Fix iframe detection: window.top/parent/self apontam para si mesmo ──────
+try{Object.defineProperty(window,'top',{get:function(){return window;},configurable:true});}catch(e){}
+try{Object.defineProperty(window,'parent',{get:function(){return window;},configurable:true});}catch(e){}
+try{Object.defineProperty(window,'self',{get:function(){return window;},configurable:true});}catch(e){}
+// ────────────────────────────────────────────────────────────────────────────
 var BASE=${JSON.stringify(pageUrl)};
 var BASE_ORIGIN=${JSON.stringify(pageOrigin)};
-function nav(url){try{parent.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
-function loading(){try{parent.postMessage({type:'omni-loading'},'*')}catch(e){}}
+// ── Fake location com URL real da página ─────────────────────────────────────
+try{
+  var _pu=new URL(BASE);
+  var _fakeLocation={
+    href:_pu.href,origin:_pu.origin,hostname:_pu.hostname,
+    host:_pu.host,pathname:_pu.pathname,search:_pu.search,
+    hash:_pu.hash,protocol:_pu.protocol,port:_pu.port,
+    assign:function(u){intercept(u);},
+    replace:function(u){intercept(u);},
+    reload:function(){},
+    toString:function(){return _pu.href;}
+  };
+  Object.defineProperty(window,'location',{get:function(){return _fakeLocation;},configurable:true});
+  try{Object.defineProperty(document,'referrer',{get:function(){return BASE_ORIGIN;},configurable:true});}catch(e){}
+}catch(e){}
+// ─────────────────────────────────────────────────────────────────────────────
+function nav(url){try{__rp.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
+function loading(){try{__rp.postMessage({type:'omni-loading'},'*')}catch(e){}}
 function toReal(u){
   try{
     var abs=new URL(u,BASE).href;
@@ -248,18 +272,13 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
     }
   }, []);
 
-  // Carrega libcurl.js + WASM
+  // Carrega libcurl.js + WASM (named export { libcurl } — não usa .default)
   useEffect(() => {
     (async () => {
       try {
-        await import('libcurl.js');
-        // libcurl.mjs adiciona ao globalThis; também pode ter default export
-        const lc = (window as any).libcurl
-          ?? (await import('libcurl.js') as any).default;
-        if (!lc || typeof lc.load_wasm !== 'function') throw new Error('libcurl API não encontrada');
-        await lc.load_wasm('/libcurl.wasm');
-        lc.set_websocket(WISP_URL);
-        lcRef.current = lc;
+        await _libcurl.load_wasm('/libcurl.wasm');
+        _libcurl.set_websocket(WISP_URL);
+        lcRef.current = _libcurl;
         setLcState('ready');
       } catch (err) {
         console.warn('[libcurl] falhou ao carregar, usando proxy:', err);
