@@ -53,7 +53,9 @@ function makeTab(url: string): Tab {
 }
 
 // ── Navegador com <webview> + abas — só funciona dentro do Electron ───────────
-function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
+function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
+  initialUrl: string; syncing?: boolean; onSyncClick?: () => void;
+}) {
   const [tabs, setTabs] = useState<Tab[]>(() => [makeTab(normalizeUrl(initialUrl))]);
   const [activeId, setActiveId] = useState(() => tabs[0].id);
   const [inputVal, setInputVal] = useState(initialUrl);
@@ -138,84 +140,118 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
 
   const wv = webviewRefs.current.get(activeId);
 
+  const btnBase = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#747474' };
+  const btnActive = { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.13)', color: '#d0d0d0' };
+
   return (
     <div className="flex flex-col w-full h-full select-none">
 
-      {/* ── Barra de abas ─────────────────────────────────────────── */}
-      <div className="flex items-end gap-0 px-2 pt-1 flex-shrink-0 overflow-x-auto"
-        style={{ background: '#0d0d0d', borderBottom: '1px solid #1f1f1f', scrollbarWidth: 'none' }}>
+      {/* ── Barra de abas — slim ───────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px 0',
+        background: '#0d0d0d', borderBottom: '1px solid rgba(255,255,255,0.05)',
+        overflowX: 'auto', scrollbarWidth: 'none' as const, flexShrink: 0 }}>
         {tabs.map(tab => (
-          <motion.button
-            key={tab.id}
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.15 }}
+          <motion.button key={tab.id} layout
+            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.15 }}
             onClick={() => setActiveId(tab.id)}
             className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg flex-shrink-0 group cursor-pointer transition-colors"
             style={{
               maxWidth: 200, minWidth: 100,
               background: tab.id === activeId ? '#111' : 'transparent',
-              borderTop: tab.id === activeId ? '1px solid #2a2a2a' : '1px solid transparent',
-              borderLeft: tab.id === activeId ? '1px solid #2a2a2a' : '1px solid transparent',
-              borderRight: tab.id === activeId ? '1px solid #2a2a2a' : '1px solid transparent',
-              marginBottom: tab.id === activeId ? '-1px' : 0,
+              border: '1px solid transparent',
+              borderBottom: 'none',
+              ...(tab.id === activeId ? { borderColor: 'rgba(255,255,255,0.07)', marginBottom: -1 } : {}),
             }}>
             {tab.loading
-              ? <div className="w-3 h-3 border border-[#3b82f6] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              ? <div style={{ width: 12, height: 12, borderRadius: '50%', flexShrink: 0,
+                  border: '1.5px solid rgba(255,255,255,0.12)',
+                  borderTopColor: 'rgba(255,255,255,0.5)',
+                  animation: 'spin 0.7s linear infinite' }} />
               : tab.favicon
-                ? <img src={tab.favicon} className="w-3 h-3 flex-shrink-0" alt="" onError={e => (e.currentTarget.style.display = 'none')} />
-                : <Globe size={11} className="text-neutral-500 flex-shrink-0" />
+                ? <img src={tab.favicon} style={{ width: 12, height: 12, flexShrink: 0 }} alt=""
+                    onError={e => (e.currentTarget.style.display = 'none')} />
+                : <Globe size={11} style={{ color: '#555', flexShrink: 0 }} />
             }
             <span className="text-xs truncate flex-1 text-left"
-              style={{ color: tab.id === activeId ? '#e5e5e5' : '#737373' }}>
+              style={{ color: tab.id === activeId ? '#d0d0d0' : '#555' }}>
               {tab.title || 'Nova aba'}
             </span>
             {tabs.length > 1 && (
               <button onClick={e => closeTab(tab.id, e)}
-                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/10 transition-all flex-shrink-0 cursor-pointer">
-                <X size={10} className="text-neutral-400" />
+                className="opacity-0 group-hover:opacity-100 p-0.5 rounded transition-all flex-shrink-0 cursor-pointer"
+                style={{ color: '#666' }}>
+                <X size={10} />
               </button>
             )}
           </motion.button>
         ))}
         <button onClick={() => openTab()}
-          className="flex items-center justify-center w-7 h-7 mb-0.5 ml-1 rounded-lg flex-shrink-0 text-neutral-500 hover:text-neutral-200 hover:bg-white/8 transition-colors cursor-pointer">
-          <Plus size={14} />
+          style={{ width: 28, height: 28, marginBottom: 2, marginLeft: 4, borderRadius: 8, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#555', cursor: 'pointer', transition: 'all 0.15s' }}>
+          <Plus size={13} />
         </button>
       </div>
 
-      {/* ── Barra de endereço ─────────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
-        style={{ background: '#111', borderBottom: '1px solid #1f1f1f' }}>
-        <button onClick={() => wv?.goBack?.()} disabled={!activeTab?.canGoBack}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-20 transition-colors cursor-pointer">
-          <ArrowLeft size={14} />
-        </button>
-        <button onClick={() => wv?.goForward?.()} disabled={!activeTab?.canGoFwd}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-20 transition-colors cursor-pointer">
-          <ArrowRight size={14} />
-        </button>
-        <button onClick={() => wv?.reload?.()}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer">
-          <RotateCcw size={13} className={activeTab?.loading ? 'animate-spin' : ''} />
-        </button>
-        <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 gap-2 focus-within:border-[#3b82f6]/50 transition-colors">
-          <Globe size={11} className="text-neutral-600 flex-shrink-0" />
-          <input
-            ref={inputRef}
-            value={inputVal}
+      {/* ── Barra de endereço — mesma aparência do IframeBrowser ─── */}
+      <div style={{
+        padding: '20px 16px 14px', background: '#111',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
+      }}>
+        {/* URL input */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+          paddingLeft: 16, paddingRight: 16, height: 52, borderRadius: 16,
+          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+          {activeTab?.loading
+            ? <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+                border: '1.5px solid rgba(255,255,255,0.12)',
+                borderTopColor: 'rgba(255,255,255,0.55)',
+                animation: 'spin 0.7s linear infinite' }} />
+            : activeTab?.favicon
+              ? <img src={activeTab.favicon} style={{ width: 17, height: 17, flexShrink: 0 }} alt=""
+                  onError={e => (e.currentTarget.style.display = 'none')} />
+              : <Globe size={17} style={{ color: '#464646', flexShrink: 0 }} />
+          }
+          <input ref={inputRef} value={inputVal}
             onChange={e => setInputVal(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={e => e.target.select()}
-            className="flex-1 bg-transparent text-xs text-neutral-200 outline-none placeholder:text-neutral-600 min-w-0"
+            onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              color: '#d0d0d0', fontSize: 15, minWidth: 0 }}
             placeholder="Endereço ou busca..." />
         </div>
+
+        {/* Nova aba */}
         <button onClick={() => openTab(inputVal)}
-          className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
-          title="Abrir em nova aba">
-          <ExternalLink size={13} />
+          style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.15s', ...btnBase }}>
+          <ExternalLink size={15} strokeWidth={1.8} />
+        </button>
+
+        {/* Ir */}
+        <button onClick={() => { navigate(inputVal); inputRef.current?.blur(); }}
+          style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.15s', ...btnBase }}>
+          <ArrowRight size={16} strokeWidth={1.8} />
+        </button>
+
+        {/* Sincronizar / Fechar */}
+        <button onClick={onSyncClick}
+          style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.2s', ...(syncing ? btnActive : btnBase) }}>
+          <AnimatePresence mode="wait">
+            <motion.div key={syncing ? 'x' : 'sync'}
+              initial={{ opacity: 0, rotate: -20, scale: 0.75 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 20, scale: 0.75 }}
+              transition={{ duration: 0.16 }}>
+              {syncing ? <X size={16} strokeWidth={1.8} /> : <RefreshCw size={15} strokeWidth={1.8} />}
+            </motion.div>
+          </AnimatePresence>
         </button>
       </div>
 
@@ -675,33 +711,13 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
           className="fixed inset-0 z-[300] flex flex-col"
           style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}
         >
-          {/* Titlebar — só para ElectronBrowser */}
-          {isElectron && (
-            <div className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
-              style={{
-                background: lm ? '#EDE8DF' : '#111',
-                borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
-              }}>
-              <div className="flex-1 min-w-0" />
-              <button
-                onClick={() => {
-                  if (syncing) { onSync ? onSync() : onClose(); }
-                  else setSyncing(true);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
-                style={lm
-                  ? { background: 'rgba(28,23,18,0.07)', color: '#1C1712' }
-                  : { background: 'rgba(255,255,255,0.05)', color: '#a3a3a3' }}>
-                <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-                {syncing ? 'Fechar' : 'Sincronizar'}
-              </button>
-            </div>
-          )}
-
           {/* Conteúdo: webview (Electron) ou iframe (browser) */}
           <div className="flex-1 min-h-0">
             {isElectron
-              ? <ElectronBrowser initialUrl={initialUrl} />
+              ? <ElectronBrowser initialUrl={initialUrl} syncing={syncing} onSyncClick={() => {
+                  if (syncing) { onSync ? onSync() : onClose(); }
+                  else setSyncing(true);
+                }} />
               : <IframeBrowser
                   initialUrl={initialUrl}
                   lightMode={lm}
