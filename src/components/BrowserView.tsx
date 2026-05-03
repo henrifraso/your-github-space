@@ -173,77 +173,114 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
 }
 
 // ── Fallback com <iframe> — browser normal ────────────────────────────────────
-function IframeBrowser({ initialUrl }: { initialUrl: string }) {
+function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
   const [url, setUrl] = useState(initialUrl);
   const [inputVal, setInputVal] = useState(initialUrl);
-  const [blocked, setBlocked] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [navCount, setNavCount] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const lm = lightMode;
+
+  function toProxyUrl(realUrl: string): string {
+    return `/api/proxy?url=${encodeURIComponent(realUrl)}`;
+  }
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
     setUrl(resolved);
     setInputVal(resolved);
-    setBlocked(false);
+    setLoading(true);
+    setNavCount(c => c + 1);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') navigate(inputVal);
   }
 
+  // Sincroniza barra de endereço quando iframe navega internamente
+  function handleLoad() {
+    setLoading(false);
+    try {
+      const loc = iframeRef.current?.contentWindow?.location;
+      if (loc) {
+        const realUrl = new URLSearchParams(loc.search).get('url');
+        if (realUrl) { setUrl(realUrl); setInputVal(realUrl); }
+      }
+    } catch {}
+  }
+
+  // SPA navigation via postMessage (para sites que usam pushState)
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.data?.type !== 'omni-nav') return;
+      try {
+        const realUrl = new URLSearchParams(new URL(e.data.url as string).search).get('url');
+        if (realUrl) { setUrl(realUrl); setInputVal(realUrl); }
+      } catch {}
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+
   return (
     <div className="flex flex-col w-full h-full">
 
       {/* Barra de endereço */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-[#111] border-b border-[#262626] flex-shrink-0">
-        <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-1.5 gap-2">
-          <Globe size={12} className="text-neutral-500 flex-shrink-0" />
+      <div
+        className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
+        style={{
+          background: lm ? '#EDE8DF' : '#111',
+          borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
+        }}
+      >
+        <div
+          className="flex-1 flex items-center rounded-lg px-3 py-1.5 gap-2"
+          style={{
+            background: lm ? 'rgba(28,23,18,0.06)' : '#1a1a1a',
+            border: lm ? '1px solid rgba(28,23,18,0.12)' : '1px solid #333',
+          }}
+        >
+          <Globe size={12} style={{ color: lm ? '#7a6f64' : '#737373', flexShrink: 0 }} />
           <input
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={e => e.target.select()}
-            className="flex-1 bg-transparent text-xs text-neutral-200 outline-none placeholder:text-neutral-600 min-w-0"
+            className="flex-1 bg-transparent text-xs outline-none min-w-0"
+            style={{ color: lm ? '#1C1712' : '#e5e5e5' }}
             placeholder="Endereço ou busca..."
           />
         </div>
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3b82f6] text-white text-xs font-medium hover:bg-[#2563eb] transition-colors whitespace-nowrap"
+        <button
+          onClick={() => navigate(inputVal)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer"
+          style={lm
+            ? { background: 'rgba(28,23,18,0.08)', color: '#1C1712' }
+            : { background: '#3b82f6', color: '#fff' }}
         >
-          <ExternalLink size={12} />
-          Abrir
-        </a>
+          <ArrowRight size={12} />
+          Ir
+        </button>
       </div>
 
-      {/* iframe */}
-      <div className="flex-1 relative min-h-0 bg-[#0a0a0a]">
-        {blocked ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center px-8">
-            <span className="text-4xl">🔒</span>
-            <p className="text-sm text-neutral-400">Este site bloqueou a exibição em iframe.</p>
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#3b82f6] text-white text-sm font-medium hover:bg-[#2563eb] transition-colors"
-            >
-              <ExternalLink size={14} />
-              Abrir em nova aba
-            </a>
-            <p className="text-xs text-neutral-600">Use o Omni Desktop para navegar sem restrições.</p>
+      {/* iframe via proxy */}
+      <div className="flex-1 relative min-h-0" style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
+            style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
+            <div className="w-6 h-6 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : (
-          <iframe
-            key={url}
-            src={url}
-            className="w-full h-full border-0"
-            onError={() => setBlocked(true)}
-            title="Omni Browser"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
-          />
         )}
+        <iframe
+          ref={iframeRef}
+          key={url + navCount}
+          src={toProxyUrl(url)}
+          className="w-full h-full border-0"
+          onLoad={handleLoad}
+          title="Omni Browser"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
+        />
       </div>
     </div>
   );
@@ -254,9 +291,11 @@ interface BrowserViewProps {
   open: boolean;
   onClose: () => void;
   initialUrl?: string;
+  lightMode?: boolean;
+  onSync?: () => void;
 }
 
-export function BrowserView({ open, onClose, initialUrl = 'https://www.google.com' }: BrowserViewProps) {
+export function BrowserView({ open, onClose, initialUrl = 'https://www.google.com', lightMode = false, onSync }: BrowserViewProps) {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { if (!open) setSyncing(false); }, [open]);
@@ -268,36 +307,50 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
     return () => window.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
+  const lm = lightMode;
+
   return (
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 12 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="fixed inset-0 z-[300] flex flex-col bg-[#0a0a0a]"
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-[300] flex flex-col"
+          style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}
         >
           {/* Titlebar */}
-          <div className="flex items-center gap-3 px-4 py-2.5 bg-[#111] border-b border-[#262626] flex-shrink-0">
+          <div
+            className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
+            style={{
+              background: lm ? '#EDE8DF' : '#111',
+              borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
+            }}
+          >
             <div className="flex-1 min-w-0" />
             <button
-              onClick={() => syncing ? onClose() : setSyncing(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
+              onClick={() => {
+                if (syncing) { onSync ? onSync() : onClose(); }
+                else setSyncing(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
+              style={lm
+                ? { background: 'rgba(28,23,18,0.07)', color: '#1C1712' }
+                : { background: 'rgba(255,255,255,0.05)', color: '#a3a3a3' }}
             >
               <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
               <AnimatePresence mode="wait">
                 {syncing ? (
                   <motion.span
-                    key="fechar"
+                    key="entrar"
                     initial={{ opacity: 0, width: 0 }}
                     animate={{ opacity: 1, width: 'auto' }}
                     exit={{ opacity: 0, width: 0 }}
                     transition={{ duration: 0.18 }}
                     className="flex items-center gap-1 overflow-hidden whitespace-nowrap"
                   >
-                    <X size={11} />
-                    Fechar
+                    {lm ? 'Entrar' : <><X size={11} /> Fechar</>}
                   </motion.span>
                 ) : (
                   <motion.span
@@ -319,7 +372,7 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
           <div className="flex-1 min-h-0">
             {isElectron
               ? <ElectronBrowser initialUrl={initialUrl} />
-              : <IframeBrowser initialUrl={initialUrl} />
+              : <IframeBrowser initialUrl={initialUrl} lightMode={lm} />
             }
           </div>
         </motion.div>

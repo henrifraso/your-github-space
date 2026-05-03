@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation, useMotionValue, animate } from 'motion/react';
-import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X } from 'lucide-react';
+import { BrowserView } from './BrowserView';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Step = 'landing' | 'auth' | 'business' | 'consent';
@@ -56,6 +57,17 @@ async function apiConsent(token: string, negocioId: string) {
   try { await fetch('/api/sync/consent', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ negocio_id: negocioId, consent_version: '1.0' }) }); } catch {}
 }
 
+// ── LupaIcon ──────────────────────────────────────────────────────────────────
+function LupaIcon({ size, strokeWidth, style, className }: { size: number; strokeWidth?: number; style?: React.CSSProperties; className?: string }) {
+  const sw = strokeWidth ?? 1.5;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style} className={className}>
+      <circle cx="10.5" cy="10.5" r="6.2" stroke="currentColor" strokeWidth={sw} />
+      <line x1="15.3" y1="15.3" x2="21.2" y2="21.2" stroke="currentColor" strokeWidth={sw * 1.3} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
   onTap, loginPhase, onNextPhase, onProfileClick,
@@ -65,10 +77,12 @@ function RippleButton({
   onNextPhase: () => void;
   onProfileClick: () => void;
 }) {
-  const FULL_TEXT = 'Um lugar único. Milhões de possibilidades.';
+  const FULL_TEXT    = 'Um lugar único. Milhões de possibilidades.';
+  const MOBILE_TEXTS = ['Um lugar único.', 'Milhões de possibilidades.'] as const;
   const PHASE_TEXT: Record<string, string> = { user: 'Usuário', pass: 'Senha' };
   const CURSOR_STYLE = { animation: 'cursor-blink 0.9s step-end infinite' };
-  const TEXT_SHADOW  = { textShadow: '0 1px 3px rgba(0,0,0,0.22)' };
+  const TEXT_SHADOW  = { textShadow: '0 1px 4px rgba(0,0,0,0.38), 0 0 2px rgba(0,0,0,0.18)' };
+  const LUPA_SHADOW  = 'drop-shadow(0 2px 6px rgba(28,23,18,0.5)) drop-shadow(0 0 2px rgba(28,23,18,0.22))';
 
   const [ripples,    setRipples]    = useState<{ id: number; x: number; y: number }[]>([]);
   const [inputVal,   setInputVal]   = useState('');
@@ -76,9 +90,10 @@ function RippleButton({
   const [phaseTyped, setPhaseTyped] = useState('');
   const [kbHeight,   setKbHeight]   = useState(0);
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 640);
-  const [introDone,       setIntroDone]       = useState(false);
-  const [isSpinning,      setIsSpinning]      = useState(true);
-  const [introLupaVisible, setIntroLupaVisible] = useState(true);
+  const [introDone,         setIntroDone]         = useState(false);
+  const [isSpinning,        setIsSpinning]        = useState(true);
+  const [introLupaVisible,  setIntroLupaVisible]  = useState(true);
+  const [mobileTypingPhase, setMobileTypingPhase] = useState<0|1>(0);
   const iRef            = useRef(0);
   const phaseRef        = useRef(0);
   const btnRef          = useRef<HTMLButtonElement>(null);
@@ -90,13 +105,17 @@ function RippleButton({
   const idleLupaTargetX = useRef(0);         // destino x para shake
   const idleLupaDivRef  = useRef<HTMLDivElement>(null); // para toggle da classe de glow
 
-  const typingDone = typed.length >= FULL_TEXT.length;
+  const currentTarget = isMobile ? MOBILE_TEXTS[mobileTypingPhase === 1 ? 1 : 0] : FULL_TEXT;
+  const typingDone    = isMobile
+    ? (mobileTypingPhase === 1 && typed.length >= MOBILE_TEXTS[1].length)
+    : typed.length >= FULL_TEXT.length;
 
   // ── Intro: dois elementos com crossfade — sem dependência de offsetWidth ──
   useEffect(() => {
     let alive = true;
     async function runIntro() {
       // Phase A: container gira + lupa intro contra-rotaciona (já centrada no DOM)
+      // Phase A: giro normal 3s
       await Promise.all([
         controls.start({
           rotate: 360 * 2,
@@ -108,26 +127,39 @@ function RippleButton({
         }),
       ]);
       if (!alive) return;
+
+      // Burst: aceleração fluida
+      await Promise.all([
+        controls.start({
+          rotate: 360 * 2 + 720,
+          transition: { type: 'tween', duration: 1.1, ease: [0.2, 0, 1, 1] },
+        }),
+        lupaControls.start({
+          rotate: -(360 * 2 + 720),
+          transition: { type: 'tween', duration: 1.1, ease: [0.2, 0, 1, 1] },
+        }),
+      ]);
+      if (!alive) return;
       setIsSpinning(false);
 
-      // Phase B: idleLupaX começa em 0 (centro), anima para +targetX (direita)
-      // Sem set() antes de animate() — elimina o race condition
+      // Phase B: expansão
       const w      = btnRef.current!.offsetWidth;
       const rPad   = window.innerWidth < 640 ? 16 : 24;
-      const lSz    = window.innerWidth < 640 ? 19 : 26;
+      const lSz    = window.innerWidth < 640 ? 60 : 48;
       const tX     = w / 2 - rPad - lSz / 2;
       idleLupaTargetX.current = tX;
 
       setIntroLupaVisible(false);
-      // Duração igual à expansão — a lupa não pode sair à frente do inset() clip
       idleLupaOpacity.set(1);
       animate(idleLupaX, [0, tX], { duration: 5.5, ease: [0.16, 1, 0.3, 1] });
 
-      // Aguarda expansão completa antes de iniciar o typewriter
+      const finalRound = 20;
+      const introTimer = setTimeout(() => { if (alive) setIntroDone(true); }, 4400);
       await controls.start({
-        clipPath: 'inset(0% 0% 0% 0% round 16px)',
+        clipPath: `inset(0% 0% 0% 0% round ${finalRound}px)`,
         transition: { duration: 5.5, ease: [0.16, 1, 0.3, 1] },
       });
+      clearTimeout(introTimer);
       if (!alive) return;
       setIntroDone(true);
     }
@@ -135,18 +167,50 @@ function RippleButton({
     return () => { alive = false; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Typewriter idle — só após intro
+  // Typewriter idle — desktop: texto completo; mobile: fase 0 ("Um lugar único.")
   useEffect(() => {
     if (!introDone) return;
+    iRef.current = 0;
+    const target = isMobile ? MOBILE_TEXTS[0] : FULL_TEXT;
     const t0 = setTimeout(() => {
       const iv = setInterval(() => {
         iRef.current += 1;
-        setTyped(FULL_TEXT.slice(0, iRef.current));
-        if (iRef.current >= FULL_TEXT.length) clearInterval(iv);
+        setTyped(target.slice(0, iRef.current));
+        if (iRef.current >= target.length) {
+          clearInterval(iv);
+          if (isMobile) {
+            // pausa, depois apaga caractere a caractere, depois digita fase 1
+            setTimeout(() => {
+              const eraseIv = setInterval(() => {
+                setTyped(prev => {
+                  if (prev.length <= 1) {
+                    clearInterval(eraseIv);
+                    iRef.current = 0;
+                    setTimeout(() => setMobileTypingPhase(1), 180);
+                    return '';
+                  }
+                  return prev.slice(0, -1);
+                });
+              }, 32);
+            }, 1100);
+          }
+        }
       }, 48);
     }, 30);
     return () => clearTimeout(t0);
   }, [introDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Typewriter mobile fase 1 ("Milhões de possibilidades.")
+  useEffect(() => {
+    if (mobileTypingPhase !== 1) return;
+    const target = MOBILE_TEXTS[1];
+    const iv = setInterval(() => {
+      iRef.current += 1;
+      setTyped(target.slice(0, iRef.current));
+      if (iRef.current >= target.length) clearInterval(iv);
+    }, 48);
+    return () => clearInterval(iv);
+  }, [mobileTypingPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Shake da lupa idle: imediato ao terminar o typewriter, depois a cada 3s
   useEffect(() => {
@@ -233,32 +297,34 @@ function RippleButton({
   const isLogin = loginPhase !== 'idle';
   const kbOpen  = kbHeight > 0;
 
-  const lupaSize   = isMobile ? 30 : 26;
-  const lupaStroke = isMobile ? 1.8 : 1.4;
+  const lupaSize   = isMobile ? 60 : 48;
+  const lupaStroke = isMobile ? 1.6 : 1.4;
 
   return (
     <motion.div
       className="w-full max-w-[340px] sm:max-w-[760px] z-20 relative"
       animate={kbOpen
-        ? { scale: 0.82, y: -(kbHeight * 0.38) }
-        : { scale: 1,    y: 0 }}
+        ? loginPhase !== 'idle'
+          ? { scale: 1,    y: -(kbHeight * 0.46) }
+          : { scale: 0.82, y: -(kbHeight * 0.38) }
+        : { scale: 1, y: 0 }}
       transition={{ type: 'spring', damping: 30, stiffness: 320 }}
     >
 
       <motion.button
         ref={btnRef}
         initial={{ clipPath: isMobile
-          ? 'inset(calc(50% - 120px) calc(50% - 120px) round 20px)'
-          : 'inset(calc(50% - 60px) calc(50% - 60px) round 16px)' }}
+          ? 'inset(calc(50% - 42px) calc(50% - 42px) round 20px)'
+          : 'inset(calc(50% - 42px) calc(50% - 42px) round 20px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
-        className="login-btn relative w-full rounded-2xl px-6 py-5 min-h-[280px] sm:min-h-[160px] flex items-center overflow-hidden outline-none"
+        className="login-btn relative w-full rounded-[20px] sm:rounded-[20px] px-6 py-5 min-h-[84px] sm:min-h-[88px] flex items-center overflow-hidden outline-none"
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: '#F5F1EA',
           border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px rgba(245,241,234,0.06)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px rgba(245,241,234,0.06), inset 0 0 24px rgba(28,23,18,0.07), inset 0 2px 8px rgba(28,23,18,0.05)',
           touchAction: 'manipulation',
           outline: 'none',
         }}
@@ -274,9 +340,9 @@ function RippleButton({
             style={{ opacity: introLupaVisible ? 1 : 0 }}>
             <motion.div
               animate={lupaControls}
-              style={isSpinning ? { animation: 'intro-lupa-glow 0.5s 0.6s ease-in-out infinite' } : { filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.3))' }}
+              style={isSpinning ? { animation: 'intro-lupa-glow 0.5s 0.6s ease-in-out infinite backwards' } : { filter: LUPA_SHADOW }}
             >
-              <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#B8913A' }} />
+              <LupaIcon size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#1C1712' }} />
             </motion.div>
           </div>
         )}
@@ -284,8 +350,8 @@ function RippleButton({
         {/* Lupa idle — parte do centro (mesma origem da intro), anima x para a direita */}
         {loginPhase === 'idle' && (
           <div ref={idleLupaDivRef} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
-            <motion.div style={{ x: idleLupaX, opacity: idleLupaOpacity, filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.2))' }}>
-              <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#B8913A' }} />
+            <motion.div style={{ x: idleLupaX, opacity: idleLupaOpacity, filter: LUPA_SHADOW }}>
+              <LupaIcon size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#1C1712' }} />
             </motion.div>
           </div>
         )}
@@ -294,11 +360,11 @@ function RippleButton({
 
           {/* Idle — typewriter */}
           {loginPhase === 'idle' && (
-            <div style={{ position: 'absolute', left: 24, right: isMobile ? 56 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#1C1712', fontSize: isMobile ? '19px' : '20px', fontWeight: 400, fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ position: 'absolute', left: 24, right: isMobile ? 84 : 80, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              <span style={{ color: '#1C1712', fontSize: isMobile ? '18px' : '22px', fontWeight: 400, fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}>
                 {typed}
               </span>
-              {typed.length < FULL_TEXT.length && (
+              {typed.length < currentTarget.length && (
                 <span className="inline-block w-[1.5px] h-[1em] bg-[#B8913A] ml-[1px] align-middle" style={{ animation: 'cursor-blink 0.9s step-end infinite' }} />
               )}
             </div>
@@ -309,9 +375,9 @@ function RippleButton({
             const target = PHASE_TEXT[loginPhase] ?? '';
             const isDone = phaseTyped.length >= target.length;
             return (
-              <div style={{ position: 'absolute', left: 24, right: isMobile ? 56 : 60, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+              <div style={{ position: 'absolute', left: 24, right: isMobile ? 84 : 80, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                 {!isDone && (
-                  <span style={{ color: '#1C1712', fontSize: isMobile ? '19px' : '20px', fontWeight: 400, fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}>
+                  <span style={{ color: '#1C1712', fontSize: isMobile ? '18px' : '22px', fontWeight: 400, fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}>
                     {phaseTyped}
                     {phaseTyped.length > 0 && (
                       <span className="inline-block w-[1.5px] h-[1em] bg-[#B8913A] ml-[1px] align-middle" style={CURSOR_STYLE} />
@@ -331,7 +397,7 @@ function RippleButton({
                     onKeyDown={handleKeyDown}
                     placeholder={target}
                     className="bg-transparent outline-none border-none w-full text-left"
-                    style={{ color: '#1C1712', fontFamily: "'Inter', sans-serif", fontSize: isMobile ? '19px' : '20px', caretColor: '#B8913A', touchAction: 'manipulation', ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
+                    style={{ color: '#1C1712', WebkitTextFillColor: '#1C1712', fontFamily: "'Inter', sans-serif", fontSize: isMobile ? '18px' : '22px', fontWeight: 400, opacity: 1, caretColor: '#B8913A', touchAction: 'manipulation', textShadow: TEXT_SHADOW.textShadow, ...(loginPhase === 'pass' ? { WebkitTextSecurity: 'disc' } as React.CSSProperties : {}) }}
                     onClick={e => e.stopPropagation()}
                   />
                 )}
@@ -341,13 +407,13 @@ function RippleButton({
 
           {/* Lupa fases login — clicável */}
           {loginPhase !== 'idle' && (
-            <Search
-              size={lupaSize}
-              strokeWidth={lupaStroke}
+            <div
               className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 z-10 cursor-pointer`}
-              style={{ color: '#B8913A', filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.25))' }}
+              style={{ color: '#1C1712', filter: LUPA_SHADOW }}
               onClick={handleLupaClick}
-            />
+            >
+              <LupaIcon size={lupaSize} strokeWidth={lupaStroke} />
+            </div>
           )}
         </>)}
       </motion.button>
@@ -455,6 +521,8 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   }
 
   const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'>('idle');
+  const [lightBrowser, setLightBrowser] = useState(false);
+  const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
@@ -468,7 +536,14 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       tkn = r.access_token;
     } catch {}
     await apiSelectBusiness(tkn, 'mcdo-paulista');
-    onAuthenticated(tkn, 'mcdo-paulista');
+    pendingAuth.current = { tkn, nid: 'mcdo-paulista' };
+    setLightBrowser(true);
+  }
+
+  function handleBrowserSync() {
+    setLightBrowser(false);
+    const p = pendingAuth.current;
+    if (p) onAuthenticated(p.tkn, p.nid);
   }
 
   const modalVariants = {
@@ -499,14 +574,14 @@ export default function LoginScreen({ onAuthenticated }: Props) {
           50%       { opacity: 0; }
         }
         @keyframes intro-lupa-glow {
-          0%, 100% { filter: drop-shadow(0 0 2px rgba(184,145,58,0.15)); }
-          50%      { filter: drop-shadow(0 0 14px rgba(184,145,58,0.9)); }
+          0%, 100% { filter: drop-shadow(0 2px 6px rgba(28,23,18,0.5)) drop-shadow(0 0 2px rgba(28,23,18,0.22)); }
+          50%      { filter: drop-shadow(0 2px 6px rgba(28,23,18,0.5)) drop-shadow(0 0 2px rgba(28,23,18,0.22)) drop-shadow(0 0 14px rgba(28,23,18,0.45)); }
         }
         @keyframes lupa-shake-glow-kf {
-          0%        { filter: drop-shadow(0 1px 3px rgba(184,145,58,0.2)); }
-          18%, 45%  { filter: drop-shadow(0 0 14px rgba(184,145,58,0.95)) drop-shadow(0 0 6px rgba(184,145,58,0.5)); }
-          30%, 60%  { filter: drop-shadow(0 0 8px rgba(184,145,58,0.6)); }
-          100%      { filter: drop-shadow(0 1px 3px rgba(184,145,58,0.2)); }
+          0%        { filter: drop-shadow(0 2px 6px rgba(28,23,18,0.5)) drop-shadow(0 0 2px rgba(28,23,18,0.22)); }
+          18%, 45%  { filter: drop-shadow(0 0 14px rgba(28,23,18,0.7)) drop-shadow(0 0 6px rgba(28,23,18,0.4)); }
+          30%, 60%  { filter: drop-shadow(0 0 9px rgba(28,23,18,0.55)); }
+          100%      { filter: drop-shadow(0 2px 6px rgba(28,23,18,0.5)) drop-shadow(0 0 2px rgba(28,23,18,0.22)); }
         }
         .lupa-shake-glow { animation: lupa-shake-glow-kf 0.6s ease-in-out forwards; }
         .login-btn:focus-visible {
@@ -725,6 +800,13 @@ export default function LoginScreen({ onAuthenticated }: Props) {
           </>
         )}
       </AnimatePresence>
+
+      {/* Browser em modo claro — aparece após senha antes de entrar no feed */}
+      <BrowserView
+        open={lightBrowser}
+        onClose={handleBrowserSync}
+        onSync={handleBrowserSync}
+      />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Bookmark, ChevronRight, TrendingUp,
   Lightbulb, Trophy, ChevronDown,
-  Moon, Sun, Layers, Info, Bell, Camera, Plus,
+  Layers, Info, Bell, Camera, Plus,
   MapPin, Scale, Store, Zap,
   Settings2, X, Globe, LayoutGrid, Power
 } from 'lucide-react';
@@ -380,11 +380,11 @@ function AuthenticatedApp() {
   return (
     <div className={dark ? 'dark' : ''}>
 
-      {/* Botão de deslogar — canto superior direito */}
+      {/* Botão de deslogar — canto superior direito (desktop only) */}
       <button
         onClick={handleLogout}
         title="Sair"
-        className="fixed top-3 right-4 z-[999] p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-white/8 transition-all duration-200 cursor-pointer active:scale-90"
+        className="fixed top-3 right-4 z-[999] hidden lg:flex items-center justify-center p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition-all duration-200 cursor-pointer active:scale-90"
       >
         <Power size={18} />
       </button>
@@ -400,6 +400,14 @@ function AuthenticatedApp() {
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat */}
           <div className="flex items-center lg:hidden">
+            <button
+              onClick={handleLogout}
+              title="Sair"
+              className="cursor-pointer text-neutral-400 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition-all duration-200 active:scale-90"
+            >
+              <Power size={18} className="sm:hidden" />
+              <Power size={20} className="hidden sm:block" />
+            </button>
             <button
               onClick={() => setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
@@ -783,8 +791,6 @@ function AuthenticatedApp() {
       {/* Chat */}
       <ChatDesktop
         wide={scrolled}
-        dark={dark}
-        onToggleDark={() => setDark(d => !d)}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         onDifficulty={() => setDifficultyOpen(true)}

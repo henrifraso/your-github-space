@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target, Send, Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp, Map, Plus, Globe, Settings2, Moon, Sun, Bell } from 'lucide-react';
+import { X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target, Send, Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp, Map, Plus, Globe, Settings2, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 type Phase = 'init' | 'expanded' | 'selected';
@@ -326,15 +326,13 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
 
 interface ChatDesktopProps {
   wide?: boolean;
-  dark?: boolean;
-  onToggleDark?: () => void;
   onSector?: () => void;
   onBrowser?: () => void;
   onDifficulty?: () => void;
   activeSector?: string;
 }
 
-export function ChatDesktop({ wide, dark, onToggleDark, onSector, onBrowser, onDifficulty, activeSector }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-400 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
@@ -354,9 +352,6 @@ export function ChatDesktop({ wide, dark, onToggleDark, onSector, onBrowser, onD
         </button>
         <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
           <Settings2 size={22} />
-        </button>
-        <button onClick={onToggleDark} className={btnCls}>
-          {dark ? <Sun size={22} /> : <Moon size={22} />}
         </button>
         <button className={btnCls}>
           <Bell size={22} />
