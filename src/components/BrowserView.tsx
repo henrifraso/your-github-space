@@ -55,7 +55,7 @@ function normalizeUrl(raw: string): string {
   if (!trimmed) return '';
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   if (/^[\w-]+\.[\w.-]+/.test(trimmed)) return `https://${trimmed}`;
-  return `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(trimmed)}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
 }
 
 function loadScript(src: string): Promise<void> {
@@ -364,7 +364,7 @@ interface BrowserViewProps {
   onSync?: () => void;
 }
 
-export function BrowserView({ open, onClose, initialUrl = 'https://lite.duckduckgo.com/lite/', lightMode = false, onSync }: BrowserViewProps) {
+export function BrowserView({ open, onClose, initialUrl = 'https://www.google.com', lightMode = false, onSync }: BrowserViewProps) {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { if (!open) setSyncing(false); }, [open]);
