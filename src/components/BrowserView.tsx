@@ -69,30 +69,8 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
-async function getActiveServiceWorker(reg: ServiceWorkerRegistration): Promise<ServiceWorker> {
-  // Já controla a página — retorna imediatamente
-  if (navigator.serviceWorker.controller) return navigator.serviceWorker.controller;
-
-  // Aguarda o SW ativar (install → waiting → activating → activated)
-  const sw = reg.active ?? reg.installing ?? reg.waiting;
-  if (!sw) throw new Error('No service worker available');
-  if (sw.state !== 'activated') {
-    await new Promise<void>((resolve, reject) => {
-      sw.addEventListener('statechange', function handler() {
-        if (sw.state === 'activated') { sw.removeEventListener('statechange', handler); resolve(); }
-        if (sw.state === 'redundant') { sw.removeEventListener('statechange', handler); reject(new Error('SW became redundant')); }
-      });
-    });
-  }
-
-  // Após ativar, clients.claim() no SW deve assumir controle — aguarda controllerchange
-  if (navigator.serviceWorker.controller) return navigator.serviceWorker.controller;
-  return new Promise(resolve => {
-    navigator.serviceWorker.addEventListener('controllerchange', function handler() {
-      navigator.serviceWorker.removeEventListener('controllerchange', handler);
-      resolve(navigator.serviceWorker.controller!);
-    });
-  });
+function timeout<T>(ms: number, msg: string): Promise<T> {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), ms));
 }
 
 // Singleton — inicializa Scramjet uma única vez por sessão
@@ -100,21 +78,37 @@ let scramjetPromise: Promise<ScramjetController> | null = null;
 
 function getScramjetController(): Promise<ScramjetController> {
   if (scramjetPromise) return scramjetPromise;
+
+  // Listener registrado ANTES de qualquer await — garante que não perde o evento
+  const controllerReady = new Promise<ServiceWorker>(resolve => {
+    if (navigator.serviceWorker.controller) { resolve(navigator.serviceWorker.controller); return; }
+    navigator.serviceWorker.addEventListener('controllerchange', function h() {
+      navigator.serviceWorker.removeEventListener('controllerchange', h);
+      resolve(navigator.serviceWorker.controller!);
+    });
+  });
+
   scramjetPromise = (async () => {
     // 1. Carregar runtime Scramjet (define window.$scramjet)
     await loadScript('/scramjet/scramjet.js');
     // 2. Carregar controller API (lê window.$scramjet, define window.$scramjetController)
     await loadScript('/controller/controller.api.js');
-    // 3. Registrar service worker
-    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-    const sw = await getActiveServiceWorker(reg);
+    // 3. Registrar SW — clients.claim() no activate dispara controllerchange
+    await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    const sw = await Promise.race([
+      controllerReady,
+      timeout<never>(12000, 'Service Worker timeout — recarregue a página'),
+    ]);
     // 4. Inicializar transporte Epoxy (Wisp)
     const { default: EpoxyTransport } = await import('@mercuryworkshop/epoxy-transport');
     const transport = new EpoxyTransport({ wisp: WISP_URL });
     // 5. Criar controller
     const Controller = window.$scramjetController!.Controller;
     const controller = new Controller({ serviceworker: sw, transport });
-    await controller.wait();
+    await Promise.race([
+      controller.wait(),
+      timeout<never>(15000, 'Controller timeout — verifique o servidor Wisp'),
+    ]);
     return controller;
   })().catch(err => {
     scramjetPromise = null; // permite retry em caso de falha
