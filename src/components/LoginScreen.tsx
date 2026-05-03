@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'motion/react';
+import { motion, AnimatePresence, useAnimation, useMotionValue, animate } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X, Search } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -79,14 +79,16 @@ function RippleButton({
   const [introDone,       setIntroDone]       = useState(false);
   const [isSpinning,      setIsSpinning]      = useState(true);
   const [introLupaVisible, setIntroLupaVisible] = useState(true);
-  const [idleLupaVisible,  setIdleLupaVisible]  = useState(false);
   const iRef            = useRef(0);
   const phaseRef        = useRef(0);
   const btnRef          = useRef<HTMLButtonElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const controls        = useAnimation();
-  const lupaControls    = useAnimation(); // intro lupa (spin Phase A)
-  const lupaIdleControls = useAnimation(); // idle lupa (shake)
+  const lupaControls    = useAnimation();    // intro lupa (spin Phase A)
+  const idleLupaX       = useMotionValue(0); // idle lupa — posição x (0 = centro)
+  const idleLupaOpacity = useMotionValue(0); // idle lupa — opacidade
+  const idleLupaTargetX = useRef(0);         // destino x para shake
+  const idleLupaDivRef  = useRef<HTMLDivElement>(null); // para toggle da classe de glow
 
   const typingDone = typed.length >= FULL_TEXT.length;
 
@@ -108,15 +110,24 @@ function RippleButton({
       if (!alive) return;
       setIsSpinning(false);
 
-      // Phase B: crossfade 150ms (intro → idle) + expansão do container
+      // Phase B: idleLupaX começa em 0 (centro), anima para +targetX (direita)
+      // Sem set() antes de animate() — elimina o race condition
+      const w      = btnRef.current!.offsetWidth;
+      const rPad   = window.innerWidth < 640 ? 16 : 24;
+      const lSz    = window.innerWidth < 640 ? 19 : 26;
+      const tX     = w / 2 - rPad - lSz / 2;
+      idleLupaTargetX.current = tX;
+
       setIntroLupaVisible(false);
-      setIdleLupaVisible(true);
-      controls.start({
-        clipPath: 'circle(200% at 50% 50%)',
+      // Duração igual à expansão — a lupa não pode sair à frente do inset() clip
+      idleLupaOpacity.set(1);
+      animate(idleLupaX, [0, tX], { duration: 5.5, ease: [0.16, 1, 0.3, 1] });
+
+      // Aguarda expansão completa antes de iniciar o typewriter
+      await controls.start({
+        clipPath: 'inset(0% 0% 0% 0% round 16px)',
         transition: { duration: 5.5, ease: [0.16, 1, 0.3, 1] },
       });
-
-      await new Promise<void>(r => setTimeout(r, 1500));
       if (!alive) return;
       setIntroDone(true);
     }
@@ -140,7 +151,16 @@ function RippleButton({
   // Shake da lupa idle: imediato ao terminar o typewriter, depois a cada 3s
   useEffect(() => {
     if (!typingDone || loginPhase !== 'idle') return;
-    const shake = () => lupaIdleControls.start({ x: [0, -3, 3, -3, 3, -2, 2, -2, 2, -1, 1, 0], transition: { duration: 0.6, ease: 'easeInOut' } });
+    const tx = idleLupaTargetX.current;
+    const shake = () => {
+      animate(idleLupaX, [tx, tx-3, tx+3, tx-3, tx+3, tx-2, tx+2, tx-2, tx+2, tx-1, tx+1, tx], { duration: 0.6, ease: 'easeInOut' });
+      const el = idleLupaDivRef.current;
+      if (el) {
+        el.classList.remove('lupa-shake-glow');
+        void el.offsetWidth; // força reflow para reiniciar a animação CSS
+        el.classList.add('lupa-shake-glow');
+      }
+    };
     shake();
     const iv = setInterval(shake, 3000);
     return () => clearInterval(iv);
@@ -227,17 +247,18 @@ function RippleButton({
 
       <motion.button
         ref={btnRef}
-        initial={{ clipPath: 'circle(34px at 50% 50%)' }}
+        initial={{ clipPath: 'inset(calc(50% - 28px) calc(50% - 28px) round 16px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
-        className="relative w-full rounded-2xl px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
+        className="login-btn relative w-full rounded-2xl px-6 py-5 min-h-[68px] flex items-center overflow-hidden outline-none"
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: '#F5F1EA',
           border: '1px solid rgba(255,255,255,0.10)',
           boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px rgba(245,241,234,0.06)',
           touchAction: 'manipulation',
+          outline: 'none',
         }}
       >
         {ripples.map(rp => (
@@ -248,7 +269,7 @@ function RippleButton({
         {/* Lupa intro — centrada, visível durante Phase A/B, crossfade para idle */}
         {loginPhase === 'idle' && (
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
-            style={{ opacity: introLupaVisible ? 1 : 0, transition: 'opacity 150ms ease' }}>
+            style={{ opacity: introLupaVisible ? 1 : 0 }}>
             <motion.div
               animate={lupaControls}
               style={isSpinning ? { animation: 'intro-lupa-glow 0.5s 0.6s ease-in-out infinite' } : { filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.3))' }}
@@ -258,14 +279,10 @@ function RippleButton({
           </div>
         )}
 
-        {/* Lupa idle — fixada à direita, aparece via crossfade após Phase B */}
+        {/* Lupa idle — parte do centro (mesma origem da intro), anima x para a direita */}
         {loginPhase === 'idle' && (
-          <div className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 pointer-events-none z-10`}
-            style={{ opacity: idleLupaVisible ? 1 : 0, transition: 'opacity 150ms ease' }}>
-            <motion.div
-              animate={lupaIdleControls}
-              style={{ filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.3))' }}
-            >
+          <div ref={idleLupaDivRef} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
+            <motion.div style={{ x: idleLupaX, opacity: idleLupaOpacity, filter: 'drop-shadow(0 1px 3px rgba(184,145,58,0.2))' }}>
               <Search size={lupaSize} strokeWidth={lupaStroke} style={{ color: '#B8913A' }} />
             </motion.div>
           </div>
@@ -482,6 +499,17 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         @keyframes intro-lupa-glow {
           0%, 100% { filter: drop-shadow(0 0 2px rgba(184,145,58,0.15)); }
           50%      { filter: drop-shadow(0 0 14px rgba(184,145,58,0.9)); }
+        }
+        @keyframes lupa-shake-glow-kf {
+          0%        { filter: drop-shadow(0 1px 3px rgba(184,145,58,0.2)); }
+          18%, 45%  { filter: drop-shadow(0 0 14px rgba(184,145,58,0.95)) drop-shadow(0 0 6px rgba(184,145,58,0.5)); }
+          30%, 60%  { filter: drop-shadow(0 0 8px rgba(184,145,58,0.6)); }
+          100%      { filter: drop-shadow(0 1px 3px rgba(184,145,58,0.2)); }
+        }
+        .lupa-shake-glow { animation: lupa-shake-glow-kf 0.6s ease-in-out forwards; }
+        .login-btn:focus-visible {
+          outline: 1.5px solid rgba(255,255,255,0.55) !important;
+          outline-offset: 2px;
         }
       `}</style>
 
