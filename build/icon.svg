@@ -1,85 +1,99 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="42%" r="65%">
-      <stop offset="0%"   stop-color="#161616"/>
+
+    <!-- Máscara macOS: rounded rect com corner radius ~22.5% -->
+    <clipPath id="macMask">
+      <rect x="0" y="0" width="1024" height="1024" rx="225" ry="225"/>
+    </clipPath>
+
+    <!-- Fundo escuro com profundidade radial -->
+    <radialGradient id="bg" cx="50%" cy="38%" r="70%">
+      <stop offset="0%"   stop-color="#1e1e1e"/>
       <stop offset="100%" stop-color="#000000"/>
     </radialGradient>
 
-    <linearGradient id="numGloss" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%"   stop-color="#2c2c2c"/>
-      <stop offset="28%"  stop-color="#111111"/>
-      <stop offset="49%"  stop-color="#060606"/>
-      <stop offset="50%"  stop-color="#000000"/>
-      <stop offset="78%"  stop-color="#0d0d0d"/>
-      <stop offset="100%" stop-color="#191919"/>
+    <!-- Cromado escuro para o número -->
+    <linearGradient id="chrome" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#c0c0c0"/>
+      <stop offset="18%"  stop-color="#484848"/>
+      <stop offset="35%"  stop-color="#181818"/>
+      <stop offset="50%"  stop-color="#070707"/>
+      <stop offset="51%"  stop-color="#0c0c0c"/>
+      <stop offset="72%"  stop-color="#252525"/>
+      <stop offset="90%"  stop-color="#101010"/>
+      <stop offset="100%" stop-color="#363636"/>
     </linearGradient>
 
-    <linearGradient id="numShine" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
-      <stop offset="44%"  stop-color="#ffffff" stop-opacity="0.03"/>
-      <stop offset="45%"  stop-color="#ffffff" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    <!-- Reflexo especular superior -->
+    <linearGradient id="shine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"  stop-color="#fff" stop-opacity="0.50"/>
+      <stop offset="20%" stop-color="#fff" stop-opacity="0.08"/>
+      <stop offset="21%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
 
-    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
-      <stop offset="55%"  stop-color="#000" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0.9"/>
+    <!-- Vinheta nas bordas -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="68%">
+      <stop offset="48%"  stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.88"/>
     </radialGradient>
 
+    <!-- Sombra do número -->
     <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feDropShadow dx="0" dy="0"  stdDeviation="50" flood-color="#000" flood-opacity="1"/>
-      <feDropShadow dx="0" dy="20" stdDeviation="30" flood-color="#000" flood-opacity="0.95"/>
-      <feDropShadow dx="0" dy="5"  stdDeviation="8"  flood-color="#000" flood-opacity="1"/>
+      <feDropShadow dx="0" dy="28" stdDeviation="32" flood-color="#000" flood-opacity="1"/>
+      <feDropShadow dx="0" dy="6"  stdDeviation="8"  flood-color="#000" flood-opacity="0.9"/>
     </filter>
 
-    <filter id="rimLight" x="-5%" y="-5%" width="110%" height="110%">
-      <feMorphology operator="dilate" radius="1.2" in="SourceAlpha" result="expanded"/>
-      <feFlood flood-color="#222222" result="rimColor"/>
-      <feComposite in="rimColor" in2="expanded" operator="in" result="rim"/>
+    <!-- Rim light: borda metálica fina -->
+    <filter id="rimLight" x="-4%" y="-4%" width="108%" height="108%">
+      <feMorphology operator="dilate" radius="2.5" in="SourceAlpha" result="rim"/>
+      <feFlood flood-color="#707070" result="c"/>
+      <feComposite in="c" in2="rim" operator="in" result="rimFinal"/>
       <feMerge>
-        <feMergeNode in="rim"/>
+        <feMergeNode in="rimFinal"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
+    <!-- Clip do número para o brilho -->
     <clipPath id="numClip">
       <text x="512" y="596"
         text-anchor="middle"
         font-family="'Courier New', Courier, monospace"
-        font-size="380"
-        font-weight="900"
-        letter-spacing="-8">001</text>
+        font-size="360" font-weight="900" letter-spacing="-6">001</text>
     </clipPath>
+
   </defs>
 
-  <!-- Fundo -->
-  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- Tudo clipado pelo rounded rect macOS -->
+  <g clip-path="url(#macMask)">
 
-  <!-- Número — sombra profunda -->
-  <text x="512" y="602"
-    text-anchor="middle"
-    font-family="'Courier New', Courier, monospace"
-    font-size="380"
-    font-weight="900"
-    letter-spacing="-8"
-    fill="#000000"
-    filter="url(#shadow)">001</text>
+    <!-- Fundo -->
+    <rect width="1024" height="1024" fill="url(#bg)"/>
 
-  <!-- Número — gloss preto brilhante -->
-  <text x="512" y="596"
-    text-anchor="middle"
-    font-family="'Courier New', Courier, monospace"
-    font-size="380"
-    font-weight="900"
-    letter-spacing="-8"
-    fill="url(#numGloss)"
-    filter="url(#rimLight)">001</text>
+    <!-- Sombra do número -->
+    <text x="512" y="604"
+      text-anchor="middle"
+      font-family="'Courier New', Courier, monospace"
+      font-size="360" font-weight="900" letter-spacing="-6"
+      fill="#000" filter="url(#shadow)">001</text>
 
-  <!-- Brilho especular superior -->
-  <rect x="0" y="0" width="1024" height="1024"
-    fill="url(#numShine)"
-    clip-path="url(#numClip)"/>
+    <!-- Número cromado -->
+    <text x="512" y="596"
+      text-anchor="middle"
+      font-family="'Courier New', Courier, monospace"
+      font-size="360" font-weight="900" letter-spacing="-6"
+      fill="url(#chrome)"
+      filter="url(#rimLight)">001</text>
 
-  <!-- Vinheta -->
-  <rect width="1024" height="1024" fill="url(#vignette)"/>
+    <!-- Reflexo especular -->
+    <rect x="0" y="0" width="1024" height="1024"
+      fill="url(#shine)"
+      clip-path="url(#numClip)"/>
+
+    <!-- Vinheta -->
+    <rect width="1024" height="1024" fill="url(#vignette)"/>
+
+  </g>
+
 </svg>
