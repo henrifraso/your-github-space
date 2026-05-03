@@ -540,22 +540,28 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [lightBrowser, setLightBrowser] = useState(false);
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
-  // ── GIF intro — timer começa no onLoad do GIF, não no mount ─────────────
-  // Frame 124 (4960ms/loop) é o mais próximo do centro. 2 loops = 9960ms.
+  // ── GIF intro — 2 loops, circle retorna ao centro no frame 124 (4960ms/loop)
   const GIF_LOOP_MS = 9960;
   const [gifStarted, setGifStarted] = useState(false);
   const [gifVisible, setGifVisible]  = useState(true);
   const gifT1 = useRef<ReturnType<typeof setTimeout>>();
   const gifT2 = useRef<ReturnType<typeof setTimeout>>();
+  const gifTriggered = useRef(false);
 
-  const handleGifLoad = useCallback(() => {
+  const triggerGifEnd = useCallback(() => {
+    if (gifTriggered.current) return;
+    gifTriggered.current = true;
+    clearTimeout(gifT1.current);
+    clearTimeout(gifT2.current);
     gifT1.current = setTimeout(() => setGifStarted(true), GIF_LOOP_MS);
     gifT2.current = setTimeout(() => setGifVisible(false), GIF_LOOP_MS + 800);
   }, []);
 
+  // Fallback: dispara mesmo se onLoad não chamar (GIF em cache)
   useEffect(() => {
-    return () => { clearTimeout(gifT1.current); clearTimeout(gifT2.current); };
-  }, []);
+    const fallback = setTimeout(triggerGifEnd, 500);
+    return () => { clearTimeout(fallback); clearTimeout(gifT1.current); clearTimeout(gifT2.current); };
+  }, [triggerGifEnd]);
 
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
@@ -653,7 +659,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
               alt=""
               className="w-full h-full object-cover"
               draggable={false}
-              onLoad={handleGifLoad}
+              onLoad={triggerGifEnd}
             />
             {/* Grain cinematográfico sobre o GIF */}
             <div className="absolute inset-0 pointer-events-none" style={{
