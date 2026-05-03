@@ -10,26 +10,7 @@ declare global {
       saveOffline: (key: string, data: unknown) => Promise<{ ok: boolean; file?: string }>;
       onNavigationUpdate: (cb: (data: unknown) => void) => void;
     };
-    $scramjet?: any;
-    $scramjetController?: {
-      Controller: new (init: { serviceworker: ServiceWorker; transport: any }) => ScramjetController;
-      config: {
-        prefix: string;
-        scramjetPath: string;
-        injectPath: string;
-        wasmPath: string;
-        virtualWasmPath: string;
-      };
-    };
   }
-}
-
-interface ScramjetController {
-  wait(): Promise<void>;
-  createFrame(el: HTMLIFrameElement): ScramjetFrame;
-}
-interface ScramjetFrame {
-  go(url: string): void;
 }
 
 // webview é um elemento Chromium/Electron — React já tem tipos parciais; usamos any no ref
@@ -47,74 +28,12 @@ type WebviewElement = HTMLElement & {
 
 const isElectron = typeof window !== 'undefined' && !!window.electron?.isElectron;
 
-// URL do Wisp server — Railway (fallback: localhost dev)
-const WISP_URL = (import.meta as any).env?.VITE_WISP_URL ?? 'ws://localhost:3003';
-
 function normalizeUrl(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return '';
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   if (/^[\w-]+\.[\w.-]+/.test(trimmed)) return `https://${trimmed}`;
   return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
-}
-
-function loadScript(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error(`Failed to load ${src}`));
-    document.head.appendChild(s);
-  });
-}
-
-function timeout<T>(ms: number, msg: string): Promise<T> {
-  return new Promise((_, reject) => setTimeout(() => reject(new Error(msg)), ms));
-}
-
-// Singleton — inicializa Scramjet uma única vez por sessão
-let scramjetPromise: Promise<ScramjetController> | null = null;
-
-function getScramjetController(): Promise<ScramjetController> {
-  if (scramjetPromise) return scramjetPromise;
-
-  // Listener registrado ANTES de qualquer await — garante que não perde o evento
-  const controllerReady = new Promise<ServiceWorker>(resolve => {
-    if (navigator.serviceWorker.controller) { resolve(navigator.serviceWorker.controller); return; }
-    navigator.serviceWorker.addEventListener('controllerchange', function h() {
-      navigator.serviceWorker.removeEventListener('controllerchange', h);
-      resolve(navigator.serviceWorker.controller!);
-    });
-  });
-
-  scramjetPromise = (async () => {
-    // 1. Carregar runtime Scramjet (define window.$scramjet)
-    await loadScript('/scramjet/scramjet.js');
-    // 2. Carregar controller API (lê window.$scramjet, define window.$scramjetController)
-    await loadScript('/controller/controller.api.js');
-    // 3. Registrar SW — clients.claim() no activate dispara controllerchange
-    await navigator.serviceWorker.register('/sw.js', { scope: '/' });
-    const sw = await Promise.race([
-      controllerReady,
-      timeout<never>(12000, 'Service Worker timeout — recarregue a página'),
-    ]);
-    // 4. Inicializar transporte Epoxy (Wisp)
-    const { default: EpoxyTransport } = await import('@mercuryworkshop/epoxy-transport');
-    const transport = new EpoxyTransport({ wisp: WISP_URL });
-    // 5. Criar controller
-    const Controller = window.$scramjetController!.Controller;
-    const controller = new Controller({ serviceworker: sw, transport });
-    await Promise.race([
-      controller.wait(),
-      timeout<never>(15000, 'Controller timeout — verifique o servidor Wisp'),
-    ]);
-    return controller;
-  })().catch(err => {
-    scramjetPromise = null; // permite retry em caso de falha
-    throw err;
-  });
-  return scramjetPromise;
 }
 
 // ── Navegador com <webview> — só funciona dentro do Electron ─────────────────
@@ -219,74 +138,60 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
   );
 }
 
-// ── Navegador com Scramjet Service Worker — browser normal ───────────────────
+// ── Navegador com iframe + proxy server-side — browser normal ─────────────────
 function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  // iframeUrl controla quando o iframe remonta (só muda via navigate())
+  // url/inputVal são só a barra de endereço (atualizam via onLoad/postMessage)
+  const [iframeUrl, setIframeUrl] = useState(initialUrl);
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const frameRef = useRef<ScramjetFrame | null>(null);
-  const pendingNavRef = useRef<string | null>(null);
+  const [navCount, setNavCount] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const lm = lightMode;
 
-  // Inicializar Scramjet e criar frame quando o iframe montar
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    getScramjetController()
-      .then(controller => {
-        if (cancelled || !iframeRef.current) return;
-        const frame = controller.createFrame(iframeRef.current);
-        frameRef.current = frame;
-        const target = pendingNavRef.current ?? initialUrl;
-        pendingNavRef.current = null;
-        frame.go(normalizeUrl(target) || initialUrl);
-      })
-      .catch(err => {
-        if (cancelled) return;
-        console.error('Scramjet init error:', err);
-        setError('Não foi possível inicializar o navegador. Verifique a conexão.');
-        setLoading(false);
-      });
-
-    return () => { cancelled = true; };
-  }, [initialUrl]);
-
-  // Spinner: ouve postMessage do frame (Scramjet injeta tracker compatível)
-  useEffect(() => {
-    function onMessage(e: MessageEvent) {
-      if (e.data?.type === 'omni-loading') setLoading(true);
-      if (e.data?.type === 'omni-nav') {
-        setLoading(false);
-        const url = e.data.url as string;
-        if (url) setInputVal(url);
-      }
-    }
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, []);
-
-  function handleIframeLoad() {
-    setLoading(false);
+  function toProxyUrl(realUrl: string): string {
+    return `/api/proxy?url=${encodeURIComponent(realUrl)}`;
   }
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
+    setIframeUrl(resolved);
     setInputVal(resolved);
     setLoading(true);
-    if (frameRef.current) {
-      frameRef.current.go(resolved);
-    } else {
-      pendingNavRef.current = resolved;
-    }
+    setNavCount(c => c + 1);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') navigate(inputVal);
   }
+
+  // Atualiza só a barra de endereço quando iframe navega — não remonta
+  function handleLoad() {
+    setLoading(false);
+    try {
+      const loc = iframeRef.current?.contentWindow?.location;
+      if (loc) {
+        const realUrl = new URLSearchParams(loc.search).get('url');
+        if (realUrl) setInputVal(realUrl);
+      }
+    } catch {}
+  }
+
+  // Navegação interna via postMessage (SPAs, tracker injected)
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.data?.type === 'omni-loading') { setLoading(true); return; }
+      if (e.data?.type !== 'omni-nav') return;
+      try {
+        const realUrl = new URLSearchParams(new URL(e.data.url as string).search).get('url');
+        if (realUrl) setInputVal(realUrl);
+      } catch {}
+      setLoading(false);
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -318,31 +223,23 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
         </button>
       </div>
 
-      {/* Área do iframe */}
+      {/* iframe via proxy */}
       <div className="flex-1 relative min-h-0" style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
-        {loading && !error && (
+        {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
             style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
             <div className="w-6 h-6 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        {error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 px-6"
-            style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
-            <p className="text-xs text-center" style={{ color: lm ? '#7a6f64' : '#737373' }}>{error}</p>
-            <button onClick={() => { setError(null); setLoading(true); scramjetPromise = null; navigate(inputVal); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer"
-              style={{ background: '#3b82f6', color: '#fff' }}>
-              Tentar novamente
-            </button>
-          </div>
-        )}
         <iframe
           ref={iframeRef}
+          key={iframeUrl + navCount}
+          src={toProxyUrl(iframeUrl)}
           className="w-full h-full border-0"
-          onLoad={handleIframeLoad}
+          onLoad={handleLoad}
+          onError={() => setLoading(false)}
           title="Omni Browser"
-          style={{ display: error ? 'none' : 'block' }}
+          sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
         />
       </div>
     </div>
@@ -420,7 +317,7 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
             </button>
           </div>
 
-          {/* Conteúdo: webview (Electron) ou Scramjet (browser) */}
+          {/* Conteúdo: webview (Electron) ou iframe (browser) */}
           <div className="flex-1 min-h-0">
             {isElectron
               ? <ElectronBrowser initialUrl={initialUrl} />
