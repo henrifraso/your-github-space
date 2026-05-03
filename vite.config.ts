@@ -29,18 +29,23 @@ var pp=history.pushState,pr=history.replaceState;
 history.pushState=function(){pp.apply(this,arguments);fn(location.href)};
 history.replaceState=function(){pr.apply(this,arguments);fn(location.href)};
 addEventListener('popstate',function(){fn(location.href)});
-document.addEventListener('submit',function(e){
-  var f=e.target;if(!f||f.nodeName!=='FORM')return;
-  if((f.getAttribute('method')||'get').toLowerCase()!=='get')return;
+function fixForm(f){
+  if(!f||f.nodeName!=='FORM')return false;
+  if((f.getAttribute('method')||'get').toLowerCase()!=='get')return false;
   try{
     var pa=new URL(f.action),orig=pa.searchParams.get('url');
-    if(!orig)return;
-    e.preventDefault();
+    if(!orig)return false;
     var fd=new URLSearchParams(new FormData(f));
     var base=orig.split('?')[0];
     window.location.href=pa.origin+pa.pathname+'?url='+encodeURIComponent(base+'?'+fd.toString());
-  }catch(ex){}
-},true);
+    return true;
+  }catch(ex){return false;}
+}
+document.addEventListener('submit',function(e){if(fixForm(e.target)){e.preventDefault();}},true);
+var os=HTMLFormElement.prototype.submit;
+HTMLFormElement.prototype.submit=function(){if(!fixForm(this))os.call(this);};
+var ors=HTMLFormElement.prototype.requestSubmit;
+if(ors)HTMLFormElement.prototype.requestSubmit=function(s){if(!fixForm(this))ors.call(this,s);};
 })();</script>`;
   html = /<head/i.test(html)
     ? html.replace(/(<head[^>]*>)/i, '$1' + tracker)
