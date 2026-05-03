@@ -396,7 +396,9 @@ try{
 }
 
 // ── Navegador com libcurl.js (primário) + iframe proxy (fallback) ─────────────
-function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
+function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncClick }: {
+  initialUrl: string; lightMode?: boolean; syncing?: boolean; onSyncClick?: () => void;
+}) {
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
   const [navCount, setNavCount] = useState(0);
@@ -533,32 +535,65 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
 
   const isInit = lcState === 'loading' && navCount === 0;
 
+  const btnBase = lm
+    ? { background: 'rgba(28,23,18,0.05)', border: '1px solid rgba(28,23,18,0.10)', color: '#4a3f36' }
+    : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#747474' };
+  const btnActive = lm
+    ? { background: 'rgba(28,23,18,0.11)', border: '1px solid rgba(28,23,18,0.18)', color: '#1C1712' }
+    : { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.13)', color: '#d0d0d0' };
+
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex items-center gap-2 px-4 py-3 flex-shrink-0"
-        style={{
-          background: lm ? '#EDE8DF' : '#111',
-          borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #1f1f1f',
+      {/* ── Barra única — espaço acima + URL + ações ─── */}
+      <div style={{
+        padding: '20px 16px 14px',
+        background: lm ? '#EDE8DF' : '#111',
+        borderBottom: lm ? '1px solid rgba(28,23,18,0.08)' : '1px solid rgba(255,255,255,0.05)',
+        display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
+      }}>
+        {/* Input URL */}
+        <div style={{
+          flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+          paddingLeft: 16, paddingRight: 16, height: 52, borderRadius: 16,
+          background: lm ? 'rgba(28,23,18,0.05)' : 'rgba(255,255,255,0.04)',
+          border: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid rgba(255,255,255,0.07)',
         }}>
-        <div className="flex-1 flex items-center gap-2.5 px-4 rounded-[16px]"
-          style={{
-            background: lm ? 'rgba(28,23,18,0.06)' : 'rgba(255,255,255,0.04)',
-            border: lm ? '1px solid rgba(28,23,18,0.12)' : '1px solid rgba(255,255,255,0.08)',
-            minHeight: 52,
-          }}>
-          <Globe size={13} style={{ color: lm ? '#9a8f84' : '#555', flexShrink: 0 }} />
+          {loading
+            ? <div style={{ width: 13, height: 13, borderRadius: '50%', flexShrink: 0,
+                border: lm ? '1.5px solid rgba(28,23,18,0.15)' : '1.5px solid rgba(255,255,255,0.12)',
+                borderTopColor: lm ? 'rgba(28,23,18,0.55)' : 'rgba(255,255,255,0.55)',
+                animation: 'spin 0.7s linear infinite' }} />
+            : <Globe size={13} style={{ color: lm ? '#9a8f84' : '#464646', flexShrink: 0 }} />
+          }
           <input value={inputVal} onChange={e => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
-            className="flex-1 bg-transparent outline-none min-w-0"
-            style={{ color: lm ? '#1C1712' : '#d4d4d4', fontSize: 13 }}
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              color: lm ? '#1C1712' : '#d0d0d0', fontSize: 13, minWidth: 0 }}
             placeholder="Endereço ou busca..." />
         </div>
+
+        {/* Botão Ir */}
         <button onClick={() => navigate(inputVal)}
-          className="flex items-center justify-center flex-shrink-0 rounded-[16px] transition-all duration-150 cursor-pointer"
-          style={lm
-            ? { background: 'rgba(28,23,18,0.07)', border: '1px solid rgba(28,23,18,0.12)', color: '#1C1712', width: 52, height: 52 }
-            : { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)', color: '#a3a3a3', width: 52, height: 52 }}>
-          <ArrowRight size={16} />
+          style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.15s', ...btnBase }}>
+          <ArrowRight size={16} strokeWidth={1.8} />
+        </button>
+
+        {/* Botão Sincronizar ↔ Fechar */}
+        <button onClick={onSyncClick}
+          style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.2s', ...(syncing ? btnActive : btnBase) }}>
+          <AnimatePresence mode="wait">
+            <motion.div key={syncing ? 'x' : 'sync'}
+              initial={{ opacity: 0, rotate: -20, scale: 0.75 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
+              exit={{ opacity: 0, rotate: 20, scale: 0.75 }}
+              transition={{ duration: 0.16 }}>
+              {syncing ? <X size={16} strokeWidth={1.8} /> : <RefreshCw size={15} strokeWidth={1.8} />}
+            </motion.div>
+          </AnimatePresence>
         </button>
       </div>
 
@@ -632,48 +667,42 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
           className="fixed inset-0 z-[300] flex flex-col"
           style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}
         >
-          {/* Titlebar */}
-          <div className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
-            style={{
-              background: lm ? '#EDE8DF' : '#111',
-              borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
-            }}>
-            <div className="flex-1 min-w-0" />
-            <button
-              onClick={() => {
-                if (syncing) { onSync ? onSync() : onClose(); }
-                else setSyncing(true);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
-              style={lm
-                ? { background: 'rgba(28,23,18,0.07)', color: '#1C1712' }
-                : { background: 'rgba(255,255,255,0.05)', color: '#a3a3a3' }}>
-              <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
-              <AnimatePresence mode="wait">
-                {syncing ? (
-                  <motion.span key="entrar"
-                    initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }} transition={{ duration: 0.18 }}
-                    className="flex items-center gap-1 overflow-hidden whitespace-nowrap">
-                    {lm ? 'Entrar' : <><X size={11} /> Fechar</>}
-                  </motion.span>
-                ) : (
-                  <motion.span key="sincronizar"
-                    initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }} transition={{ duration: 0.18 }}
-                    className="overflow-hidden whitespace-nowrap">
-                    Sincronizar
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </button>
-          </div>
+          {/* Titlebar — só para ElectronBrowser */}
+          {isElectron && (
+            <div className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
+              style={{
+                background: lm ? '#EDE8DF' : '#111',
+                borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
+              }}>
+              <div className="flex-1 min-w-0" />
+              <button
+                onClick={() => {
+                  if (syncing) { onSync ? onSync() : onClose(); }
+                  else setSyncing(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
+                style={lm
+                  ? { background: 'rgba(28,23,18,0.07)', color: '#1C1712' }
+                  : { background: 'rgba(255,255,255,0.05)', color: '#a3a3a3' }}>
+                <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
+                {syncing ? 'Fechar' : 'Sincronizar'}
+              </button>
+            </div>
+          )}
 
           {/* Conteúdo: webview (Electron) ou iframe (browser) */}
           <div className="flex-1 min-h-0">
             {isElectron
               ? <ElectronBrowser initialUrl={initialUrl} />
-              : <IframeBrowser initialUrl={initialUrl} lightMode={lm} />
+              : <IframeBrowser
+                  initialUrl={initialUrl}
+                  lightMode={lm}
+                  syncing={syncing}
+                  onSyncClick={() => {
+                    if (syncing) { onSync ? onSync() : onClose(); }
+                    else setSyncing(true);
+                  }}
+                />
             }
           </div>
         </motion.div>
