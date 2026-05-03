@@ -36,15 +36,15 @@ function createWindow() {
   return win;
 }
 
-// Handlers IPC registrados uma única vez — fora de createWindow
+// Handlers IPC — removeHandler antes de handle para evitar erro no activate
+ipcMain.removeHandler('get-platform');
 ipcMain.handle('get-platform', () => process.platform);
+
+ipcMain.removeHandler('save-offline');
+ipcMain.handle('save-offline', async (_e, _key, _data) => ({ ok: true }));
 
 ipcMain.on('navigation-captured', (_e, data) => {
   console.log('[nav]', data.url);
-});
-
-ipcMain.handle('save-offline', async (_e, _key, _data) => {
-  return { ok: true };
 });
 
 app.whenReady().then(() => {
@@ -74,7 +74,9 @@ app.whenReady().then(() => {
   createWindow();
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    const windows = BrowserWindow.getAllWindows();
+    if (windows.length === 0) createWindow();
+    else windows[0].show(); // traz a janela existente para frente
   });
 });
 
