@@ -98,7 +98,7 @@ function RippleButton({
   const [mobileTypingPhase, setMobileTypingPhase] = useState<0|1>(0);
   const iRef            = useRef(0);
   const phaseRef        = useRef(0);
-  const animVersion     = useRef(0);
+  const animatedPhases  = useRef(new Set<string>());
   const btnRef          = useRef<HTMLButtonElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const controls        = useAnimation();
@@ -206,7 +206,10 @@ function RippleButton({
 
   // Typewriter por fase (user / pass)
   useEffect(() => {
-    if (loginPhase === 'idle') return;
+    if (loginPhase === 'idle') { animatedPhases.current.clear(); return; }
+    if (animatedPhases.current.has(loginPhase)) return;
+    animatedPhases.current.add(loginPhase);
+
     const label = PHASE_TEXT[loginPhase] ?? '';
     const fake  = loginPhase === 'user' ? 'usuario'   : 'senha';
     const real  = loginPhase === 'user' ? '@mcdonalds' : 'Teste123!';
@@ -214,8 +217,8 @@ function RippleButton({
     setPhaseTyped('');
     setInputVal('');
 
-    const v = ++animVersion.current;
-    const ok = () => animVersion.current === v;
+    let cancelled = false;
+    const ok = () => !cancelled;
 
     const t0 = setTimeout(() => {
       if (!ok()) return;
@@ -262,7 +265,7 @@ function RippleButton({
       }, 55);
     }, 80 + label.length * 55 + 120);
 
-    return () => { clearTimeout(t0); clearTimeout(t1); };
+    return () => { cancelled = true; clearTimeout(t0); clearTimeout(t1); };
   }, [loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
