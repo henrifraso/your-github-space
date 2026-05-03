@@ -32,11 +32,6 @@ function buildTracker(origin: string): string {
 var o=${JSON.stringify(origin)};
 function loading(){try{parent.postMessage({type:'omni-loading'},'*')}catch(e){}}
 function nav(u){try{parent.postMessage({type:'omni-nav',url:u},'*')}catch(e){}}
-function urlReal(){var p=new URLSearchParams(location.search).get('url');return p||location.href;}
-var pp=history.pushState,pr=history.replaceState;
-history.pushState=function(){pp.apply(this,arguments);nav(urlReal())};
-history.replaceState=function(){pr.apply(this,arguments);nav(urlReal())};
-addEventListener('popstate',function(){nav(urlReal())});
 function fixForm(f){
   if(!f||f.nodeName!=='FORM')return false;
   if((f.getAttribute('method')||'get').toLowerCase()!=='get')return false;

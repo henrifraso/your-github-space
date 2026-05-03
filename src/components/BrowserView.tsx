@@ -192,6 +192,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
   const lcRef = useRef<any>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const didInitRef = useRef(false);
+  const currentUrlRef = useRef(initialUrl); // URL atual para deduplicação
   const lm = lightMode;
 
   useEffect(() => {
@@ -234,11 +235,8 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
   }, []);
 
   const goLibcurl = useCallback(async (url: string) => {
-    // Ignora se já é uma URL de proxy — evita loop duplo-proxy
-    if (url.includes('/api/proxy?url=')) {
-      console.warn('[libcurl] URL já é proxy — ignorada:', url);
-      return;
-    }
+    if (url.includes('/api/proxy?url=')) return;
+    currentUrlRef.current = url;
     setLoading(true);
     setNavCount(c => c + 1);
     setInputVal(url);
@@ -288,9 +286,11 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
       if (e.data?.type !== 'omni-nav') return;
       const url = e.data.url as string;
       if (!url) return;
-      if (url.includes('/api/proxy?url=')) return; // nunca navegar para URL já proxiada
+      if (url.includes('/api/proxy?url=')) return;
+      // Deduplicação: SPA (Google, etc.) pode enviar a mesma URL várias vezes
+      if (url === currentUrlRef.current) return;
       if (lcRef.current) goLibcurl(url);
-      else { setProxyUrl(url); setSrcDoc(null); setInputVal(url); setNavCount(c => c + 1); }
+      else if (/^https?:\/\//i.test(url)) { setProxyUrl(url); setSrcDoc(null); setInputVal(url); setNavCount(c => c + 1); }
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
