@@ -30,6 +30,15 @@
     "react-leaflet": "^4.2.1",
     "vite-plugin-static-copy": "^4.1.0"
   },
+  "build": {
+    "appId": "com.omni.os1",
+    "productName": "001",
+    "icon": "build/icon.png",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    }
+  },
   "devDependencies": {
     "@ibm/plex": "^6.4.1",
     "@types/node": "^22.7.5",

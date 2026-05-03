@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { width: 1024px; height: 1024px; overflow: hidden; background: #000; }
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+
+    <!-- Fundo: preto profundo com gradiente radial sutil -->
+    <radialGradient id="bg" cx="50%" cy="42%" r="65%">
+      <stop offset="0%"   stop-color="#161616"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <!-- Gloss do número: preto brilhante com reflexo superior -->
+    <linearGradient id="numGloss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#2c2c2c"/>
+      <stop offset="28%"  stop-color="#111111"/>
+      <stop offset="49%"  stop-color="#060606"/>
+      <stop offset="50%"  stop-color="#000000"/>
+      <stop offset="78%"  stop-color="#0d0d0d"/>
+      <stop offset="100%" stop-color="#191919"/>
+    </linearGradient>
+
+    <!-- Brilho superior (reflexo especular) -->
+    <linearGradient id="numShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="43%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Sombra dramática multi-camada -->
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0"  dy="0"  stdDeviation="48" flood-color="#000" flood-opacity="1"/>
+      <feDropShadow dx="0"  dy="24" stdDeviation="32" flood-color="#000" flood-opacity="0.95"/>
+      <feDropShadow dx="0"  dy="6"  stdDeviation="10" flood-color="#000" flood-opacity="1"/>
+      <feDropShadow dx="0"  dy="2"  stdDeviation="3"  flood-color="#000" flood-opacity="1"/>
+    </filter>
+
+    <!-- Vinheta nas bordas -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
+      <stop offset="55%"  stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.85"/>
+    </radialGradient>
+
+    <!-- Textura de grain (noise industrial) -->
+    <filter id="grain" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="screen" result="blended"/>
+      <feComposite in="blended" in2="SourceGraphic" operator="in"/>
+    </filter>
+
+    <!-- Brilho de borda (rim light) no número -->
+    <filter id="rimLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feMorphology operator="dilate" radius="1.5" in="SourceAlpha" result="expanded"/>
+      <feFlood flood-color="#1a1a1a" result="rimColor"/>
+      <feComposite in="rimColor" in2="expanded" operator="in" result="rim"/>
+      <feMerge>
+        <feMergeNode in="rim"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Clip para garantir que o brilho superior não vaze -->
+    <clipPath id="numClip">
+      <text x="512" y="596"
+        text-anchor="middle"
+        font-family="'Courier New', Courier, monospace"
+        font-size="380"
+        font-weight="900"
+        letter-spacing="-8">001</text>
+    </clipPath>
+
+  </defs>
+
+  <!-- ── FUNDO ── -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Grain no fundo (sutil) -->
+  <rect width="1024" height="1024" fill="#0a0a0a" opacity="0.35" filter="url(#grain)"/>
+
+  <!-- Linhas horizontais sugestivas (scan lines militares) -->
+  <rect width="1024" height="1024" fill="none"
+    style="background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 4px)"/>
+
+  <!-- ── NÚMERO — camada de sombra (offset para profundidade) ── -->
+  <text x="512" y="600"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="380"
+    font-weight="900"
+    letter-spacing="-8"
+    fill="#000000"
+    opacity="0.9"
+    filter="url(#shadow)"
+    transform="translate(0, 6)">001</text>
+
+  <!-- ── NÚMERO — camada principal (gloss preto) ── -->
+  <text x="512" y="596"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="380"
+    font-weight="900"
+    letter-spacing="-8"
+    fill="url(#numGloss)"
+    filter="url(#rimLight)">001</text>
+
+  <!-- ── NÚMERO — brilho especular superior ── -->
+  <rect x="0" y="0" width="1024" height="1024"
+    fill="url(#numShine)"
+    clip-path="url(#numClip)"/>
+
+  <!-- ── VINHETA ── -->
+  <rect width="1024" height="1024" fill="url(#vignette)"/>
+
+</svg>
+</body>
+</html>

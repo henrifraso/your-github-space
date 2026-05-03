@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="65%">
+      <stop offset="0%"   stop-color="#161616"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+
+    <linearGradient id="numGloss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#2c2c2c"/>
+      <stop offset="28%"  stop-color="#111111"/>
+      <stop offset="49%"  stop-color="#060606"/>
+      <stop offset="50%"  stop-color="#000000"/>
+      <stop offset="78%"  stop-color="#0d0d0d"/>
+      <stop offset="100%" stop-color="#191919"/>
+    </linearGradient>
+
+    <linearGradient id="numShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="44%"  stop-color="#ffffff" stop-opacity="0.03"/>
+      <stop offset="45%"  stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
+      <stop offset="55%"  stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.9"/>
+    </radialGradient>
+
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="0"  stdDeviation="50" flood-color="#000" flood-opacity="1"/>
+      <feDropShadow dx="0" dy="20" stdDeviation="30" flood-color="#000" flood-opacity="0.95"/>
+      <feDropShadow dx="0" dy="5"  stdDeviation="8"  flood-color="#000" flood-opacity="1"/>
+    </filter>
+
+    <filter id="rimLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feMorphology operator="dilate" radius="1.2" in="SourceAlpha" result="expanded"/>
+      <feFlood flood-color="#222222" result="rimColor"/>
+      <feComposite in="rimColor" in2="expanded" operator="in" result="rim"/>
+      <feMerge>
+        <feMergeNode in="rim"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <clipPath id="numClip">
+      <text x="512" y="596"
+        text-anchor="middle"
+        font-family="'Courier New', Courier, monospace"
+        font-size="380"
+        font-weight="900"
+        letter-spacing="-8">001</text>
+    </clipPath>
+  </defs>
+
+  <!-- Fundo -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Número — sombra profunda -->
+  <text x="512" y="602"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="380"
+    font-weight="900"
+    letter-spacing="-8"
+    fill="#000000"
+    filter="url(#shadow)">001</text>
+
+  <!-- Número — gloss preto brilhante -->
+  <text x="512" y="596"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="380"
+    font-weight="900"
+    letter-spacing="-8"
+    fill="url(#numGloss)"
+    filter="url(#rimLight)">001</text>
+
+  <!-- Brilho especular superior -->
+  <rect x="0" y="0" width="1024" height="1024"
+    fill="url(#numShine)"
+    clip-path="url(#numClip)"/>
+
+  <!-- Vinheta -->
+  <rect width="1024" height="1024" fill="url(#vignette)"/>
+</svg>
