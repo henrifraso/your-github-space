@@ -158,6 +158,13 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const lm = lightMode;
 
+  // Timeout de segurança: limpa o loading após 10s mesmo se onLoad não disparar
+  useEffect(() => {
+    if (!loading) return;
+    const t = setTimeout(() => setLoading(false), 10000);
+    return () => clearTimeout(t);
+  }, [loading, navCount]);
+
   function toProxyUrl(realUrl: string): string {
     return `/api/proxy?url=${encodeURIComponent(realUrl)}`;
   }
