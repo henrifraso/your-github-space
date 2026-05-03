@@ -155,6 +155,7 @@ function proxifyClient(url: string, base: string): string {
 
 function rewriteHtmlClient(html: string, pageUrl: string): string {
   html = html.replace(/<meta[^>]+(?:x-frame-options|content-security-policy)[^>]*>/gi, '');
+  html = html.replace(/<meta[^>]+name=["']viewport["'][^>]*>/gi, '');
   html = html.replace(/\starget=["']_blank["']/gi, '');
   html = html.replace(/(\s(?:href|src|action|data-src|poster)=")([^"]+)(")/g,
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
@@ -245,12 +246,35 @@ document.addEventListener('submit',function(e){
   }catch(ex){}
 },true);
 document.addEventListener('click',function(e){
-  var el=e.target;while(el&&el.nodeName!=='A')el=el.parentElement;
-  if(!el)return;
-  var href=el.getAttribute('href');
+  var el=e.target;var d=0;
+  while(el&&el.nodeName!=='A'&&d<8){el=el.parentElement;d++;}
+  if(!el||el.nodeName!=='A')return;
+  var href=el.getAttribute('href')||el.getAttribute('data-href');
   if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
-  e.preventDefault();loading();nav(toReal(href));
+  e.preventDefault();e.stopPropagation();loading();nav(toReal(href));
 },true);
+try{
+  var _of=window.fetch;
+  window.fetch=function(input,init){
+    try{
+      var u=typeof input==='string'?input:(input&&input.url?input.url:'');
+      if(u&&/^https?:\/\//i.test(u)&&!u.includes('/api/proxy')){
+        var pu='/api/proxy?url='+encodeURIComponent(u);
+        input=typeof input==='string'?pu:new Request(pu,input);
+      }
+    }catch(e){}
+    return _of.apply(this,arguments);
+  };
+}catch(e){}
+try{
+  var _ox=XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open=function(m,u){
+    if(u&&typeof u==='string'&&/^https?:\/\//i.test(u)&&!u.includes('/api/proxy')){
+      arguments[1]='/api/proxy?url='+encodeURIComponent(u);
+    }
+    return _ox.apply(this,arguments);
+  };
+}catch(e){}
 })();</script>`;
   return /<head/i.test(html)
     ? html.replace(/(<head[^>]*>)/i, '$1' + tracker)
@@ -313,16 +337,15 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
     if (url.includes('/api/proxy?url=')) return;
     currentUrlRef.current = url;
     setLoading(true);
-    setNavCount(c => c + 1);
     setInputVal(url);
     try {
       const html = await fetchWithLibcurl(url);
       setSrcDoc(rewriteHtmlClient(html, url));
       setProxyUrl(null);
+      setNavCount(c => c + 1);
       setLoading(false);
     } catch (err) {
       console.warn('[libcurl] fetch falhou, fallback proxy:', err);
-      // Só usa proxy se a URL for absoluta e externa (não já proxiada)
       if (/^https?:\/\//i.test(url) && !url.includes('/api/proxy')) {
         setProxyUrl(url);
         setSrcDoc(null);
