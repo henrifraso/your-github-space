@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { buildTracker } from './api/tracker';
+import { copyFileSync, mkdirSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 // ── Lógica do proxy (espelho de api/proxy.ts para dev local) ──────────────────
 
@@ -88,11 +90,53 @@ async function proxyMiddleware(req: IncomingMessage, res: ServerResponse, origin
   }
 }
 
+// ── Plugin: copia dist files do Scramjet para public/ (dev) e dist/ (build) ──
+const NM = 'node_modules';
+
+const SCRAMJET_COPIES = [
+  { from: `${NM}/@mercuryworkshop/scramjet/dist/scramjet.js`,   to: 'scramjet/scramjet.js' },
+  { from: `${NM}/@mercuryworkshop/scramjet/dist/scramjet.wasm`, to: 'scramjet/scramjet.wasm' },
+  { from: `${NM}/@mercuryworkshop/scramjet-controller/dist/controller.api.js`,    to: 'controller/controller.api.js' },
+  { from: `${NM}/@mercuryworkshop/scramjet-controller/dist/controller.inject.js`, to: 'controller/controller.inject.js' },
+  { from: `${NM}/@mercuryworkshop/scramjet-controller/dist/controller.sw.js`,     to: 'controller/controller.sw.js' },
+];
+
+function copyScramjetAssets(targetDir: string) {
+  for (const { from, to } of SCRAMJET_COPIES) {
+    const src = resolve(from);
+    const dest = resolve(targetDir, to);
+    if (!existsSync(src)) { console.warn(`[scramjet] not found: ${src}`); continue; }
+    mkdirSync(resolve(dest, '..'), { recursive: true });
+    copyFileSync(src, dest);
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: 'scramjet-assets',
+      // Dev: serve os arquivos diretamente de node_modules
+      configureServer(server) {
+        for (const { from, to } of SCRAMJET_COPIES) {
+          const src = resolve(from);
+          server.middlewares.use(`/${to}`, (_req, res) => {
+            if (!existsSync(src)) { res.statusCode = 404; res.end('not found'); return; }
+            const ext = to.endsWith('.wasm') ? 'application/wasm' : 'application/javascript';
+            res.setHeader('Content-Type', ext);
+            res.setHeader('Cache-Control', 'no-cache');
+            const { createReadStream } = require('node:fs');
+            createReadStream(src).pipe(res);
+          });
+        }
+      },
+      // Build: copia para o diretório de saída
+      closeBundle() {
+        copyScramjetAssets('dist');
+      },
+    },
     {
       name: 'omni-proxy',
       configureServer(server) {

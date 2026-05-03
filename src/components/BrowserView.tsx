@@ -10,7 +10,26 @@ declare global {
       saveOffline: (key: string, data: unknown) => Promise<{ ok: boolean; file?: string }>;
       onNavigationUpdate: (cb: (data: unknown) => void) => void;
     };
+    $scramjet?: any;
+    $scramjetController?: {
+      Controller: new (init: { serviceworker: ServiceWorker; transport: any }) => ScramjetController;
+      config: {
+        prefix: string;
+        scramjetPath: string;
+        injectPath: string;
+        wasmPath: string;
+        virtualWasmPath: string;
+      };
+    };
   }
+}
+
+interface ScramjetController {
+  wait(): Promise<void>;
+  createFrame(el: HTMLIFrameElement): ScramjetFrame;
+}
+interface ScramjetFrame {
+  go(url: string): void;
 }
 
 // webview é um elemento Chromium/Electron — React já tem tipos parciais; usamos any no ref
@@ -28,6 +47,9 @@ type WebviewElement = HTMLElement & {
 
 const isElectron = typeof window !== 'undefined' && !!window.electron?.isElectron;
 
+// URL do Wisp server — Railway (fallback: localhost dev)
+const WISP_URL = (import.meta as any).env?.VITE_WISP_URL ?? 'ws://localhost:3003';
+
 function normalizeUrl(raw: string): string {
   const trimmed = raw.trim();
   if (!trimmed) return '';
@@ -36,12 +58,61 @@ function normalizeUrl(raw: string): string {
   return `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(trimmed)}`;
 }
 
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+async function getActiveServiceWorker(reg: ServiceWorkerRegistration): Promise<ServiceWorker> {
+  if (navigator.serviceWorker.controller) return navigator.serviceWorker.controller;
+  const sw = reg.active ?? reg.installing ?? reg.waiting;
+  if (!sw) throw new Error('No service worker available');
+  if (sw.state === 'activated') return sw;
+  return new Promise((resolve, reject) => {
+    sw.addEventListener('statechange', function handler() {
+      if (sw.state === 'activated') { sw.removeEventListener('statechange', handler); resolve(sw); }
+      if (sw.state === 'redundant') { sw.removeEventListener('statechange', handler); reject(new Error('SW became redundant')); }
+    });
+  });
+}
+
+// Singleton — inicializa Scramjet uma única vez por sessão
+let scramjetPromise: Promise<ScramjetController> | null = null;
+
+function getScramjetController(): Promise<ScramjetController> {
+  if (scramjetPromise) return scramjetPromise;
+  scramjetPromise = (async () => {
+    // 1. Carregar runtime Scramjet (define window.$scramjet)
+    await loadScript('/scramjet/scramjet.js');
+    // 2. Carregar controller API (lê window.$scramjet, define window.$scramjetController)
+    await loadScript('/controller/controller.api.js');
+    // 3. Registrar service worker
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    const sw = await getActiveServiceWorker(reg);
+    // 4. Inicializar transporte Epoxy (Wisp)
+    const { default: EpoxyTransport } = await import('@mercuryworkshop/epoxy-transport');
+    const transport = new EpoxyTransport({ wisp: WISP_URL });
+    // 5. Criar controller
+    const Controller = window.$scramjetController!.Controller;
+    const controller = new Controller({ serviceworker: sw, transport });
+    await controller.wait();
+    return controller;
+  })().catch(err => {
+    scramjetPromise = null; // permite retry em caso de falha
+    throw err;
+  });
+  return scramjetPromise;
+}
+
 // ── Navegador com <webview> — só funciona dentro do Electron ─────────────────
 function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
   const webviewRef = useRef<WebviewElement | null>(null);
-  // inputVal é só a barra de endereço — NÃO alimenta o src do webview.
-  // Navegações internas da página (pushState, redirects) atualizam a barra
-  // sem disparar re-render do webview, quebrando o loop.
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -62,7 +133,6 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
     const onStart = () => setLoading(true);
     const onStop = () => { setLoading(false); refreshNav(); };
 
-    // Só atualiza a barra de endereço — nunca o src do webview
     const onNavigate = (e: any) => {
       const newUrl = e.url || '';
       if (newUrl) setInputVal(newUrl);
@@ -72,9 +142,7 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
       }
     };
 
-    const onTitle = (e: any) => {
-      pageTitleRef.current = e.title || '';
-    };
+    const onTitle = (e: any) => { pageTitleRef.current = e.title || ''; };
 
     wv.addEventListener('did-start-loading', onStart);
     wv.addEventListener('did-stop-loading', onStop);
@@ -89,13 +157,12 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
       wv.removeEventListener('did-navigate-in-page', onNavigate);
       wv.removeEventListener('page-title-updated', onTitle);
     };
-  }, [refreshNav]); // sem pageTitle nas deps — usamos ref pra evitar re-attach de listeners
+  }, [refreshNav]);
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
     setInputVal(resolved);
-    // loadURL direto no elemento — não passa pelo src/state do React
     webviewRef.current?.loadURL?.(resolved);
   }
 
@@ -105,187 +172,170 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
 
   return (
     <div className="flex flex-col w-full h-full">
-      {/* Barra de endereço */}
       <div className="flex items-center gap-2 px-3 py-2 bg-[#111] border-b border-[#262626] flex-shrink-0">
-        <button
-          onClick={() => webviewRef.current?.goBack?.()}
-          disabled={!canGoBack}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
-        >
+        <button onClick={() => webviewRef.current?.goBack?.()} disabled={!canGoBack}
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer">
           <ArrowLeft size={15} />
         </button>
-        <button
-          onClick={() => webviewRef.current?.goForward?.()}
-          disabled={!canGoFwd}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
-        >
+        <button onClick={() => webviewRef.current?.goForward?.()} disabled={!canGoFwd}
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer">
           <ArrowRight size={15} />
         </button>
-        <button
-          onClick={() => webviewRef.current?.reload?.()}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer"
-        >
+        <button onClick={() => webviewRef.current?.reload?.()}
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer">
           <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
         </button>
-
         <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-1.5 gap-2">
           <Globe size={12} className="text-neutral-500 flex-shrink-0" />
-          <input
-            value={inputVal}
-            onChange={e => setInputVal(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={e => e.target.select()}
+          <input value={inputVal} onChange={e => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
             className="flex-1 bg-transparent text-xs text-neutral-200 outline-none placeholder:text-neutral-600 min-w-0"
-            placeholder="Endereço ou busca..."
-          />
+            placeholder="Endereço ou busca..." />
         </div>
-
-        <a
-          href={inputVal}
-          target="_blank"
-          rel="noopener noreferrer"
+        <a href={inputVal} target="_blank" rel="noopener noreferrer"
           className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
-          title="Abrir no navegador externo"
-        >
+          title="Abrir no navegador externo">
           <ExternalLink size={14} />
         </a>
       </div>
-
-      {/* Webview — sem restrição de CORS no Electron */}
       <div className="flex-1 relative min-h-0">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] z-10 pointer-events-none">
             <div className="w-6 h-6 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-ignore — webview aceita booleanos como atributos Chromium */}
-        <webview
-          ref={webviewRef as any}
-          src={initialUrl}
-          disablewebsecurity
-          allowpopups
-          style={{ width: '100%', height: '100%', display: 'flex' }}
-        />
+        {/* @ts-ignore */}
+        <webview ref={webviewRef as any} src={initialUrl} disablewebsecurity allowpopups
+          style={{ width: '100%', height: '100%', display: 'flex' }} />
       </div>
     </div>
   );
 }
 
-// ── Fallback com <iframe> — browser normal ────────────────────────────────────
+// ── Navegador com Scramjet Service Worker — browser normal ───────────────────
 function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
-  // iframeUrl controla quando o iframe remonta (só muda via navigate())
-  // url/inputVal são só a barra de endereço (atualizam via onLoad/postMessage sem remontar)
-  const [iframeUrl, setIframeUrl] = useState(initialUrl);
-  const [url, setUrl] = useState(initialUrl);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
-  const [navCount, setNavCount] = useState(0);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const frameRef = useRef<ScramjetFrame | null>(null);
+  const pendingNavRef = useRef<string | null>(null);
   const lm = lightMode;
 
-  function toProxyUrl(realUrl: string): string {
-    return `/api/proxy?url=${encodeURIComponent(realUrl)}`;
+  // Inicializar Scramjet e criar frame quando o iframe montar
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getScramjetController()
+      .then(controller => {
+        if (cancelled || !iframeRef.current) return;
+        const frame = controller.createFrame(iframeRef.current);
+        frameRef.current = frame;
+        const target = pendingNavRef.current ?? initialUrl;
+        pendingNavRef.current = null;
+        frame.go(normalizeUrl(target) || initialUrl);
+      })
+      .catch(err => {
+        if (cancelled) return;
+        console.error('Scramjet init error:', err);
+        setError('Não foi possível inicializar o navegador. Verifique a conexão.');
+        setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [initialUrl]);
+
+  // Spinner: ouve postMessage do frame (Scramjet injeta tracker compatível)
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.data?.type === 'omni-loading') setLoading(true);
+      if (e.data?.type === 'omni-nav') {
+        setLoading(false);
+        const url = e.data.url as string;
+        if (url) setInputVal(url);
+      }
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
+
+  function handleIframeLoad() {
+    setLoading(false);
   }
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
-    setIframeUrl(resolved);
-    setUrl(resolved);
     setInputVal(resolved);
     setLoading(true);
-    setNavCount(c => c + 1);
+    if (frameRef.current) {
+      frameRef.current.go(resolved);
+    } else {
+      pendingNavRef.current = resolved;
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') navigate(inputVal);
   }
 
-  // Atualiza só a barra de endereço quando iframe navega — não remonta
-  function handleLoad() {
-    setLoading(false);
-    try {
-      const loc = iframeRef.current?.contentWindow?.location;
-      if (loc) {
-        const realUrl = new URLSearchParams(loc.search).get('url');
-        if (realUrl) { setUrl(realUrl); setInputVal(realUrl); }
-      }
-    } catch {}
-  }
-
-  // Navegação interna: atualiza barra + mostra spinner
-  useEffect(() => {
-    function onMessage(e: MessageEvent) {
-      if (e.data?.type === 'omni-loading') { setLoading(true); return; }
-      if (e.data?.type !== 'omni-nav') return;
-      try {
-        const realUrl = new URLSearchParams(new URL(e.data.url as string).search).get('url');
-        if (realUrl) { setUrl(realUrl); setInputVal(realUrl); }
-      } catch {}
-    }
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, []);
-
   return (
     <div className="flex flex-col w-full h-full">
-
       {/* Barra de endereço */}
-      <div
-        className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
+      <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
         style={{
           background: lm ? '#EDE8DF' : '#111',
           borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
-        }}
-      >
-        <div
-          className="flex-1 flex items-center rounded-lg px-3 py-1.5 gap-2"
+        }}>
+        <div className="flex-1 flex items-center rounded-lg px-3 py-1.5 gap-2"
           style={{
             background: lm ? 'rgba(28,23,18,0.06)' : '#1a1a1a',
             border: lm ? '1px solid rgba(28,23,18,0.12)' : '1px solid #333',
-          }}
-        >
+          }}>
           <Globe size={12} style={{ color: lm ? '#7a6f64' : '#737373', flexShrink: 0 }} />
-          <input
-            value={inputVal}
-            onChange={e => setInputVal(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={e => e.target.select()}
+          <input value={inputVal} onChange={e => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
             className="flex-1 bg-transparent text-xs outline-none min-w-0"
             style={{ color: lm ? '#1C1712' : '#e5e5e5' }}
-            placeholder="Endereço ou busca..."
-          />
+            placeholder="Endereço ou busca..." />
         </div>
-        <button
-          onClick={() => navigate(inputVal)}
+        <button onClick={() => navigate(inputVal)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer"
           style={lm
             ? { background: 'rgba(28,23,18,0.08)', color: '#1C1712' }
-            : { background: '#3b82f6', color: '#fff' }}
-        >
+            : { background: '#3b82f6', color: '#fff' }}>
           <ArrowRight size={12} />
           Ir
         </button>
       </div>
 
-      {/* iframe via proxy */}
+      {/* Área do iframe */}
       <div className="flex-1 relative min-h-0" style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
-        {loading && (
+        {loading && !error && (
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
             style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
             <div className="w-6 h-6 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
+        {error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 px-6"
+            style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
+            <p className="text-xs text-center" style={{ color: lm ? '#7a6f64' : '#737373' }}>{error}</p>
+            <button onClick={() => { setError(null); setLoading(true); scramjetPromise = null; navigate(inputVal); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer"
+              style={{ background: '#3b82f6', color: '#fff' }}>
+              Tentar novamente
+            </button>
+          </div>
+        )}
         <iframe
           ref={iframeRef}
-          key={iframeUrl + navCount}
-          src={toProxyUrl(iframeUrl)}
           className="w-full h-full border-0"
-          onLoad={handleLoad}
-          onError={() => setLoading(false)}
+          onLoad={handleIframeLoad}
           title="Omni Browser"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
+          style={{ display: error ? 'none' : 'block' }}
         />
       </div>
     </div>
@@ -327,13 +377,11 @@ export function BrowserView({ open, onClose, initialUrl = 'https://lite.duckduck
           style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}
         >
           {/* Titlebar */}
-          <div
-            className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
+          <div className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
             style={{
               background: lm ? '#EDE8DF' : '#111',
               borderBottom: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid #262626',
-            }}
-          >
+            }}>
             <div className="flex-1 min-w-0" />
             <button
               onClick={() => {
@@ -343,30 +391,21 @@ export function BrowserView({ open, onClose, initialUrl = 'https://lite.duckduck
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
               style={lm
                 ? { background: 'rgba(28,23,18,0.07)', color: '#1C1712' }
-                : { background: 'rgba(255,255,255,0.05)', color: '#a3a3a3' }}
-            >
+                : { background: 'rgba(255,255,255,0.05)', color: '#a3a3a3' }}>
               <RefreshCw size={13} className={syncing ? 'animate-spin' : ''} />
               <AnimatePresence mode="wait">
                 {syncing ? (
-                  <motion.span
-                    key="entrar"
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.18 }}
-                    className="flex items-center gap-1 overflow-hidden whitespace-nowrap"
-                  >
+                  <motion.span key="entrar"
+                    initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }} transition={{ duration: 0.18 }}
+                    className="flex items-center gap-1 overflow-hidden whitespace-nowrap">
                     {lm ? 'Entrar' : <><X size={11} /> Fechar</>}
                   </motion.span>
                 ) : (
-                  <motion.span
-                    key="sincronizar"
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.18 }}
-                    className="overflow-hidden whitespace-nowrap"
-                  >
+                  <motion.span key="sincronizar"
+                    initial={{ opacity: 0, width: 0 }} animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }} transition={{ duration: 0.18 }}
+                    className="overflow-hidden whitespace-nowrap">
                     Sincronizar
                   </motion.span>
                 )}
@@ -374,7 +413,7 @@ export function BrowserView({ open, onClose, initialUrl = 'https://lite.duckduck
             </button>
           </div>
 
-          {/* Conteúdo: webview (Electron) ou iframe (browser) */}
+          {/* Conteúdo: webview (Electron) ou Scramjet (browser) */}
           <div className="flex-1 min-h-0">
             {isElectron
               ? <ElectronBrowser initialUrl={initialUrl} />
