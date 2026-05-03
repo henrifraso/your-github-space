@@ -70,13 +70,14 @@ function LupaIcon({ size, strokeWidth, style, className }: { size: number; strok
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, loginPhase, onNextPhase, onProfileClick, started,
+  onTap, loginPhase, onNextPhase, onProfileClick, started, overlayDone,
 }: {
   onTap: () => void;
   loginPhase: 'idle' | 'user' | 'pass';
   onNextPhase: () => void;
   onProfileClick: () => void;
   started: boolean;
+  overlayDone: boolean;
 }) {
   const FULL_TEXT    = 'Um lugar único. Milhões de possibilidades.';
   const MOBILE_TEXTS = ['Um lugar único.', 'Milhões de possibilidades.'] as const;
@@ -92,7 +93,7 @@ function RippleButton({
   const [kbHeight,   setKbHeight]   = useState(0);
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 640);
   const [introDone,         setIntroDone]         = useState(false);
-  const [isSpinning,        setIsSpinning]        = useState(true);
+  const [isSpinning,        setIsSpinning]        = useState(false);
   const [introLupaVisible,  setIntroLupaVisible]  = useState(true);
   const [mobileTypingPhase, setMobileTypingPhase] = useState<0|1>(0);
   const iRef            = useRef(0);
@@ -111,63 +112,33 @@ function RippleButton({
     ? (mobileTypingPhase === 1 && typed.length >= MOBILE_TEXTS[1].length)
     : typed.length >= FULL_TEXT.length;
 
-  // ── Intro: aguarda GIF terminar (started=true) antes de animar ──
+  // ── Phase B: só começa quando overlay SAIU completamente (onExitComplete) ──
   useEffect(() => {
-    if (!started) return;
+    if (!started || !overlayDone) return;
     let alive = true;
-    async function runIntro() {
-      // Phase A: container gira + lupa intro contra-rotaciona (já centrada no DOM)
-      // Phase A: giro normal 3s
-      await Promise.all([
-        controls.start({
-          rotate: 360 * 2,
-          transition: { duration: 3, ease: 'linear' },
-        }),
-        lupaControls.start({
-          rotate: -(360 * 2),
-          transition: { duration: 3, ease: 'linear' },
-        }),
-      ]);
-      if (!alive) return;
-
-      // Burst: aceleração fluida
-      await Promise.all([
-        controls.start({
-          rotate: 360 * 2 + 720,
-          transition: { type: 'tween', duration: 1.1, ease: [0.2, 0, 1, 1] },
-        }),
-        lupaControls.start({
-          rotate: -(360 * 2 + 720),
-          transition: { type: 'tween', duration: 1.1, ease: [0.2, 0, 1, 1] },
-        }),
-      ]);
-      if (!alive) return;
-      setIsSpinning(false);
-
-      // Phase B: expansão
-      const w      = btnRef.current!.offsetWidth;
-      const rPad   = window.innerWidth < 640 ? 16 : 24;
-      const lSz    = window.innerWidth < 640 ? 60 : 48;
-      const tX     = w / 2 - rPad - lSz / 2;
+    async function runPhaseB() {
+      const w    = btnRef.current!.offsetWidth;
+      const rPad = window.innerWidth < 640 ? 16 : 24;
+      const lSz  = window.innerWidth < 640 ? 60 : 48;
+      const tX   = w / 2 - rPad - lSz / 2;
       idleLupaTargetX.current = tX;
 
       setIntroLupaVisible(false);
       idleLupaOpacity.set(1);
       animate(idleLupaX, [0, tX], { duration: 2.6, ease: [0.16, 1, 0.3, 1] });
 
-      const finalRound = 20;
       const introTimer = setTimeout(() => { if (alive) setIntroDone(true); }, 2000);
       await controls.start({
-        clipPath: `inset(0% 0% 0% 0% round ${finalRound}px)`,
+        clipPath: 'inset(0% 0% 0% 0% round 20px)',
         transition: { duration: 2.6, ease: [0.16, 1, 0.3, 1] },
       });
       clearTimeout(introTimer);
       if (!alive) return;
       setIntroDone(true);
     }
-    runIntro();
+    runPhaseB();
     return () => { alive = false; };
-  }, [started]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [started, overlayDone]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Typewriter idle — desktop: texto completo; mobile: fase 0 ("Um lugar único.")
   useEffect(() => {
@@ -334,17 +305,6 @@ function RippleButton({
           outline: 'none',
         }}
       >
-        {/* Flash branco — dissolve de #fff para creme ao emergir do GIF */}
-        {started && (
-          <motion.div
-            className="absolute inset-0 pointer-events-none z-0"
-            style={{ background: '#ffffff', borderRadius: 'inherit' }}
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-          />
-        )}
-
         {ripples.map(rp => (
           <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
@@ -540,15 +500,39 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [lightBrowser, setLightBrowser] = useState(false);
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
-  // ── GIF intro — 1 loop (5040ms) + buffer 200ms para o círculo estar no centro
-  const [gifStarted, setGifStarted] = useState(false);
-  const [gifVisible, setGifVisible]  = useState(true);
+  // ── GIF intro — 2 loops completos
+  // Frame 124 = 4960ms por loop. Loop 2 frame 124 = 5040 + 4960 = 10000ms desde o início do GIF.
+  const [gifStarted,  setGifStarted]  = useState(false);
+  const [overlayDone, setOverlayDone] = useState(false);
+  const gifTimerSet = useRef(false);
+  const gifImgRef   = useRef<HTMLImageElement>(null);
 
+  function startGifTimer() {
+    if (gifTimerSet.current) return;
+    gifTimerSet.current = true;
+    setTimeout(() => setGifStarted(true), 10000);
+  }
+
+  // GIF cacheado: img.complete=true no mount → onLoad nunca dispara → detecta aqui
   useEffect(() => {
-    const t1 = setTimeout(() => setGifStarted(true), 5200);
-    const t2 = setTimeout(() => setGifVisible(false), 6000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+    if (gifImgRef.current?.complete) startGifTimer();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Congela o GIF no frame exato ao disparar — canvas captura o frame atual antes do primeiro paint
+  useEffect(() => {
+    if (!gifStarted || !gifImgRef.current) return;
+    const img = gifImgRef.current;
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.naturalWidth  || 1440;
+      canvas.height = img.naturalHeight || 900;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        img.src = canvas.toDataURL('image/png');
+      }
+    } catch { /* CORS ou GIF já removido */ }
+  }, [gifStarted]);
 
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
@@ -628,51 +612,39 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         onNextPhase={() => setLoginPhase('pass')}
         onProfileClick={handleFinalLogin}
         started={gifStarted}
+        overlayDone={overlayDone}
       />
 
       {/* ── GIF Intro Overlay ─────────────────────────────────────────────── */}
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => setOverlayDone(true)}>
         {!gifStarted && (
           <motion.div
             key="gif-overlay"
             className="fixed inset-0 z-[200] bg-black"
             style={{ pointerEvents: 'auto' }}
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: [0.4, 0, 1, 1] }}
+            initial={{ opacity: 1, clipPath: 'inset(0% 0% 0% 0% round 0px)' }}
+            exit={{
+              clipPath: 'inset(calc(50% - 44px) calc(50% - 44px) round 44px)',
+              opacity: 0,
+            }}
+            transition={{
+              clipPath: { duration: 0.35, ease: [0.4, 0, 0.2, 1] },
+              opacity:   { duration: 0.2,  delay: 0.3, ease: 'linear' },
+            }}
           >
             <img
+              ref={gifImgRef}
               src="/intro.gif"
               alt=""
               className="w-full h-full object-cover"
               draggable={false}
-              onLoad={() => {}}
+              onLoad={startGifTimer}
             />
             {/* Grain cinematográfico sobre o GIF */}
             <div className="absolute inset-0 pointer-events-none" style={{
               opacity: 0.035,
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
               backgroundSize: '200px 200px',
-            }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Pulso de luz — círculo do GIF "vira" lupa ────────────────────── */}
-      <AnimatePresence>
-        {gifStarted && gifVisible && (
-          <motion.div
-            key="light-pulse"
-            className="fixed inset-0 z-[199] pointer-events-none flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.28, 0] }}
-            transition={{ duration: 0.9, times: [0, 0.25, 1], ease: 'easeOut' }}
-          >
-            <div style={{
-              width: 120, height: 120,
-              borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-              filter: 'blur(18px)',
             }} />
           </motion.div>
         )}
