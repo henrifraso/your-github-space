@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw, Plus } from 'lucide-react';
 import { libcurl as _libcurl } from 'libcurl.js';
 
 declare global {
@@ -37,103 +37,205 @@ function normalizeUrl(raw: string): string {
   return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
 }
 
-// ── Navegador com <webview> — só funciona dentro do Electron ─────────────────
+// ── Tipos para o sistema de abas ─────────────────────────────────────────────
+interface Tab {
+  id: string;
+  url: string;
+  title: string;
+  favicon: string;
+  loading: boolean;
+  canGoBack: boolean;
+  canGoFwd: boolean;
+}
+
+function makeTab(url: string): Tab {
+  return { id: crypto.randomUUID(), url, title: new URL(url).hostname, favicon: '', loading: true, canGoBack: false, canGoFwd: false };
+}
+
+// ── Navegador com <webview> + abas — só funciona dentro do Electron ───────────
 function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
-  const webviewRef = useRef<WebviewElement | null>(null);
+  const [tabs, setTabs] = useState<Tab[]>(() => [makeTab(normalizeUrl(initialUrl))]);
+  const [activeId, setActiveId] = useState(() => tabs[0].id);
   const [inputVal, setInputVal] = useState(initialUrl);
-  const [loading, setLoading] = useState(true);
-  const [canGoBack, setCanGoBack] = useState(false);
-  const [canGoFwd, setCanGoFwd] = useState(false);
-  const pageTitleRef = useRef('');
+  const webviewRefs = useRef<Map<string, WebviewElement>>(new Map());
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const refreshNav = useCallback(() => {
-    const wv = webviewRef.current;
-    if (!wv) return;
-    setCanGoBack(wv.canGoBack?.() ?? false);
-    setCanGoFwd(wv.canGoForward?.() ?? false);
-  }, []);
+  const activeTab = tabs.find(t => t.id === activeId) ?? tabs[0];
 
-  useEffect(() => {
-    const wv = webviewRef.current;
-    if (!wv) return;
+  // Sincroniza input com a aba ativa
+  useEffect(() => { setInputVal(activeTab?.url ?? ''); }, [activeId]);
 
-    const onStart = () => setLoading(true);
-    const onStop = () => { setLoading(false); refreshNav(); };
+  // Registra eventos de uma webview quando ela é montada
+  const bindWebview = useCallback((id: string, wv: WebviewElement | null) => {
+    if (!wv) { webviewRefs.current.delete(id); return; }
+    webviewRefs.current.set(id, wv);
 
+    const update = (patch: Partial<Tab>) =>
+      setTabs(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
+
+    const refreshNav = () => update({
+      canGoBack: wv.canGoBack?.() ?? false,
+      canGoFwd: wv.canGoForward?.() ?? false,
+    });
+
+    const onStart = () => update({ loading: true });
+    const onStop = () => { update({ loading: false }); refreshNav(); };
     const onNavigate = (e: any) => {
-      const newUrl = e.url || '';
-      if (newUrl) setInputVal(newUrl);
+      const url = e.url || '';
+      if (url && !url.startsWith('about:')) {
+        update({ url });
+        setTabs(prev => prev.map(t => t.id === id && id === activeId ? { ...t, url } : t));
+        if (id === activeId) setInputVal(url);
+      }
       refreshNav();
-      if (newUrl && window.electron) {
-        window.electron.captureNavigation({ url: newUrl, title: pageTitleRef.current, ts: Date.now() });
+      if (url && window.electron) {
+        window.electron.captureNavigation({ url, title: '', ts: Date.now() });
       }
     };
-
-    const onTitle = (e: any) => { pageTitleRef.current = e.title || ''; };
+    const onTitle = (e: any) => update({ title: e.title || new URL(wv.src || 'about:blank').hostname });
+    const onFavicon = (e: any) => update({ favicon: e.favicons?.[0] || '' });
 
     wv.addEventListener('did-start-loading', onStart);
     wv.addEventListener('did-stop-loading', onStop);
     wv.addEventListener('did-navigate', onNavigate);
     wv.addEventListener('did-navigate-in-page', onNavigate);
     wv.addEventListener('page-title-updated', onTitle);
+    wv.addEventListener('page-favicon-updated', onFavicon);
+  }, [activeId]);
 
-    return () => {
-      wv.removeEventListener('did-start-loading', onStart);
-      wv.removeEventListener('did-stop-loading', onStop);
-      wv.removeEventListener('did-navigate', onNavigate);
-      wv.removeEventListener('did-navigate-in-page', onNavigate);
-      wv.removeEventListener('page-title-updated', onTitle);
-    };
-  }, [refreshNav]);
+  function openTab(url = 'https://www.google.com') {
+    const tab = makeTab(normalizeUrl(url));
+    setTabs(prev => [...prev, tab]);
+    setActiveId(tab.id);
+  }
+
+  function closeTab(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setTabs(prev => {
+      const next = prev.filter(t => t.id !== id);
+      if (next.length === 0) return [makeTab('https://www.google.com')];
+      return next;
+    });
+    setActiveId(prev => {
+      if (prev !== id) return prev;
+      const idx = tabs.findIndex(t => t.id === id);
+      return tabs[Math.max(0, idx - 1)]?.id ?? tabs[0].id;
+    });
+  }
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
+    webviewRefs.current.get(activeId)?.loadURL?.(resolved);
+    setTabs(prev => prev.map(t => t.id === activeId ? { ...t, url: resolved, loading: true } : t));
     setInputVal(resolved);
-    webviewRef.current?.loadURL?.(resolved);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') navigate(inputVal);
+    if (e.key === 'Enter') { navigate(inputVal); inputRef.current?.blur(); }
+    if (e.key === 'Escape') { setInputVal(activeTab?.url ?? ''); inputRef.current?.blur(); }
   }
 
+  const wv = webviewRefs.current.get(activeId);
+
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex items-center gap-2 px-3 py-2 bg-[#111] border-b border-[#262626] flex-shrink-0">
-        <button onClick={() => webviewRef.current?.goBack?.()} disabled={!canGoBack}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer">
-          <ArrowLeft size={15} />
+    <div className="flex flex-col w-full h-full select-none">
+
+      {/* ── Barra de abas ─────────────────────────────────────────── */}
+      <div className="flex items-end gap-0 px-2 pt-1 flex-shrink-0 overflow-x-auto"
+        style={{ background: '#0d0d0d', borderBottom: '1px solid #1f1f1f', scrollbarWidth: 'none' }}>
+        {tabs.map(tab => (
+          <motion.button
+            key={tab.id}
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.15 }}
+            onClick={() => setActiveId(tab.id)}
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg flex-shrink-0 group cursor-pointer transition-colors"
+            style={{
+              maxWidth: 200, minWidth: 100,
+              background: tab.id === activeId ? '#111' : 'transparent',
+              borderTop: tab.id === activeId ? '1px solid #2a2a2a' : '1px solid transparent',
+              borderLeft: tab.id === activeId ? '1px solid #2a2a2a' : '1px solid transparent',
+              borderRight: tab.id === activeId ? '1px solid #2a2a2a' : '1px solid transparent',
+              marginBottom: tab.id === activeId ? '-1px' : 0,
+            }}>
+            {tab.loading
+              ? <div className="w-3 h-3 border border-[#3b82f6] border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              : tab.favicon
+                ? <img src={tab.favicon} className="w-3 h-3 flex-shrink-0" alt="" onError={e => (e.currentTarget.style.display = 'none')} />
+                : <Globe size={11} className="text-neutral-500 flex-shrink-0" />
+            }
+            <span className="text-xs truncate flex-1 text-left"
+              style={{ color: tab.id === activeId ? '#e5e5e5' : '#737373' }}>
+              {tab.title || 'Nova aba'}
+            </span>
+            {tabs.length > 1 && (
+              <button onClick={e => closeTab(tab.id, e)}
+                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/10 transition-all flex-shrink-0 cursor-pointer">
+                <X size={10} className="text-neutral-400" />
+              </button>
+            )}
+          </motion.button>
+        ))}
+        <button onClick={() => openTab()}
+          className="flex items-center justify-center w-7 h-7 mb-0.5 ml-1 rounded-lg flex-shrink-0 text-neutral-500 hover:text-neutral-200 hover:bg-white/8 transition-colors cursor-pointer">
+          <Plus size={14} />
         </button>
-        <button onClick={() => webviewRef.current?.goForward?.()} disabled={!canGoFwd}
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-30 transition-colors cursor-pointer">
-          <ArrowRight size={15} />
+      </div>
+
+      {/* ── Barra de endereço ─────────────────────────────────────── */}
+      <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
+        style={{ background: '#111', borderBottom: '1px solid #1f1f1f' }}>
+        <button onClick={() => wv?.goBack?.()} disabled={!activeTab?.canGoBack}
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-20 transition-colors cursor-pointer">
+          <ArrowLeft size={14} />
         </button>
-        <button onClick={() => webviewRef.current?.reload?.()}
+        <button onClick={() => wv?.goForward?.()} disabled={!activeTab?.canGoFwd}
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-white disabled:opacity-20 transition-colors cursor-pointer">
+          <ArrowRight size={14} />
+        </button>
+        <button onClick={() => wv?.reload?.()}
           className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer">
-          <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
+          <RotateCcw size={13} className={activeTab?.loading ? 'animate-spin' : ''} />
         </button>
-        <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-1.5 gap-2">
-          <Globe size={12} className="text-neutral-500 flex-shrink-0" />
-          <input value={inputVal} onChange={e => setInputVal(e.target.value)}
-            onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
+        <div className="flex-1 flex items-center bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-3 py-1.5 gap-2 focus-within:border-[#3b82f6]/50 transition-colors">
+          <Globe size={11} className="text-neutral-600 flex-shrink-0" />
+          <input
+            ref={inputRef}
+            value={inputVal}
+            onChange={e => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={e => e.target.select()}
             className="flex-1 bg-transparent text-xs text-neutral-200 outline-none placeholder:text-neutral-600 min-w-0"
             placeholder="Endereço ou busca..." />
         </div>
-        <a href={inputVal} target="_blank" rel="noopener noreferrer"
-          className="p-1.5 rounded-lg text-neutral-400 hover:text-white transition-colors"
-          title="Abrir no navegador externo">
-          <ExternalLink size={14} />
-        </a>
+        <button onClick={() => openTab(inputVal)}
+          className="p-1.5 rounded-lg text-neutral-500 hover:text-neutral-200 transition-colors cursor-pointer"
+          title="Abrir em nova aba">
+          <ExternalLink size={13} />
+        </button>
       </div>
-      <div className="flex-1 relative min-h-0">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] z-10 pointer-events-none">
-            <div className="w-6 h-6 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
+
+      {/* ── Webviews — uma por aba, mostrar/ocultar via CSS ────────── */}
+      <div className="flex-1 relative min-h-0 bg-[#0a0a0a]">
+        {tabs.map(tab => (
+          <div
+            key={tab.id}
+            style={{ position: 'absolute', inset: 0, display: tab.id === activeId ? 'flex' : 'none' }}>
+            {/* @ts-ignore */}
+            <webview
+              ref={(el: any) => bindWebview(tab.id, el)}
+              src={tab.url}
+              partition="persist:omni-browser"
+              disablewebsecurity
+              allowpopups
+              style={{ width: '100%', height: '100%', display: 'flex' }}
+            />
           </div>
-        )}
-        {/* @ts-ignore */}
-        <webview ref={webviewRef as any} src={initialUrl} disablewebsecurity allowpopups
-          style={{ width: '100%', height: '100%', display: 'flex' }} />
+        ))}
       </div>
     </div>
   );

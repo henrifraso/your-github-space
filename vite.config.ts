@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import electron from 'vite-plugin-electron';
+import renderer from 'vite-plugin-electron-renderer';
 import { fileURLToPath, URL } from 'node:url';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { buildTracker } from './api/tracker';
@@ -90,9 +92,25 @@ async function proxyMiddleware(req: IncomingMessage, res: ServerResponse, origin
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+const isElectronBuild = process.env.ELECTRON === 'true';
+
 export default defineConfig({
   plugins: [
     react(),
+    ...(isElectronBuild ? [
+      electron([
+        {
+          entry: 'electron/main.ts',
+          vite: { build: { outDir: 'dist-electron', rollupOptions: { external: ['electron'] } } },
+        },
+        {
+          entry: 'electron/preload.ts',
+          vite: { build: { outDir: 'dist-electron', rollupOptions: { external: ['electron'] } } },
+          onstart(options) { options.reload(); },
+        },
+      ]),
+      renderer(),
+    ] : []),
     {
       name: 'omni-proxy',
       configureServer(server) {
