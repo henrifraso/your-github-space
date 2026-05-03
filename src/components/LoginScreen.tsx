@@ -571,6 +571,10 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       tkn = r.access_token;
     } catch {}
     await apiSelectBusiness(tkn, 'mcdo-paulista');
+    if (window.innerWidth < 640) {
+      onAuthenticated(tkn, 'mcdo-paulista');
+      return;
+    }
     pendingAuth.current = { tkn, nid: 'mcdo-paulista' };
     setLightBrowser(true);
   }
