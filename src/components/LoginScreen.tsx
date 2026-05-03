@@ -70,12 +70,13 @@ function LupaIcon({ size, strokeWidth, style, className }: { size: number; strok
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, loginPhase, onNextPhase, onProfileClick,
+  onTap, loginPhase, onNextPhase, onProfileClick, started,
 }: {
   onTap: () => void;
   loginPhase: 'idle' | 'user' | 'pass';
   onNextPhase: () => void;
   onProfileClick: () => void;
+  started: boolean;
 }) {
   const FULL_TEXT    = 'Um lugar único. Milhões de possibilidades.';
   const MOBILE_TEXTS = ['Um lugar único.', 'Milhões de possibilidades.'] as const;
@@ -110,8 +111,9 @@ function RippleButton({
     ? (mobileTypingPhase === 1 && typed.length >= MOBILE_TEXTS[1].length)
     : typed.length >= FULL_TEXT.length;
 
-  // ── Intro: dois elementos com crossfade — sem dependência de offsetWidth ──
+  // ── Intro: aguarda GIF terminar (started=true) antes de animar ──
   useEffect(() => {
+    if (!started) return;
     let alive = true;
     async function runIntro() {
       // Phase A: container gira + lupa intro contra-rotaciona (já centrada no DOM)
@@ -165,7 +167,7 @@ function RippleButton({
     }
     runIntro();
     return () => { alive = false; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Typewriter idle — desktop: texto completo; mobile: fase 0 ("Um lugar único.")
   useEffect(() => {
@@ -303,11 +305,12 @@ function RippleButton({
   return (
     <motion.div
       className="w-full max-w-[340px] sm:max-w-[760px] z-20 relative"
-      animate={kbOpen
-        ? loginPhase !== 'idle'
-          ? { scale: 1,    y: -(kbHeight * 0.46) }
-          : { scale: 0.82, y: -(kbHeight * 0.38) }
-        : { scale: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{
+        opacity: started ? 1 : 0,
+        scale: started && kbOpen ? (loginPhase !== 'idle' ? 1 : 0.82) : 1,
+        y: started && kbOpen ? (loginPhase !== 'idle' ? -(kbHeight * 0.46) : -(kbHeight * 0.38)) : 0,
+      }}
       transition={{ type: 'spring', damping: 30, stiffness: 320 }}
     >
 
@@ -524,6 +527,17 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [lightBrowser, setLightBrowser] = useState(false);
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
+  // ── GIF intro — 3 loops × 5040ms = 15120ms ──────────────────────────────
+  const GIF_DURATION = 15120;
+  const [gifStarted, setGifStarted] = useState(false); // RippleButton pode iniciar
+  const [gifVisible, setGifVisible]  = useState(true);  // overlay no DOM
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setGifStarted(true), GIF_DURATION);
+    const t2 = setTimeout(() => setGifVisible(false), GIF_DURATION + 500);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
     setLoginPhase('user');
@@ -601,7 +615,27 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         loginPhase={loginPhase}
         onNextPhase={() => setLoginPhase('pass')}
         onProfileClick={handleFinalLogin}
+        started={gifStarted}
       />
+
+      {/* ── GIF Intro Overlay ─────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {gifVisible && (
+          <motion.div
+            key="gif-overlay"
+            className="fixed inset-0 z-[200] bg-black flex items-center justify-center pointer-events-none"
+            animate={{ opacity: gifStarted ? 0 : 1 }}
+            transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <img
+              src="/intro.gif"
+              alt=""
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Overlay + Modal ──────────────────────────────────────────────────── */}
       <AnimatePresence>
