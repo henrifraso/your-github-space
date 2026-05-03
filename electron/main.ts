@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, session, nativeTheme } from 'electron';
+import { app, BrowserWindow, ipcMain, session, nativeTheme, nativeImage } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -49,6 +49,12 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  if (process.platform === 'darwin') {
+    const iconPath = path.join(__dirname, '../build/icon.png');
+    const icon = nativeImage.createFromPath(iconPath);
+    app.dock.setIcon(icon);
+  }
+
   // Sessão persistente compartilhada entre abas — cookies ficam gravados em disco
   const ses = session.fromPartition('persist:omni-browser');
 
