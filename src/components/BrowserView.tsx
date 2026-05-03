@@ -162,16 +162,16 @@ function rewriteHtmlClient(html: string, pageUrl: string): string {
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
   const pageOrigin = (() => { try { return new URL(pageUrl).origin; } catch { return ''; } })();
   const tracker = `<script>(function(){
-// ── Guarda referência real do parent ANTES de sobrescrever ──────────────────
 var __rp=window.parent;
-// ── Fix iframe detection: window.top/parent/self apontam para si mesmo ──────
 try{Object.defineProperty(window,'top',{get:function(){return window;},configurable:true});}catch(e){}
 try{Object.defineProperty(window,'parent',{get:function(){return window;},configurable:true});}catch(e){}
 try{Object.defineProperty(window,'self',{get:function(){return window;},configurable:true});}catch(e){}
-// ────────────────────────────────────────────────────────────────────────────
+try{Object.defineProperty(window,'frameElement',{get:function(){return null;},configurable:true});}catch(e){}
+try{Object.defineProperty(navigator,'webdriver',{get:function(){return false;},configurable:true});}catch(e){}
+try{if(!window.chrome)window.chrome={runtime:{}};}catch(e){}
+try{window.rwt=function(){return true;};}catch(e){}
 var BASE=${JSON.stringify(pageUrl)};
 var BASE_ORIGIN=${JSON.stringify(pageOrigin)};
-// ── Fake location com URL real da página ─────────────────────────────────────
 try{
   var _pu=new URL(BASE);
   var _fakeLocation={
@@ -185,35 +185,42 @@ try{
   };
   Object.defineProperty(window,'location',{get:function(){return _fakeLocation;},configurable:true});
   try{Object.defineProperty(document,'referrer',{get:function(){return BASE_ORIGIN;},configurable:true});}catch(e){}
+  try{Object.defineProperty(document,'URL',{get:function(){return BASE;},configurable:true});}catch(e){}
+  try{Object.defineProperty(document,'documentURI',{get:function(){return BASE;},configurable:true});}catch(e){}
+  try{Object.defineProperty(document,'location',{get:function(){return _fakeLocation;},configurable:true});}catch(e){}
 }catch(e){}
-// ─────────────────────────────────────────────────────────────────────────────
+try{
+  var _fakeHistory={pushState:function(){},replaceState:function(){},go:function(){},back:function(){},forward:function(){},state:null,length:1};
+  Object.defineProperty(window,'history',{get:function(){return _fakeHistory;},configurable:true});
+}catch(e){}
 function nav(url){try{__rp.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
 function loading(){try{__rp.postMessage({type:'omni-loading'},'*')}catch(e){}}
 function toReal(u){
   try{
     var abs=new URL(u,BASE).href;
-    var p=new URL(abs).searchParams.get('url');
-    return p||abs;
+    var pu=new URL(abs);
+    var p=pu.searchParams.get('url');
+    if(p)return p;
+    if(pu.hostname.includes('google.')&&pu.pathname==='/url'){var q=pu.searchParams.get('q');if(q)return q;}
+    return abs;
   }catch(e){return u;}
 }
 function intercept(u){
   if(!u)return false;
   try{
     var abs=new URL(u,BASE).href;
-    if(abs.includes('/api/proxy?url='))return false; // já é proxy — ignorar
+    if(abs.includes('/api/proxy?url='))return false;
     nav(toReal(abs));
     return true;
   }catch(e){return false;}
 }
-// Intercepta location.assign e location.replace
 try{
   var lp=Location.prototype;
   var oa=lp.assign.bind(location);
   lp.assign=function(u){if(!intercept(u))oa(u);};
-  var or=lp.replace.bind(location);
-  lp.replace=function(u){if(!intercept(u))or(u);};
+  var or_=lp.replace.bind(location);
+  lp.replace=function(u){if(!intercept(u))or_(u);};
 }catch(e){}
-// Intercepta location.href setter
 try{
   var ld=Object.getOwnPropertyDescriptor(Location.prototype,'href')||
          Object.getOwnPropertyDescriptor(Object.getPrototypeOf(location),'href');
@@ -226,7 +233,6 @@ try{
     });
   }
 }catch(e){}
-// Intercepta submit de formulários GET
 document.addEventListener('submit',function(e){
   var f=e.target;
   if(!f||f.nodeName!=='FORM')return;
@@ -238,13 +244,12 @@ document.addEventListener('submit',function(e){
     e.preventDefault();loading();nav(url);
   }catch(ex){}
 },true);
-// Intercepta cliques em links <a>
 document.addEventListener('click',function(e){
   var el=e.target;while(el&&el.nodeName!=='A')el=el.parentElement;
   if(!el)return;
   var href=el.getAttribute('href');
   if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
-  e.preventDefault();e.stopPropagation();loading();nav(toReal(href));
+  e.preventDefault();loading();nav(toReal(href));
 },true);
 })();</script>`;
   return /<head/i.test(html)
@@ -295,6 +300,10 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
         'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
       }
     });
     return await resp.text();
@@ -430,7 +439,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
             onLoad={handleLoad}
             onError={() => setLoading(false)}
             title="Omni Browser"
-            sandbox="allow-scripts allow-forms allow-modals allow-popups"
+            sandbox="allow-scripts allow-forms allow-modals allow-popups allow-same-origin"
           />
         )}
         {srcDoc === null && proxyUrl && (
