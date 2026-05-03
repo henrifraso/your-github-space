@@ -540,15 +540,21 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [lightBrowser, setLightBrowser] = useState(false);
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
 
-  // ── GIF intro — 3 loops × 5040ms = 15120ms ──────────────────────────────
-  const GIF_DURATION = 10080; // 2 loops × 5040ms
-  const [gifStarted, setGifStarted] = useState(false); // RippleButton pode iniciar
-  const [gifVisible, setGifVisible]  = useState(true);  // overlay no DOM
+  // ── GIF intro — timer começa no onLoad do GIF, não no mount ─────────────
+  // Frame 124 (4960ms/loop) é o mais próximo do centro. 2 loops = 9960ms.
+  const GIF_LOOP_MS = 9960;
+  const [gifStarted, setGifStarted] = useState(false);
+  const [gifVisible, setGifVisible]  = useState(true);
+  const gifT1 = useRef<ReturnType<typeof setTimeout>>();
+  const gifT2 = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleGifLoad = useCallback(() => {
+    gifT1.current = setTimeout(() => setGifStarted(true), GIF_LOOP_MS);
+    gifT2.current = setTimeout(() => setGifVisible(false), GIF_LOOP_MS + 800);
+  }, []);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setGifStarted(true), GIF_DURATION);
-    const t2 = setTimeout(() => setGifVisible(false), GIF_DURATION + 800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => { clearTimeout(gifT1.current); clearTimeout(gifT2.current); };
   }, []);
 
   function handleContainerTap() {
@@ -647,6 +653,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
               alt=""
               className="w-full h-full object-cover"
               draggable={false}
+              onLoad={handleGifLoad}
             />
             {/* Grain cinematográfico sobre o GIF */}
             <div className="absolute inset-0 pointer-events-none" style={{
