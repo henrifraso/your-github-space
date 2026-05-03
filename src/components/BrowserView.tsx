@@ -161,6 +161,13 @@ function rewriteHtmlClient(html: string, pageUrl: string): string {
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
   html = html.replace(/(\s(?:href|src|action|data-src|poster)=')([^']+)(')/g,
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
+  html = html.replace(
+    /(<script[^>]*>)([\s\S]*?ytInitialPlayerResponse[\s\S]*?)(<\/script>)/gi,
+    (_m, open, body, close) => open + body.replace(
+      /"(https:\/\/[^"]*googlevideo\.com[^"]+)"/g,
+      (_u: string, u: string) => `"/api/proxy?url=${encodeURIComponent(u)}"`
+    ) + close
+  );
   const pageOrigin = (() => { try { return new URL(pageUrl).origin; } catch { return ''; } })();
   const tracker = `<script>(function(){
 var __rp=window.parent;
@@ -192,7 +199,7 @@ try{
 }catch(e){}
 try{
   var _fakeHistory={
-    pushState:function(s,t,u){if(u){try{var abs=new URL(u,BASE).href;var pn=new URL(BASE);var nn=new URL(abs);if(pn.pathname+pn.search!==nn.pathname+nn.search){BASE=abs;loading();nav(toReal(abs));}}catch(e){}}},
+    pushState:function(s,t,u){if(u){try{var abs=new URL(u,BASE).href;var pn=new URL(BASE);var nn=new URL(abs);if(pn.pathname+pn.search!==nn.pathname+nn.search){BASE=abs;var real=toReal(abs);if(!real.includes('/api/proxy')){loading();nav(real);}}}catch(e){}}},
     replaceState:function(s,t,u){if(u){try{BASE=new URL(u,BASE).href;}catch(e){}}},
     go:function(){},back:function(){},forward:function(){},state:null,length:1
   };
@@ -255,7 +262,8 @@ document.addEventListener('click',function(e){
   if(!el||el.nodeName!=='A')return;
   var href=el.getAttribute('href')||el.getAttribute('data-href');
   if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
-  e.preventDefault();e.stopPropagation();loading();nav(toReal(href));
+  if(!/^https?:\/\/|^\//i.test(href))return;
+  e.preventDefault();loading();nav(toReal(href));
 },true);
 try{
   var _of=window.fetch;
@@ -392,7 +400,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
       if (!url) return;
       if (url.includes('/api/proxy?url=')) return;
       // Deduplicação: SPA (Google, etc.) pode enviar a mesma URL várias vezes
-      if (url === currentUrlRef.current) return;
+      if (url === currentUrlRef.current) { setLoading(false); return; }
       if (lcRef.current) goLibcurl(url);
       else if (/^https?:\/\//i.test(url)) { setProxyUrl(url); setSrcDoc(null); setInputVal(url); setNavCount(c => c + 1); }
     }
