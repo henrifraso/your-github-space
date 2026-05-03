@@ -34,6 +34,10 @@
     "appId": "com.omni.os1",
     "productName": "001",
     "icon": "build/icon.png",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.png"
