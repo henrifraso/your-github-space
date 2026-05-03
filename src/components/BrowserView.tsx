@@ -559,16 +559,16 @@ function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncC
           border: lm ? '1px solid rgba(28,23,18,0.10)' : '1px solid rgba(255,255,255,0.07)',
         }}>
           {loading
-            ? <div style={{ width: 13, height: 13, borderRadius: '50%', flexShrink: 0,
+            ? <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
                 border: lm ? '1.5px solid rgba(28,23,18,0.15)' : '1.5px solid rgba(255,255,255,0.12)',
                 borderTopColor: lm ? 'rgba(28,23,18,0.55)' : 'rgba(255,255,255,0.55)',
                 animation: 'spin 0.7s linear infinite' }} />
-            : <Globe size={13} style={{ color: lm ? '#9a8f84' : '#464646', flexShrink: 0 }} />
+            : <Globe size={17} style={{ color: lm ? '#9a8f84' : '#464646', flexShrink: 0 }} />
           }
           <input value={inputVal} onChange={e => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
             style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: lm ? '#1C1712' : '#d0d0d0', fontSize: 13, minWidth: 0 }}
+              color: lm ? '#1C1712' : '#d0d0d0', fontSize: 15, minWidth: 0 }}
             placeholder="Endereço ou busca..." />
         </div>
 
