@@ -138,80 +138,173 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
   );
 }
 
-// ── Navegador com iframe + proxy server-side — browser normal ─────────────────
-function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
-  // Garante que nenhum SW antigo (Scramjet) interfere nos requests do proxy
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(r => r.unregister());
-      });
-    }
-  }, []);
+const WISP_URL = 'wss://wisp.mercurywork.shop/';
 
-  // iframeUrl controla quando o iframe remonta (só muda via navigate())
-  // url/inputVal são só a barra de endereço (atualizam via onLoad/postMessage)
-  const [iframeUrl, setIframeUrl] = useState(initialUrl);
+function proxifyClient(url: string, base: string): string {
+  if (!url) return url;
+  const skip = ['data:', 'blob:', 'javascript:', 'mailto:', 'tel:', '#', 'about:'];
+  if (skip.some(p => url.startsWith(p))) return url;
+  if (url.startsWith('/api/proxy')) return url;
+  try {
+    const abs = /^https?:\/\//i.test(url) ? url : new URL(url, base).href;
+    return `/api/proxy?url=${encodeURIComponent(abs)}`;
+  } catch { return url; }
+}
+
+function rewriteHtmlClient(html: string, pageUrl: string): string {
+  html = html.replace(/<meta[^>]+(?:x-frame-options|content-security-policy)[^>]*>/gi, '');
+  html = html.replace(/\starget=["']_blank["']/gi, '');
+  html = html.replace(/(\s(?:href|src|action|data-src|poster)=")([^"]+)(")/g,
+    (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
+  html = html.replace(/(\s(?:href|src|action|data-src|poster)=')([^']+)(')/g,
+    (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
+  const tracker = `<script>(function(){
+function nav(url){try{parent.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
+function loading(){try{parent.postMessage({type:'omni-loading'},'*')}catch(e){}}
+function real(href){try{var u=new URL(href,location.href);var p=u.searchParams.get('url');return p||u.href;}catch(e){return href;}}
+document.addEventListener('click',function(e){
+  var el=e.target;while(el&&el.nodeName!=='A')el=el.parentElement;
+  if(!el)return;
+  var href=el.getAttribute('href');
+  if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
+  e.preventDefault();e.stopPropagation();loading();nav(real(href));
+},true);
+var pp=history.pushState,pr=history.replaceState;
+history.pushState=function(){pp.apply(this,arguments);nav(real(location.href));};
+history.replaceState=function(){pr.apply(this,arguments);nav(real(location.href));};
+addEventListener('popstate',function(){nav(real(location.href));});
+})();</script>`;
+  return /<head/i.test(html)
+    ? html.replace(/(<head[^>]*>)/i, '$1' + tracker)
+    : tracker + html;
+}
+
+// ── Navegador com libcurl.js (primário) + iframe proxy (fallback) ─────────────
+function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
   const [navCount, setNavCount] = useState(0);
+  const [srcDoc, setSrcDoc] = useState<string | null>(null);
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
+  const [lcState, setLcState] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const lcRef = useRef<any>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const didInitRef = useRef(false);
   const lm = lightMode;
 
-  // Timeout de segurança: limpa o loading após 10s mesmo se onLoad não disparar
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    }
+  }, []);
+
+  // Carrega libcurl.js + WASM
+  useEffect(() => {
+    (async () => {
+      try {
+        const mod = await import('libcurl.js');
+        const lc = (mod as any).default ?? mod;
+        await lc.load_wasm('/libcurl.wasm');
+        lc.set_websocket(WISP_URL);
+        lcRef.current = lc;
+        setLcState('ready');
+      } catch (err) {
+        console.warn('[libcurl] falhou ao carregar, usando proxy:', err);
+        setLcState('failed');
+      }
+    })();
+  }, []);
+
+  const fetchWithLibcurl = useCallback(async (url: string) => {
+    const lc = lcRef.current;
+    if (!lc) throw new Error('libcurl não disponível');
+    const resp = await lc.fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,*/*;q=0.9',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+      }
+    });
+    return await resp.text();
+  }, []);
+
+  const goLibcurl = useCallback(async (url: string) => {
+    setLoading(true);
+    setNavCount(c => c + 1);
+    setInputVal(url);
+    try {
+      const html = await fetchWithLibcurl(url);
+      setSrcDoc(rewriteHtmlClient(html, url));
+      setProxyUrl(null);
+      setLoading(false);
+    } catch (err) {
+      console.warn('[libcurl] fetch falhou, fallback proxy:', err);
+      setProxyUrl(url);
+      setSrcDoc(null);
+      setNavCount(c => c + 1);
+    }
+  }, [fetchWithLibcurl]);
+
+  // Navegação inicial após libcurl carregar
+  useEffect(() => {
+    if (didInitRef.current) return;
+    if (lcState === 'ready') {
+      didInitRef.current = true;
+      goLibcurl(initialUrl);
+    } else if (lcState === 'failed') {
+      didInitRef.current = true;
+      setProxyUrl(initialUrl);
+      setSrcDoc(null);
+      setNavCount(c => c + 1);
+    }
+  }, [lcState, initialUrl, goLibcurl]);
+
+  // Safety timeout
   useEffect(() => {
     if (!loading) return;
-    const t = setTimeout(() => setLoading(false), 10000);
+    const t = setTimeout(() => setLoading(false), 12000);
     return () => clearTimeout(t);
   }, [loading, navCount]);
 
-  function toProxyUrl(realUrl: string): string {
-    return `/api/proxy?url=${encodeURIComponent(realUrl)}`;
-  }
+  // postMessage do iframe (cliques em links no srcDoc)
+  useEffect(() => {
+    function onMessage(e: MessageEvent) {
+      if (e.data?.type === 'omni-loading') { setLoading(true); return; }
+      if (e.data?.type !== 'omni-nav') return;
+      const url = e.data.url as string;
+      if (!url) return;
+      if (lcRef.current) goLibcurl(url);
+      else { setProxyUrl(url); setSrcDoc(null); setInputVal(url); setNavCount(c => c + 1); }
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [goLibcurl]);
 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
-    setIframeUrl(resolved);
-    setInputVal(resolved);
-    setLoading(true);
-    setNavCount(c => c + 1);
+    if (lcRef.current) goLibcurl(resolved);
+    else { setProxyUrl(resolved); setSrcDoc(null); setInputVal(resolved); setLoading(true); setNavCount(c => c + 1); }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') navigate(inputVal);
   }
 
-  // Atualiza só a barra de endereço quando iframe navega — não remonta
   function handleLoad() {
     setLoading(false);
-    try {
-      const loc = iframeRef.current?.contentWindow?.location;
-      if (loc) {
-        const realUrl = new URLSearchParams(loc.search).get('url');
-        if (realUrl) setInputVal(realUrl);
-      }
-    } catch {}
+    if (proxyUrl && !srcDoc) {
+      try {
+        const loc = iframeRef.current?.contentWindow?.location;
+        if (loc) { const r = new URLSearchParams(loc.search).get('url'); if (r) setInputVal(r); }
+      } catch {}
+    }
   }
 
-  // Navegação interna via postMessage (SPAs, tracker injected)
-  useEffect(() => {
-    function onMessage(e: MessageEvent) {
-      if (e.data?.type === 'omni-loading') { setLoading(true); return; }
-      if (e.data?.type !== 'omni-nav') return;
-      try {
-        const realUrl = new URLSearchParams(new URL(e.data.url as string).search).get('url');
-        if (realUrl) setInputVal(realUrl);
-      } catch {}
-      setLoading(false);
-    }
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, []);
+  const isInit = lcState === 'loading' && navCount === 0;
 
   return (
     <div className="flex flex-col w-full h-full">
-      {/* Barra de endereço */}
       <div className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
         style={{
           background: lm ? '#EDE8DF' : '#111',
@@ -239,24 +332,37 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
         </button>
       </div>
 
-      {/* iframe via proxy */}
       <div className="flex-1 relative min-h-0" style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
-        {loading && (
+        {(loading || isInit) && (
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
             style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
             <div className="w-6 h-6 border-2 border-[#3b82f6] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        <iframe
-          ref={iframeRef}
-          key={iframeUrl + navCount}
-          src={toProxyUrl(iframeUrl)}
-          className="w-full h-full border-0"
-          onLoad={handleLoad}
-          onError={() => setLoading(false)}
-          title="Omni Browser"
-          sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
-        />
+        {srcDoc !== null && (
+          <iframe
+            ref={iframeRef}
+            key={'lc-' + navCount}
+            srcDoc={srcDoc}
+            className="w-full h-full border-0"
+            onLoad={handleLoad}
+            onError={() => setLoading(false)}
+            title="Omni Browser"
+            sandbox="allow-scripts allow-forms allow-modals allow-popups"
+          />
+        )}
+        {srcDoc === null && proxyUrl && (
+          <iframe
+            ref={iframeRef}
+            key={'px-' + navCount}
+            src={`/api/proxy?url=${encodeURIComponent(proxyUrl)}`}
+            className="w-full h-full border-0"
+            onLoad={handleLoad}
+            onError={() => setLoading(false)}
+            title="Omni Browser"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
+          />
+        )}
       </div>
     </div>
   );
