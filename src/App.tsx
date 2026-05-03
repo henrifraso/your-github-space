@@ -12,6 +12,8 @@ import {
   Settings2, X, LayoutGrid, Power
 } from 'lucide-react';
 
+const isElectron = typeof window !== 'undefined' && !!(window as any).electron?.isElectron;
+
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
 type Difficulty = 'muito_facil' | 'facil' | 'normal' | 'dificil' | 'muito_dificil';
 
@@ -392,16 +394,20 @@ function AuthenticatedApp() {
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
-        <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3">
-          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
+      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+        style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
+        <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
+          style={isElectron ? { paddingLeft: 82 } : undefined}>
+          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
+            style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
             <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">{data.negocio.nome_fantasia}</h1>
             <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat */}
-          <div className="flex items-center lg:hidden">
+          <div className="flex items-center lg:hidden"
+            style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <button
               onClick={handleLogout}
               title="Sair"
