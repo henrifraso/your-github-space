@@ -46,6 +46,8 @@ async function proxyMiddleware(req: IncomingMessage, res: ServerResponse, origin
   const rawUrl = new URL(req.url!, `http://localhost`).searchParams.get('url');
   if (!rawUrl) { res.statusCode = 400; res.end('Missing ?url='); return; }
 
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 15000);
   try {
     const upstream = await fetch(rawUrl, {
       headers: {
@@ -54,7 +56,9 @@ async function proxyMiddleware(req: IncomingMessage, res: ServerResponse, origin
         'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
       },
       redirect: 'follow',
+      signal: abort.signal,
     });
+    clearTimeout(timer);
 
     const ct = upstream.headers.get('content-type') || 'application/octet-stream';
     for (const [k, v] of upstream.headers.entries()) {

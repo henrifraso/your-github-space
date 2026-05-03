@@ -71,6 +71,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
   const origin = `${proto}://${req.headers.host}`;
 
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), 15000);
   try {
     const upstream = await fetch(rawUrl, {
       headers: {
@@ -79,7 +81,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
       },
       redirect: 'follow',
+      signal: abort.signal,
     });
+    clearTimeout(timer);
 
     const ct = upstream.headers.get('content-type') || 'application/octet-stream';
 

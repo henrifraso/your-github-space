@@ -283,6 +283,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
           src={toProxyUrl(iframeUrl)}
           className="w-full h-full border-0"
           onLoad={handleLoad}
+          onError={() => setLoading(false)}
           title="Omni Browser"
           sandbox="allow-same-origin allow-scripts allow-forms allow-modals"
         />
