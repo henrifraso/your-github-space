@@ -147,6 +147,7 @@ function proxifyClient(url: string, base: string): string {
   if (url.startsWith('/api/proxy')) return url;
   try {
     const abs = /^https?:\/\//i.test(url) ? url : new URL(url, base).href;
+    if (abs.includes('/api/proxy?url=')) return abs; // já é URL proxiada — não envelopar de novo
     return `/api/proxy?url=${encodeURIComponent(abs)}`;
   } catch { return url; }
 }
@@ -158,10 +159,15 @@ function rewriteHtmlClient(html: string, pageUrl: string): string {
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
   html = html.replace(/(\s(?:href|src|action|data-src|poster)=')([^']+)(')/g,
     (_, a, u, b) => u.startsWith('/api/proxy') ? _ : a + proxifyClient(u, pageUrl) + b);
+  // Tracker: só intercepta cliques em links — NÃO intercepta pushState/replaceState
+  // (SPA do Google dispara replaceState → parent re-fetcha → loop infinito)
   const tracker = `<script>(function(){
 function nav(url){try{parent.postMessage({type:'omni-nav',url:url},'*')}catch(e){}}
 function loading(){try{parent.postMessage({type:'omni-loading'},'*')}catch(e){}}
-function real(href){try{var u=new URL(href,location.href);var p=u.searchParams.get('url');return p||u.href;}catch(e){return href;}}
+function real(href){
+  try{var u=new URL(href,location.href);var p=u.searchParams.get('url');return p||u.href;}
+  catch(e){return href;}
+}
 document.addEventListener('click',function(e){
   var el=e.target;while(el&&el.nodeName!=='A')el=el.parentElement;
   if(!el)return;
@@ -169,10 +175,6 @@ document.addEventListener('click',function(e){
   if(!href||href.startsWith('javascript:')||href.startsWith('#')||href.startsWith('mailto:'))return;
   e.preventDefault();e.stopPropagation();loading();nav(real(href));
 },true);
-var pp=history.pushState,pr=history.replaceState;
-history.pushState=function(){pp.apply(this,arguments);nav(real(location.href));};
-history.replaceState=function(){pr.apply(this,arguments);nav(real(location.href));};
-addEventListener('popstate',function(){nav(real(location.href));});
 })();</script>`;
   return /<head/i.test(html)
     ? html.replace(/(<head[^>]*>)/i, '$1' + tracker)
@@ -229,6 +231,11 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
   }, []);
 
   const goLibcurl = useCallback(async (url: string) => {
+    // Ignora se já é uma URL de proxy — evita loop duplo-proxy
+    if (url.includes('/api/proxy?url=')) {
+      console.warn('[libcurl] URL já é proxy — ignorada:', url);
+      return;
+    }
     setLoading(true);
     setNavCount(c => c + 1);
     setInputVal(url);
@@ -239,9 +246,14 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
       setLoading(false);
     } catch (err) {
       console.warn('[libcurl] fetch falhou, fallback proxy:', err);
-      setProxyUrl(url);
-      setSrcDoc(null);
-      setNavCount(c => c + 1);
+      // Só usa proxy se a URL for absoluta e externa (não já proxiada)
+      if (/^https?:\/\//i.test(url) && !url.includes('/api/proxy')) {
+        setProxyUrl(url);
+        setSrcDoc(null);
+        setNavCount(c => c + 1);
+      } else {
+        setLoading(false);
+      }
     }
   }, [fetchWithLibcurl]);
 

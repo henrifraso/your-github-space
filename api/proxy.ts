@@ -20,6 +20,7 @@ function proxify(url: string, base: string, origin: string): string {
   if (url.startsWith('/api/proxy')) return origin + url;
   try {
     const abs = /^https?:\/\//i.test(url) ? url : new URL(url, base).href;
+    if (abs.includes('/api/proxy?url=')) return abs; // já é URL proxiada — não envelopar de novo
     return `${origin}/api/proxy?url=${encodeURIComponent(abs)}`;
   } catch {
     return url;
