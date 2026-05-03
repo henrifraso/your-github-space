@@ -320,9 +320,7 @@ function RippleButton({
 
       <motion.button
         ref={btnRef}
-        initial={{ clipPath: isMobile
-          ? 'inset(calc(50% - 42px) calc(50% - 42px) round 42px)'
-          : 'inset(calc(50% - 42px) calc(50% - 42px) round 42px)' }}
+        initial={{ clipPath: 'inset(calc(50% - 44px) calc(50% - 44px) round 44px)' }}
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
@@ -336,6 +334,17 @@ function RippleButton({
           outline: 'none',
         }}
       >
+        {/* Flash branco — dissolve de #fff para creme ao emergir do GIF */}
+        {started && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{ background: '#ffffff', borderRadius: 'inherit' }}
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+          />
+        )}
+
         {ripples.map(rp => (
           <span key={rp.id} className="ripple-circle absolute rounded-full bg-[#3b82f6]/20 pointer-events-none"
             style={{ width: 80, height: 80, left: rp.x - 40, top: rp.y - 40 }} />
