@@ -85,20 +85,49 @@ function InitializerButtons() {
             transition={{ duration: 0.2 }}
             className="flex flex-col gap-2"
           >
-            <div className="flex sm:flex-row flex-col gap-1.5">
+            <div className="grid grid-cols-3 gap-2">
               {MAIN_BTNS.map((btn, i) => {
-                const offset = (i - 1) * 28;
+                const CFG = [
+                  { c: '#60a5fa', raw: '59,130,246',  glow: 'rgba(59,130,246,0.28)'  },
+                  { c: '#fb923c', raw: '251,146,60',  glow: 'rgba(251,146,60,0.28)'  },
+                  { c: '#34d399', raw: '52,211,153',  glow: 'rgba(52,211,153,0.28)'  },
+                ][i];
                 return (
                   <motion.button
                     key={btn.key}
-                    initial={{ opacity: 0, x: offset }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.35, delay: i * 0.05, ease: 'easeOut' }}
+                    initial={{ opacity: 0, y: 22, scale: 0.80, filter: 'blur(3px)' }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                    transition={{ duration: 0.55, delay: i * 0.09, ease: [0.34, 1.45, 0.64, 1] }}
+                    whileHover={{ y: -4, boxShadow: `0 8px 28px ${CFG.glow}`, transition: { duration: 0.2, ease: 'easeOut' } }}
+                    whileTap={{ scale: 0.93 }}
                     onClick={() => handleMain(btn.key)}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 h-11 rounded-2xl border text-[11px] sm:text-xs font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer bg-[#f0f2f4] dark:bg-[#414141] border-neutral-200 dark:border-[#4e4e4e] text-neutral-700 dark:text-neutral-200 hover:bg-[#3b82f6] hover:text-white hover:border-[#3b82f6]"
+                    className="group relative flex flex-col items-center justify-center gap-2.5 py-4 rounded-2xl cursor-pointer overflow-hidden"
+                    style={{
+                      background: 'rgba(255,255,255,0.035)',
+                      border: `1px solid rgba(${CFG.raw},0.22)`,
+                      boxShadow: `0 1px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05)`,
+                    }}
                   >
-                    <btn.Icon size={14} />
-                    <span>{btn.label}</span>
+                    {/* linha shimmer no topo */}
+                    <div className="absolute inset-x-0 top-0 h-px pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, rgba(${CFG.raw},0.6), transparent)` }} />
+                    {/* ícone fantasma de fundo */}
+                    <div className="absolute right-0.5 bottom-0.5 pointer-events-none opacity-[0.065] group-hover:opacity-[0.13] transition-opacity duration-300" style={{ color: CFG.c }}>
+                      <btn.Icon size={50} strokeWidth={1} />
+                    </div>
+                    {/* ícone principal */}
+                    <div
+                      className="relative z-10 flex items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-[1.15]"
+                      style={{
+                        width: 38, height: 38,
+                        background: `rgba(${CFG.raw},0.12)`,
+                        color: CFG.c,
+                      }}
+                    >
+                      <btn.Icon size={18} strokeWidth={1.8} />
+                    </div>
+                    <span className="relative z-10 text-[11px] font-semibold tracking-wider uppercase" style={{ color: `rgba(${CFG.raw},0.85)`, letterSpacing: '0.06em' }}>
+                      {btn.label}
+                    </span>
                   </motion.button>
                 );
               })}

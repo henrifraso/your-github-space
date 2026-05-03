@@ -148,6 +148,8 @@ function AuthenticatedApp() {
     | { type: 'destaque'; idx: number }
     | { type: 'workspace'; card: IntelligenceCard };
   const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentChecks, setConsentChecks] = useState({ termos: false, navegador: false, lido: false });
   const [browserOpen, setBrowserOpen] = useState(false);
   const [sectorOpen, setSectorOpen] = useState(false);
   const [activeSector, setActiveSector] = useState<SectorId>('geral');
@@ -1024,6 +1026,66 @@ function AuthenticatedApp() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Overlay de Consentimento */}
+      {!consentAccepted && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+            className="w-full max-w-sm rounded-2xl p-6 space-y-5"
+            style={{ background: dark ? '#323232' : '#f0f2f4', border: `1px solid ${dark ? '#414141' : 'rgba(0,0,0,0.08)'}`, boxShadow: dark ? '0 2px 32px rgba(0,0,0,0.5)' : '0 2px 32px rgba(0,0,0,0.12)' }}
+          >
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: dark ? '#9ca3af' : '#6b7280' }}>Para continuar</p>
+              <p className="text-sm" style={{ color: dark ? '#9ca3af' : '#6b7280' }}>Confirme os itens abaixo para acessar o feed.</p>
+            </div>
+            <div className="space-y-3">
+              {([
+                { key: 'termos', label: 'Termos de uso e Política de privacidade' },
+                { key: 'navegador', label: 'Navegador sincronizado' },
+                { key: 'lido', label: 'Li e concordo' },
+              ] as { key: keyof typeof consentChecks; label: string }[]).map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setConsentChecks(prev => ({ ...prev, [key]: !prev[key] }))}
+                  className="w-full flex items-center gap-3 cursor-pointer"
+                >
+                  <div style={{
+                    width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                    border: `1.5px solid ${consentChecks[key] ? '#3b82f6' : dark ? '#6b7280' : '#d1d5db'}`,
+                    background: consentChecks[key] ? '#3b82f6' : 'transparent',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}>
+                    {consentChecks[key] && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    )}
+                  </div>
+                  <span className="text-sm text-left leading-snug" style={{ color: dark ? '#e5e7eb' : '#1f2937' }}>{label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                if (consentChecks.termos && consentChecks.navegador && consentChecks.lido) setConsentAccepted(true);
+              }}
+              disabled={!consentChecks.termos || !consentChecks.navegador || !consentChecks.lido}
+              style={{
+                width: '100%', padding: '12px 0', borderRadius: 12,
+                fontSize: 14, fontWeight: 700,
+                background: (consentChecks.termos && consentChecks.navegador && consentChecks.lido) ? '#3b82f6' : (dark ? '#414141' : '#e5e7eb'),
+                color: (consentChecks.termos && consentChecks.navegador && consentChecks.lido) ? '#fff' : (dark ? '#6b7280' : '#9ca3af'),
+                cursor: (consentChecks.termos && consentChecks.navegador && consentChecks.lido) ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s', border: 'none',
+              }}
+            >
+              Continuar
+            </button>
+          </motion.div>
+        </div>
+      )}
 
     </div>
     </div>
