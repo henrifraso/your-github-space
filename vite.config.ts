@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { buildTracker } from './api/tracker';
 
 // ── Lógica do proxy (espelho de api/proxy.ts para dev local) ──────────────────
 
@@ -23,30 +24,7 @@ function proxify(url: string, base: string, origin: string): string {
 }
 
 function rewriteHtml(html: string, pageUrl: string, origin: string): string {
-  const tracker = `<script>(function(){
-var fn=function(u){try{parent.postMessage({type:'omni-nav',url:u},'*')}catch(e){}};
-var pp=history.pushState,pr=history.replaceState;
-history.pushState=function(){pp.apply(this,arguments);fn(location.href)};
-history.replaceState=function(){pr.apply(this,arguments);fn(location.href)};
-addEventListener('popstate',function(){fn(location.href)});
-function fixForm(f){
-  if(!f||f.nodeName!=='FORM')return false;
-  if((f.getAttribute('method')||'get').toLowerCase()!=='get')return false;
-  try{
-    var pa=new URL(f.action),orig=pa.searchParams.get('url');
-    if(!orig)return false;
-    var fd=new URLSearchParams(new FormData(f));
-    var base=orig.split('?')[0];
-    window.location.href=pa.origin+pa.pathname+'?url='+encodeURIComponent(base+'?'+fd.toString());
-    return true;
-  }catch(ex){return false;}
-}
-document.addEventListener('submit',function(e){if(fixForm(e.target)){e.preventDefault();}},true);
-var os=HTMLFormElement.prototype.submit;
-HTMLFormElement.prototype.submit=function(){if(!fixForm(this))os.call(this);};
-var ors=HTMLFormElement.prototype.requestSubmit;
-if(ors)HTMLFormElement.prototype.requestSubmit=function(s){if(!fixForm(this))ors.call(this,s);};
-})();</script>`;
+  const tracker = buildTracker();
   html = /<head/i.test(html)
     ? html.replace(/(<head[^>]*>)/i, '$1' + tracker)
     : tracker + html;

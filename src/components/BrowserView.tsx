@@ -214,9 +214,10 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
     } catch {}
   }
 
-  // SPA pushState: atualiza barra de endereço sem remontar o iframe
+  // Navegação interna: atualiza barra + mostra spinner
   useEffect(() => {
     function onMessage(e: MessageEvent) {
+      if (e.data?.type === 'omni-loading') { setLoading(true); return; }
       if (e.data?.type !== 'omni-nav') return;
       try {
         const realUrl = new URLSearchParams(new URL(e.data.url as string).search).get('url');
