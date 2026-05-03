@@ -385,7 +385,7 @@ function AuthenticatedApp() {
         <button
           onClick={handleLogout}
           title="Sair"
-          className="fixed top-3 right-4 z-[999] hidden lg:flex items-center justify-center p-2 rounded-xl text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition-all duration-200 cursor-pointer active:scale-90"
+          className="fixed top-3 right-4 z-[999] hidden lg:flex items-center justify-center p-2 rounded-xl text-neutral-800 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer active:scale-90"
         >
           <Power size={18} />
         </button>
@@ -405,7 +405,7 @@ function AuthenticatedApp() {
             <button
               onClick={handleLogout}
               title="Sair"
-              className="cursor-pointer text-neutral-400 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-700/40 transition-all duration-200 active:scale-90"
+              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
             >
               <Power size={18} className="sm:hidden" />
               <Power size={20} className="hidden sm:block" />
