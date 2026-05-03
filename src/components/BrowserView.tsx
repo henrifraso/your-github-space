@@ -174,6 +174,9 @@ function ElectronBrowser({ initialUrl }: { initialUrl: string }) {
 
 // ── Fallback com <iframe> — browser normal ────────────────────────────────────
 function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; lightMode?: boolean }) {
+  // iframeUrl controla quando o iframe remonta (só muda via navigate())
+  // url/inputVal são só a barra de endereço (atualizam via onLoad/postMessage sem remontar)
+  const [iframeUrl, setIframeUrl] = useState(initialUrl);
   const [url, setUrl] = useState(initialUrl);
   const [inputVal, setInputVal] = useState(initialUrl);
   const [loading, setLoading] = useState(true);
@@ -188,6 +191,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
   function navigate(target: string) {
     const resolved = normalizeUrl(target);
     if (!resolved) return;
+    setIframeUrl(resolved);
     setUrl(resolved);
     setInputVal(resolved);
     setLoading(true);
@@ -198,7 +202,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
     if (e.key === 'Enter') navigate(inputVal);
   }
 
-  // Sincroniza barra de endereço quando iframe navega internamente
+  // Atualiza só a barra de endereço quando iframe navega — não remonta
   function handleLoad() {
     setLoading(false);
     try {
@@ -210,7 +214,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
     } catch {}
   }
 
-  // SPA navigation via postMessage (para sites que usam pushState)
+  // SPA pushState: atualiza barra de endereço sem remontar o iframe
   useEffect(() => {
     function onMessage(e: MessageEvent) {
       if (e.data?.type !== 'omni-nav') return;
@@ -274,8 +278,8 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
         )}
         <iframe
           ref={iframeRef}
-          key={url + navCount}
-          src={toProxyUrl(url)}
+          key={iframeUrl + navCount}
+          src={toProxyUrl(iframeUrl)}
           className="w-full h-full border-0"
           onLoad={handleLoad}
           title="Omni Browser"
