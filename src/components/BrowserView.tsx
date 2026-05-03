@@ -204,8 +204,11 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
   useEffect(() => {
     (async () => {
       try {
-        const mod = await import('libcurl.js');
-        const lc = (mod as any).default ?? mod;
+        await import('libcurl.js');
+        // libcurl.mjs adiciona ao globalThis; também pode ter default export
+        const lc = (window as any).libcurl
+          ?? (await import('libcurl.js') as any).default;
+        if (!lc || typeof lc.load_wasm !== 'function') throw new Error('libcurl API não encontrada');
         await lc.load_wasm('/libcurl.wasm');
         lc.set_websocket(WISP_URL);
         lcRef.current = lc;
@@ -285,6 +288,7 @@ function IframeBrowser({ initialUrl, lightMode = false }: { initialUrl: string; 
       if (e.data?.type !== 'omni-nav') return;
       const url = e.data.url as string;
       if (!url) return;
+      if (url.includes('/api/proxy?url=')) return; // nunca navegar para URL já proxiada
       if (lcRef.current) goLibcurl(url);
       else { setProxyUrl(url); setSrcDoc(null); setInputVal(url); setNavCount(c => c + 1); }
     }
