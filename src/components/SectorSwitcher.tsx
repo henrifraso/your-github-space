@@ -1,18 +1,165 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Check, Share2, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
+import React from 'react';
+import { motion } from 'motion/react';
+import { X, Check, ChevronRight, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
+import type { DepartmentId } from '../types';
 
-export type SectorId = 'geral' | 'marketing' | 'vendas' | 'financeiro' | 'rh' | 'operacoes' | 'estoque' | 'juridico';
+export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
 
-export const SECTORS: { id: SectorId; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'geral',      label: 'Geral',       desc: 'Todas as áreas combinadas',       icon: <Globe size={22}/>,     color: '#3b82f6' },
-  { id: 'marketing',  label: 'Marketing',   desc: 'Campanhas, marca e reputação',    icon: <Megaphone size={22}/>, color: '#ec4899' },
-  { id: 'vendas',     label: 'Vendas',      desc: 'Resultados, metas e delivery',    icon: <TrendingUp size={22}/>,color: '#10b981' },
-  { id: 'financeiro', label: 'Financeiro',  desc: 'Fiscal, custos e margens',        icon: <Banknote size={22}/>,  color: '#f59e0b' },
-  { id: 'rh',         label: 'RH',          desc: 'Equipe, escalas e treinamentos',  icon: <Users size={22}/>,     color: '#8b5cf6' },
-  { id: 'operacoes',  label: 'Operações',   desc: 'Qualidade, ANVISA e processos',   icon: <Settings2 size={22}/>, color: '#06b6d4' },
-  { id: 'estoque',    label: 'Estoque',     desc: 'Insumos, pedidos e fornecedores', icon: <Package size={22}/>,   color: '#84cc16' },
-  { id: 'juridico',   label: 'Jurídico',    desc: 'Compliance, contratos e leis',    icon: <Scale size={22}/>,     color: '#f97316' },
+export type ProfileConfig = {
+  id: SectorId;
+  label: string;
+  niche: string;
+  desc: string;
+  color: string;
+  logo: string;
+  active: boolean;
+};
+
+export const SECTORS: ProfileConfig[] = [
+  {
+    id: 'os1',
+    label: 'OS1',
+    niche: 'SaaS & Inteligência Artificial',
+    desc: 'Plataforma de inteligência de negócios com IA',
+    color: '#3b82f6',
+    logo: '001',
+    active: true,
+  },
+  {
+    id: 'mcdonalds',
+    label: "McDonald's",
+    niche: 'Fast Food & Alimentação Rápida',
+    desc: 'Maior rede de fast food do mundo',
+    color: '#f59e0b',
+    logo: 'Mc',
+    active: false,
+  },
+  {
+    id: 'nike',
+    label: 'Nike',
+    niche: 'Moda & Artigos Esportivos',
+    desc: 'Líder global em calçados e vestuário esportivo',
+    color: '#000000',
+    logo: '✓',
+    active: false,
+  },
+  {
+    id: 'nubank',
+    label: 'Nubank',
+    niche: 'Fintech & Banco Digital',
+    desc: 'Maior fintech da América Latina',
+    color: '#8b5cf6',
+    logo: 'Nu',
+    active: false,
+  },
+  {
+    id: 'ifood',
+    label: 'iFood',
+    niche: 'Delivery & Foodtech',
+    desc: 'Plataforma líder de delivery no Brasil',
+    color: '#ef4444',
+    logo: 'iF',
+    active: false,
+  },
+  {
+    id: 'ambev',
+    label: 'Ambev',
+    niche: 'Bebidas & FMCG',
+    desc: 'Maior produtora de bebidas da América Latina',
+    color: '#f97316',
+    logo: 'Ab',
+    active: false,
+  },
+  {
+    id: 'magalu',
+    label: 'Magazine Luiza',
+    niche: 'Varejo & E-commerce',
+    desc: 'Líder omnichannel do varejo brasileiro',
+    color: '#3b82f6',
+    logo: 'ML',
+    active: false,
+  },
+  {
+    id: 'embraer',
+    label: 'Embraer',
+    niche: 'Aeronáutica & Defesa',
+    desc: '3ª maior fabricante de aeronaves do mundo',
+    color: '#0891b2',
+    logo: 'Em',
+    active: false,
+  },
+  {
+    id: 'tesla',
+    label: 'Tesla',
+    niche: 'Veículos Elétricos & Energia',
+    desc: 'Líder global em veículos elétricos e baterias',
+    color: '#cc0000',
+    logo: 'T',
+    active: false,
+  },
+  {
+    id: 'netflix',
+    label: 'Netflix',
+    niche: 'Streaming & Entretenimento',
+    desc: 'Maior plataforma de streaming do mundo',
+    color: '#e50914',
+    logo: 'Nf',
+    active: false,
+  },
+  {
+    id: 'spotify',
+    label: 'Spotify',
+    niche: 'Música & Áudio Digital',
+    desc: 'Plataforma de streaming musical líder global',
+    color: '#1db954',
+    logo: 'Sp',
+    active: false,
+  },
+  {
+    id: 'airbnb',
+    label: 'Airbnb',
+    niche: 'Viagens & Hospitalidade',
+    desc: 'Plataforma líder de acomodações alternativas',
+    color: '#ff5a5f',
+    logo: 'Ai',
+    active: false,
+  },
+  {
+    id: 'uber',
+    label: 'Uber',
+    niche: 'Mobilidade & Logística',
+    desc: 'Maior plataforma de mobilidade urbana do mundo',
+    color: '#09091a',
+    logo: 'Ub',
+    active: false,
+  },
+  {
+    id: 'apple',
+    label: 'Apple',
+    niche: 'Eletrônicos & Ecossistema Digital',
+    desc: 'Empresa mais valiosa do mundo — iPhone, Mac, serviços',
+    color: '#6e6e73',
+    logo: 'Ap',
+    active: false,
+  },
+  {
+    id: 'amazon',
+    label: 'Amazon',
+    niche: 'E-commerce & Cloud Computing',
+    desc: 'Maior e-commerce e provedor de cloud do planeta',
+    color: '#ff9900',
+    logo: 'Az',
+    active: false,
+  },
+  {
+    id: 'natura',
+    label: 'Natura',
+    niche: 'Cosméticos & Sustentabilidade',
+    desc: 'Grupo de beleza mais sustentável do mundo',
+    color: '#00a651',
+    logo: 'Na',
+    active: false,
+  },
 ];
 
 interface Props {
@@ -22,24 +169,51 @@ interface Props {
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number], delay: i * 0.05 },
-  }),
+  hidden: { opacity: 1 },
+  visible: { opacity: 1 },
 };
 
+function ProfileLogo({ profile, size = 48 }: { profile: ProfileConfig; size?: number }) {
+  const isOS1 = profile.id === 'os1';
+  return (
+    <div
+      style={{
+        width: size, height: size,
+        borderRadius: 14,
+        background: isOS1
+          ? 'radial-gradient(ellipse 80% 60% at center, #1a1a1a 0%, #0a0a0a 50%, #000000 100%)'
+          : profile.color + '18',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
+        position: 'relative',
+        overflow: 'hidden',
+        border: isOS1 ? '1px solid rgba(255,255,255,0.1)' : undefined,
+      }}
+    >
+      {isOS1 && (
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          opacity: 0.025,
+        }} />
+      )}
+      <span style={{
+        color: isOS1 ? '#ffffff' : profile.color,
+        fontFamily: isOS1 ? "'Big Shoulders Display', sans-serif" : 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace',
+        fontWeight: 900,
+        fontSize: isOS1 ? 26 : 15,
+        letterSpacing: isOS1 ? '-0.04em' : '-0.01em',
+        userSelect: 'none',
+        position: 'relative', zIndex: 2,
+        textShadow: 'none',
+      }}>
+        {profile.logo}
+      </span>
+    </div>
+  );
+}
+
 export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
-  const [copied, setCopied] = useState<SectorId | null>(null);
-
-  function handleShare(e: React.MouseEvent, id: SectorId) {
-    e.stopPropagation();
-    const url = `${window.location.origin}${window.location.pathname}?sector=${id}`;
-    navigator.clipboard.writeText(url).catch(() => {});
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -51,8 +225,8 @@ export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
         <div>
-          <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Feed por Área</h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">Escolha uma área ou compartilhe o link com a equipe</p>
+          <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Perfis</h1>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">Alterne entre empresas para ver o feed de cada uma</p>
         </div>
         <button
           onClick={onClose}
@@ -62,57 +236,139 @@ export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
         </button>
       </div>
 
-      {/* Grid de setores */}
+      {/* Grid de perfis */}
       <div className="flex-1 px-4 sm:px-5 py-6 max-w-[935px] w-full mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SECTORS.map((sector, i) => {
-            const isActive = active === sector.id;
+          {SECTORS.map((profile, i) => {
+            const isActive = active === profile.id;
             return (
               <motion.div
-                key={sector.id}
-                custom={i}
+                key={profile.id}
                 variants={cardVariants}
                 initial="hidden"
                 animate="visible"
-                onClick={() => { onSelect(sector.id); onClose(); }}
-                className={`relative flex items-center gap-4 px-5 py-4 rounded-2xl border cursor-pointer transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]
+                onClick={() => { onSelect(profile.id); onClose(); }}
+                className={`relative flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] cursor-pointer
                   ${isActive
                     ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
                     : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
                   }`}
               >
-                {/* Ícone */}
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: sector.color + '18' }}
-                >
-                  <span style={{ color: sector.color }}>{sector.icon}</span>
-                </div>
+                <ProfileLogo profile={profile} />
 
                 {/* Texto */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{sector.label}</p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-snug">{sector.desc}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{profile.label}</p>
+                    {profile.id === 'os1' && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#3b82f6]/15 text-[#3b82f6] uppercase tracking-wide">master</span>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-medium text-[#3b82f6] dark:text-[#60a5fa] mt-0.5 leading-snug">{profile.niche}</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-snug truncate">{profile.desc}</p>
                 </div>
 
-                {/* Ativo */}
-                {isActive && (
+                {/* Estado */}
+                {isActive ? (
                   <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0">
                     <Check size={11} className="text-white" strokeWidth={3} />
                   </div>
+                ) : (
+                  <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0" />
                 )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
-                {/* Compartilhar */}
-                <button
-                  onClick={e => handleShare(e, sector.id)}
-                  className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 flex-shrink-0 cursor-pointer"
-                  title={`Compartilhar feed de ${sector.label}`}
-                >
-                  {copied === sector.id
-                    ? <Check size={14} className="text-[#10b981]" />
-                    : <Share2 size={14} />
-                  }
-                </button>
+// ─── DepartmentSwitcher (usado em perfis não-OS1) ─────────────────────────────
+
+const DEPARTMENTS: { id: Exclude<DepartmentId, 'geral'>; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
+  { id: 'marketing',  label: 'Marketing',   desc: 'Campanhas, marca e reputação',    icon: <Megaphone size={22}/>,  color: '#ec4899' },
+  { id: 'vendas',     label: 'Vendas',       desc: 'Resultados, metas e canais',      icon: <TrendingUp size={22}/>, color: '#10b981' },
+  { id: 'financeiro', label: 'Financeiro',   desc: 'Fiscal, custos e margens',        icon: <Banknote size={22}/>,   color: '#f59e0b' },
+  { id: 'rh',         label: 'RH',           desc: 'Equipe, escalas e treinamentos',  icon: <Users size={22}/>,      color: '#8b5cf6' },
+  { id: 'operacoes',  label: 'Operações',    desc: 'Qualidade e processos internos',  icon: <Settings2 size={22}/>,  color: '#06b6d4' },
+  { id: 'estoque',    label: 'Estoque',      desc: 'Insumos, pedidos e fornecedores', icon: <Package size={22}/>,    color: '#84cc16' },
+  { id: 'juridico',   label: 'Jurídico',     desc: 'Compliance, contratos e leis',    icon: <Scale size={22}/>,      color: '#f97316' },
+];
+
+interface DeptProps {
+  active: DepartmentId;
+  onSelect: (id: DepartmentId) => void;
+  onClose: () => void;
+}
+
+export function DepartmentSwitcherModal({ active, onSelect, onClose }: DeptProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 24 }}
+      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+      className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+    >
+      <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
+        <div>
+          <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Feed por Área</h1>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">Escolha uma área da empresa</p>
+        </div>
+        <button onClick={onClose} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer">
+          <X size={20} />
+        </button>
+      </div>
+
+      <div className="flex-1 px-4 sm:px-5 py-6 max-w-[935px] w-full mx-auto">
+        {/* Botão Geral */}
+        <motion.div
+          onClick={() => { onSelect('geral'); onClose(); }}
+          className={`flex items-center gap-4 px-5 py-4 mb-3 rounded-2xl border cursor-pointer transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]
+            ${active === 'geral'
+              ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
+              : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+            }`}
+        >
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3b82f618' }}>
+            <Globe size={22} className="text-[#3b82f6]" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100">Geral</p>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">Todas as áreas combinadas</p>
+          </div>
+          {active === 'geral'
+            ? <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0"><Check size={11} className="text-white" strokeWidth={3} /></div>
+            : <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0" />
+          }
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {DEPARTMENTS.map((dept, i) => {
+            const isActive = active === dept.id;
+            return (
+              <motion.div
+                key={dept.id}
+                onClick={() => { onSelect(dept.id); onClose(); }}
+                className={`flex items-center gap-4 px-5 py-4 rounded-2xl border cursor-pointer transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]
+                  ${isActive
+                    ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
+                    : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                  }`}
+              >
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: dept.color + '18' }}>
+                  <span style={{ color: dept.color }}>{dept.icon}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-neutral-800 dark:text-neutral-100">{dept.label}</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 leading-snug">{dept.desc}</p>
+                </div>
+                {isActive
+                  ? <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0"><Check size={11} className="text-white" strokeWidth={3} /></div>
+                  : <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0" />
+                }
               </motion.div>
             );
           })}

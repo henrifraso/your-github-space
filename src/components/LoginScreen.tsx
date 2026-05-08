@@ -207,7 +207,7 @@ function RippleButton({
   const startPhaseAnim = useCallback((phase: 'user' | 'pass') => {
     animCancelRef.current?.();
     const label = phase === 'user' ? 'Usuário' : 'Senha';
-    const real  = phase === 'user' ? '@mcdonalds' : 'Teste123!';
+    const real  = phase === 'user' ? '@OS1' : 'Teste123!';
     phaseRef.current = 0;
     setPhaseTyped('');
     setInputVal('');
@@ -571,12 +571,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       tkn = r.access_token;
     } catch {}
     await apiSelectBusiness(tkn, 'mcdo-paulista');
-    if (window.innerWidth < 640) {
-      onAuthenticated(tkn, 'mcdo-paulista');
-      return;
-    }
-    pendingAuth.current = { tkn, nid: 'mcdo-paulista' };
-    setLightBrowser(true);
+    onAuthenticated(tkn, 'mcdo-paulista');
   }
 
   function handleBrowserSync() {
@@ -807,7 +802,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
 
                     {authMode === 'login' && (
                       <p className="text-center text-[10px] text-white/12 mt-3">
-                        Demo: admin@mcdonalds-os1.test · Teste123!
+                        @OS1
                       </p>
                     )}
                   </div>

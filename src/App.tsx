@@ -78,7 +78,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import LoginScreen from './components/LoginScreen';
 import { getAuthState, setAuthState, clearAuthState } from './hooks/useAuth';
 import type { OmniData, Competitor, TimelineEvent } from './types';
-import { MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
+import { MOCK_DATA, PROFILE_MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
 import { BottomModal, ModalHeader } from './components/BottomModal';
 import { FeedSection, FeedCard, PEPItemRow } from './components/FeedComponents';
 import { CircleProgress, PieChart } from './components/CircleProgress';
@@ -90,9 +90,11 @@ import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
 import type { PhotoSettings } from './components/PhotoEditor';
-import { SectorSwitcherModal, SECTORS } from './components/SectorSwitcher';
+import { SectorSwitcherModal, DepartmentSwitcherModal, SECTORS, type ProfileConfig } from './components/SectorSwitcher';
 import type { SectorId } from './components/SectorSwitcher';
+import type { DepartmentId, CompanySectorFeeds } from './types';
 import { SectorFeed } from './components/SectorFeed';
+import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard } from './components/WorkspacePanel';
 
@@ -148,16 +150,23 @@ function AuthenticatedApp() {
     | { type: 'destaque'; idx: number }
     | { type: 'workspace'; card: IntelligenceCard };
   const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
-  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(true);
   const [consentChecks, setConsentChecks] = useState({ termos: false, navegador: false, lido: false });
   const [browserOpen, setBrowserOpen] = useState(false);
   const [sectorOpen, setSectorOpen] = useState(false);
-  const [activeSector, setActiveSector] = useState<SectorId>('geral');
+  const [activeSector, setActiveSector] = useState<SectorId>('os1');
+  const [activeDepartment, setActiveDepartment] = useState<DepartmentId>('geral');
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
+
+  function loadPhotoForProfile(profileId: string): PhotoSettings {
+    const saved = localStorage.getItem(`photo_settings_${profileId}`);
+    if (saved) { try { return JSON.parse(saved); } catch {} }
+    return { src: '', x: 0, y: 0, zoom: 1, locked: true };
+  }
+
   const [photoSettings, setPhotoSettings] = useState<PhotoSettings>(
-    () => (window as any).__OMNI_DATA__?.photo_settings
-      ?? { src: '/profile-photo.jpg', x: 0, y: 0, zoom: 1, locked: true }
+    () => loadPhotoForProfile('os1')
   );
   const omniToken = useMemo(
     () => window.location.pathname.match(/\/client\/([^/]+)/)?.[1] ?? null,
@@ -205,17 +214,7 @@ function AuthenticatedApp() {
 
   const handlePhotoSave = async (s: PhotoSettings) => {
     setPhotoSettings(s);
-    if (omniToken) {
-      try {
-        await fetch(`/api/client/${omniToken}/photo`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(s),
-        });
-      } catch (e) {
-        console.error('Erro ao salvar foto no servidor:', e);
-      }
-    }
+    localStorage.setItem(`photo_settings_${activeSector}`, JSON.stringify(s));
   };
 
   const anyModalOpen = storyIndex !== null || evolucaoOpen || empresaOpen ||
@@ -244,6 +243,14 @@ function AuthenticatedApp() {
     const omniData = (window as any).__OMNI_DATA__;
     if (omniData) setData(omniData);
   }, []);
+
+  useEffect(() => {
+    const profileData = PROFILE_MOCK_DATA[activeSector];
+    if (profileData) setData(profileData);
+    setPhotoSettings(loadPhotoForProfile(activeSector));
+    setActiveDepartment('geral');
+    setScrolled(false);
+  }, [activeSector]);
 
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -377,6 +384,10 @@ function AuthenticatedApp() {
   })();
 
   function handleLogout() {
+    if (activeSector !== 'os1') {
+      setActiveSector('os1');
+      return;
+    }
     clearAuthState();
     window.location.reload();
   }
@@ -421,12 +432,18 @@ function AuthenticatedApp() {
             <button
               onClick={() => setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
-              title="Trocar feed por área"
+              title={activeSector === 'os1' ? 'Trocar perfil de empresa' : 'Trocar área da empresa'}
             >
-              <Plus size={22} className={`sm:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
-              <Plus size={22} className={`hidden sm:block lg:hidden ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
-              <Plus size={30} className={`hidden lg:block ${activeSector !== 'geral' ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`} />
-              {activeSector !== 'geral' && (
+              {(() => {
+                const highlighted = activeSector !== 'os1' ? activeDepartment !== 'geral' : false;
+                const cls = (size: string) => `${size} ${highlighted ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`;
+                return (<>
+                  <Plus size={22} className={`sm:hidden ${cls('')}`} />
+                  <Plus size={22} className={`hidden sm:block lg:hidden ${cls('')}`} />
+                  <Plus size={30} className={`hidden lg:block ${cls('')}`} />
+                </>);
+              })()}
+              {activeSector !== 'os1' && activeDepartment !== 'geral' && (
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
             </button>
@@ -486,16 +503,52 @@ function AuthenticatedApp() {
                   <div
                     className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
                     onClick={() => setDestaqueOpen(d => !d)}
+                    style={activeSector === 'os1' ? {
+                      background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
+                    } : undefined}
                   >
-                    <img
-                      src={photoSettings.src || BARBER_PHOTOS.profile}
-                      alt="perfil"
-                      style={{
-                        width: '100%', height: '100%', objectFit: 'cover',
-                        transform: `scale(${photoSettings.zoom}) translate(${photoSettings.x / photoSettings.zoom}px, ${photoSettings.y / photoSettings.zoom}px)`,
-                        transformOrigin: 'center',
-                      }}
-                    />
+                    {activeSector === 'os1' && (
+                      <div style={{
+                        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                        opacity: 0.07,
+                      }} />
+                    )}
+                    {photoSettings.src ? (
+                      <img
+                        src={photoSettings.src}
+                        alt="perfil"
+                        style={{
+                          width: '100%', height: '100%', objectFit: 'cover',
+                          transform: `scale(${photoSettings.zoom}) translate(${photoSettings.x / photoSettings.zoom}px, ${photoSettings.y / photoSettings.zoom}px)`,
+                          transformOrigin: 'center',
+                          position: 'relative', zIndex: 2,
+                        }}
+                      />
+                    ) : (() => {
+                      const activeProfile = SECTORS.find(s => s.id === activeSector);
+                      const isOS1 = activeSector === 'os1';
+                      return (
+                        <div style={{
+                          width: '100%', height: '100%',
+                          background: isOS1 ? 'transparent' : (activeProfile?.color ?? '#3b82f6') + '22',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          position: 'relative', overflow: 'hidden',
+                        }}>
+                          <span style={{
+                            color: isOS1 ? '#ffffff' : (activeProfile?.color ?? '#3b82f6'),
+                            fontFamily: isOS1 ? "'Big Shoulders Display', sans-serif" : 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace',
+                            fontWeight: 900,
+                            fontSize: 'clamp(34px, 11vw, 56px)',
+                            letterSpacing: isOS1 ? '-0.04em' : '-0.05em',
+                            userSelect: 'none',
+                            position: 'relative',
+                            textShadow: 'none',
+                            position: 'relative', zIndex: 2,
+                          }}>{activeProfile?.logo ?? '?'}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -568,11 +621,16 @@ function AuthenticatedApp() {
         </motion.div>
       </main>
 
-      {/* Feed de setor específico */}
-      {activeSector !== 'geral' && <SectorFeed sector={activeSector} />}
+      {/* Feed de setor por empresa (não-OS1 com departamento ativo) */}
+      {activeSector !== 'os1' && activeDepartment !== 'geral' && (
+        <SectorFeed
+          department={activeDepartment as Exclude<DepartmentId, 'geral'>}
+          feeds={PROFILE_SECTOR_FEEDS[activeSector] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
+        />
+      )}
 
-      {/* Feed geral */}
-      {activeSector === 'geral' && <motion.div
+      {/* Feed geral da empresa (OS1 sempre, ou outros perfis em modo Geral) */}
+      {(activeSector === 'os1' || activeDepartment === 'geral') && <motion.div
         className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
@@ -958,12 +1016,19 @@ function AuthenticatedApp() {
         )}
       </AnimatePresence>
 
-      {/* Sector Switcher */}
+      {/* Sector Switcher — OS1: troca empresa | outros: troca departamento */}
       <AnimatePresence>
-        {sectorOpen && (
+        {sectorOpen && activeSector === 'os1' && (
           <SectorSwitcherModal
             active={activeSector}
             onSelect={setActiveSector}
+            onClose={() => setSectorOpen(false)}
+          />
+        )}
+        {sectorOpen && activeSector !== 'os1' && (
+          <DepartmentSwitcherModal
+            active={activeDepartment}
+            onSelect={setActiveDepartment}
             onClose={() => setSectorOpen(false)}
           />
         )}

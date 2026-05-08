@@ -91,6 +91,25 @@ export interface OmniData {
   pep?: Record<string, PEPContainer>;
 }
 
+export type DepartmentId = 'geral' | 'marketing' | 'vendas' | 'financeiro' | 'rh' | 'operacoes' | 'estoque' | 'juridico';
+
+export interface SectorCard {
+  color: string;
+  tag: string;
+  title: string;
+  detail: string;
+  badge?: { label: string; type: 'ok' | 'warn' | 'info' };
+}
+
+export interface SectorSection {
+  sectionTitle: string;
+  cards: SectorCard[];
+}
+
+export type CompanySectorFeeds = {
+  [K in Exclude<DepartmentId, 'geral'>]: SectorSection[];
+};
+
 export interface StorySlide {
   image: string;
   title: string;
