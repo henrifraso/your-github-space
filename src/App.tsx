@@ -389,7 +389,8 @@ function AuthenticatedApp() {
       return;
     }
     clearAuthState();
-    window.location.reload();
+    const isLocal = window.location.hostname === 'localhost';
+    window.location.href = isLocal ? 'http://localhost:5000' : 'https://os1.space';
   }
 
   return (
