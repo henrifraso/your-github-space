@@ -77,6 +77,7 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import LoginScreen from './components/LoginScreen';
 import { getAuthState, setAuthState, clearAuthState } from './hooks/useAuth';
+import { apiFetch, getOrgContext } from './api';
 import type { OmniData, Competitor, TimelineEvent } from './types';
 import { MOCK_DATA, PROFILE_MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
 import { BottomModal, ModalHeader } from './components/BottomModal';
@@ -97,16 +98,42 @@ import { SectorFeed } from './components/SectorFeed';
 import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard } from './components/WorkspacePanel';
+import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
+
+function GoogleMapsPreloader() {
+  useGoogleMaps();
+  return null;
+}
 
 export default function App() {
-  const [auth, setAuth] = useState(() => getAuthState());
+  const [auth, setAuth] = useState(() => {
+    // Auto-login quando redirecionado de os1.space com ?token=xxx&org=yyy&bu=zzz
+    const p = new URLSearchParams(window.location.search);
+    const urlToken = p.get('token');
+    const urlOrg   = p.get('org');
+    const urlBu    = p.get('bu');
+    if (urlToken) {
+      const bu = urlBu || 'bu-mcdo-paulista';
+      const org = urlOrg || 'org-mcdonalds-brasil';
+      try {
+        localStorage.setItem('os1_token', urlToken);
+        localStorage.setItem('os1_negocio_id', bu);
+        localStorage.setItem('os1_org_id', org);
+        localStorage.setItem('os1_bu_id', bu);
+      } catch {}
+      window.history.replaceState({}, '', window.location.pathname);
+      // Retorna diretamente dos params — não depende de leitura imediata do localStorage
+      return { token: urlToken, negocioId: bu, orgId: org, buId: bu, isAuthenticated: true };
+    }
+    return getAuthState();
+  });
 
   if (!auth.isAuthenticated) {
     return (
       <LoginScreen
         onAuthenticated={(token, negocioId) => {
           setAuthState(token, negocioId);
-          setAuth({ token, negocioId, isAuthenticated: true });
+          setAuth(getAuthState());
         }}
       />
     );
@@ -117,8 +144,16 @@ export default function App() {
 
 function AuthenticatedApp() {
   const [data, setData] = useState<OmniData>(MOCK_DATA);
+  const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    const { orgId } = getOrgContext();
+    if (!orgId) return;
+    apiFetch<{ unread: number }>(`/api/notifications/unread-count?org_id=${encodeURIComponent(orgId)}`)
+      .then(d => setUnreadCount(d.unread ?? 0))
+      .catch(() => {});
+  }, []);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
-  const [dark] = useState(true);
+  const dark = true;
   const [difficulty, setDifficulty] = useState<Difficulty>(() => (localStorage.getItem('difficulty') as Difficulty) ?? 'normal');
   const [difficultyOpen, setDifficultyOpen] = useState(false);
   const txt = (key: TextKey) => TEXTS[key][difficulty];
@@ -153,6 +188,8 @@ function AuthenticatedApp() {
   const [consentAccepted, setConsentAccepted] = useState(true);
   const [consentChecks, setConsentChecks] = useState({ termos: false, navegador: false, lido: false });
   const [browserOpen, setBrowserOpen] = useState(false);
+  const [esferaOpen, setEsferaOpen] = useState(false);
+  const ESFERA_URL = '/esfera-ontologica.html';
   const [sectorOpen, setSectorOpen] = useState(false);
   const [activeSector, setActiveSector] = useState<SectorId>('os1');
   const [activeDepartment, setActiveDepartment] = useState<DepartmentId>('geral');
@@ -206,8 +243,13 @@ function AuthenticatedApp() {
       return next;
     });
     if (selected) {
-      const negocioId = (data as any).negocio?.id ?? omniToken;
-      if (negocioId) fetch('/api/interacoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ negocio_id: negocioId, container_tipo: containerType, tipo: 'utilizar' }) }).catch(() => {});
+      const { orgId, buId } = getOrgContext();
+      if (orgId && buId) {
+        apiFetch('/api/orchestrator/interact', {
+          method: 'POST',
+          body: JSON.stringify({ org_id: orgId, bu_id: buId, interaction_type: 'utilizar', metadata: { container_tipo: containerType } }),
+        }).catch(() => {});
+      }
       setFullscreenCard({ type: 'plano' });
     }
   };
@@ -396,8 +438,10 @@ function AuthenticatedApp() {
   return (
     <div className={dark ? 'dark' : ''}>
 
+      <GoogleMapsPreloader />
+
       {/* Botão de deslogar — canto superior direito (desktop only) */}
-      {!browserOpen && (
+      {!browserOpen && !esferaOpen && !mapOpen && (
         <button
           onClick={handleLogout}
           title="Sair"
@@ -448,15 +492,18 @@ function AuthenticatedApp() {
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
             </button>
-            <button onClick={() => setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
+            <button onClick={() => activeSector === 'os1' ? setEsferaOpen(true) : setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
               <Settings2 size={18} className="sm:hidden" />
               <Settings2 size={20} className="hidden sm:block lg:hidden" />
               <Settings2 size={24} className="hidden lg:block" />
             </button>
-            <button className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
+            <button className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               <Bell size={18} className="sm:hidden" />
               <Bell size={20} className="hidden sm:block lg:hidden" />
               <Bell size={24} className="hidden lg:block" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </button>
           </div>
         </div>
@@ -545,7 +592,7 @@ function AuthenticatedApp() {
                             userSelect: 'none',
                             position: 'relative',
                             textShadow: 'none',
-                            position: 'relative', zIndex: 2,
+                            zIndex: 2,
                           }}>{activeProfile?.logo ?? '?'}</span>
                         </div>
                       );
@@ -861,7 +908,7 @@ function AuthenticatedApp() {
         wide={scrolled}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
-        onDifficulty={() => setDifficultyOpen(true)}
+        onDifficulty={() => activeSector === 'os1' ? setEsferaOpen(true) : setDifficultyOpen(true)}
         activeSector={activeSector}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
@@ -1092,6 +1139,17 @@ function AuthenticatedApp() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Esfera Ontológica — fullscreen iframe (só perfil OS1) */}
+      {esferaOpen && (
+        <div className="fixed inset-0 z-[300] bg-black">
+          <iframe
+            src={ESFERA_URL}
+            className="w-full h-full border-0"
+            title="Esfera Ontológica"
+          />
+        </div>
+      )}
 
       {/* Overlay de Consentimento */}
       {!consentAccepted && (
