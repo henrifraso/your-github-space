@@ -2,27 +2,31 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useAnimation, useMotionValue, animate } from 'motion/react';
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X } from 'lucide-react';
 import { BrowserView } from './BrowserView';
+import { setRole } from '../hooks/useAuth';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Step = 'landing' | 'auth' | 'business' | 'consent';
 type AuthMode = 'login' | 'register';
 
-interface Business { id: string; nome: string; segmento: string; cidade: string; estado: string; }
+interface Business { id: string; orgId: string; nome: string; segmento: string; cidade: string; estado: string; }
 
 export interface Props { onAuthenticated: (token: string, negocioId: string) => void; }
 
 // ── Phrases ───────────────────────────────────────────────────────────────────
 // ── API ───────────────────────────────────────────────────────────────────────
-async function apiLogin(email: string, password: string) {
+async function apiLogin(handle: string, password: string) {
+  const isHandle = handle.startsWith('@') || !handle.includes('@');
+  const body = isHandle
+    ? { handle: handle.replace(/^@+/, ''), password }
+    : { email: handle, password };
   try {
-    const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (r.ok) return await r.json();
     const e = await r.json().catch(() => ({}));
     throw new Error(e.detail || 'Credenciais inválidas');
   } catch (err: any) {
     if (err?.message && err.message !== 'Failed to fetch') throw err;
   }
-  if (email === 'admin@mcdonalds-os1.test' && password === 'Teste123!') return { access_token: `demo.${Date.now()}`, user: { nome: 'Admin', email } };
   throw new Error('Credenciais inválidas');
 }
 
@@ -38,19 +42,27 @@ async function apiRegister(nome: string, email: string, password: string) {
   }
 }
 
+const FALLBACK_BUSINESSES: Business[] = [
+  { id: 'bu-mcdo-paulista', orgId: 'org-mcdonalds-brasil', nome: "McDonald's Avenida Paulista", segmento: 'fast_food', cidade: 'São Paulo', estado: 'SP' },
+];
+
 async function apiBusinesses(token: string): Promise<Business[]> {
   try {
-    const r = await fetch('/api/negocios', { headers: { Authorization: `Bearer ${token}` } });
-    if (r.ok) return await r.json();
-  } catch {}
-  return [
-    { id: 'mcdo-paulista', nome: "McDonald's Avenida Paulista", segmento: 'fast_food', cidade: 'São Paulo', estado: 'SP' },
-    { id: 'mcdo-brigadeiro', nome: "McDonald's Brigadeiro", segmento: 'fast_food', cidade: 'São Paulo', estado: 'SP' },
-  ];
-}
-
-async function apiSelectBusiness(token: string, negocioId: string) {
-  try { await fetch('/api/negocios/selecionar', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ negocio_id: negocioId }) }); } catch {}
+    const headers = { Authorization: `Bearer ${token}` };
+    const orgs: { id: string; name: string }[] = await fetch('/api/organizations', { headers })
+      .then(r => (r.ok ? r.json() : []));
+    const all: Business[] = [];
+    for (const org of orgs) {
+      const units: { id: string; organization_id: string; name: string; segment: string; city: string | null }[] =
+        await fetch(`/api/organizations/${org.id}/units`, { headers }).then(r => (r.ok ? r.json() : []));
+      for (const u of units) {
+        all.push({ id: u.id, orgId: org.id, nome: u.name, segmento: u.segment, cidade: u.city ?? '', estado: '' });
+      }
+    }
+    return all.length > 0 ? all : FALLBACK_BUSINESSES;
+  } catch {
+    return FALLBACK_BUSINESSES;
+  }
 }
 
 async function apiConsent(token: string, negocioId: string) {
@@ -207,7 +219,7 @@ function RippleButton({
   const startPhaseAnim = useCallback((phase: 'user' | 'pass') => {
     animCancelRef.current?.();
     const label = phase === 'user' ? 'Usuário' : 'Senha';
-    const real  = phase === 'user' ? '@OS1' : 'Teste123!';
+    const real  = '';
     phaseRef.current = 0;
     setPhaseTyped('');
     setInputVal('');
@@ -464,6 +476,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
+  const [handle, setHandle] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -473,7 +486,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [selectedBiz, setSelectedBiz] = useState('');
 
 
-  function resetForm() { setNome(''); setEmail(''); setPassword(''); setConfirmPassword(''); setError(''); }
+  function resetForm() { setNome(''); setEmail(''); setHandle(''); setPassword(''); setConfirmPassword(''); setError(''); }
 
   async function handleAuth(e: React.FormEvent) {
     e.preventDefault();
@@ -481,7 +494,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     try {
       let result;
       if (authMode === 'login') {
-        result = await apiLogin(email, password);
+        result = await apiLogin(handle || email, password);
       } else {
         if (!nome.trim()) throw new Error('Nome obrigatório');
         if (password !== confirmPassword) throw new Error('Senhas não coincidem');
@@ -489,6 +502,14 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         result = await apiRegister(nome, email, password);
       }
       setToken(result.access_token);
+      if (result.user?.role) setRole(result.user.role);
+      // Login por handle retorna org_id/bu_id direto — pula seleção de negócio
+      if (result.org_id && result.bu_id) {
+        localStorage.setItem('os1_org_id', result.org_id);
+        localStorage.setItem('os1_bu_id', result.bu_id);
+        onAuthenticated(result.access_token, result.bu_id);
+        return;
+      }
       const list = await apiBusinesses(result.access_token);
       setBusinesses(list);
       if (list.length > 0) setSelectedBiz(list[0].id);
@@ -502,9 +523,11 @@ export default function LoginScreen({ onAuthenticated }: Props) {
 
   async function handleSelectBusiness() {
     if (!selectedBiz) return;
-    setLoading(true);
-    await apiSelectBusiness(token, selectedBiz);
-    setLoading(false);
+    const biz = businesses.find(b => b.id === selectedBiz);
+    if (biz) {
+      localStorage.setItem('os1_org_id', biz.orgId);
+      localStorage.setItem('os1_bu_id', biz.id);
+    }
     setStep('consent');
   }
 
@@ -564,14 +587,9 @@ export default function LoginScreen({ onAuthenticated }: Props) {
     setLoginPhase('user');
   }
 
-  async function handleFinalLogin() {
-    let tkn = `demo.${Date.now()}`;
-    try {
-      const r = await apiLogin('admin@mcdonalds-os1.test', 'Teste123!');
-      tkn = r.access_token;
-    } catch {}
-    await apiSelectBusiness(tkn, 'mcdo-paulista');
-    onAuthenticated(tkn, 'mcdo-paulista');
+  function handleFinalLogin() {
+    resetForm();
+    setStep('auth');
   }
 
   function handleBrowserSync() {
@@ -755,8 +773,20 @@ export default function LoginScreen({ onAuthenticated }: Props) {
                       </AnimatePresence>
 
                       <div>
-                        <label className="block text-[11px] font-medium text-white/40 mb-1.5 tracking-wide uppercase">E-mail</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/25 transition-colors duration-200" />
+                        <label className="block text-[11px] font-medium text-white/40 mb-1.5 tracking-wide uppercase">{authMode === 'login' ? 'Handle' : 'E-mail'}</label>
+                        {authMode === 'login' ? (
+                          <input
+                            type="text"
+                            value={handle}
+                            onChange={e => setHandle(e.target.value.startsWith('@') ? e.target.value : '@' + e.target.value.replace(/^@*/, ''))}
+                            placeholder="@handle"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/25 transition-colors duration-200"
+                          />
+                        ) : (
+                          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/20 outline-none focus:border-white/25 transition-colors duration-200" />
+                        )}
                       </div>
 
                       <div>

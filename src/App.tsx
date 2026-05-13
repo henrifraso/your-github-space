@@ -76,7 +76,7 @@ const TEXTS: Record<TextKey, Record<Difficulty, string>> = {
 import { motion, AnimatePresence } from 'motion/react';
 
 import LoginScreen from './components/LoginScreen';
-import { getAuthState, setAuthState, clearAuthState } from './hooks/useAuth';
+import { getAuthState, setAuthState, clearAuthState, getRole, setRole } from './hooks/useAuth';
 import { apiFetch, getOrgContext } from './api';
 import type { OmniData, Competitor, TimelineEvent } from './types';
 import { MOCK_DATA, PROFILE_MOCK_DATA, buildStories, BARBER_PHOTOS } from './mockData';
@@ -99,6 +99,11 @@ import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard } from './components/WorkspacePanel';
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
+import { getRoleConfig, PERSONALIZED_ROLES } from './config/roleConfig';
+import type { RoleFeedCard } from './config/roleConfig';
+import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA } from './config/roleConfig';
+import { Toast, useToast } from './components/Toast';
+import { Mail } from 'lucide-react';
 
 function GoogleMapsPreloader() {
   useGoogleMaps();
@@ -112,6 +117,7 @@ export default function App() {
     const urlToken = p.get('token');
     const urlOrg   = p.get('org');
     const urlBu    = p.get('bu');
+    const urlRole  = p.get('role');
     if (urlToken) {
       const bu = urlBu || 'bu-mcdo-paulista';
       const org = urlOrg || 'org-mcdonalds-brasil';
@@ -120,6 +126,7 @@ export default function App() {
         localStorage.setItem('os1_negocio_id', bu);
         localStorage.setItem('os1_org_id', org);
         localStorage.setItem('os1_bu_id', bu);
+        if (urlRole) localStorage.setItem('os1_role', urlRole);
       } catch {}
       window.history.replaceState({}, '', window.location.pathname);
       // Retorna diretamente dos params — não depende de leitura imediata do localStorage
@@ -143,6 +150,16 @@ export default function App() {
 }
 
 function AuthenticatedApp() {
+  const role = getRole();
+  const roleConfig = getRoleConfig(role);
+  const [activeRoleTab, setActiveRoleTab] = useState(roleConfig.swipeOptions[0]?.id ?? 'demos');
+  const [dismissedCards, setDismissedCards] = useState<Set<string>>(new Set());
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteInput, setInviteInput] = useState('');
+  const { toast, show: showToast, hide: hideToast } = useToast();
+  const [sendNetworkOpen, setSendNetworkOpen] = useState<string | null>(null);
+  const [sendNetworkSelected, setSendNetworkSelected] = useState<Set<string>>(new Set(['Franquia Paulista', 'Franquia Morumbi', 'Franquia Campinas']));
+
   const [data, setData] = useState<OmniData>(MOCK_DATA);
   const [unreadCount, setUnreadCount] = useState(0);
   useEffect(() => {
@@ -531,6 +548,10 @@ function AuthenticatedApp() {
 
           {/* Foto + bio + botões */}
           <section className="mb-0 px-4 sm:px-5">
+            {(() => {
+              const isRoleView = PERSONALIZED_ROLES.has(role) && activeSector === 'os1';
+              const bio = roleConfig.bio;
+              return (
             <div className="flex flex-row gap-3 sm:gap-4 md:gap-24 items-center mb-4 sm:mb-5">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
@@ -551,18 +572,18 @@ function AuthenticatedApp() {
                   <div
                     className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
                     onClick={() => setDestaqueOpen(d => !d)}
-                    style={activeSector === 'os1' ? {
+                    style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
                       background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
                     } : undefined}
                   >
-                    {activeSector === 'os1' && (
+                    {(isRoleView ? role === 'codify' : activeSector === 'os1') && (
                       <div style={{
                         position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
                         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
                         opacity: 0.07,
                       }} />
                     )}
-                    {photoSettings.src ? (
+                    {!isRoleView && photoSettings.src ? (
                       <img
                         src={photoSettings.src}
                         alt="perfil"
@@ -574,6 +595,20 @@ function AuthenticatedApp() {
                         }}
                       />
                     ) : (() => {
+                      if (isRoleView) {
+                        return (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                            <span style={{
+                              color: '#ffffff',
+                              fontFamily: role === 'codify' ? "'Big Shoulders Display', sans-serif" : 'ui-monospace, SFMono-Regular, Consolas, monospace',
+                              fontWeight: 900,
+                              fontSize: role === 'codify' ? 'clamp(34px, 11vw, 56px)' : 'clamp(24px, 8vw, 40px)',
+                              letterSpacing: '-0.04em',
+                              userSelect: 'none', position: 'relative', zIndex: 2,
+                            }}>{bio.initials}</span>
+                          </div>
+                        );
+                      }
                       const activeProfile = SECTORS.find(s => s.id === activeSector);
                       const isOS1 = activeSector === 'os1';
                       return (
@@ -601,6 +636,63 @@ function AuthenticatedApp() {
                 </div>
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
+                {isRoleView ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <p className="text-base sm:text-lg font-bold text-neutral-800 dark:text-neutral-100">{bio.displayName}</p>
+                      {bio.showInviteButton && (
+                        <button
+                          onClick={() => setInviteOpen(o => !o)}
+                          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-lg text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer"
+                        >
+                          <Mail size={12} />
+                          <span>Convidar</span>
+                        </button>
+                      )}
+                    </div>
+                    {inviteOpen && bio.showInviteButton && (
+                      <div className="flex gap-2 mt-0.5">
+                        <input
+                          value={inviteInput}
+                          onChange={e => setInviteInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && inviteInput.trim()) {
+                              setInviteInput('');
+                              setInviteOpen(false);
+                              showToast('Convite enviado', 'blue');
+                            }
+                          }}
+                          placeholder="Email ou @handle"
+                          className="flex-1 bg-white/5 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
+                          className="px-3 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                        >
+                          Enviar
+                        </button>
+                      </div>
+                    )}
+                    {/* Barra de resumo — só codify */}
+                    {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
+                      <div className="flex gap-2 mt-1">
+                        {[
+                          { num: roleConfig.summaryNumbers.empresas,  label: 'empresas' },
+                          { num: roleConfig.summaryNumbers.afiliados, label: 'afiliados' },
+                          { num: roleConfig.summaryNumbers.parceiros, label: 'parceiros' },
+                        ].map(item => (
+                          <div key={item.label} className="flex-1 bg-white/5 dark:bg-white/5 border border-neutral-100 dark:border-white/10 rounded-xl px-2 py-2 text-center">
+                            <p className="text-base font-bold text-neutral-800 dark:text-white">{item.num}</p>
+                            <p className="text-[10px] text-neutral-500 dark:text-neutral-400">{item.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{bio.bioText}</p>
+                  </>
+                ) : (
+                  <>
                 <div className="flex gap-3 sm:gap-4 md:gap-10 items-center text-[11px] sm:text-xs md:text-base">
                   <span><strong>{gridItems.length}</strong> {txt('stat_opor')}</span>
                   <span><strong>{data.concorrentes.length}</strong> Oponentes</span>
@@ -633,8 +725,12 @@ function AuthenticatedApp() {
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
                   </div>
                 </div>
+                  </>
+                )}
               </div>
             </div>
+              );
+            })()}
             <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
             {bioOpen && (
               <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
@@ -677,13 +773,306 @@ function AuthenticatedApp() {
         />
       )}
 
+      {/* Tab bar de role — visível quando usuário tem role personalizado */}
+      {PERSONALIZED_ROLES.has(role) && activeSector === 'os1' && !roleConfig.useDefaultSectors && roleConfig.swipeOptions.length > 0 && (
+        <div className="max-w-[935px] mx-auto px-4 sm:px-5 mt-3 sm:mt-4">
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+            {roleConfig.swipeOptions.map(opt => (
+              <button
+                key={opt.id}
+                onClick={() => setActiveRoleTab(opt.id)}
+                className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  activeRoleTab === opt.id
+                    ? 'bg-neutral-800 dark:bg-white text-white dark:text-neutral-900'
+                    : 'bg-[#f0f2f4] dark:bg-[#323232] text-neutral-500 dark:text-neutral-400 hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                }`}
+              >
+                {opt.label}
+                {opt.id === 'minha-empresa' && roleConfig.showPendingBadge && (
+                  <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold">
+                    {roleConfig.feedCards.filter(c => c.isPending).length}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Feed role-specific (codify, affiliate, franchisor que não usa setores padrão) */}
+      {PERSONALIZED_ROLES.has(role) && activeSector === 'os1' && !roleConfig.useDefaultSectors && (() => {
+        const isRoleView = true;
+        const showDemos = (role === 'codify' && activeRoleTab === 'demos') || (role === 'affiliate' && activeRoleTab === 'demos') || (role === 'team_member' && activeRoleTab === 'demos');
+
+        if (showDemos) {
+          // mostra o feed normal do OS1 (demos)
+          return null;
+        }
+
+        // Determina quais cards mostrar
+        let cards: RoleFeedCard[] = [];
+        let listItems: React.ReactNode = null;
+
+        if (role === 'codify' || role === 'franchisor') {
+          if (activeRoleTab === 'empresas') {
+            listItems = (
+              <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
+                {CODIFY_TAB_DATA.empresas.map(emp => (
+                  <div key={emp.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{emp.nome}</p>
+                      <p className="text-xs text-neutral-500 mt-0.5">{emp.segmento} · {emp.cidade}</p>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${emp.status === 'ativo' ? 'bg-green-500/15 text-green-600 dark:text-green-400' : emp.status === 'em risco' ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}`}>
+                      {emp.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            );
+          } else if (activeRoleTab === 'afiliados') {
+            listItems = (
+              <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
+                {CODIFY_TAB_DATA.afiliados.length > 0 ? CODIFY_TAB_DATA.afiliados.map(afl => (
+                  <div key={afl.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{afl.nome}</p>
+                      <span className="text-sm font-bold text-[#3b82f6]">{afl.conversao}</span>
+                    </div>
+                    <p className="text-xs text-neutral-500">{afl.clientes} cliente{afl.clientes !== 1 ? 's' : ''} ativo{afl.clientes !== 1 ? 's' : ''} · Último contato: {afl.ultimoContato}</p>
+                  </div>
+                )) : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum afiliado ainda.</div>}
+              </div>
+            );
+          } else if (activeRoleTab === 'parceiros') {
+            listItems = (
+              <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
+                {CODIFY_TAB_DATA.parceiros.length > 0 ? CODIFY_TAB_DATA.parceiros.map(par => (
+                  <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
+                      <span className="text-xs text-neutral-500">{par.oportunidades} oportunidade{par.oportunidades !== 1 ? 's' : ''}</span>
+                    </div>
+                    <p className="text-xs text-neutral-500">Setor: {par.setor}</p>
+                  </div>
+                )) : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum parceiro ainda.</div>}
+              </div>
+            );
+          }
+        }
+
+        if ((role === 'affiliate' || role === 'team_member') && activeRoleTab === 'meus-clientes') {
+          listItems = (
+            <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
+              {AFFILIATE_TAB_DATA['meus-clientes'].map(cli => (
+                <div key={cli.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{cli.nome}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">Último contato: {cli.ultimaInteracao}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${cli.status === 'ativo' ? 'bg-green-500/15 text-green-600 dark:text-green-400' : cli.status === 'em risco' ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}`}>
+                    {cli.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        }
+        if ((role === 'affiliate' || role === 'team_member') && activeRoleTab === 'parceiros') {
+          listItems = (
+            <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
+              {AFFILIATE_TAB_DATA.parceiros.map(par => (
+                <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
+                    <span className="text-sm font-bold text-[#3b82f6]">{par.comissao}</span>
+                  </div>
+                  <p className="text-xs text-neutral-500">Setor: {par.setor}</p>
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        // Cards do franchisor por aba
+        if (role === 'franchisor') {
+          const relevantCards = activeRoleTab === 'minha-empresa'
+            ? roleConfig.feedCards.filter(c => !c.isPending)
+            : roleConfig.feedCards.filter(c => c.franchiseName?.toLowerCase().includes(activeRoleTab.replace('franquia-', '')));
+          cards = relevantCards.filter(c => !dismissedCards.has(c.id));
+        } else if (!listItems) {
+          cards = roleConfig.feedCards.filter(c => !dismissedCards.has(c.id));
+        }
+
+        if (listItems) return listItems;
+
+        const urgenciaColor = (u: string) => u === 'alta' ? '#ef4444' : u === 'media' ? '#f59e0b' : '#6b7280';
+
+        return (
+          <motion.div
+            className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
+            initial="hidden"
+            animate="visible"
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
+          >
+            {cards.length === 0 && (
+              <div className="text-center text-neutral-400 py-12 text-sm">Nenhum item nesta aba.</div>
+            )}
+            {cards.map(card => (
+              <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
+                <AnimatePresence>
+                  <motion.div
+                    layout
+                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="relative bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+                  >
+                    {/* Badge Pendente */}
+                    {roleConfig.showPendingBadge && card.isPending && (
+                      <span className="absolute top-3 right-3 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full">
+                        Pendente
+                      </span>
+                    )}
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgenciaColor(card.urgencia) }}>
+                      {card.tags[0]}
+                    </p>
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug pr-16">{card.titulo}</p>
+                    <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
+
+                    {/* Botões normais */}
+                    <div className="flex gap-2 mt-3 flex-wrap">
+                      {[
+                        { label: 'Utilizar',    fn: () => setFullscreenCard({ type: 'plano' }) },
+                        { label: 'Perguntas',   fn: () => setChatOpen(true) },
+                        { label: 'Exemplos',    fn: () => setFullscreenCard({ type: 'plano' }) },
+                        { label: 'Compartilhar',fn: () => {} },
+                      ].map(btn => (
+                        <button key={btn.label} onClick={btn.fn}
+                          className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Botões Aprovar/Reprovar (franchisor, cards pendentes) */}
+                    {roleConfig.showApproveButtons && card.isPending && (
+                      <div className="flex gap-2 mt-2.5">
+                        <button
+                          onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Aprovado', 'green'); }}
+                          className="flex-1 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                        >
+                          Aprovar
+                        </button>
+                        <button
+                          onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Reprovado', 'red'); }}
+                          className="flex-1 py-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                        >
+                          Reprovar
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Botão Enviar pra rede (franchisor, cards normais) */}
+                    {role === 'franchisor' && !card.isPending && (
+                      <div className="mt-2.5">
+                        <button
+                          onClick={() => setSendNetworkOpen(card.id)}
+                          className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer"
+                        >
+                          Enviar pra rede
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </motion.div>
+        );
+      })()}
+
+      {/* Modal "Enviar pra rede" */}
+      <AnimatePresence>
+        {sendNetworkOpen && (
+          <>
+            <motion.div key="overlay-network" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm" onClick={() => setSendNetworkOpen(null)} />
+            <motion.div key="modal-network" initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.25 }}
+              className="fixed inset-0 z-[90] flex items-center justify-center px-4 pointer-events-none"
+            >
+              <div className="w-full max-w-[360px] bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 shadow-xl pointer-events-auto">
+                <h3 className="text-white font-semibold text-sm mb-3">Enviar pra unidades</h3>
+                <div className="space-y-2 mb-4">
+                  {['Franquia Paulista', 'Franquia Morumbi', 'Franquia Campinas'].map(f => (
+                    <label key={f} className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sendNetworkSelected.has(f)}
+                        onChange={e => {
+                          setSendNetworkSelected(prev => {
+                            const next = new Set(prev);
+                            if (e.target.checked) next.add(f); else next.delete(f);
+                            return next;
+                          });
+                        }}
+                        className="w-4 h-4 rounded"
+                      />
+                      <span className="text-sm text-white/80">{f}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setSendNetworkOpen(null)} className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white/60 text-sm rounded-xl transition-all cursor-pointer">Cancelar</button>
+                  <button
+                    onClick={() => { setSendNetworkOpen(null); showToast(`Enviado pra ${sendNetworkSelected.size} unidade${sendNetworkSelected.size !== 1 ? 's' : ''}`, 'blue'); }}
+                    className="flex-[2] py-2.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-sm font-semibold rounded-xl transition-all cursor-pointer"
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Toast global */}
+      <Toast message={toast.message} color={toast.color} visible={toast.visible} onHide={hideToast} />
+
       {/* Feed geral da empresa (OS1 sempre, ou outros perfis em modo Geral) */}
-      {(activeSector === 'os1' || activeDepartment === 'geral') && <motion.div
+      {(activeSector === 'os1' || activeDepartment === 'geral') &&
+       (!PERSONALIZED_ROLES.has(role) || roleConfig.useDefaultSectors ||
+        ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
+        (roleConfig.swipeOptions.length === 0)
+       ) && <motion.div
         className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
       >
+
+        {/* Cards do role no topo do feed (codify/afiliado/parceiro/franquia na aba Demos ou useDefaultSectors) */}
+        {PERSONALIZED_ROLES.has(role) && roleConfig.feedCards.length > 0 && roleConfig.feedCards.map(card => (
+          <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
+            <FeedCard>
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.tags[0]}</p>
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{card.titulo}</p>
+                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
+                </div>
+                <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
+              </div>
+              <div className="flex gap-2 mt-3 flex-wrap">
+                {['Utilizar', 'Perguntas', 'Exemplos', 'Compartilhar'].map(btn => (
+                  <button key={btn} onClick={() => btn === 'Perguntas' ? setChatOpen(true) : btn === 'Utilizar' ? setFullscreenCard({ type: 'plano' }) : undefined}
+                    className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
+                    {btn}
+                  </button>
+                ))}
+              </div>
+            </FeedCard>
+          </motion.div>
+        ))}
 
         {/* Cards 1–5 */}
         {[
