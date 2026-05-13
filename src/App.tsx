@@ -101,7 +101,7 @@ import type { IntelligenceCard } from './components/WorkspacePanel';
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
 import { getRoleConfig, PERSONALIZED_ROLES } from './config/roleConfig';
 import type { RoleFeedCard } from './config/roleConfig';
-import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA } from './config/roleConfig';
+import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES } from './config/roleConfig';
 import { Toast, useToast } from './components/Toast';
 import { Mail } from 'lucide-react';
 
@@ -158,7 +158,7 @@ function AuthenticatedApp() {
   const [inviteInput, setInviteInput] = useState('');
   const { toast, show: showToast, hide: hideToast } = useToast();
   const [sendNetworkOpen, setSendNetworkOpen] = useState<string | null>(null);
-  const [sendNetworkSelected, setSendNetworkSelected] = useState<Set<string>>(new Set(['Franquia Paulista', 'Franquia Morumbi', 'Franquia Campinas']));
+  const [sendNetworkSelected, setSendNetworkSelected] = useState<Set<string>>(new Set(FRANCHISOR_FRANCHISE_NAMES));
 
   const [data, setData] = useState<OmniData>(MOCK_DATA);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -690,6 +690,9 @@ function AuthenticatedApp() {
                       </div>
                     )}
                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{bio.bioText}</p>
+                    {bio.bioSubtext && (
+                      <p className="text-[11px] text-neutral-400 dark:text-neutral-500">{bio.bioSubtext}</p>
+                    )}
                   </>
                 ) : (
                   <>
@@ -788,7 +791,7 @@ function AuthenticatedApp() {
                 }`}
               >
                 {opt.label}
-                {opt.id === 'minha-empresa' && roleConfig.showPendingBadge && (
+                {(opt.id === 'minha-empresa' || opt.id === 'rede') && roleConfig.showPendingBadge && (
                   <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold">
                     {roleConfig.feedCards.filter(c => c.isPending).length}
                   </span>
@@ -896,8 +899,9 @@ function AuthenticatedApp() {
 
         // Cards do franchisor por aba
         if (role === 'franchisor') {
-          const relevantCards = activeRoleTab === 'minha-empresa'
-            ? roleConfig.feedCards.filter(c => !c.isPending)
+          const isRedeTab = activeRoleTab === 'minha-empresa' || activeRoleTab === 'rede';
+        const relevantCards = isRedeTab
+            ? roleConfig.feedCards.filter(c => !c.franchiseName)
             : roleConfig.feedCards.filter(c => c.franchiseName?.toLowerCase().includes(activeRoleTab.replace('franquia-', '')));
           cards = relevantCards.filter(c => !dismissedCards.has(c.id));
         } else if (!listItems) {
@@ -1002,7 +1006,7 @@ function AuthenticatedApp() {
               <div className="w-full max-w-[360px] bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 shadow-xl pointer-events-auto">
                 <h3 className="text-white font-semibold text-sm mb-3">Enviar pra unidades</h3>
                 <div className="space-y-2 mb-4">
-                  {['Franquia Paulista', 'Franquia Morumbi', 'Franquia Campinas'].map(f => (
+                  {FRANCHISOR_FRANCHISE_NAMES.map(f => (
                     <label key={f} className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
