@@ -4,6 +4,7 @@ export interface Competitor {
   endereco: string;
   cidade: string;
   faixa_preco: string;
+  categoria?: 'direto' | 'indireto';
   faz_bem?: string[];
   nao_oferece?: string[];
   mudancas_recentes?: string[];
