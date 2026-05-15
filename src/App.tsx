@@ -161,6 +161,35 @@ function AuthenticatedApp() {
   const [sendNetworkSelected, setSendNetworkSelected] = useState<Set<string>>(new Set(FRANCHISOR_FRANCHISE_NAMES));
 
   const [data, setData] = useState<OmniData>(MOCK_DATA);
+
+  // Cards reais do backend (intelligence_cards via /api/orchestrator/feed)
+  const [orchCards, setOrchCards] = useState<IntelligenceCard[]>([]);
+  useEffect(() => {
+    const { orgId, buId } = getOrgContext();
+    if (!orgId || !buId) return;
+    apiFetch<any[]>('/api/orchestrator/feed')
+      .then(cards => {
+        const mapped: IntelligenceCard[] = cards.map(c => ({
+          id:              c.id,
+          titulo:          c.title,
+          resumo:          c.summary,
+          por_que_importa: c.probable_impact ?? '',
+          onde_afeta:      c.domain_id ?? '',
+          o_que_fazer:     c.recommended_action ?? '',
+          dominio:         c.domain_id ?? '',
+          area:            c.gap_type ?? '',
+          urgencia:        c.urgency,
+          tipo_card:       c.card_type,
+          confianca:       c.confidence_level ?? 'media',
+          confianca_score: c.confidence_score ?? 0.5,
+          impacto:         c.probable_impact ?? '',
+          risco_erro:      Math.max(0, 1 - (c.confidence_score ?? 0.5)),
+        }));
+        if (mapped.length > 0) setOrchCards(mapped);
+      })
+      .catch(() => {});
+  }, []);
+
   const [unreadCount, setUnreadCount] = useState(0);
   useEffect(() => {
     const { orgId } = getOrgContext();
@@ -1069,6 +1098,40 @@ function AuthenticatedApp() {
               <div className="flex gap-2 mt-3 flex-wrap">
                 {['Utilizar', 'Perguntas', 'Exemplos', 'Compartilhar'].map(btn => (
                   <button key={btn} onClick={() => btn === 'Perguntas' ? setChatOpen(true) : btn === 'Utilizar' ? setFullscreenCard({ type: 'plano' }) : undefined}
+                    className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
+                    {btn}
+                  </button>
+                ))}
+              </div>
+            </FeedCard>
+          </motion.div>
+        ))}
+
+        {/* Cards reais do backend (intelligence_cards via /api/orchestrator/feed) */}
+        {orchCards.map(card => (
+          <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
+            <FeedCard>
+              <div className="flex items-start gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.dominio}</p>
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{card.titulo}</p>
+                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
+                </div>
+                <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
+              </div>
+              <div className="flex gap-2 mt-3 flex-wrap">
+                {['Utilizar', 'Perguntas', 'Compartilhar'].map(btn => (
+                  <button key={btn}
+                    onClick={() => {
+                      if (btn === 'Perguntas') { setChatOpen(true); return; }
+                      if (btn === 'Utilizar') {
+                        apiFetch('/api/orchestrator/interact', {
+                          method: 'POST',
+                          body: JSON.stringify({ card_id: card.id, interaction_type: 'utilizou' }),
+                        }).catch(() => {});
+                        setFullscreenCard({ type: 'workspace', card });
+                      }
+                    }}
                     className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
                     {btn}
                   </button>
