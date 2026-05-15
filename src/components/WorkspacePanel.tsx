@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { apiFetch } from '../api';
 import {
   X, Search, Zap, BookOpen, BarChart2, RefreshCw, Sliders,
   Share2, ChevronRight, AlertTriangle, TrendingUp, Info, Shield,
@@ -95,13 +96,10 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
   const [shortcuts, setShortcuts]       = useState<Shortcut[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem('omni_token') || '';
-    fetch('/api/shortcuts/para-card', {
+    apiFetch<{ shortcuts?: Shortcut[] }>('/api/shortcuts/para-card', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ card_id: card.id, limit: 5 }),
     })
-      .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.shortcuts) setShortcuts(data.shortcuts); })
       .catch(() => {});
   }, [card.id]);
@@ -121,16 +119,14 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
     setActiveAction(action);
     setActionResult(null);
     try {
-      const token = localStorage.getItem('omni_token') || '';
-      const res = await fetch(`/api/workspace/${action}`, {
+      const data = await apiFetch<Record<string, unknown>>(`/api/workspace/${action}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ card_id: card.id, ...extra }),
       });
-      const data = await res.json();
       setActionResult(data);
-    } catch {
-      setActionResult({ erro: 'Não foi possível conectar ao servidor.' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Não foi possível conectar ao servidor.';
+      setActionResult({ erro: msg });
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, TrendingUp, TrendingDown, Minus, Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { apiFetch } from '../api';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -213,14 +214,9 @@ export default function CapabilityMap({ token, onClose, inline }: CapabilityMapP
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [showAll, setShowAll] = useState(false);
 
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:3002';
-
   useEffect(() => {
     if (!token) { setLoading(false); return; }
-    fetch(`${API}/api/capabilities/resumo`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
+    apiFetch<SummaryData>('/api/capabilities/resumo')
       .then(d => { setData(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, [token]);

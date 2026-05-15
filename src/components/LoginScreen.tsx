@@ -600,8 +600,8 @@ export default function LoginScreen({ onAuthenticated }: Props) {
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 16 },
-    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] } },
-    exit: { opacity: 0, scale: 0.95, y: 8, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.32, ease: [0.4, 0, 0.2, 1] as [number,number,number,number] } },
+    exit: { opacity: 0, scale: 0.95, y: 8, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] as [number,number,number,number] } },
   };
 
   return (

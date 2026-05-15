@@ -3,6 +3,7 @@ export interface Competitor {
   nota_google: number | string;
   endereco: string;
   cidade: string;
+  estado?: string;
   faixa_preco: string;
   categoria?: 'direto' | 'indireto';
   faz_bem?: string[];
