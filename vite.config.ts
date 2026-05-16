@@ -126,4 +126,18 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      // Repassa ao backend Flask tudo que começa com /api, exceto /api/proxy
+      // O middleware omni-proxy captura /api/proxy antes que o proxy do Vite veja.
+      '/api': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        bypass(req) {
+          // Deixa o middleware omni-proxy tratar /api/proxy
+          if (req.url?.startsWith('/api/proxy')) return req.url;
+        },
+      },
+    },
+  },
 });

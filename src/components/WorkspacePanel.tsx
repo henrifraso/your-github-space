@@ -405,10 +405,14 @@ function RegenerarResult({ r }: { r: Record<string, unknown> }) {
 
 function EstenderResult({ r }: { r: Record<string, unknown> }) {
   const cards = (r.cards_relacionados as Record<string, unknown>[] | undefined) || [];
+  const adicionados = r.adicionados_ao_feed as number | undefined;
+  const label = (r.fallback || !adicionados)
+    ? `${cards.length} sugestões relacionadas geradas`
+    : `${adicionados} cards adicionados ao feed`;
   return (
     <div className="space-y-2">
       <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 mb-3">
-        {cards.length} cards adicionados ao feed
+        {label}
       </p>
       {cards.map((c, i) => (
         <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-neutral-50 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#303030]">

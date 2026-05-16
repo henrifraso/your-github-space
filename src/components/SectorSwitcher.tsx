@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Check, ChevronRight, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
+import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
 import type { DepartmentId } from '../types';
 
 export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
@@ -162,10 +162,19 @@ export const SECTORS: ProfileConfig[] = [
   },
 ];
 
+interface RoleSection {
+  title: string;
+  tabs: { id: string; label: string }[];
+  activeTab: string;
+  onSelectTab: (id: string) => void;
+  renderContent?: (tabId: string) => React.ReactNode;
+}
+
 interface Props {
   active: SectorId;
   onSelect: (id: SectorId) => void;
   onClose: () => void;
+  roleSection?: RoleSection;
 }
 
 const cardVariants = {
@@ -213,7 +222,11 @@ function ProfileLogo({ profile, size = 48 }: { profile: ProfileConfig; size?: nu
   );
 }
 
-export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
+export function SectorSwitcherModal({ active, onSelect, onClose, roleSection }: Props) {
+  const [openTab, setOpenTab] = useState<string | null>(null);
+  const openTabLabel = openTab ? roleSection?.tabs.find(t => t.id === openTab)?.label : null;
+  const showSubview = !!openTab && !!roleSection?.renderContent;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -224,10 +237,15 @@ export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
     >
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
-        <div>
-          <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Perfis</h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">Alterne entre empresas para ver o feed de cada uma</p>
-        </div>
+        {showSubview ? (
+          <button
+            onClick={() => setOpenTab(null)}
+            className="flex items-center gap-2 p-2 -ml-2 rounded-xl text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
+          >
+            <ChevronLeft size={18} />
+            <span className="text-sm font-bold">{openTabLabel}</span>
+          </button>
+        ) : <span />}
         <button
           onClick={onClose}
           className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
@@ -236,8 +254,54 @@ export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
         </button>
       </div>
 
-      {/* Grid de perfis */}
+      {/* Body */}
       <div className="flex-1 px-4 sm:px-5 py-6 max-w-[935px] w-full mx-auto">
+        {/* Subview: conteúdo da tab selecionada */}
+        {showSubview && roleSection?.renderContent?.(openTab!)}
+
+        {/* View principal: grid de tabs + grid de perfis */}
+        {!showSubview && roleSection && roleSection.tabs.length > 0 && (
+          <div className="mb-8">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2.5">{roleSection.title}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {roleSection.tabs.map(tab => {
+                const isActive = roleSection.activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      const hasContent = roleSection.renderContent && roleSection.renderContent(tab.id) != null;
+                      if (hasContent) {
+                        // Subview dentro do modal — não muda o feed
+                        setOpenTab(tab.id);
+                      } else {
+                        // Tab sem conteúdo no modal (ex: demos) — fecha e atualiza feed
+                        roleSection.onSelectTab(tab.id);
+                        onClose();
+                      }
+                    }}
+                    className={`flex items-center justify-between gap-2 px-4 py-3 rounded-2xl border transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] cursor-pointer
+                      ${isActive
+                        ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
+                        : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                      }`}
+                  >
+                    <span className="text-sm font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{tab.label}</span>
+                    {isActive
+                      ? <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0"><Check size={11} className="text-white" strokeWidth={3} /></div>
+                      : <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0" />
+                    }
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!showSubview && roleSection && (
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2.5">Perfis demo</p>
+        )}
+        {!showSubview && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {SECTORS.map((profile, i) => {
             const isActive = active === profile.id;
@@ -280,6 +344,7 @@ export function SectorSwitcherModal({ active, onSelect, onClose }: Props) {
             );
           })}
         </div>
+        )}
       </div>
     </motion.div>
   );

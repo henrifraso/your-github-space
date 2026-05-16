@@ -99,9 +99,10 @@ import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard } from './components/WorkspacePanel';
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
-import { getRoleConfig, PERSONALIZED_ROLES } from './config/roleConfig';
+import { getRoleConfig } from './config/roleConfig';
 import type { RoleFeedCard } from './config/roleConfig';
-import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES } from './config/roleConfig';
+import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES } from './data/roleMocks';
+import { isPersonalizedRole, filterFranchisorCardsByTab, shouldShowRoleDemos } from './utils/roleUtils';
 import { Toast, useToast } from './components/Toast';
 import { Mail } from 'lucide-react';
 
@@ -156,6 +157,15 @@ function AuthenticatedApp() {
   const [dismissedCards, setDismissedCards] = useState<Set<string>>(new Set());
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteInput, setInviteInput] = useState('');
+  const saibaMaisRef = useRef<HTMLButtonElement>(null);
+  const [saibaMaisWidth, setSaibaMaisWidth] = useState<number | null>(null);
+  useEffect(() => {
+    if (!saibaMaisRef.current) return;
+    const measure = () => setSaibaMaisWidth(saibaMaisRef.current?.offsetWidth ?? null);
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  });
   const { toast, show: showToast, hide: hideToast } = useToast();
   const [sendNetworkOpen, setSendNetworkOpen] = useState<string | null>(null);
   const [sendNetworkSelected, setSendNetworkSelected] = useState<Set<string>>(new Set(FRANCHISOR_FRANCHISE_NAMES));
@@ -481,6 +491,95 @@ function AuthenticatedApp() {
     window.location.href = isLocal ? 'http://localhost:5000' : 'https://os1.space';
   }
 
+  // Conteúdo das tabs do role (codify/affiliate) renderizado dentro do modal "+"
+  function renderRoleTabContent(tabId: string): React.ReactNode {
+    if (role === 'codify' || role === 'franchisor') {
+      if (tabId === 'empresas') {
+        return (
+          <div className="space-y-2.5">
+            {CODIFY_TAB_DATA.empresas.map(emp => (
+              <div key={emp.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{emp.nome}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">{emp.segmento} · {emp.cidade}</p>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${emp.status === 'ativo' ? 'bg-green-500/15 text-green-600 dark:text-green-400' : emp.status === 'em risco' ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}`}>
+                  {emp.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      if (tabId === 'afiliados') {
+        return (
+          <div className="space-y-2.5">
+            {CODIFY_TAB_DATA.afiliados.length > 0 ? CODIFY_TAB_DATA.afiliados.map(afl => (
+              <div key={afl.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{afl.nome}</p>
+                  <span className="text-sm font-bold text-[#3b82f6]">{afl.conversao}</span>
+                </div>
+                <p className="text-xs text-neutral-500">{afl.clientes} cliente{afl.clientes !== 1 ? 's' : ''} ativo{afl.clientes !== 1 ? 's' : ''} · Último contato: {afl.ultimoContato}</p>
+              </div>
+            )) : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum afiliado ainda.</div>}
+          </div>
+        );
+      }
+      if (tabId === 'parceiros') {
+        return (
+          <div className="space-y-2.5">
+            {CODIFY_TAB_DATA.parceiros.length > 0 ? CODIFY_TAB_DATA.parceiros.map(par => (
+              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
+                  <span className="text-xs text-neutral-500">{par.oportunidades} oportunidade{par.oportunidades !== 1 ? 's' : ''}</span>
+                </div>
+                <p className="text-xs text-neutral-500">Setor: {par.setor}</p>
+              </div>
+            )) : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum parceiro ainda.</div>}
+          </div>
+        );
+      }
+    }
+    if ((role === 'affiliate' || role === 'team_member')) {
+      if (tabId === 'meus-clientes') {
+        return (
+          <div className="space-y-2.5">
+            {AFFILIATE_TAB_DATA['meus-clientes'].map(cli => (
+              <div key={cli.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{cli.nome}</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">Último contato: {cli.ultimaInteracao}</p>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${cli.status === 'ativo' ? 'bg-green-500/15 text-green-600 dark:text-green-400' : cli.status === 'em risco' ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}`}>
+                  {cli.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      if (tabId === 'parceiros') {
+        return (
+          <div className="space-y-2.5">
+            {AFFILIATE_TAB_DATA.parceiros.map(par => (
+              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
+                  <span className="text-sm font-bold text-[#3b82f6]">{par.comissao}</span>
+                </div>
+                <p className="text-xs text-neutral-500">Setor: {par.setor}</p>
+              </div>
+            ))}
+          </div>
+        );
+      }
+    }
+    // tabId='demos' e outras sem conteúdo retornam null → modal fecha
+    return null;
+  }
+
   return (
     <div className={dark ? 'dark' : ''}>
 
@@ -505,7 +604,9 @@ function AuthenticatedApp() {
           <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">{data.negocio.nome_fantasia}</h1>
+            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
+            </h1>
             <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
@@ -578,7 +679,7 @@ function AuthenticatedApp() {
           {/* Foto + bio + botões */}
           <section className="mb-0 px-4 sm:px-5">
             {(() => {
-              const isRoleView = PERSONALIZED_ROLES.has(role) && activeSector === 'os1';
+              const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
               return (
             <div className="flex flex-row gap-3 sm:gap-4 md:gap-24 items-center mb-4 sm:mb-5">
@@ -612,7 +713,13 @@ function AuthenticatedApp() {
                         opacity: 0.07,
                       }} />
                     )}
-                    {!isRoleView && photoSettings.src ? (
+                    {isRoleView && roleConfig.bio.photoUrl ? (
+                      <img
+                        src={roleConfig.bio.photoUrl}
+                        alt={roleConfig.bio.displayName}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'relative', zIndex: 2 }}
+                      />
+                    ) : !isRoleView && photoSettings.src ? (
                       <img
                         src={photoSettings.src}
                         alt="perfil"
@@ -667,60 +774,64 @@ function AuthenticatedApp() {
               <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
                 {isRoleView ? (
                   <>
-                    <div className="flex items-center gap-3">
-                      <p className="text-base sm:text-lg font-bold text-neutral-800 dark:text-neutral-100">{bio.displayName}</p>
-                      {bio.showInviteButton && (
+                    {/* Barra de resumo — só codify */}
+                    {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
+                      <div className="flex gap-3 sm:gap-4 md:gap-10 items-center text-[11px] sm:text-xs md:text-base text-neutral-800 dark:text-neutral-200">
+                        <span><strong>{roleConfig.summaryNumbers.empresas}</strong> empresas</span>
+                        <span><strong>{roleConfig.summaryNumbers.afiliados}</strong> afiliados</span>
+                        <span><strong>{roleConfig.summaryNumbers.parceiros}</strong> parceiros</span>
+                        {!bioOpen && (
+                          <button
+                            ref={saibaMaisRef}
+                            onClick={() => setBioOpen(true)}
+                            className="hidden lg:inline-flex ml-auto items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
+                          >
+                            <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
+                            <span>Saiba mais</span>
+                            <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3 mt-0.5 sm:mt-1">
+                      <p className="flex-1 text-[11px] sm:text-xs md:text-sm text-neutral-800 dark:text-neutral-200">{bio.bioText}</p>
+                      {bio.showInviteButton && !inviteOpen && (
                         <button
-                          onClick={() => setInviteOpen(o => !o)}
-                          className="flex items-center gap-1.5 px-2.5 py-1 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-lg text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer"
+                          onClick={() => setInviteOpen(true)}
+                          style={saibaMaisWidth ? { width: saibaMaisWidth } : undefined}
+                          className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
                         >
-                          <Mail size={12} />
+                          <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
                           <span>Convidar</span>
                         </button>
                       )}
+                      {inviteOpen && bio.showInviteButton && (
+                        <div className="hidden lg:flex gap-2 w-full max-w-[280px]">
+                          <input
+                            value={inviteInput}
+                            onChange={e => setInviteInput(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && inviteInput.trim()) {
+                                setInviteInput('');
+                                setInviteOpen(false);
+                                showToast('Convite enviado', 'blue');
+                              }
+                            }}
+                            placeholder="Email ou @handle"
+                            className="flex-1 bg-white/5 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
+                            className="px-3 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                          >
+                            Enviar
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {inviteOpen && bio.showInviteButton && (
-                      <div className="flex gap-2 mt-0.5">
-                        <input
-                          value={inviteInput}
-                          onChange={e => setInviteInput(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && inviteInput.trim()) {
-                              setInviteInput('');
-                              setInviteOpen(false);
-                              showToast('Convite enviado', 'blue');
-                            }
-                          }}
-                          placeholder="Email ou @handle"
-                          className="flex-1 bg-white/5 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
-                          className="px-3 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer"
-                        >
-                          Enviar
-                        </button>
-                      </div>
-                    )}
-                    {/* Barra de resumo — só codify */}
-                    {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
-                      <div className="flex gap-2 mt-1">
-                        {[
-                          { num: roleConfig.summaryNumbers.empresas,  label: 'empresas' },
-                          { num: roleConfig.summaryNumbers.afiliados, label: 'afiliados' },
-                          { num: roleConfig.summaryNumbers.parceiros, label: 'parceiros' },
-                        ].map(item => (
-                          <div key={item.label} className="flex-1 bg-white/5 dark:bg-white/5 border border-neutral-100 dark:border-white/10 rounded-xl px-2 py-2 text-center">
-                            <p className="text-base font-bold text-neutral-800 dark:text-white">{item.num}</p>
-                            <p className="text-[10px] text-neutral-500 dark:text-neutral-400">{item.label}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">{bio.bioText}</p>
                     {bio.bioSubtext && (
-                      <p className="text-[11px] text-neutral-400 dark:text-neutral-500">{bio.bioSubtext}</p>
+                      <p className="text-[11px] sm:text-xs md:text-sm text-neutral-800 dark:text-neutral-200">{bio.bioSubtext}</p>
                     )}
                   </>
                 ) : (
@@ -805,36 +916,10 @@ function AuthenticatedApp() {
         />
       )}
 
-      {/* Tab bar de role — visível quando usuário tem role personalizado */}
-      {PERSONALIZED_ROLES.has(role) && activeSector === 'os1' && !roleConfig.useDefaultSectors && roleConfig.swipeOptions.length > 0 && (
-        <div className="max-w-[935px] mx-auto px-4 sm:px-5 mt-3 sm:mt-4">
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-            {roleConfig.swipeOptions.map(opt => (
-              <button
-                key={opt.id}
-                onClick={() => setActiveRoleTab(opt.id)}
-                className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                  activeRoleTab === opt.id
-                    ? 'bg-neutral-800 dark:bg-white text-white dark:text-neutral-900'
-                    : 'bg-[#f0f2f4] dark:bg-[#323232] text-neutral-500 dark:text-neutral-400 hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
-                }`}
-              >
-                {opt.label}
-                {(opt.id === 'minha-empresa' || opt.id === 'rede') && roleConfig.showPendingBadge && (
-                  <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-500 text-white text-[9px] font-bold">
-                    {roleConfig.feedCards.filter(c => c.isPending).length}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Feed role-specific (codify, affiliate, franchisor que não usa setores padrão) */}
-      {PERSONALIZED_ROLES.has(role) && activeSector === 'os1' && !roleConfig.useDefaultSectors && (() => {
+      {isPersonalizedRole(role) && activeSector === 'os1' && !roleConfig.useDefaultSectors && (() => {
         const isRoleView = true;
-        const showDemos = (role === 'codify' && activeRoleTab === 'demos') || (role === 'affiliate' && activeRoleTab === 'demos') || (role === 'team_member' && activeRoleTab === 'demos');
+        const showDemos = shouldShowRoleDemos(role, activeRoleTab);
 
         if (showDemos) {
           // mostra o feed normal do OS1 (demos)
@@ -843,101 +928,14 @@ function AuthenticatedApp() {
 
         // Determina quais cards mostrar
         let cards: RoleFeedCard[] = [];
-        let listItems: React.ReactNode = null;
-
-        if (role === 'codify' || role === 'franchisor') {
-          if (activeRoleTab === 'empresas') {
-            listItems = (
-              <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
-                {CODIFY_TAB_DATA.empresas.map(emp => (
-                  <div key={emp.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{emp.nome}</p>
-                      <p className="text-xs text-neutral-500 mt-0.5">{emp.segmento} · {emp.cidade}</p>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${emp.status === 'ativo' ? 'bg-green-500/15 text-green-600 dark:text-green-400' : emp.status === 'em risco' ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}`}>
-                      {emp.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            );
-          } else if (activeRoleTab === 'afiliados') {
-            listItems = (
-              <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
-                {CODIFY_TAB_DATA.afiliados.length > 0 ? CODIFY_TAB_DATA.afiliados.map(afl => (
-                  <div key={afl.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{afl.nome}</p>
-                      <span className="text-sm font-bold text-[#3b82f6]">{afl.conversao}</span>
-                    </div>
-                    <p className="text-xs text-neutral-500">{afl.clientes} cliente{afl.clientes !== 1 ? 's' : ''} ativo{afl.clientes !== 1 ? 's' : ''} · Último contato: {afl.ultimoContato}</p>
-                  </div>
-                )) : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum afiliado ainda.</div>}
-              </div>
-            );
-          } else if (activeRoleTab === 'parceiros') {
-            listItems = (
-              <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
-                {CODIFY_TAB_DATA.parceiros.length > 0 ? CODIFY_TAB_DATA.parceiros.map(par => (
-                  <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
-                      <span className="text-xs text-neutral-500">{par.oportunidades} oportunidade{par.oportunidades !== 1 ? 's' : ''}</span>
-                    </div>
-                    <p className="text-xs text-neutral-500">Setor: {par.setor}</p>
-                  </div>
-                )) : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum parceiro ainda.</div>}
-              </div>
-            );
-          }
-        }
-
-        if ((role === 'affiliate' || role === 'team_member') && activeRoleTab === 'meus-clientes') {
-          listItems = (
-            <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
-              {AFFILIATE_TAB_DATA['meus-clientes'].map(cli => (
-                <div key={cli.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{cli.nome}</p>
-                    <p className="text-xs text-neutral-500 mt-0.5">Último contato: {cli.ultimaInteracao}</p>
-                  </div>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${cli.status === 'ativo' ? 'bg-green-500/15 text-green-600 dark:text-green-400' : cli.status === 'em risco' ? 'bg-red-500/15 text-red-600 dark:text-red-400' : 'bg-blue-500/15 text-blue-600 dark:text-blue-400'}`}>
-                    {cli.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          );
-        }
-        if ((role === 'affiliate' || role === 'team_member') && activeRoleTab === 'parceiros') {
-          listItems = (
-            <div className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-2.5 px-4 sm:px-5">
-              {AFFILIATE_TAB_DATA.parceiros.map(par => (
-                <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
-                    <span className="text-sm font-bold text-[#3b82f6]">{par.comissao}</span>
-                  </div>
-                  <p className="text-xs text-neutral-500">Setor: {par.setor}</p>
-                </div>
-              ))}
-            </div>
-          );
-        }
 
         // Cards do franchisor por aba
         if (role === 'franchisor') {
-          const isRedeTab = activeRoleTab === 'minha-empresa' || activeRoleTab === 'rede';
-        const relevantCards = isRedeTab
-            ? roleConfig.feedCards.filter(c => !c.franchiseName)
-            : roleConfig.feedCards.filter(c => c.franchiseName?.toLowerCase().includes(activeRoleTab.replace('franquia-', '')));
+          const relevantCards = filterFranchisorCardsByTab(roleConfig.feedCards, activeRoleTab);
           cards = relevantCards.filter(c => !dismissedCards.has(c.id));
-        } else if (!listItems) {
+        } else {
           cards = roleConfig.feedCards.filter(c => !dismissedCards.has(c.id));
         }
-
-        if (listItems) return listItems;
 
         const urgenciaColor = (u: string) => u === 'alta' ? '#ef4444' : u === 'media' ? '#f59e0b' : '#6b7280';
 
@@ -1073,7 +1071,7 @@ function AuthenticatedApp() {
 
       {/* Feed geral da empresa (OS1 sempre, ou outros perfis em modo Geral) */}
       {(activeSector === 'os1' || activeDepartment === 'geral') &&
-       (!PERSONALIZED_ROLES.has(role) || roleConfig.useDefaultSectors ||
+       (!isPersonalizedRole(role) || roleConfig.useDefaultSectors ||
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
@@ -1084,7 +1082,7 @@ function AuthenticatedApp() {
       >
 
         {/* Cards do role no topo do feed (codify/afiliado/parceiro/franquia na aba Demos ou useDefaultSectors) */}
-        {PERSONALIZED_ROLES.has(role) && roleConfig.feedCards.length > 0 && roleConfig.feedCards.map(card => (
+        {isPersonalizedRole(role) && roleConfig.feedCards.length > 0 && roleConfig.feedCards.map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard>
               <div className="flex items-start gap-3">
@@ -1527,6 +1525,17 @@ function AuthenticatedApp() {
             active={activeSector}
             onSelect={setActiveSector}
             onClose={() => setSectorOpen(false)}
+            roleSection={
+              isPersonalizedRole(role) && !roleConfig.useDefaultSectors && roleConfig.swipeOptions.length > 0
+                ? {
+                    title: roleConfig.bio.displayName,
+                    tabs: roleConfig.swipeOptions,
+                    activeTab: activeRoleTab,
+                    onSelectTab: setActiveRoleTab,
+                    renderContent: renderRoleTabContent,
+                  }
+                : undefined
+            }
           />
         )}
         {sectorOpen && activeSector !== 'os1' && (

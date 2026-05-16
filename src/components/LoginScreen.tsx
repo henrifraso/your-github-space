@@ -14,6 +14,17 @@ export interface Props { onAuthenticated: (token: string, negocioId: string) => 
 
 // ── Phrases ───────────────────────────────────────────────────────────────────
 // ── API ───────────────────────────────────────────────────────────────────────
+function formatBackendDetail(detail: unknown): string {
+  if (typeof detail === 'string' && detail.trim()) return detail;
+  if (Array.isArray(detail)) {
+    const msgs = detail
+      .map(d => (d && typeof d === 'object' && 'msg' in (d as any) ? String((d as any).msg) : ''))
+      .filter(Boolean);
+    if (msgs.length) return msgs.join(' · ');
+  }
+  return 'Credenciais inválidas';
+}
+
 async function apiLogin(handle: string, password: string) {
   const isHandle = handle.startsWith('@') || !handle.includes('@');
   const body = isHandle
@@ -23,7 +34,7 @@ async function apiLogin(handle: string, password: string) {
     const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     if (r.ok) return await r.json();
     const e = await r.json().catch(() => ({}));
-    throw new Error(e.detail || 'Credenciais inválidas');
+    throw new Error(formatBackendDetail(e.detail));
   } catch (err: any) {
     if (err?.message && err.message !== 'Failed to fetch') throw err;
   }
@@ -82,12 +93,13 @@ function LupaIcon({ size, strokeWidth, style, className }: { size: number; strok
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, loginPhase, onNextPhase, onProfileClick, started, overlayDone,
+  onTap, loginPhase, onNextPhase, onSubmitLogin, loginLoading, started, overlayDone,
 }: {
   onTap: () => void;
   loginPhase: 'idle' | 'user' | 'pass';
   onNextPhase: () => void;
-  onProfileClick: () => void;
+  onSubmitLogin: (handle: string, password: string) => void;
+  loginLoading: boolean;
   started: boolean;
   overlayDone: boolean;
 }) {
@@ -110,6 +122,7 @@ function RippleButton({
   const iRef            = useRef(0);
   const phaseRef        = useRef(0);
   const animCancelRef   = useRef<(() => void) | null>(null);
+  const capturedHandle  = useRef('');
   const btnRef          = useRef<HTMLButtonElement>(null);
   const inputRef        = useRef<HTMLInputElement>(null);
   const controls        = useAnimation();
@@ -263,19 +276,29 @@ function RippleButton({
     startPhaseAnim('user');
   }, [loginPhase, onTap, startPhaseAnim]);
 
+  const submitOrAdvance = useCallback(() => {
+    if (!inputVal.trim()) return;
+    if (loginPhase === 'user') {
+      capturedHandle.current = inputVal.trim();
+      onNextPhase();
+      startPhaseAnim('pass');
+      return;
+    }
+    if (loginPhase === 'pass') {
+      if (loginLoading) return;
+      onSubmitLogin(capturedHandle.current, inputVal);
+    }
+  }, [inputVal, loginPhase, loginLoading, onNextPhase, onSubmitLogin, startPhaseAnim]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return;
-    if (!inputVal.trim()) return;
-    if (loginPhase === 'user') { onNextPhase(); startPhaseAnim('pass'); return; }
-    if (loginPhase === 'pass') { onProfileClick(); return; }
-  }, [inputVal, loginPhase, onNextPhase, onProfileClick, startPhaseAnim]);
+    submitOrAdvance();
+  }, [submitOrAdvance]);
 
   const handleLupaClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!inputVal.trim()) return;
-    if (loginPhase === 'user') { onNextPhase(); startPhaseAnim('pass'); return; }
-    if (loginPhase === 'pass') { onProfileClick(); return; }
-  }, [inputVal, loginPhase, onNextPhase, onProfileClick, startPhaseAnim]);
+    submitOrAdvance();
+  }, [submitOrAdvance]);
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 640);
@@ -541,6 +564,35 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'>('idle');
   const [lightBrowser, setLightBrowser] = useState(false);
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
+  const [containerError, setContainerError] = useState('');
+  const [containerLoading, setContainerLoading] = useState(false);
+
+  async function handleContainerLogin(h: string, p: string) {
+    setContainerError('');
+    setContainerLoading(true);
+    try {
+      const result = await apiLogin(h, p);
+      setToken(result.access_token);
+      if (result.user?.role) setRole(result.user.role);
+      // Login por handle retorna org_id/bu_id direto — autentica sem passar por modal
+      if (result.org_id && result.bu_id) {
+        localStorage.setItem('os1_org_id', result.org_id);
+        localStorage.setItem('os1_bu_id', result.bu_id);
+        onAuthenticated(result.access_token, result.bu_id);
+        return;
+      }
+      // Sem org/bu na resposta — precisa escolher negócio
+      const list = await apiBusinesses(result.access_token);
+      setBusinesses(list);
+      if (list.length > 0) setSelectedBiz(list[0].id);
+      setStep('business');
+    } catch (err: any) {
+      setContainerError(err.message ?? 'Credenciais inválidas');
+      setLoginPhase('user');
+    } finally {
+      setContainerLoading(false);
+    }
+  }
 
   // ── GIF intro — 2 loops completos
   // Frame 124 = 4960ms por loop. Loop 2 frame 124 = 5040 + 4960 = 10000ms desde o início do GIF.
@@ -585,11 +637,6 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
     setLoginPhase('user');
-  }
-
-  function handleFinalLogin() {
-    resetForm();
-    setStep('auth');
   }
 
   function handleBrowserSync() {
@@ -662,10 +709,29 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         onTap={handleContainerTap}
         loginPhase={loginPhase}
         onNextPhase={() => setLoginPhase('pass')}
-        onProfileClick={handleFinalLogin}
+        onSubmitLogin={handleContainerLogin}
+        loginLoading={containerLoading}
         started={gifStarted}
         overlayDone={overlayDone}
       />
+
+      {/* Erro de login — mensagem inline embaixo do container */}
+      <AnimatePresence>
+        {containerError && (
+          <motion.div
+            key="container-error"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.22 }}
+            className="w-full max-w-[340px] sm:max-w-[760px] z-20 mt-3"
+          >
+            <p className="text-center text-[13px]" style={{ color: '#f87171', fontFamily: "'Inter', sans-serif", textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+              {containerError}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── GIF Intro Overlay ─────────────────────────────────────────────── */}
       <AnimatePresence onExitComplete={() => setOverlayDone(true)}>
