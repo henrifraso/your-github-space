@@ -101,7 +101,7 @@ import type { IntelligenceCard } from './components/WorkspacePanel';
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
 import { getRoleConfig } from './config/roleConfig';
 import type { RoleFeedCard } from './config/roleConfig';
-import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES } from './data/roleMocks';
+import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES, PARTNER_SOLD_COMPANIES } from './data/roleMocks';
 import { isPersonalizedRole, filterFranchisorCardsByTab, shouldShowRoleDemos } from './utils/roleUtils';
 import { Toast, useToast } from './components/Toast';
 import { Mail } from 'lucide-react';
@@ -111,36 +111,40 @@ function GoogleMapsPreloader() {
   return null;
 }
 
+interface AutoLoginParams {
+  token: string;
+  orgId: string;
+  buId: string;
+  role: string;
+}
+
 export default function App() {
-  const [auth, setAuth] = useState(() => {
-    // Auto-login quando redirecionado de os1.space com ?token=xxx&org=yyy&bu=zzz
+  // Detecta redirect vindo de os1.space (?token=...&org=...&bu=...&role=...)
+  // Não autentica direto: passa pro LoginScreen executar a animação cinemática
+  const [autoLogin] = useState<AutoLoginParams | null>(() => {
     const p = new URLSearchParams(window.location.search);
     const urlToken = p.get('token');
-    const urlOrg   = p.get('org');
-    const urlBu    = p.get('bu');
-    const urlRole  = p.get('role');
-    if (urlToken) {
-      const bu = urlBu || 'bu-mcdo-paulista';
-      const org = urlOrg || 'org-mcdonalds-brasil';
-      try {
-        localStorage.setItem('os1_token', urlToken);
-        localStorage.setItem('os1_negocio_id', bu);
-        localStorage.setItem('os1_org_id', org);
-        localStorage.setItem('os1_bu_id', bu);
-        if (urlRole) localStorage.setItem('os1_role', urlRole);
-      } catch {}
-      window.history.replaceState({}, '', window.location.pathname);
-      // Retorna diretamente dos params — não depende de leitura imediata do localStorage
-      return { token: urlToken, negocioId: bu, orgId: org, buId: bu, isAuthenticated: true };
-    }
-    return getAuthState();
+    if (!urlToken) return null;
+    const bu = p.get('bu') || 'bu-mcdo-paulista';
+    const org = p.get('org') || 'org-mcdonalds-brasil';
+    const role = p.get('role') || '';
+    window.history.replaceState({}, '', window.location.pathname);
+    return { token: urlToken, orgId: org, buId: bu, role };
   });
+
+  const [auth, setAuth] = useState(() => getAuthState());
 
   if (!auth.isAuthenticated) {
     return (
       <LoginScreen
+        autoLogin={autoLogin}
         onAuthenticated={(token, negocioId) => {
           setAuthState(token, negocioId);
+          if (autoLogin) {
+            localStorage.setItem('os1_org_id', autoLogin.orgId);
+            localStorage.setItem('os1_bu_id', autoLogin.buId);
+            if (autoLogin.role) localStorage.setItem('os1_role', autoLogin.role);
+          }
           setAuth(getAuthState());
         }}
       />
@@ -158,6 +162,7 @@ function AuthenticatedApp() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteInput, setInviteInput] = useState('');
   const saibaMaisRef = useRef<HTMLButtonElement>(null);
+  const inviteContainerRef = useRef<HTMLDivElement>(null);
   const [saibaMaisWidth, setSaibaMaisWidth] = useState<number | null>(null);
   useEffect(() => {
     if (!saibaMaisRef.current) return;
@@ -166,6 +171,22 @@ function AuthenticatedApp() {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   });
+  useEffect(() => {
+    if (!inviteOpen) return;
+    const handleOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node | null;
+      if (target && inviteContainerRef.current && !inviteContainerRef.current.contains(target)) {
+        setInviteOpen(false);
+        setInviteInput('');
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('touchstart', handleOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('touchstart', handleOutside);
+    };
+  }, [inviteOpen]);
   const { toast, show: showToast, hide: hideToast } = useToast();
   const [sendNetworkOpen, setSendNetworkOpen] = useState<string | null>(null);
   const [sendNetworkSelected, setSendNetworkSelected] = useState<Set<string>>(new Set(FRANCHISOR_FRANCHISE_NAMES));
@@ -231,6 +252,8 @@ function AuthenticatedApp() {
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
   const [bioOpen, setBioOpen] = useState(false);
+  const bioOpenRef = useRef(false);
+  useEffect(() => { bioOpenRef.current = bioOpen; }, [bioOpen]);
   const [destaqueOpen, setDestaqueOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   type FullscreenContent =
@@ -360,12 +383,18 @@ function AuthenticatedApp() {
       document.body.style.overflow = 'hidden';
       const onWheel = (e: WheelEvent) => {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
-        if (e.deltaY > 5) { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
+        if (e.deltaY > 5) {
+          if (!bioOpenRef.current) { setBioOpen(true); }
+          else { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
+        }
       };
       const onTouchStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
       const onTouchMove = (e: TouchEvent) => {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
-        if (touchStartY.current - e.touches[0].clientY > 15) { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
+        if (touchStartY.current - e.touches[0].clientY > 15) {
+          if (!bioOpenRef.current) { setBioOpen(true); }
+          else { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
+        }
       };
       window.addEventListener('wheel', onWheel);
       window.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -576,6 +605,41 @@ function AuthenticatedApp() {
         );
       }
     }
+    if (role === 'partner') {
+      const company = PARTNER_SOLD_COMPANIES.find(c => c.id === tabId);
+      if (!company) return null;
+      const statusColor =
+        company.status === 'ativo'
+          ? 'bg-green-500/15 text-green-600 dark:text-green-400'
+          : company.status === 'pendente'
+          ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+          : 'bg-blue-500/15 text-blue-600 dark:text-blue-400';
+      return (
+        <div className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl p-5 sm:p-6 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-base sm:text-lg font-bold text-neutral-800 dark:text-neutral-100">{company.nome}</p>
+              <p className="text-xs text-neutral-500 mt-0.5">{company.segmento} · {company.cidade}</p>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${statusColor}`}>{company.status}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-neutral-200 dark:border-[#414141]">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Valor mensal</p>
+              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{company.valor}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Cliente desde</p>
+              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{company.desde}</p>
+            </div>
+          </div>
+          <div className="pt-2 border-t border-neutral-200 dark:border-[#414141]">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Contato</p>
+            <p className="text-sm text-neutral-800 dark:text-neutral-100">{company.contato}</p>
+          </div>
+        </div>
+      );
+    }
     // tabId='demos' e outras sem conteúdo retornam null → modal fecha
     return null;
   }
@@ -627,7 +691,7 @@ function AuthenticatedApp() {
               title={activeSector === 'os1' ? 'Trocar perfil de empresa' : 'Trocar área da empresa'}
             >
               {(() => {
-                const highlighted = activeSector !== 'os1' ? activeDepartment !== 'geral' : false;
+                const highlighted = (activeSector !== 'os1' || role === 'franchise') ? activeDepartment !== 'geral' : false;
                 const cls = (size: string) => `${size} ${highlighted ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`;
                 return (<>
                   <Plus size={22} className={`sm:hidden ${cls('')}`} />
@@ -635,11 +699,11 @@ function AuthenticatedApp() {
                   <Plus size={30} className={`hidden lg:block ${cls('')}`} />
                 </>);
               })()}
-              {activeSector !== 'os1' && activeDepartment !== 'geral' && (
+              {(activeSector !== 'os1' || role === 'franchise') && activeDepartment !== 'geral' && (
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
             </button>
-            <button onClick={() => activeSector === 'os1' ? setEsferaOpen(true) : setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
+            <button onClick={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
               <Settings2 size={18} className="sm:hidden" />
               <Settings2 size={20} className="hidden sm:block lg:hidden" />
               <Settings2 size={24} className="hidden lg:block" />
@@ -701,7 +765,7 @@ function AuthenticatedApp() {
                 <div className="w-full h-full rounded-full overflow-hidden p-[3px] md:p-[5px]">
                   <div
                     className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
-                    onClick={() => setDestaqueOpen(d => !d)}
+                    onClick={() => { setBioOpen(true); setDestaqueOpen(d => !d); }}
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
                       background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
                     } : undefined}
@@ -780,53 +844,78 @@ function AuthenticatedApp() {
                         <span><strong>{roleConfig.summaryNumbers.empresas}</strong> empresas</span>
                         <span><strong>{roleConfig.summaryNumbers.afiliados}</strong> afiliados</span>
                         <span><strong>{roleConfig.summaryNumbers.parceiros}</strong> parceiros</span>
-                        {!bioOpen && (
-                          <button
-                            ref={saibaMaisRef}
-                            onClick={() => setBioOpen(true)}
-                            className="hidden lg:inline-flex ml-auto items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
-                          >
-                            <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
-                            <span>Saiba mais</span>
-                            <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
-                          </button>
-                        )}
+                      </div>
+                    )}
+                    {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
+                    {roleConfig.roleStats && (
+                      <div className="flex gap-3 sm:gap-4 md:gap-10 items-center text-[11px] sm:text-xs md:text-base text-neutral-800 dark:text-neutral-200">
+                        {roleConfig.roleStats.map((s, i) => (
+                          <span key={i}><strong>{s.value}</strong> {s.label}</span>
+                        ))}
+                      </div>
+                    )}
+                    {roleConfig.bioLines && (
+                      <div className="space-y-0.5 sm:space-y-1">
+                        {roleConfig.bioLines.map((line, i) => {
+                          const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
+                          const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
+                          return (
+                            <div key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                              <Icon size={13} className="sm:hidden flex-shrink-0" style={{ color }} strokeWidth={2.2} />
+                              <Icon size={15} className="hidden sm:block flex-shrink-0" style={{ color }} strokeWidth={2.2} />
+                              <span className="text-neutral-800 dark:text-neutral-200 truncate">{line.text}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                     <div className="flex items-center gap-3 mt-0.5 sm:mt-1">
                       <p className="flex-1 text-[11px] sm:text-xs md:text-sm text-neutral-800 dark:text-neutral-200">{bio.bioText}</p>
-                      {bio.showInviteButton && !inviteOpen && (
-                        <button
-                          onClick={() => setInviteOpen(true)}
-                          style={saibaMaisWidth ? { width: saibaMaisWidth } : undefined}
-                          className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
-                        >
-                          <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
-                          <span>Convidar</span>
-                        </button>
-                      )}
-                      {inviteOpen && bio.showInviteButton && (
-                        <div className="hidden lg:flex gap-2 w-full max-w-[280px]">
-                          <input
-                            value={inviteInput}
-                            onChange={e => setInviteInput(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter' && inviteInput.trim()) {
-                                setInviteInput('');
-                                setInviteOpen(false);
-                                showToast('Convite enviado', 'blue');
-                              }
-                            }}
-                            placeholder="Email ou @handle"
-                            className="flex-1 bg-white/5 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
-                            autoFocus
-                          />
+                      {bio.showInviteButton && (
+                        <div ref={inviteContainerRef} className="hidden lg:block relative flex-shrink-0">
                           <button
-                            onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
-                            className="px-3 py-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-xl transition-all cursor-pointer"
+                            onClick={() => setInviteOpen(o => !o)}
+                            style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
+                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-opacity duration-150 cursor-pointer"
                           >
-                            Enviar
+                            <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
+                            <span>Convite</span>
                           </button>
+                          <AnimatePresence>
+                          {inviteOpen && (
+                            <motion.div
+                              key="invite-panel"
+                              initial={{ opacity: 0, x: 40, scaleX: 0.6 }}
+                              animate={{ opacity: 1, x: 0,  scaleX: 1   }}
+                              exit={{    opacity: 0, x: 40, scaleX: 0.6 }}
+                              transition={{ duration: 0.26, ease: [0.22, 0.9, 0.3, 1] }}
+                              style={{ transformOrigin: 'right center' }}
+                              className="absolute right-0 top-0 flex gap-2 w-[280px] z-50 bg-[#f0f2f4] dark:bg-[#2a2a2a] border border-neutral-200 dark:border-white/10 rounded-xl p-1 shadow-[0_8px_30px_rgba(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+                            >
+                              <input
+                                value={inviteInput}
+                                onChange={e => setInviteInput(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' && inviteInput.trim()) {
+                                    setInviteInput('');
+                                    setInviteOpen(false);
+                                    showToast('Convite enviado', 'blue');
+                                  }
+                                  if (e.key === 'Escape') { setInviteOpen(false); setInviteInput(''); }
+                                }}
+                                placeholder="Email ou @handle"
+                                className="flex-1 min-w-0 bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
+                                autoFocus
+                              />
+                              <button
+                                onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
+                                className="px-3 py-1.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex-shrink-0"
+                              >
+                                Enviar
+                              </button>
+                            </motion.div>
+                          )}
+                          </AnimatePresence>
                         </div>
                       )}
                     </div>
@@ -840,16 +929,6 @@ function AuthenticatedApp() {
                   <span><strong>{gridItems.length}</strong> {txt('stat_opor')}</span>
                   <span><strong>{data.concorrentes.length}</strong> Oponentes</span>
                   <span><strong>{data.negocio.nivel}</strong> {txt('stat_nivel')}</span>
-                  {!bioOpen && (
-                    <button
-                      onClick={() => setBioOpen(true)}
-                      className="hidden lg:inline-flex ml-auto items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
-                    >
-                      <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
-                      <span>Saiba mais</span>
-                      <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
-                    </button>
-                  )}
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
@@ -908,8 +987,8 @@ function AuthenticatedApp() {
         </motion.div>
       </main>
 
-      {/* Feed de setor por empresa (não-OS1 com departamento ativo) */}
-      {activeSector !== 'os1' && activeDepartment !== 'geral' && (
+      {/* Feed de setor por empresa (não-OS1 com departamento ativo, ou Franquia em setor específico) */}
+      {((activeSector !== 'os1' && activeDepartment !== 'geral') || (role === 'franchise' && activeDepartment !== 'geral')) && (
         <SectorFeed
           department={activeDepartment as Exclude<DepartmentId, 'geral'>}
           feeds={PROFILE_SECTOR_FEEDS[activeSector] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
@@ -952,68 +1031,28 @@ function AuthenticatedApp() {
             {cards.map(card => (
               <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
                 <AnimatePresence>
-                  <motion.div
-                    layout
-                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="relative bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
-                  >
-                    {/* Badge Pendente */}
-                    {roleConfig.showPendingBadge && card.isPending && (
-                      <span className="absolute top-3 right-3 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full">
-                        Pendente
-                      </span>
-                    )}
-                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgenciaColor(card.urgencia) }}>
-                      {card.tags[0]}
-                    </p>
-                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug pr-16">{card.titulo}</p>
-                    <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
-
-                    {/* Botões normais */}
-                    <div className="flex gap-2 mt-3 flex-wrap">
-                      {[
-                        { label: 'Utilizar',    fn: () => setFullscreenCard({ type: 'plano' }) },
-                        { label: 'Perguntas',   fn: () => setChatOpen(true) },
-                        { label: 'Exemplos',    fn: () => setFullscreenCard({ type: 'plano' }) },
-                        { label: 'Compartilhar',fn: () => {} },
-                      ].map(btn => (
-                        <button key={btn.label} onClick={btn.fn}
-                          className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
-                          {btn.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Botões Aprovar/Reprovar (franchisor, cards pendentes) */}
-                    {roleConfig.showApproveButtons && card.isPending && (
-                      <div className="flex gap-2 mt-2.5">
-                        <button
-                          onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Aprovado', 'green'); }}
-                          className="flex-1 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
-                        >
-                          Aprovar
-                        </button>
-                        <button
-                          onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Reprovado', 'red'); }}
-                          className="flex-1 py-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
-                        >
-                          Reprovar
-                        </button>
+                  <motion.div layout exit={{ opacity: 0, height: 0, marginBottom: 0 }} transition={{ duration: 0.25 }}>
+                    <FeedCard>
+                      <div className="relative">
+                        {roleConfig.showPendingBadge && card.isPending && (
+                          <span className="absolute -top-0.5 right-0 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full">Pendente</span>
+                        )}
+                        <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgenciaColor(card.urgencia) }}>{card.tags[0]}</p>
+                        <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug pr-16">{card.titulo}</p>
+                        <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
+                        {roleConfig.showApproveButtons && card.isPending && (
+                          <div className="flex gap-2 mt-3">
+                            <button onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Aprovado', 'green'); }} className="flex-1 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer">Aprovar</button>
+                            <button onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Reprovado', 'red'); }} className="flex-1 py-2 bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-bold rounded-xl transition-all cursor-pointer">Reprovar</button>
+                          </div>
+                        )}
+                        {role === 'franchisor' && !card.isPending && (
+                          <div className="mt-2">
+                            <button onClick={() => setSendNetworkOpen(card.id)} className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">Enviar pra rede</button>
+                          </div>
+                        )}
                       </div>
-                    )}
-
-                    {/* Botão Enviar pra rede (franchisor, cards normais) */}
-                    {role === 'franchisor' && !card.isPending && (
-                      <div className="mt-2.5">
-                        <button
-                          onClick={() => setSendNetworkOpen(card.id)}
-                          className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer"
-                        >
-                          Enviar pra rede
-                        </button>
-                      </div>
-                    )}
+                    </FeedCard>
                   </motion.div>
                 </AnimatePresence>
               </motion.div>
@@ -1071,6 +1110,7 @@ function AuthenticatedApp() {
 
       {/* Feed geral da empresa (OS1 sempre, ou outros perfis em modo Geral) */}
       {(activeSector === 'os1' || activeDepartment === 'geral') &&
+       !(role === 'franchise' && activeDepartment !== 'geral') &&
        (!isPersonalizedRole(role) || roleConfig.useDefaultSectors ||
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
@@ -1093,14 +1133,6 @@ function AuthenticatedApp() {
                 </div>
                 <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
               </div>
-              <div className="flex gap-2 mt-3 flex-wrap">
-                {['Utilizar', 'Perguntas', 'Exemplos', 'Compartilhar'].map(btn => (
-                  <button key={btn} onClick={() => btn === 'Perguntas' ? setChatOpen(true) : btn === 'Utilizar' ? setFullscreenCard({ type: 'plano' }) : undefined}
-                    className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
-                    {btn}
-                  </button>
-                ))}
-              </div>
             </FeedCard>
           </motion.div>
         ))}
@@ -1116,24 +1148,6 @@ function AuthenticatedApp() {
                   <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
                 </div>
                 <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
-              </div>
-              <div className="flex gap-2 mt-3 flex-wrap">
-                {['Utilizar', 'Perguntas', 'Compartilhar'].map(btn => (
-                  <button key={btn}
-                    onClick={() => {
-                      if (btn === 'Perguntas') { setChatOpen(true); return; }
-                      if (btn === 'Utilizar') {
-                        apiFetch('/api/orchestrator/interact', {
-                          method: 'POST',
-                          body: JSON.stringify({ card_id: card.id, interaction_type: 'utilizou' }),
-                        }).catch(() => {});
-                        setFullscreenCard({ type: 'workspace', card });
-                      }
-                    }}
-                    className="px-3 py-1.5 bg-white/50 dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg text-xs font-medium text-neutral-600 dark:text-neutral-300 hover:bg-white dark:hover:bg-white/10 transition-all cursor-pointer">
-                    {btn}
-                  </button>
-                ))}
               </div>
             </FeedCard>
           </motion.div>
@@ -1362,7 +1376,7 @@ function AuthenticatedApp() {
         wide={scrolled}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
-        onDifficulty={() => activeSector === 'os1' ? setEsferaOpen(true) : setDifficultyOpen(true)}
+        onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         activeSector={activeSector}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
@@ -1518,13 +1532,14 @@ function AuthenticatedApp() {
         )}
       </AnimatePresence>
 
-      {/* Sector Switcher — OS1: troca empresa | outros: troca departamento */}
+      {/* Sector Switcher — OS1: troca empresa | franchise: troca direto pra setor | outros: troca departamento */}
       <AnimatePresence>
-        {sectorOpen && activeSector === 'os1' && (
+        {sectorOpen && activeSector === 'os1' && role !== 'franchise' && (
           <SectorSwitcherModal
             active={activeSector}
             onSelect={setActiveSector}
             onClose={() => setSectorOpen(false)}
+            hideDemoProfiles={role === 'franchisor' || role === 'partner'}
             roleSection={
               isPersonalizedRole(role) && !roleConfig.useDefaultSectors && roleConfig.swipeOptions.length > 0
                 ? {
@@ -1538,7 +1553,7 @@ function AuthenticatedApp() {
             }
           />
         )}
-        {sectorOpen && activeSector !== 'os1' && (
+        {sectorOpen && (activeSector !== 'os1' || role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
             onSelect={setActiveDepartment}

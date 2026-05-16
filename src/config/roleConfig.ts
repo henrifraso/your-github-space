@@ -32,6 +32,16 @@ export interface RoleSummaryNumbers {
   parceiros: number;
 }
 
+export interface RoleStatItem {
+  value: string | number;
+  label: string;
+}
+
+export interface RoleBioLine {
+  icon: 'store' | 'mappin' | 'zap';
+  text: string;
+}
+
 export interface RoleConfig {
   bio: RoleBio;
   swipeOptions: RoleSwipeOption[];
@@ -40,6 +50,8 @@ export interface RoleConfig {
   showPendingBadge: boolean;
   showSummaryBar: boolean;
   summaryNumbers?: RoleSummaryNumbers;
+  roleStats?: RoleStatItem[];
+  bioLines?: RoleBioLine[];
   useDefaultSectors: boolean;
 }
 
@@ -75,12 +87,11 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
 
   affiliate: {
     bio: {
-      displayName: 'Rafael Mendes',
-      initials: 'RM',
-      gradientStyle: { background: 'linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%)' },
+      displayName: 'Afiliado Demo',
+      initials: 'AD',
+      gradientStyle: { background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #1f2937 0%, #0b1220 45%, #050608 100%)' },
       bioText: 'Consultor comercial · São Paulo, SP',
-      bioSubtext: '12 empresas vendidas · 8 ativas · Taxa 67%',
-      showInviteButton: false,
+      showInviteButton: true,
     },
     swipeOptions: [
       { id: 'meus-clientes', label: 'Meus clientes' },
@@ -98,54 +109,68 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     showApproveButtons: false,
     showPendingBadge: false,
     showSummaryBar: false,
+    roleStats: [
+      { value: 5, label: 'clientes' },
+      { value: 3, label: 'demos' },
+      { value: '67%', label: 'conversão' },
+    ],
+    bioLines: [
+      { icon: 'store',  text: 'Carteira · 5 clientes ativos' },
+      { icon: 'mappin', text: 'Região · São Paulo capital' },
+      { icon: 'zap',    text: 'Evolução · 60% da meta do mês' },
+    ],
     useDefaultSectors: false,
   },
 
   franchisor: {
     bio: {
-      displayName: 'Açaí da Terra — Rede',
-      initials: 'AT',
-      gradientStyle: { background: 'linear-gradient(135deg, #15803d 0%, #a16207 100%)' },
-      bioText: 'Franqueadora · 23 unidades · São Paulo, RJ e MG',
-      bioSubtext: '3 pendentes · 20 ativas · Nota média da rede: 4.4',
+      displayName: 'Franqueador Demo',
+      initials: 'FD',
+      gradientStyle: { background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #1f2937 0%, #0b1220 45%, #050608 100%)' },
+      bioText: 'Rede · Matriz e unidades',
       showInviteButton: true,
     },
     swipeOptions: [
-      { id: 'rede',               label: 'Rede Açaí da Terra' },
-      { id: 'franquia-paulista',  label: 'Franquia Paulista' },
-      { id: 'franquia-morumbi',   label: 'Franquia Morumbi' },
-      { id: 'franquia-campinas',  label: 'Franquia Campinas' },
-      { id: 'franquia-copacabana',label: 'Franquia Copacabana' },
-      { id: 'franquia-savassi',   label: 'Franquia Savassi' },
+      { id: 'minha-empresa',     label: 'Minha empresa' },
+      { id: 'franquia-paulista', label: 'Franquia Paulista' },
+      { id: 'franquia-morumbi',  label: 'Franquia Morumbi' },
+      { id: 'franquia-campinas', label: 'Franquia Campinas' },
     ],
     feedCards: [
-      // Cards da rede (sem isPending, sem franchiseName)
-      { id: 'fr-1', titulo: 'Oakberry expande em SP', resumo: 'Oakberry abriu 2 novas unidades em São Paulo esse mês. Agora 15 unidades na região contra 8 suas. Monitorar impacto no movimento das unidades próximas.', tipo: 'alerta', urgencia: 'media', tags: ['concorrência'] },
-      { id: 'fr-2', titulo: 'Condição especial de fornecedor', resumo: 'Distribuidora Frutas Premium oferece açaí em polpa com 12% de desconto pra redes com mais de 20 unidades. Condição válida até dia 30.', tipo: 'informacao', urgencia: 'baixa', tags: ['fornecedor'] },
-      { id: 'fr-3', titulo: 'Tendência: açaí proteico', resumo: 'Busca por "açaí proteico" cresceu 45% nos últimos 60 dias em SP. Nenhuma unidade da rede oferece essa variação. Oportunidade de diferenciação.', tipo: 'informacao', urgencia: 'media', tags: ['tendência'] },
-      // Cards pendentes por franquia
-      { id: 'fr-4', titulo: 'Franquia Paulista — concorrente a 400m', resumo: 'Novo quiosque de açaí a 400m da unidade. Nota 4.8 no Google e preço 15% menor. Aprovar envio do alerta pra unidade?', tipo: 'alerta', urgencia: 'alta', tags: ['aprovação'], isPending: true, franchiseName: 'Franquia Paulista' },
-      { id: 'fr-5', titulo: 'Franquia Morumbi — reputação em queda', resumo: 'Nota Google caiu de 4.6 pra 4.3 em 2 semanas. 5 avaliações negativas mencionam porção menor que o anunciado. Aprovar envio do alerta?', tipo: 'alerta', urgencia: 'alta', tags: ['aprovação'], isPending: true, franchiseName: 'Franquia Morumbi' },
-      { id: 'fr-6', titulo: 'Franquia Campinas — fornecedor local', resumo: 'Fornecedor de granola artesanal com preço 20% menor que o da rede. Avaliação 4.7. Aprovar recomendação pra unidade?', tipo: 'informacao', urgencia: 'media', tags: ['aprovação'], isPending: true, franchiseName: 'Franquia Campinas' },
-      // Cards específicos Copacabana
-      { id: 'fr-7', titulo: 'Franquia Copacabana — alta temporada', resumo: 'Julho é alta temporada em Copacabana. Movimento previsto 40% acima da média. Recomendar reforço de estoque e equipe pra unidade?', tipo: 'informacao', urgencia: 'media', tags: ['sazonalidade'], franchiseName: 'Franquia Copacabana' },
-      // Cards específicos Savassi
-      { id: 'fr-8', titulo: 'Franquia Savassi — concorrente direto', resumo: 'Açaí Sabor Natural abriu unidade a 300m no Savassi. Preço similar, nota 4.5. Monitorar por 30 dias antes de aprovar ação.', tipo: 'alerta', urgencia: 'media', tags: ['concorrência'], franchiseName: 'Franquia Savassi' },
+      // Cards da matriz (sem isPending, sem franchiseName) — concorrência, mercado, fornecedores, reputação, operação
+      { id: 'fr-1', titulo: 'Concorrência: Oakberry expande em SP',     resumo: 'Oakberry abriu 2 novas unidades em São Paulo. Agora 15 unidades na região contra 8 suas. Monitorar impacto no movimento das unidades próximas.', tipo: 'alerta',     urgencia: 'media', tags: ['concorrência'] },
+      { id: 'fr-2', titulo: 'Mercado: açaí proteico em alta',           resumo: 'Busca por "açaí proteico" cresceu 45% nos últimos 60 dias em SP. Nenhuma unidade da rede oferece a variação. Oportunidade de diferenciação.',                        tipo: 'informacao', urgencia: 'media', tags: ['mercado'] },
+      { id: 'fr-3', titulo: 'Fornecedores: condição especial de polpa', resumo: 'Distribuidora Frutas Premium oferece açaí em polpa com 12% de desconto pra redes com mais de 20 unidades. Condição válida até dia 30.',                              tipo: 'informacao', urgencia: 'baixa', tags: ['fornecedores'] },
+      { id: 'fr-4', titulo: 'Reputação: nota média da rede',            resumo: 'Nota média da rede subiu de 4.3 pra 4.4 no último mês. Paulista e Morumbi puxam pra cima, Campinas ainda em 4.1. Reforçar treinamento de atendimento na unidade.', tipo: 'informacao', urgencia: 'baixa', tags: ['reputação'] },
+      { id: 'fr-5', titulo: 'Operação: padronização de porcionamento',  resumo: '7 unidades fora do padrão de porcionamento (variação acima de 10%). Sugerir auditoria interna e nova checklist nos próximos 15 dias.',                                tipo: 'alerta',     urgencia: 'media', tags: ['operação'] },
+      // Cards pendentes por franquia (textos do briefing)
+      { id: 'fr-pend-1', titulo: 'Franquia Paulista — concorrente a 500m', resumo: 'Concorrente novo detectado a 500m da unidade. Aprovar envio do alerta pra unidade?',                       tipo: 'alerta',     urgencia: 'alta',  tags: ['aprovação'], isPending: true, franchiseName: 'Franquia Paulista' },
+      { id: 'fr-pend-2', titulo: 'Franquia Morumbi — nota Google em queda', resumo: 'Nota Google da unidade caiu de 4.5 pra 4.2 nas últimas semanas. Aprovar envio do alerta pra unidade?',     tipo: 'alerta',     urgencia: 'alta',  tags: ['aprovação'], isPending: true, franchiseName: 'Franquia Morumbi' },
+      { id: 'fr-pend-3', titulo: 'Franquia Campinas — fornecedor 15% mais barato', resumo: 'Fornecedor local com preço 15% menor que o da rede. Aprovar recomendação pra unidade?',           tipo: 'informacao', urgencia: 'media', tags: ['aprovação'], isPending: true, franchiseName: 'Franquia Campinas' },
     ],
     showApproveButtons: true,
     showPendingBadge: true,
     showSummaryBar: false,
+    roleStats: [
+      { value: 8, label: 'unidades' },
+      { value: 3, label: 'pendências' },
+      { value: '4.4', label: 'nota média' },
+    ],
+    bioLines: [
+      { icon: 'store',  text: 'Rede · Açaí da Terra' },
+      { icon: 'mappin', text: 'Cobertura · Capital + Campinas' },
+      { icon: 'zap',    text: 'Evolução · nota +0.1 no mês' },
+    ],
     useDefaultSectors: false,
   },
 
   franchise: {
     bio: {
-      displayName: 'Açaí da Terra — Paulista',
-      initials: 'AT',
-      gradientStyle: { background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' },
+      displayName: 'Franquia Demo',
+      initials: 'FQ',
+      gradientStyle: { background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #1f2937 0%, #0b1220 45%, #050608 100%)' },
       bioText: 'Unidade · Av. Paulista, 1234 · São Paulo',
-      bioSubtext: 'Nota Google: 4.4 · 127 avaliações · Nível: Ativa',
-      showInviteButton: false,
+      showInviteButton: true,
     },
     swipeOptions: [],
     feedCards: [
@@ -158,19 +183,34 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     showApproveButtons: false,
     showPendingBadge: false,
     showSummaryBar: false,
+    roleStats: [
+      { value: 5, label: 'oportunidades' },
+      { value: 4, label: 'concorrentes' },
+      { value: '4.4', label: 'nota' },
+    ],
+    bioLines: [
+      { icon: 'store',  text: 'Mercado · Açaí & Saudáveis' },
+      { icon: 'mappin', text: 'Posição · 3° de 7 na Av. Paulista' },
+      { icon: 'zap',    text: 'Evolução · 62% pro próximo nível' },
+    ],
     useDefaultSectors: true,
   },
 
   partner: {
     bio: {
-      displayName: 'SupraNutri Distribuidora',
-      initials: 'SN',
-      gradientStyle: { background: 'linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%)' },
+      displayName: 'Parceiro Demo',
+      initials: 'PD',
+      gradientStyle: { background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #1f2937 0%, #0b1220 45%, #050608 100%)' },
       bioText: 'Fornecedor · Suplementos e insumos saudáveis',
-      bioSubtext: '3 oportunidades ativas · Região: SP, RJ e MG',
-      showInviteButton: false,
+      showInviteButton: true,
     },
-    swipeOptions: [],
+    swipeOptions: [
+      { id: 'sold-1', label: 'Açaí da Terra Paulista' },
+      { id: 'sold-2', label: 'Sabor & Arte Restaurante' },
+      { id: 'sold-3', label: 'Beleza Pura Clínica' },
+      { id: 'sold-4', label: 'Pet Shop Amigo Fiel' },
+      { id: 'sold-5', label: 'Padaria Nova Era' },
+    ],
     feedCards: [
       { id: 'par-1', titulo: 'Açaí em expansão — 47 lojas', resumo: 'Setor de açaí cresceu 31% na região metropolitana de SP. 47 lojas ativas no OS¹. 68% buscam fornecedor de whey protein e granola. Demanda estimada: R$ 85 mil/mês.', tipo: 'informacao', urgencia: 'alta', tags: ['oportunidade', 'açaí'] },
       { id: 'par-2', titulo: 'Rede Açaí da Terra — 23 unidades', resumo: 'Rede precisa de fornecedor de suplementos pra nova linha "açaí proteico". Volume estimado: 500kg/mês de whey. Contato disponível no workspace.', tipo: 'alerta', urgencia: 'alta', tags: ['demanda', 'rede'] },
@@ -181,17 +221,26 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     showApproveButtons: false,
     showPendingBadge: false,
     showSummaryBar: false,
-    useDefaultSectors: true,
+    roleStats: [
+      { value: 47, label: 'oportunidades' },
+      { value: 12, label: 'concorrentes' },
+      { value: '+22%', label: 'crescimento' },
+    ],
+    bioLines: [
+      { icon: 'store',  text: 'Categoria · Suplementos & insumos' },
+      { icon: 'mappin', text: 'Cobertura · São Paulo metropolitana' },
+      { icon: 'zap',    text: 'Evolução · 22% no trimestre' },
+    ],
+    useDefaultSectors: false,
   },
 
   team_member: {
     bio: {
-      displayName: 'Rafael Mendes',
-      initials: 'RM',
-      gradientStyle: { background: 'linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%)' },
+      displayName: 'Afiliado Demo',
+      initials: 'AD',
+      gradientStyle: { background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #1f2937 0%, #0b1220 45%, #050608 100%)' },
       bioText: 'Consultor comercial · São Paulo, SP',
-      bioSubtext: '12 empresas vendidas · 8 ativas · Taxa 67%',
-      showInviteButton: false,
+      showInviteButton: true,
     },
     swipeOptions: [
       { id: 'meus-clientes', label: 'Meus clientes' },
@@ -207,6 +256,16 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     showApproveButtons: false,
     showPendingBadge: false,
     showSummaryBar: false,
+    roleStats: [
+      { value: 5, label: 'clientes' },
+      { value: 3, label: 'demos' },
+      { value: '67%', label: 'conversão' },
+    ],
+    bioLines: [
+      { icon: 'store',  text: 'Carteira · 5 clientes ativos' },
+      { icon: 'mappin', text: 'Região · São Paulo capital' },
+      { icon: 'zap',    text: 'Evolução · 60% da meta do mês' },
+    ],
     useDefaultSectors: false,
   },
 };

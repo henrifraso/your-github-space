@@ -36,6 +36,23 @@ export const FRANCHISOR_FRANCHISE_NAMES = [
   'Franquia Paulista',
   'Franquia Morumbi',
   'Franquia Campinas',
-  'Franquia Copacabana',
-  'Franquia Savassi',
+];
+
+export type PartnerSoldCompany = {
+  id: string;
+  nome: string;
+  segmento: string;
+  cidade: string;
+  valor: string;
+  status: 'ativo' | 'pendente' | 'renovação';
+  contato: string;
+  desde: string;
+};
+
+export const PARTNER_SOLD_COMPANIES: PartnerSoldCompany[] = [
+  { id: 'sold-1', nome: 'Açaí da Terra Paulista',  segmento: 'Açaí',          cidade: 'São Paulo',   valor: 'R$ 4.200/mês', status: 'ativo',      contato: 'Marcos Lima · (11) 9 8765-1234',   desde: 'Jan/2026' },
+  { id: 'sold-2', nome: 'Sabor & Arte Restaurante', segmento: 'Alimentação',   cidade: 'São Paulo',   valor: 'R$ 2.800/mês', status: 'ativo',      contato: 'Joana Reis · (11) 9 8123-4567',     desde: 'Fev/2026' },
+  { id: 'sold-3', nome: 'Beleza Pura Clínica',      segmento: 'Estética',      cidade: 'São Paulo',   valor: 'R$ 1.950/mês', status: 'renovação', contato: 'Patrícia Souza · (11) 9 9912-3344', desde: 'Mar/2025' },
+  { id: 'sold-4', nome: 'Pet Shop Amigo Fiel',      segmento: 'Pet',           cidade: 'Campinas',    valor: 'R$ 1.500/mês', status: 'pendente',  contato: 'André Costa · (19) 9 8877-6655',   desde: 'Abr/2026' },
+  { id: 'sold-5', nome: 'Padaria Nova Era',         segmento: 'Alimentação',   cidade: 'Campinas',    valor: 'R$ 2.100/mês', status: 'ativo',      contato: 'Eduardo Pinto · (19) 9 9123-7788',  desde: 'Dez/2025' },
 ];

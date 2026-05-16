@@ -10,7 +10,21 @@ type AuthMode = 'login' | 'register';
 
 interface Business { id: string; orgId: string; nome: string; segmento: string; cidade: string; estado: string; }
 
-export interface Props { onAuthenticated: (token: string, negocioId: string) => void; }
+export interface AutoLoginParams { token: string; orgId: string; buId: string; role: string; }
+export interface Props {
+  onAuthenticated: (token: string, negocioId: string) => void;
+  autoLogin?: AutoLoginParams | null;
+}
+
+// Role do backend → handle visível no typewriter
+const ROLE_TO_HANDLE: Record<string, string> = {
+  codify: 'codify',
+  franchisor: 'franqueador',
+  franchise: 'franquia',
+  team_member: 'afiliado',
+  affiliate: 'afiliado',
+  partner: 'parceiro',
+};
 
 // ── Phrases ───────────────────────────────────────────────────────────────────
 // ── API ───────────────────────────────────────────────────────────────────────
@@ -93,7 +107,7 @@ function LupaIcon({ size, strokeWidth, style, className }: { size: number; strok
 
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
-  onTap, loginPhase, onNextPhase, onSubmitLogin, loginLoading, started, overlayDone,
+  onTap, loginPhase, onNextPhase, onSubmitLogin, loginLoading, started, overlayDone, autoFill,
 }: {
   onTap: () => void;
   loginPhase: 'idle' | 'user' | 'pass';
@@ -102,6 +116,7 @@ function RippleButton({
   loginLoading: boolean;
   started: boolean;
   overlayDone: boolean;
+  autoFill?: { handle: string; password: string } | null;
 }) {
   const FULL_TEXT    = 'Um lugar único. Milhões de possibilidades.';
   const MOBILE_TEXTS = ['Um lugar único.', 'Milhões de possibilidades.'] as const;
@@ -228,11 +243,13 @@ function RippleButton({
     return () => clearInterval(iv);
   }, [typingDone, loginPhase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Anima label e valor — digita caractere a caractere e trava no final
-  const startPhaseAnim = useCallback((phase: 'user' | 'pass') => {
+  // Anima label e valor — digita caractere a caractere e trava no final.
+  // autoValue: se passado, faz typewriter automático do valor (auto-login cinemático)
+  // onAutoDone: chamado depois do typewriter do valor terminar
+  const startPhaseAnim = useCallback((phase: 'user' | 'pass', autoValue?: string, onAutoDone?: () => void) => {
     animCancelRef.current?.();
     const label = phase === 'user' ? 'Usuário' : 'Senha';
-    const real  = '';
+    const real  = autoValue ?? '';
     phaseRef.current = 0;
     setPhaseTyped('');
     setInputVal('');
@@ -251,17 +268,20 @@ function RippleButton({
       }, 55);
     }, 80);
 
-    // digita o valor real
+    // digita o valor real (auto-typewriter quando autoValue presente)
     const t1 = setTimeout(() => {
-      if (!ok()) return;
+      if (!ok() || real.length === 0) return;
       let i = 0;
       const iv = setInterval(() => {
         if (!ok()) { clearInterval(iv); return; }
         i++;
         setInputVal(real.slice(0, i));
-        if (i >= real.length) clearInterval(iv);
-      }, 55);
-    }, 80 + label.length * 55 + 80);
+        if (i >= real.length) {
+          clearInterval(iv);
+          if (onAutoDone) setTimeout(() => { if (ok()) onAutoDone(); }, 500);
+        }
+      }, 90);
+    }, 80 + label.length * 55 + 120);
 
     return () => { cancelled = true; clearTimeout(t0); clearTimeout(t1); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -289,6 +309,30 @@ function RippleButton({
       onSubmitLogin(capturedHandle.current, inputVal);
     }
   }, [inputVal, loginPhase, loginLoading, onNextPhase, onSubmitLogin, startPhaseAnim]);
+
+  // ── Auto-login cinemático (vindo de os1.space): toca animação completa,
+  //    typewriter automático do handle e senha, submete sozinho.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (!autoFill || !introDone || loginPhase !== 'idle' || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    const handle = '@' + autoFill.handle;
+    const password = autoFill.password;
+    // 1) Espera o typewriter idle terminar, depois "clica" no container
+    const tap = setTimeout(() => {
+      onTap();
+      startPhaseAnim('user', handle, () => {
+        // 2) Avança pra senha após digitar handle
+        capturedHandle.current = handle.trim();
+        onNextPhase();
+        startPhaseAnim('pass', password, () => {
+          // 3) Submete o login
+          onSubmitLogin(capturedHandle.current, password);
+        });
+      });
+    }, 1200);
+    return () => clearTimeout(tap);
+  }, [autoFill, introDone, loginPhase, onTap, onNextPhase, onSubmitLogin, startPhaseAnim]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return;
@@ -435,14 +479,21 @@ function RippleButton({
             );
           })()}
 
-          {/* Lupa fases login — clicável */}
+          {/* Lupa fases login — clicável (vira spinner enquanto autentica) */}
           {loginPhase !== 'idle' && (
             <div
-              className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 z-10 cursor-pointer`}
+              className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 z-10 ${loginLoading ? 'cursor-default' : 'cursor-pointer'}`}
               style={{ color: '#1C1712', filter: LUPA_SHADOW }}
-              onClick={handleLupaClick}
+              onClick={loginLoading ? undefined : handleLupaClick}
             >
-              <LupaIcon size={lupaSize} strokeWidth={lupaStroke} />
+              {loginLoading ? (
+                <svg width={lupaSize} height={lupaSize} viewBox="0 0 24 24" fill="none" className="animate-spin">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth={lupaStroke} strokeOpacity="0.25" />
+                  <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" strokeWidth={lupaStroke * 1.3} strokeLinecap="round" />
+                </svg>
+              ) : (
+                <LupaIcon size={lupaSize} strokeWidth={lupaStroke} />
+              )}
             </div>
           )}
         </>)}
@@ -494,7 +545,7 @@ function BusinessCard({ b, selected, onClick }: { b: Business; selected: boolean
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export default function LoginScreen({ onAuthenticated }: Props) {
+export default function LoginScreen({ onAuthenticated, autoLogin }: Props) {
   const [step, setStep] = useState<Step>('landing');
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [nome, setNome] = useState('');
@@ -570,8 +621,18 @@ export default function LoginScreen({ onAuthenticated }: Props) {
   async function handleContainerLogin(h: string, p: string) {
     setContainerError('');
     setContainerLoading(true);
+    const t0 = Date.now();
+    const minSpinner = (ms: number) => new Promise<void>(r => setTimeout(r, Math.max(0, ms - (Date.now() - t0))));
     try {
+      // Auto-login vindo de os1.space — usa token já autenticado, sem refazer apiLogin
+      if (autoLogin) {
+        await minSpinner(700);
+        if (autoLogin.role) setRole(autoLogin.role);
+        onAuthenticated(autoLogin.token, autoLogin.buId);
+        return;
+      }
       const result = await apiLogin(h, p);
+      await minSpinner(450);
       setToken(result.access_token);
       if (result.user?.role) setRole(result.user.role);
       // Login por handle retorna org_id/bu_id direto — autentica sem passar por modal
@@ -587,6 +648,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
       if (list.length > 0) setSelectedBiz(list[0].id);
       setStep('business');
     } catch (err: any) {
+      await minSpinner(450);
       setContainerError(err.message ?? 'Credenciais inválidas');
       setLoginPhase('user');
     } finally {
@@ -713,6 +775,7 @@ export default function LoginScreen({ onAuthenticated }: Props) {
         loginLoading={containerLoading}
         started={gifStarted}
         overlayDone={overlayDone}
+        autoFill={autoLogin ? { handle: ROLE_TO_HANDLE[autoLogin.role] ?? autoLogin.role, password: '1234' } : null}
       />
 
       {/* Erro de login — mensagem inline embaixo do container */}

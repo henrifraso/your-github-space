@@ -175,6 +175,7 @@ interface Props {
   onSelect: (id: SectorId) => void;
   onClose: () => void;
   roleSection?: RoleSection;
+  hideDemoProfiles?: boolean;
 }
 
 const cardVariants = {
@@ -222,7 +223,7 @@ function ProfileLogo({ profile, size = 48 }: { profile: ProfileConfig; size?: nu
   );
 }
 
-export function SectorSwitcherModal({ active, onSelect, onClose, roleSection }: Props) {
+export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hideDemoProfiles }: Props) {
   const [openTab, setOpenTab] = useState<string | null>(null);
   const openTabLabel = openTab ? roleSection?.tabs.find(t => t.id === openTab)?.label : null;
   const showSubview = !!openTab && !!roleSection?.renderContent;
@@ -298,10 +299,10 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection }: 
           </div>
         )}
 
-        {!showSubview && roleSection && (
+        {!showSubview && roleSection && !hideDemoProfiles && (
           <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2.5">Perfis demo</p>
         )}
-        {!showSubview && (
+        {!showSubview && !hideDemoProfiles && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {SECTORS.map((profile, i) => {
             const isActive = active === profile.id;

@@ -9,19 +9,8 @@ import { CompetitiveMap } from './maps/CompetitiveMap';
 interface ButtonProps { bioOpen: boolean; onHome: () => void; onMap: () => void; }
 interface ContentProps { open: boolean; onClose: () => void; competitors: Competitor[]; onCompetitorClick?: (c: Competitor) => void; }
 
-export function MarketMapButton({ bioOpen, onHome, onMap }: ButtonProps) {
-  if (!bioOpen) {
-    return (
-      <button
-        onClick={onHome}
-        className="lg:hidden w-full h-9 flex items-center justify-between px-4 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-xs font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
-      >
-        <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
-        <span>Saiba mais</span>
-        <ChevronDown size={13} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
-      </button>
-    );
-  }
+export function MarketMapButton({ bioOpen, onHome: _onHome, onMap }: ButtonProps) {
+  if (!bioOpen) return null;
   return (
     <button
       onClick={onMap}
