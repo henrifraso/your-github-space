@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Layers, Info, Bell, Camera, Plus,
   MapPin, Scale, Store, Zap,
-  Settings2, X, LayoutGrid, Power
+  Settings2, X, LayoutGrid, Power, Sun, Moon
 } from 'lucide-react';
 
 const isElectron = typeof window !== 'undefined' && !!(window as any).electron?.isElectron;
@@ -230,7 +230,9 @@ function AuthenticatedApp() {
       .catch(() => {});
   }, []);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
-  const dark = true;
+  const [dark, setDark] = useState<boolean>(() => localStorage.getItem('os1_theme') !== 'light');
+  useEffect(() => { localStorage.setItem('os1_theme', dark ? 'dark' : 'light'); }, [dark]);
+  const toggleTheme = () => setDark(d => !d);
   const [difficulty, setDifficulty] = useState<Difficulty>(() => (localStorage.getItem('difficulty') as Difficulty) ?? 'normal');
   const [difficultyOpen, setDifficultyOpen] = useState(false);
   const txt = (key: TextKey) => TEXTS[key][difficulty];
@@ -649,15 +651,24 @@ function AuthenticatedApp() {
 
       <GoogleMapsPreloader />
 
-      {/* Botão de deslogar — canto superior direito (desktop only) */}
+      {/* Botões topo direito — modo claro/escuro + deslogar (desktop only) */}
       {!browserOpen && !esferaOpen && !mapOpen && (
-        <button
-          onClick={handleLogout}
-          title="Sair"
-          className="fixed top-3 right-4 z-[999] hidden lg:flex items-center justify-center p-2 rounded-xl text-neutral-800 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer active:scale-90"
-        >
-          <Power size={18} />
-        </button>
+        <div className="fixed top-3 right-4 z-[999] hidden lg:flex items-center gap-1">
+          <button
+            onClick={toggleTheme}
+            title={dark ? 'Modo claro' : 'Modo escuro'}
+            className="flex items-center justify-center p-2 rounded-xl text-neutral-800 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer active:scale-90"
+          >
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button
+            onClick={handleLogout}
+            title="Sair"
+            className="flex items-center justify-center p-2 rounded-xl text-neutral-800 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer active:scale-90"
+          >
+            <Power size={18} />
+          </button>
+        </div>
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
@@ -677,6 +688,23 @@ function AuthenticatedApp() {
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat */}
           <div className="flex items-center lg:hidden"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
+            <button
+              onClick={toggleTheme}
+              title={dark ? 'Modo claro' : 'Modo escuro'}
+              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+            >
+              {dark ? (
+                <>
+                  <Sun size={18} className="sm:hidden" />
+                  <Sun size={20} className="hidden sm:block" />
+                </>
+              ) : (
+                <>
+                  <Moon size={18} className="sm:hidden" />
+                  <Moon size={20} className="hidden sm:block" />
+                </>
+              )}
+            </button>
             <button
               onClick={handleLogout}
               title="Sair"
