@@ -4,7 +4,7 @@ import {
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
   Plus, Globe, Settings2, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
-  Sparkles, Loader2,
+  Sparkles, Loader2, Sun, Moon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
@@ -1460,17 +1460,19 @@ interface ChatDesktopProps {
   onDifficulty?: () => void;
   activeSector?: string;
   workspaceContext?: WorkspaceContext | null;
+  dark?: boolean;
+  onToggleTheme?: () => void;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-400 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
       style={{ width: wide ? 'calc(50vw - 16px)' : '380px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
-      {/* Header com ícones */}
-      <div className="flex items-center justify-between gap-8 px-6 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
+      {/* Header com ícones — ordem: Plus / Globe / Bell / Sun-Moon / Settings */}
+      <div className="flex items-center justify-between gap-6 px-6 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
         <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
           <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
           {activeSector && activeSector !== 'geral' && (
@@ -1480,11 +1482,16 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
         <button onClick={onBrowser} className={btnCls} title="Sincronizar">
           <Globe size={22} />
         </button>
+        <button className={btnCls} title="Notificações">
+          <Bell size={22} />
+        </button>
+        {onToggleTheme && (
+          <button onClick={onToggleTheme} className={btnCls} title={dark ? 'Modo claro' : 'Modo escuro'}>
+            {dark ? <Sun size={22} /> : <Moon size={22} />}
+          </button>
+        )}
         <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
           <Settings2 size={22} />
-        </button>
-        <button className={btnCls}>
-          <Bell size={22} />
         </button>
       </div>
       <div className="flex-1 min-h-0">
@@ -1534,6 +1541,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 export function ChatMobile({
   open, onClose, workspaceContext, activeSector,
   onSector, onBrowser, onDifficulty, unreadCount,
+  dark, onToggleTheme,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1543,6 +1551,8 @@ export function ChatMobile({
   onBrowser?: () => void;
   onDifficulty?: () => void;
   unreadCount?: number;
+  dark?: boolean;
+  onToggleTheme?: () => void;
 }) {
   const btnCls = "cursor-pointer text-neutral-600 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
@@ -1555,8 +1565,8 @@ export function ChatMobile({
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b] flex flex-col"
         >
-          {/* Header com ícones — mesmo padrão do ChatDesktop */}
-          <div className="flex items-center justify-between gap-4 px-5 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
+          {/* Header com ícones — ordem: Plus / Globe / Bell / Sun-Moon / Settings / X */}
+          <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
             <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
               <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
               {activeSector && activeSector !== 'geral' && (
@@ -1566,14 +1576,19 @@ export function ChatMobile({
             <button onClick={onBrowser} className={btnCls} title="Sincronizar">
               <Globe size={22} />
             </button>
-            <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
-              <Settings2 size={22} />
-            </button>
             <button className={`${btnCls} relative`} title="Notificações">
               <Bell size={22} />
               {(unreadCount ?? 0) > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
               )}
+            </button>
+            {onToggleTheme && (
+              <button onClick={onToggleTheme} className={btnCls} title={dark ? 'Modo claro' : 'Modo escuro'}>
+                {dark ? <Sun size={22} /> : <Moon size={22} />}
+              </button>
+            )}
+            <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
+              <Settings2 size={22} />
             </button>
             <button onClick={onClose} className={btnCls} title="Fechar">
               <X size={20} />

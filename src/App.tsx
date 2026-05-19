@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Layers, Info, Bell, Camera, Plus,
   MapPin, Scale, Store, Zap,
-  Settings2, X, LayoutGrid, Power, Sun, Moon
+  Settings2, X, LayoutGrid, Power
 } from 'lucide-react';
 
 const isElectron = typeof window !== 'undefined' && !!(window as any).electron?.isElectron;
@@ -376,9 +376,15 @@ function AuthenticatedApp() {
     // Envia o card pro contêiner do chat (botão "Área de trabalho") em vez de fullscreen.
     workspaceSeqRef.current += 1;
     setWorkspaceContext({ card, intent, seq: workspaceSeqRef.current });
-    // No mobile, abre o drawer do chat automaticamente.
+    // Alinhamento automático: simula o "deslize manual" que divide a tela ao meio.
+    // No mobile abre o drawer do chat fullscreen; no desktop ativa o split view.
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setChatOpen(true);
+    } else {
+      // Esconde o bio (se aberto) e aciona o split — mesmo estado do deslize manual.
+      setBioOpen(false);
+      setDestaqueOpen(false);
+      setScrolled(true);
     }
   };
 
@@ -718,16 +724,9 @@ function AuthenticatedApp() {
 
       <GoogleMapsPreloader />
 
-      {/* Botões topo direito — modo claro/escuro + deslogar (desktop only) */}
+      {/* Botão deslogar — desktop only (modo escuro foi pro header da Área de Trabalho) */}
       {!browserOpen && !esferaOpen && !mapOpen && (
         <div className="fixed top-3 right-4 z-[999] hidden lg:flex items-center gap-1">
-          <button
-            onClick={toggleTheme}
-            title={dark ? 'Modo claro' : 'Modo escuro'}
-            className="flex items-center justify-center p-2 rounded-xl text-neutral-800 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer active:scale-90"
-          >
-            {dark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
           <button
             onClick={handleLogout}
             title="Sair"
@@ -752,26 +751,10 @@ function AuthenticatedApp() {
             <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
             <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
-          {/* Botões — mobile/tablet apenas; desktop fica no topo do chat */}
+          {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
+              Modo escuro foi movido pro header da Área de Trabalho. */}
           <div className="flex items-center lg:hidden"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            <button
-              onClick={toggleTheme}
-              title={dark ? 'Modo claro' : 'Modo escuro'}
-              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
-            >
-              {dark ? (
-                <>
-                  <Sun size={18} className="sm:hidden" />
-                  <Sun size={20} className="hidden sm:block" />
-                </>
-              ) : (
-                <>
-                  <Moon size={18} className="sm:hidden" />
-                  <Moon size={20} className="hidden sm:block" />
-                </>
-              )}
-            </button>
             <button
               onClick={handleLogout}
               title="Sair"
@@ -1490,6 +1473,8 @@ function AuthenticatedApp() {
         onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         activeSector={activeSector}
         workspaceContext={workspaceContext}
+        dark={dark}
+        onToggleTheme={toggleTheme}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile
@@ -1501,6 +1486,8 @@ function AuthenticatedApp() {
         onBrowser={() => setBrowserOpen(true)}
         onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         unreadCount={unreadCount}
+        dark={dark}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Fullscreen */}
