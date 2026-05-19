@@ -273,6 +273,15 @@ function AuthenticatedApp() {
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
+  // Altura medida da navbar — usada pra alinhar o topo do ChatPanel com o topo do feed.
+  const navRef = useRef<HTMLElement>(null);
+  const [navHeight, setNavHeight] = useState(56);
+  useEffect(() => {
+    const measure = () => { if (navRef.current) setNavHeight(navRef.current.offsetHeight); };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -738,7 +747,7 @@ function AuthenticatedApp() {
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+      <nav ref={navRef} className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
@@ -1475,6 +1484,7 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
         dark={dark}
         onToggleTheme={toggleTheme}
+        topOffset={navHeight}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile
