@@ -1218,8 +1218,9 @@ function AuthenticatedApp() {
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
       >
 
-        {/* Cards do role no topo do feed (codify/afiliado/parceiro/franquia na aba Demos ou useDefaultSectors) */}
-        {isPersonalizedRole(role) && roleConfig.feedCards.length > 0 && roleConfig.feedCards.map(card => (
+        {/* Cards do role no topo do feed (codify/afiliado/parceiro/franquia na aba Demos ou useDefaultSectors).
+            Só aparecem no perfil próprio (activeSector === 'os1') — em demos eles confundiriam com cards da demo. */}
+        {isPersonalizedRole(role) && activeSector === 'os1' && roleConfig.feedCards.length > 0 && roleConfig.feedCards.map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard
               onWorkspaceIntent={(intent) => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), intent)}
