@@ -150,7 +150,47 @@ const MODE_LABEL: Record<MainKey, string> = {
 };
 
 // ── Bloco gerado por uma ação ─────────────────────────────────────────────────
-type BlockKind = 'standard' | 'initial' | 'share';
+type BlockKind = 'standard' | 'initial' | 'share' | 'mode';
+
+const MODE_TITLES: Record<MainKey, string> = {
+  pesquisar: 'Entendendo este sinal',
+  executar:  'Caminho de execução',
+  aprender:  'Aprendizado aplicado',
+};
+
+const MODE_FIELDS: Record<MainKey, { label: string; key: string }[]> = {
+  pesquisar: [
+    { label: 'Resumo do sinal',           key: 'resumo_sinal' },
+    { label: 'Por que isso importa',      key: 'por_que_importa' },
+    { label: 'O que pode estar por trás', key: 'pode_estar_por_tras' },
+    { label: 'Risco de ignorar',          key: 'risco_ignorar' },
+    { label: 'Oportunidade se agir',      key: 'oportunidade_agir' },
+    { label: 'O que observar agora',      key: 'observar_agora' },
+  ],
+  executar: [
+    { label: 'Objetivo da ação',          key: 'objetivo' },
+    { label: 'Primeiro passo',            key: 'primeiro_passo' },
+    { label: 'Quem deveria executar',     key: 'quem_executa' },
+    { label: 'Prazo sugerido',            key: 'prazo' },
+    { label: 'Critério de sucesso',       key: 'criterio_sucesso' },
+    { label: 'Risco antes de executar',   key: 'risco_antes' },
+  ],
+  aprender: [
+    { label: 'Conceito principal',        key: 'conceito' },
+    { label: 'Por que importa p/ negócio',key: 'por_que_negocio' },
+    { label: 'Exemplo prático',           key: 'exemplo' },
+    { label: 'Erro comum',                key: 'erro_comum' },
+    { label: 'Como medir',                key: 'como_medir' },
+    { label: 'Próximo nível',             key: 'proximo_nivel' },
+  ],
+};
+
+// Ordem dos atalhos dentro de cada bloco de modo — top 5 + outros 5 em "Mais ações"
+const MODE_TOP5: Record<MainKey, string[]> = {
+  pesquisar: ['resumir', 'risco', 'evidencias', 'comparar', 'negocio'],
+  executar:  ['checklist', 'plano', 'mensagem', 'simular', 'missao'],
+  aprender:  ['exemplo', 'conceito', 'erro', 'medir', 'memoria'],
+};
 
 type WorkspaceBlock = {
   id: string;
@@ -637,6 +677,59 @@ function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
   ];
 }
 
+// Conteúdo do bloco de modo (Entender / Executar / Aprender) — fallback local.
+function buildModeBlock(card: IntelligenceCard, mode: MainKey, difficulty: Dificuldade): WorkspaceBlock {
+  const dom = (card.area || card.dominio || 'área de operação').toLowerCase();
+  const titulo = card.titulo;
+  const resumo = card.resumo || titulo;
+  const urg = card.urgencia || 'media';
+  const acao = card.o_que_fazer || 'definir próximo passo';
+  let result: Record<string, unknown>;
+  if (mode === 'pesquisar') {
+    result = {
+      resumo_sinal:        resumo,
+      por_que_importa:     card.por_que_importa || `Esse sinal toca diretamente ${dom} e pode antecipar mudanças mais amplas.`,
+      pode_estar_por_tras: `Variações em ${dom} costumam refletir movimento competitivo ou mudança de comportamento.`,
+      risco_ignorar:       urg === 'alta'
+        ? 'Alto — concorrentes podem capturar terreno antes da reação.'
+        : urg === 'media' ? 'Moderado — vale acompanhar nas próximas semanas.' : 'Baixo — manter sob acompanhamento.',
+      oportunidade_agir:   `Reagir antes dos pares posiciona ${dom} como referência local.`,
+      observar_agora:      `Indicador correlato de ${dom} nos próximos ${urg === 'alta' ? '7' : '30'} dias.`,
+    };
+  } else if (mode === 'executar') {
+    result = {
+      objetivo:         `Tratar o sinal "${titulo}" com ação operacional concreta.`,
+      primeiro_passo:   acao,
+      quem_executa:     `Gestor responsável por ${dom}.`,
+      prazo:            urg === 'alta' ? 'Esta semana' : 'Próximas 2 semanas',
+      criterio_sucesso: `Indicador de ${dom} retornar ao nível esperado em 30 dias.`,
+      risco_antes:      'Verificar se há iniciativa semelhante já em curso antes de duplicar esforço.',
+    };
+  } else {
+    result = {
+      conceito:        `${dom} como termômetro operacional do negócio.`,
+      por_que_negocio: card.por_que_importa || 'Sinais como este antecipam problemas maiores e oportunidades de diferenciação.',
+      exemplo:         `Unidade do mesmo setor reagiu a sinal similar com ${acao} e ganhou tração em 60 dias.`,
+      erro_comum:      'Agir antes de confirmar a causa raiz e sem definir responsável.',
+      como_medir:      'KPI semanal específico para a área, com revisão quinzenal.',
+      proximo_nivel:   'Automatizar alerta direto para o gestor quando o padrão se repetir.',
+    };
+  }
+  return {
+    id:         `blk-mode-${mode}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    cardId:     card.id,
+    mode,
+    subKey:     'mode',
+    subLabel:   MODE_TITLES[mode],
+    endpoint:   null,
+    result,
+    difficulty,
+    pinned:     false,
+    createdAt:  new Date().toISOString(),
+    kind:       'mode',
+  };
+}
+
 // 5 botões de ação rápida no rodapé do bloco inicial.
 const INITIAL_ACTIONS: { key: string; label: string; mode: MainKey; subKey: string }[] = [
   { key: 'i-entender',  label: 'Entender melhor', mode: 'pesquisar', subKey: 'explicar' },
@@ -655,194 +748,46 @@ const SHARE_OPTIONS: { id: string; label: string; Icon: React.ElementType; text:
   { id: 'unidade', label: 'Mensagem para unidade',   Icon: Bell,          text: c => `Unidade — alerta:\n${c.titulo}\n${c.resumo || ''}` },
 ];
 
-function InitializerButtons({ initialMain, triggerKey, onSubAction, disabled }: {
-  initialMain?: MainKey | null;
-  triggerKey?: number;
-  onSubAction?: (mode: MainKey, sub: SubAction) => void;
+// Toolbar fixo do ChatPanel: 4 chips premium e limpos, sem expansão de listas.
+// Cada modo gera um bloco de conteúdo abaixo — os 10 atalhos vão dentro do bloco.
+function WorkspaceToolbar({ activeMode, onModeClick, onWorkspaceClick, disabled }: {
+  activeMode?: MainKey | null;
+  onModeClick: (mode: MainKey) => void;
+  onWorkspaceClick: () => void;
   disabled?: boolean;
 }) {
-  const [phase,      setPhase]      = useState<Phase>('init');
-  const [activeMain, setActiveMain] = useState<MainKey | null>(null);
-  const [activeSub,  setActiveSub]  = useState<string | null>(null);
-
-  // Card chegou do feed com modo pré-selecionado.
-  useEffect(() => {
-    if (triggerKey === undefined) return;
-    if (initialMain) {
-      setActiveMain(initialMain);
-      setActiveSub(null);
-      setPhase('selected');
-    } else {
-      setPhase('expanded');
-      setActiveMain(null);
-      setActiveSub(null);
-    }
-  }, [triggerKey, initialMain]);
-
-  function handleMain(key: MainKey) {
-    setActiveMain(key);
-    setActiveSub(null);
-    setPhase('selected');
-  }
-
-  function handleSubClick(sub: SubAction) {
-    if (disabled || !activeMain) return;
-    setActiveSub(sub.key);
-    if (onSubAction) onSubAction(activeMain, sub);
-  }
-
-  function handleReset() {
-    setPhase('init');
-    setActiveMain(null);
-    setActiveSub(null);
-  }
-
-  const subIdle   = "flex items-center justify-start gap-1.5 h-9 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2.5 bg-transparent border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] dark:hover:text-[#3b82f6]";
-  const subActive = "flex items-center justify-start gap-1.5 h-9 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2.5 bg-[#3b82f6] border-[#3b82f6] text-white";
-
+  const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border text-[11px] font-semibold transition-all duration-150 active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-default";
   return (
-    <div className="flex flex-col gap-2">
-      <AnimatePresence mode="wait">
-
-        {/* — INIT — */}
-        {phase === 'init' && (
-          <motion.button
-            key="init"
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.85 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            whileTap={{ scale: 1.05 }}
-            onClick={() => setPhase('expanded')}
-            className="w-full h-11 rounded-2xl bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] text-neutral-800 dark:text-neutral-100 text-[13px] font-semibold tracking-wide hover:bg-neutral-200 dark:hover:bg-[#353535] transition-all duration-200 cursor-pointer"
-          >
-            Área de trabalho
-          </motion.button>
-        )}
-
-        {/* — EXPANDED: 3 botões — */}
-        {phase === 'expanded' && (
-          <motion.div
-            key="expanded"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col gap-2"
-          >
-            <div className="grid grid-cols-3 gap-2">
-              {MAIN_BTNS.map((btn, i) => {
-                const CFG = [
-                  { c: '#60a5fa', raw: '59,130,246',  glow: 'rgba(59,130,246,0.28)'  },
-                  { c: '#fb923c', raw: '251,146,60',  glow: 'rgba(251,146,60,0.28)'  },
-                  { c: '#34d399', raw: '52,211,153',  glow: 'rgba(52,211,153,0.28)'  },
-                ][i];
-                return (
-                  <motion.button
-                    key={btn.key}
-                    initial={{ opacity: 0, y: 22, scale: 0.80, filter: 'blur(3px)' }}
-                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                    transition={{ duration: 0.55, delay: i * 0.09, ease: [0.34, 1.45, 0.64, 1] }}
-                    whileHover={{ y: -4, boxShadow: `0 8px 28px ${CFG.glow}`, transition: { duration: 0.2, ease: 'easeOut' } }}
-                    whileTap={{ scale: 0.93 }}
-                    onClick={() => handleMain(btn.key)}
-                    className="group relative flex flex-col items-center justify-center gap-2.5 py-4 rounded-2xl cursor-pointer overflow-hidden"
-                    style={{
-                      background: 'rgba(255,255,255,0.035)',
-                      border: `1px solid rgba(${CFG.raw},0.22)`,
-                      boxShadow: `0 1px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05)`,
-                    }}
-                  >
-                    {/* linha shimmer no topo */}
-                    <div className="absolute inset-x-0 top-0 h-px pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, rgba(${CFG.raw},0.6), transparent)` }} />
-                    {/* ícone fantasma de fundo */}
-                    <div className="absolute right-0.5 bottom-0.5 pointer-events-none opacity-[0.065] group-hover:opacity-[0.13] transition-opacity duration-300" style={{ color: CFG.c }}>
-                      <btn.Icon size={50} strokeWidth={1} />
-                    </div>
-                    {/* ícone principal */}
-                    <div
-                      className="relative z-10 flex items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-[1.15]"
-                      style={{
-                        width: 38, height: 38,
-                        background: `rgba(${CFG.raw},0.12)`,
-                        color: CFG.c,
-                      }}
-                    >
-                      <btn.Icon size={18} strokeWidth={1.8} />
-                    </div>
-                    <span className="relative z-10 text-[11px] font-semibold tracking-wider uppercase" style={{ color: `rgba(${CFG.raw},0.85)`, letterSpacing: '0.06em' }}>
-                      {btn.label}
-                    </span>
-                  </motion.button>
-                );
-              })}
-            </div>
-            <div className="flex justify-center gap-4">
-              <button onClick={handleReset} className="text-[10px] text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-200 cursor-pointer">
-                ✕ fechar
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* — SELECTED: sub-botões acima + botão ativo — */}
-        {phase === 'selected' && activeMain && (
-          <motion.div
-            key={`selected-${activeMain}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col gap-2"
-          >
-            {/* Sub-botões — 10 ações nomeadas, dispara handler ao clicar */}
-            <div className="grid grid-cols-2 gap-1.5">
-              {SUB_BTNS[activeMain].map((sub, i) => (
-                <motion.button
-                  key={sub.key}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 14 }}
-                  transition={{ duration: 0.22, delay: Math.min(i, 5) * 0.04, ease: 'easeOut' }}
-                  onClick={() => handleSubClick(sub)}
-                  disabled={disabled}
-                  className={`${activeSub === sub.key ? subActive : subIdle} disabled:opacity-40 disabled:cursor-default`}
-                >
-                  <sub.Icon size={12} className="flex-shrink-0" />
-                  <span className="text-left truncate">{sub.label}</span>
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Botão principal selecionado */}
-            {(() => {
-              const btn = MAIN_BTNS.find(b => b.key === activeMain)!;
-              return (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                  onClick={() => setPhase('expanded')}
-                  className="w-full flex items-center justify-center gap-2 h-11 rounded-2xl border text-[12px] font-semibold transition-all duration-200 cursor-pointer bg-[#3b82f6] border-[#3b82f6] text-white hover:bg-[#2563eb]"
-                >
-                  <btn.Icon size={14} />
-                  <span>{btn.label}</span>
-                </motion.button>
-              );
-            })()}
-
-            <div className="flex justify-center gap-4">
-              <button onClick={() => setPhase('expanded')} className="text-[10px] text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-200 cursor-pointer">
-                ← voltar
-              </button>
-              <button onClick={handleReset} className="text-[10px] text-neutral-400 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-400 transition-colors duration-200 cursor-pointer">
-                ✕ fechar
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-      </AnimatePresence>
+    <div className="flex flex-col gap-1.5">
+      {/* Área de Trabalho — base */}
+      <button
+        type="button"
+        onClick={onWorkspaceClick}
+        disabled={disabled}
+        className={`${chipBase} w-full bg-neutral-100 dark:bg-[#2b2b2b] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200/70 dark:hover:bg-[#353535]`}
+      >
+        Área de Trabalho
+      </button>
+      {/* 3 modos — chips */}
+      <div className="grid grid-cols-3 gap-1.5">
+        {MAIN_BTNS.map(btn => {
+          const isActive = activeMode === btn.key;
+          return (
+            <button
+              key={btn.key}
+              type="button"
+              onClick={() => onModeClick(btn.key)}
+              disabled={disabled}
+              className={`${chipBase} ${isActive
+                ? 'bg-[#3b82f6] border-[#3b82f6] text-white'
+                : 'bg-white dark:bg-[#373737] border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:border-[#3b82f6]/40 hover:text-[#3b82f6] dark:hover:text-[#60a5fa]'}`}
+            >
+              <btn.Icon size={12} />
+              {btn.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -860,13 +805,13 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
-  const [initMain, setInitMain] = useState<MainKey | null>(null);
-  const [triggerKey, setTriggerKey] = useState<number | undefined>(undefined);
   const [activeCard, setActiveCard] = useState<IntelligenceCard | null>(null);
   const [dificuldade, setDificuldade] = useState<Dificuldade>('facil');
   const [shortcuts, setShortcuts] = useState<LocalShortcut[]>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null); // sub.key em execução
+  const [activeMode, setActiveMode] = useState<MainKey | null>(null);
   const lastCardIdRef = useRef<string | null>(null);
+  const firstBlockRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -879,11 +824,24 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
     setMessages([]);
     setShortcuts([]);
     setActiveCard(null);
-    setInitMain(null);
-    setTriggerKey(undefined);
     setActionLoading(null);
+    setActiveMode(null);
     lastCardIdRef.current = null;
   }, [activeSector]);
+
+  // Clique no botão de modo (Entender/Executar/Aprender) — gera bloco de modo no chat.
+  function handleModeClick(mode: MainKey) {
+    if (!activeCard) return;
+    setActiveMode(mode);
+    const block = buildModeBlock(activeCard, mode, dificuldade);
+    setMessages(prev => [...prev, { id: block.id, role: 'block', text: block.subLabel, block }]);
+  }
+
+  // Clique em "Área de Trabalho" — foca/rola pro topo do histórico (bloco inicial).
+  function handleAreaTrabalhoClick() {
+    setActiveMode(null);
+    firstBlockRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   // Card chegou do feed — anexa ao histórico, define card ativo, carrega atalhos,
   // gera bloco inicial expandido + bloco de compartilhamento quando aplicável.
@@ -891,11 +849,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
     if (!workspaceContext) return;
     const { card, intent, seq } = workspaceContext;
 
-    // Mesmo card reativado: só atualiza modo, sem duplicar conteúdo.
+    // Mesmo card reativado: só dispara bloco de modo conforme intent (sem duplicar análise).
     if (lastCardIdRef.current === card.id) {
-      setInitMain(INTENT_TO_MAIN[intent]);
-      setTriggerKey(seq);
-      // Pra intent compartilhar reaberto, adiciona bloco de share novo (utilitário).
+      const mainKey = INTENT_TO_MAIN[intent];
+      if (mainKey) {
+        setActiveMode(mainKey);
+        const modeBlock = buildModeBlock(card, mainKey, dificuldade);
+        setMessages(prev => [...prev, { id: modeBlock.id, role: 'block', text: modeBlock.subLabel, block: modeBlock }]);
+      }
       if (intent === 'compartilhar') {
         const shareBlock = buildShareBlock(card, dificuldade);
         setMessages(prev => [...prev, { id: shareBlock.id, role: 'block', text: shareBlock.subLabel, block: shareBlock }]);
@@ -918,6 +879,13 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
       const shareBlock = buildShareBlock(card, dificuldade);
       newMessages.push({ id: shareBlock.id, role: 'block', text: shareBlock.subLabel, block: shareBlock });
     }
+    // 4) Intent que mapeia pra modo (utilizar/perguntas/exemplos) pré-gera bloco de modo
+    const mainKey = INTENT_TO_MAIN[intent];
+    if (mainKey) {
+      setActiveMode(mainKey);
+      const modeBlock = buildModeBlock(card, mainKey, dificuldade);
+      newMessages.push({ id: modeBlock.id, role: 'block', text: modeBlock.subLabel, block: modeBlock });
+    }
     setMessages(prev => [...prev, ...newMessages]);
 
     // 4) Atalhos: começa com fallback local por domínio; tenta backend e mescla
@@ -939,8 +907,6 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
         .catch(() => { /* mantém locais */ });
     }
 
-    setInitMain(INTENT_TO_MAIN[intent]);
-    setTriggerKey(seq);
   }, [workspaceContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Dispara uma sub-ação: chama endpoint ou usa fallback local, gera bloco.
@@ -1073,9 +1039,11 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
             const b = msg.block;
             const isInitial = b.kind === 'initial';
             const isShare   = b.kind === 'share';
-            const headerColor = isInitial ? '#10b981' : isShare ? '#f59e0b' : '#3b82f6';
+            const isMode    = b.kind === 'mode';
+            const headerColor = isInitial ? '#10b981' : isShare ? '#f59e0b' : isMode ? '#3b82f6' : '#3b82f6';
             return (
               <motion.div
+                ref={isInitial ? firstBlockRef : undefined}
                 key={msg.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -1085,9 +1053,15 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
                 <div className="max-w-[94%] w-full rounded-2xl rounded-bl-sm bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141] overflow-hidden">
                   <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
                     <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: headerColor }}>
-                      {isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : MODE_LABEL[b.mode]}
+                      {isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : isMode ? MODE_LABEL[b.mode] : MODE_LABEL[b.mode]}
                     </span>
-                    {!isInitial && !isShare && (
+                    {isMode && (
+                      <>
+                        <span className="text-[10px] text-neutral-400">·</span>
+                        <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{b.subLabel}</span>
+                      </>
+                    )}
+                    {!isInitial && !isShare && !isMode && (
                       <>
                         <span className="text-[10px] text-neutral-400">·</span>
                         <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{b.subLabel}</span>
@@ -1104,13 +1078,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
                       <InitialBlockContent result={b.result} />
                     ) : isShare ? (
                       <ShareOptionsContent card={activeCard} />
+                    ) : isMode ? (
+                      <ModeBlockContent result={b.result} mode={b.mode} />
                     ) : (
                       <ActionResult result={b.result} action={b.endpoint || null} />
                     )}
                   </div>
                   {/* Rodapé: ações + seletor de dificuldade no próprio bloco */}
                   {isInitial ? (
-                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-1.5">
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
+                      {/* Atalhos principais do card */}
                       <div className="flex items-center gap-1 flex-wrap">
                         {INITIAL_ACTIONS.map(a => {
                           const sub = SUB_BTNS[a.mode].find(s => s.key === a.subKey);
@@ -1124,12 +1101,43 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
                           );
                         })}
                       </div>
+                      {/* Controles do bloco — mesma estética dos outros blocos */}
+                      <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
+                        <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => {
+                          if (!activeCard) return;
+                          const newBlock = buildInitialBlock(activeCard, dificuldade);
+                          setMessages(prev => [...prev, { id: newBlock.id, role: 'block', text: newBlock.subLabel, block: newBlock }]);
+                        }} />
+                        <BlockCtrl Icon={Lightbulb} label="Exemplos" onClick={blockExamples} />
+                        <BlockCtrl Icon={Pin}       label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
+                        <BlockCtrl Icon={Copy}      label="Copiar"   onClick={() => copyBlock(b)} />
+                      </div>
                       <DifficultyRow value={dificuldade} onChange={setDificuldade} />
                     </div>
                   ) : isShare ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
                       <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
                       <BlockCtrl Icon={Copy} label="Copiar tudo" onClick={() => copyBlock(b)} />
+                    </div>
+                  ) : isMode ? (
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
+                      <ModeShortcuts
+                        mode={b.mode}
+                        onPick={(subKey) => {
+                          const sub = SUB_BTNS[b.mode].find(x => x.key === subKey);
+                          if (sub) handleSubAction(b.mode, sub);
+                        }}
+                      />
+                      <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
+                        <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => {
+                          const newBlock = buildModeBlock(activeCard!, b.mode, dificuldade);
+                          setMessages(prev => [...prev, { id: newBlock.id, role: 'block', text: newBlock.subLabel, block: newBlock }]);
+                        }} />
+                        <BlockCtrl Icon={Lightbulb} label="Exemplos" onClick={blockExamples} />
+                        <BlockCtrl Icon={Pin}       label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
+                        <BlockCtrl Icon={Copy}      label="Copiar"   onClick={() => copyBlock(b)} />
+                      </div>
+                      <DifficultyRow value={dificuldade} onChange={setDificuldade} />
                     </div>
                   ) : (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
@@ -1216,10 +1224,10 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
             >
-              <InitializerButtons
-                initialMain={initMain}
-                triggerKey={triggerKey}
-                onSubAction={handleSubAction}
+              <WorkspaceToolbar
+                activeMode={activeMode}
+                onModeClick={handleModeClick}
+                onWorkspaceClick={handleAreaTrabalhoClick}
                 disabled={!activeCard || actionLoading !== null}
               />
             </motion.div>
@@ -1316,6 +1324,52 @@ function ShareOptionsContent({ card }: { card: IntelligenceCard | null }) {
           <span className="text-[11px] font-medium text-neutral-700 dark:text-neutral-200">{opt.label}</span>
         </button>
       ))}
+    </div>
+  );
+}
+
+// Conteúdo de um bloco de modo (Entender / Executar / Aprender) — 6 campos por modo.
+function ModeBlockContent({ result, mode }: { result: Record<string, unknown>; mode: MainKey }) {
+  const fields = MODE_FIELDS[mode];
+  return (
+    <div className="space-y-2.5">
+      {fields.map(f => {
+        const v = result[f.key];
+        if (!v) return null;
+        return (
+          <div key={f.key}>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-0.5">{f.label}</p>
+            <p className="text-[12px] leading-relaxed text-neutral-700 dark:text-neutral-300">{String(v)}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Atalhos do bloco de modo: 5 primeiros + "Mais ações" para os 5 seguintes.
+function ModeShortcuts({ mode, onPick }: { mode: MainKey; onPick: (subKey: string) => void }) {
+  const [showMore, setShowMore] = useState(false);
+  const top5Keys = MODE_TOP5[mode];
+  const allSubs = SUB_BTNS[mode];
+  const top5 = top5Keys.map(k => allSubs.find(s => s.key === k)).filter(Boolean) as SubAction[];
+  const rest = allSubs.filter(s => !top5Keys.includes(s.key));
+  const visible = showMore ? [...top5, ...rest] : top5;
+  return (
+    <div className="flex flex-wrap gap-1">
+      {visible.map(s => (
+        <button key={s.key} type="button" onClick={() => onPick(s.key)}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] hover:border-[#3b82f6]/40 dark:hover:text-[#60a5fa] transition-colors cursor-pointer">
+          <s.Icon size={11} />
+          {s.label}
+        </button>
+      ))}
+      {!showMore && rest.length > 0 && (
+        <button type="button" onClick={() => setShowMore(true)}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-dashed border-neutral-300 dark:border-[#4e4e4e] text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-[#414141] transition-colors cursor-pointer">
+          Mais ações
+        </button>
+      )}
     </div>
   );
 }
