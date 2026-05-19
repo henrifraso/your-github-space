@@ -1450,7 +1450,20 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function ChatMobile({ open, onClose, workspaceContext, activeSector }: { open: boolean; onClose: () => void; workspaceContext?: WorkspaceContext | null; activeSector?: string }) {
+export function ChatMobile({
+  open, onClose, workspaceContext, activeSector,
+  onSector, onBrowser, onDifficulty, unreadCount,
+}: {
+  open: boolean;
+  onClose: () => void;
+  workspaceContext?: WorkspaceContext | null;
+  activeSector?: string;
+  onSector?: () => void;
+  onBrowser?: () => void;
+  onDifficulty?: () => void;
+  unreadCount?: number;
+}) {
+  const btnCls = "cursor-pointer text-neutral-600 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <AnimatePresence>
       {open && (
@@ -1459,9 +1472,35 @@ export function ChatMobile({ open, onClose, workspaceContext, activeSector }: { 
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b]"
+          className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b] flex flex-col"
         >
-          <ChatBody onClose={onClose} showClose workspaceContext={workspaceContext} activeSector={activeSector} />
+          {/* Header com ícones — mesmo padrão do ChatDesktop */}
+          <div className="flex items-center justify-between gap-4 px-5 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
+            <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
+              <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
+              {activeSector && activeSector !== 'geral' && (
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
+              )}
+            </button>
+            <button onClick={onBrowser} className={btnCls} title="Sincronizar">
+              <Globe size={22} />
+            </button>
+            <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
+              <Settings2 size={22} />
+            </button>
+            <button className={`${btnCls} relative`} title="Notificações">
+              <Bell size={22} />
+              {(unreadCount ?? 0) > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              )}
+            </button>
+            <button onClick={onClose} className={btnCls} title="Fechar">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0">
+            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1492,7 +1492,16 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
-      <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} workspaceContext={workspaceContext} activeSector={activeSector} />
+      <ChatMobile
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        workspaceContext={workspaceContext}
+        activeSector={activeSector}
+        onSector={() => setSectorOpen(true)}
+        onBrowser={() => setBrowserOpen(true)}
+        onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
+        unreadCount={unreadCount}
+      />
 
       {/* Fullscreen */}
       <AnimatePresence>
