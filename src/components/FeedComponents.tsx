@@ -333,7 +333,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                 transition={{ duration: 0.2 }}>
                 <Rocket size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
                 <Rocket size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
-                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Utilizar</span>
+                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Executar</span>
                 <span className="hidden lg:inline text-sm text-neutral-500 dark:text-white">· {likes}</span>
               </motion.div>
             )}
@@ -374,7 +374,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                 transition={{ duration: 0.2 }}>
                 <MessageCircle size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
                 <MessageCircle size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
-                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Perguntas</span>
+                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Entender</span>
               </motion.div>
             )}
             {pergStatus === 'picking' && (
@@ -383,7 +383,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                 transition={{ duration: 0.2 }}>
                 <MessageCircle size={14} className="lg:hidden text-neutral-400 dark:text-neutral-300 flex-shrink-0" />
                 <MessageCircle size={20} className="hidden lg:block text-neutral-400 dark:text-neutral-300 flex-shrink-0" />
-                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Perguntas</span>
+                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-neutral-300 font-medium whitespace-nowrap">Entender</span>
               </motion.div>
             )}
             {pergStatus === 'loading' && (
@@ -422,7 +422,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                 transition={{ duration: 0.2 }}>
                 <Lightbulb size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
                 <Lightbulb size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
-                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Exemplos</span>
+                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Aprender</span>
               </motion.div>
             )}
             {ideiaStatus === 'picking' && (
@@ -431,7 +431,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                 transition={{ duration: 0.2 }}>
                 <Lightbulb size={14} className="lg:hidden text-slate-500 dark:text-neutral-300 flex-shrink-0" />
                 <Lightbulb size={20} className="hidden lg:block text-slate-500 dark:text-neutral-300 flex-shrink-0" />
-                <span className="text-[10px] lg:text-sm text-slate-500 dark:text-neutral-300 font-medium whitespace-nowrap">Exemplos</span>
+                <span className="text-[10px] lg:text-sm text-slate-500 dark:text-neutral-300 font-medium whitespace-nowrap">Aprender</span>
               </motion.div>
             )}
             {ideiaStatus === 'loading' && (

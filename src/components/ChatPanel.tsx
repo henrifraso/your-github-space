@@ -750,8 +750,9 @@ const SHARE_OPTIONS: { id: string; label: string; Icon: React.ElementType; text:
 
 // Toolbar fixo do ChatPanel: 4 chips premium e limpos, sem expansão de listas.
 // Cada modo gera um bloco de conteúdo abaixo — os 10 atalhos vão dentro do bloco.
-function WorkspaceToolbar({ activeMode, onModeClick, onWorkspaceClick, disabled }: {
+function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceClick, disabled }: {
   activeMode?: MainKey | null;
+  workspaceOpen: boolean;
   onModeClick: (mode: MainKey) => void;
   onWorkspaceClick: () => void;
   disabled?: boolean;
@@ -759,35 +760,48 @@ function WorkspaceToolbar({ activeMode, onModeClick, onWorkspaceClick, disabled 
   const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border text-[11px] font-semibold transition-all duration-150 active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-default";
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Área de Trabalho — base */}
+      {/* Área de Trabalho — toggle dos 3 modos */}
       <button
         type="button"
         onClick={onWorkspaceClick}
         disabled={disabled}
-        className={`${chipBase} w-full bg-neutral-100 dark:bg-[#2b2b2b] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200/70 dark:hover:bg-[#353535]`}
+        className={`${chipBase} w-full ${workspaceOpen
+          ? 'bg-[#3b82f6]/10 border-[#3b82f6]/40 text-[#3b82f6] dark:text-[#60a5fa]'
+          : 'bg-neutral-100 dark:bg-[#2b2b2b] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200/70 dark:hover:bg-[#353535]'}`}
       >
         Área de Trabalho
       </button>
-      {/* 3 modos — chips */}
-      <div className="grid grid-cols-3 gap-1.5">
-        {MAIN_BTNS.map(btn => {
-          const isActive = activeMode === btn.key;
-          return (
-            <button
-              key={btn.key}
-              type="button"
-              onClick={() => onModeClick(btn.key)}
-              disabled={disabled}
-              className={`${chipBase} ${isActive
-                ? 'bg-[#3b82f6] border-[#3b82f6] text-white'
-                : 'bg-white dark:bg-[#373737] border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:border-[#3b82f6]/40 hover:text-[#3b82f6] dark:hover:text-[#60a5fa]'}`}
-            >
-              <btn.Icon size={12} />
-              {btn.label}
-            </button>
-          );
-        })}
-      </div>
+      {/* 3 modos — chips (só aparecem quando workspaceOpen) */}
+      <AnimatePresence initial={false}>
+        {workspaceOpen && (
+          <motion.div
+            key="modes"
+            initial={{ opacity: 0, height: 0, marginTop: -6 }}
+            animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
+            exit={{ opacity: 0, height: 0, marginTop: -6 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="grid grid-cols-3 gap-1.5 overflow-hidden"
+          >
+            {MAIN_BTNS.map(btn => {
+              const isActive = activeMode === btn.key;
+              return (
+                <button
+                  key={btn.key}
+                  type="button"
+                  onClick={() => onModeClick(btn.key)}
+                  disabled={disabled}
+                  className={`${chipBase} ${isActive
+                    ? 'bg-[#3b82f6] border-[#3b82f6] text-white'
+                    : 'bg-white dark:bg-[#373737] border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:border-[#3b82f6]/40 hover:text-[#3b82f6] dark:hover:text-[#60a5fa]'}`}
+                >
+                  <btn.Icon size={12} />
+                  {btn.label}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -810,6 +824,8 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
   const [shortcuts, setShortcuts] = useState<LocalShortcut[]>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null); // sub.key em execução
   const [activeMode, setActiveMode] = useState<MainKey | null>(null);
+  // Toggle dos 3 modos no toolbar (Área de Trabalho expande/recolhe).
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const lastCardIdRef = useRef<string | null>(null);
   const firstBlockRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -826,6 +842,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
     setActiveCard(null);
     setActionLoading(null);
     setActiveMode(null);
+    setWorkspaceOpen(false);
     lastCardIdRef.current = null;
   }, [activeSector]);
 
@@ -837,10 +854,10 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
     setMessages(prev => [...prev, { id: block.id, role: 'block', text: block.subLabel, block }]);
   }
 
-  // Clique em "Área de Trabalho" — foca/rola pro topo do histórico (bloco inicial).
+  // Clique em "Área de Trabalho" — alterna a visibilidade dos 3 modos no toolbar.
+  // NÃO gera bloco, NÃO apaga conteúdo, NÃO abre fullscreen.
   function handleAreaTrabalhoClick() {
-    setActiveMode(null);
-    firstBlockRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setWorkspaceOpen(prev => !prev);
   }
 
   // Card chegou do feed — anexa ao histórico, define card ativo, carrega atalhos,
@@ -854,10 +871,12 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
       const mainKey = INTENT_TO_MAIN[intent];
       if (mainKey) {
         setActiveMode(mainKey);
+        setWorkspaceOpen(true);
         const modeBlock = buildModeBlock(card, mainKey, dificuldade);
         setMessages(prev => [...prev, { id: modeBlock.id, role: 'block', text: modeBlock.subLabel, block: modeBlock }]);
       }
       if (intent === 'compartilhar') {
+        // Compartilhar não abre os 3 modos automaticamente.
         const shareBlock = buildShareBlock(card, dificuldade);
         setMessages(prev => [...prev, { id: shareBlock.id, role: 'block', text: shareBlock.subLabel, block: shareBlock }]);
       }
@@ -880,11 +899,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
       newMessages.push({ id: shareBlock.id, role: 'block', text: shareBlock.subLabel, block: shareBlock });
     }
     // 4) Intent que mapeia pra modo (utilizar/perguntas/exemplos) pré-gera bloco de modo
+    //    e abre o workspace toolbar. Compartilhar NÃO abre os 3 modos.
     const mainKey = INTENT_TO_MAIN[intent];
     if (mainKey) {
       setActiveMode(mainKey);
+      setWorkspaceOpen(true);
       const modeBlock = buildModeBlock(card, mainKey, dificuldade);
       newMessages.push({ id: modeBlock.id, role: 'block', text: modeBlock.subLabel, block: modeBlock });
+    } else {
+      // Intent compartilhar (ou desconhecido) — mantém workspace fechado.
+      setWorkspaceOpen(false);
     }
     setMessages(prev => [...prev, ...newMessages]);
 
@@ -1226,6 +1250,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
             >
               <WorkspaceToolbar
                 activeMode={activeMode}
+                workspaceOpen={workspaceOpen}
                 onModeClick={handleModeClick}
                 onWorkspaceClick={handleAreaTrabalhoClick}
                 disabled={!activeCard || actionLoading !== null}
