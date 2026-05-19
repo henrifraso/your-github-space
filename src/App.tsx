@@ -99,6 +99,7 @@ import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard, WorkspaceIntent } from './components/WorkspacePanel';
 import type { WorkspaceContext } from './components/ChatPanel';
+import { DEMO_FEED_CARDS } from './data/demo-feed-cards';
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
 import { getRoleConfig } from './config/roleConfig';
 import type { RoleFeedCard } from './config/roleConfig';
@@ -1236,8 +1237,10 @@ function AuthenticatedApp() {
           </motion.div>
         ))}
 
-        {/* Cards reais do backend (intelligence_cards via /api/orchestrator/feed) */}
-        {orchCards.map(card => (
+        {/* Cards do feed da empresa:
+            - activeSector === 'os1' → cards reais do backend (orchCards)
+            - outras demos → cards mockados específicos da empresa (DEMO_FEED_CARDS) */}
+        {(activeSector === 'os1' ? orchCards : (DEMO_FEED_CARDS[activeSector] ?? [])).map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard
               onWorkspaceIntent={(intent) => openWorkspaceFromCard(card, intent)}
