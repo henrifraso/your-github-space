@@ -438,6 +438,8 @@ function AuthenticatedApp() {
     setPhotoSettings(loadPhotoForProfile(activeSector));
     setActiveDepartment('geral');
     setScrolled(false);
+    // Zera o card ativo do chat — cada perfil/demo tem sua própria Área de Trabalho.
+    setWorkspaceContext(null);
   }, [activeSector]);
 
   useEffect(() => {
@@ -1490,7 +1492,7 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
-      <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} workspaceContext={workspaceContext} />
+      <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} workspaceContext={workspaceContext} activeSector={activeSector} />
 
       {/* Fullscreen */}
       <AnimatePresence>

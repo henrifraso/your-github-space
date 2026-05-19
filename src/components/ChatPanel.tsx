@@ -855,7 +855,7 @@ interface Message {
   block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -873,6 +873,17 @@ function ChatBody({ onClose, showClose, workspaceContext }: { onClose?: () => vo
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, actionLoading]);
+
+  // Trocar de perfil/demo (activeSector) zera o chat — cada empresa tem sua Área de Trabalho própria.
+  useEffect(() => {
+    setMessages([]);
+    setShortcuts([]);
+    setActiveCard(null);
+    setInitMain(null);
+    setTriggerKey(undefined);
+    setActionLoading(null);
+    lastCardIdRef.current = null;
+  }, [activeSector]);
 
   // Card chegou do feed — anexa ao histórico, define card ativo, carrega atalhos,
   // gera bloco inicial expandido + bloco de compartilhamento quando aplicável.
@@ -1397,7 +1408,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
           <Bell size={22} />
         </button>
       </div>
-      <ChatBody workspaceContext={workspaceContext} />
+      <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
     </div>
   );
 }
@@ -1439,7 +1450,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function ChatMobile({ open, onClose, workspaceContext }: { open: boolean; onClose: () => void; workspaceContext?: WorkspaceContext | null }) {
+export function ChatMobile({ open, onClose, workspaceContext, activeSector }: { open: boolean; onClose: () => void; workspaceContext?: WorkspaceContext | null; activeSector?: string }) {
   return (
     <AnimatePresence>
       {open && (
@@ -1450,7 +1461,7 @@ export function ChatMobile({ open, onClose, workspaceContext }: { open: boolean;
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b]"
         >
-          <ChatBody onClose={onClose} showClose workspaceContext={workspaceContext} />
+          <ChatBody onClose={onClose} showClose workspaceContext={workspaceContext} activeSector={activeSector} />
         </motion.div>
       )}
     </AnimatePresence>
