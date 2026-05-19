@@ -1408,7 +1408,9 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
           <Bell size={22} />
         </button>
       </div>
-      <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
+      <div className="flex-1 min-h-0">
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
+      </div>
     </div>
   );
 }
