@@ -3,18 +3,45 @@ import { motion } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import { FeedSection, FeedCard } from './FeedComponents';
 import type { DepartmentId, CompanySectorFeeds } from '../types';
+import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
 
 const fadeItem = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } },
 };
 
-function SimpleCard({ color, tag, title, detail, badge }: {
+function sectorCardToIntelligence(c: { tag: string; title: string; detail: string }, dept: string, idx: number): IntelligenceCard {
+  return {
+    id:              `synthetic-sector-${dept}-${idx}`,
+    titulo:          c.title,
+    resumo:          c.detail,
+    por_que_importa: '',
+    onde_afeta:      '',
+    o_que_fazer:     '',
+    dominio:         c.tag,
+    area:            dept,
+    urgencia:        'media',
+    tipo_card:       'informacao',
+    confianca:       'media',
+    confianca_score: 0.5,
+    impacto:         '',
+    risco_erro:      0.3,
+    _synthetic:      true,
+  };
+}
+
+function SimpleCard({ color, tag, title, detail, badge, onOpenWorkspace, intelligence }: {
   color: string; tag: string; title: string; detail: string;
   badge?: { label: string; type: 'ok' | 'warn' | 'info' };
+  onOpenWorkspace?: (card: IntelligenceCard, intent: WorkspaceIntent) => void;
+  intelligence?: IntelligenceCard;
 }) {
+  const callbacks = (onOpenWorkspace && intelligence) ? {
+    onWorkspaceIntent: (intent: WorkspaceIntent) => onOpenWorkspace(intelligence, intent),
+    onFullscreen:      () => onOpenWorkspace(intelligence, 'utilizar' as WorkspaceIntent),
+  } : {};
   return (
-    <FeedCard>
+    <FeedCard {...callbacks}>
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color }}>{tag}</p>
@@ -37,9 +64,10 @@ function SimpleCard({ color, tag, title, detail, badge }: {
 interface Props {
   department: Exclude<DepartmentId, 'geral'>;
   feeds: CompanySectorFeeds;
+  onOpenWorkspace?: (card: IntelligenceCard, intent: WorkspaceIntent) => void;
 }
 
-export function SectorFeed({ department, feeds }: Props) {
+export function SectorFeed({ department, feeds, onOpenWorkspace }: Props) {
   const sections = feeds[department] ?? [];
 
   return (
@@ -63,7 +91,12 @@ export function SectorFeed({ department, feeds }: Props) {
           <motion.div key={i} variants={fadeItem}>
             <FeedSection title={section.sectionTitle} icon={<ChevronRight size={18}/>}>
               {section.cards.map((card, j) => (
-                <SimpleCard key={j} {...card} />
+                <SimpleCard
+                  key={j}
+                  {...card}
+                  onOpenWorkspace={onOpenWorkspace}
+                  intelligence={sectorCardToIntelligence(card, department, i * 100 + j)}
+                />
               ))}
             </FeedSection>
           </motion.div>

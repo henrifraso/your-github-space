@@ -97,7 +97,8 @@ import type { DepartmentId, CompanySectorFeeds } from './types';
 import { SectorFeed } from './components/SectorFeed';
 import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
-import type { IntelligenceCard } from './components/WorkspacePanel';
+import type { IntelligenceCard, WorkspaceIntent } from './components/WorkspacePanel';
+import type { WorkspaceContext } from './components/ChatPanel';
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
 import { getRoleConfig } from './config/roleConfig';
 import type { RoleFeedCard } from './config/roleConfig';
@@ -134,17 +135,27 @@ export default function App() {
 
   const [auth, setAuth] = useState(() => getAuthState());
 
+  // Auto-autentica direto quando vem de os1.space — pula a animação cinemática
+  // de ~15s (GIF + Phase B + typewriter) que estava confundindo o usuário.
+  useEffect(() => {
+    if (!autoLogin) return;
+    if (auth.isAuthenticated) return;
+    setAuthState(autoLogin.token, autoLogin.buId);
+    localStorage.setItem('os1_org_id', autoLogin.orgId);
+    localStorage.setItem('os1_bu_id', autoLogin.buId);
+    if (autoLogin.role) localStorage.setItem('os1_role', autoLogin.role);
+    setAuth(getAuthState());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (!auth.isAuthenticated) {
+    // Tela preta enquanto o useEffect acima autentica (1 frame).
+    if (autoLogin) return <div className="fixed inset-0 bg-black" />;
     return (
       <LoginScreen
-        autoLogin={autoLogin}
+        autoLogin={null}
         onAuthenticated={(token, negocioId) => {
           setAuthState(token, negocioId);
-          if (autoLogin) {
-            localStorage.setItem('os1_org_id', autoLogin.orgId);
-            localStorage.setItem('os1_bu_id', autoLogin.buId);
-            if (autoLogin.role) localStorage.setItem('os1_role', autoLogin.role);
-          }
           setAuth(getAuthState());
         }}
       />
@@ -258,13 +269,16 @@ function AuthenticatedApp() {
   useEffect(() => { bioOpenRef.current = bioOpen; }, [bioOpen]);
   const [destaqueOpen, setDestaqueOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
+  const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
+  const workspaceSeqRef = useRef(0);
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
     | { type: 'estrategia' }
     | { type: 'pratica' }
     | { type: 'destaque'; idx: number }
-    | { type: 'workspace'; card: IntelligenceCard };
+    | { type: 'workspace'; card: IntelligenceCard; intent?: WorkspaceIntent };
   const [fullscreenCard, setFullscreenCard] = useState<FullscreenContent | null>(null);
   const [consentAccepted, setConsentAccepted] = useState(true);
   const [consentChecks, setConsentChecks] = useState({ termos: false, navegador: false, lido: false });
@@ -316,6 +330,56 @@ function AuthenticatedApp() {
       />
     );
   }
+
+  // Converte card de role/mock em IntelligenceCard sintético pro WorkspacePanel.
+  const roleFeedCardToIntelligenceCard = (c: RoleFeedCard): IntelligenceCard => ({
+    id:              `synthetic-${c.id}`,
+    titulo:          c.titulo,
+    resumo:          c.resumo,
+    por_que_importa: '',
+    onde_afeta:      '',
+    o_que_fazer:     '',
+    dominio:         c.tags[0] ?? '',
+    area:            c.tags[0] ?? '',
+    urgencia:        c.urgencia,
+    tipo_card:       c.tipo,
+    confianca:       'media',
+    confianca_score: 0.5,
+    impacto:         '',
+    risco_erro:      c.urgencia === 'alta' ? 0.6 : c.urgencia === 'media' ? 0.4 : 0.2,
+    _synthetic:      true,
+  });
+
+  // Abre o WorkspacePanel a partir de um card real do feed.
+  // Registra a interação correspondente (best-effort, não bloqueia abertura).
+  const openWorkspaceFromCard = (card: IntelligenceCard, intent: WorkspaceIntent) => {
+    const INTERACTION_BY_INTENT: Record<WorkspaceIntent, string> = {
+      utilizar:     'utilizou',
+      perguntas:    'perguntou',
+      exemplos:     'clicou',
+      compartilhar: 'compartilhou',
+    };
+    const { orgId, buId } = getOrgContext();
+    // Cards sintéticos não existem no backend — interação retornaria 404.
+    if (orgId && buId && !card._synthetic) {
+      apiFetch('/api/orchestrator/interact', {
+        method: 'POST',
+        body: JSON.stringify({
+          org_id: orgId,
+          bu_id: buId,
+          card_id: card.id,
+          interaction_type: INTERACTION_BY_INTENT[intent],
+        }),
+      }).catch((err) => { console.warn('[workspace] interact falhou:', err); });
+    }
+    // Envia o card pro contêiner do chat (botão "Área de trabalho") em vez de fullscreen.
+    workspaceSeqRef.current += 1;
+    setWorkspaceContext({ card, intent, seq: workspaceSeqRef.current });
+    // No mobile, abre o drawer do chat automaticamente.
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setChatOpen(true);
+    }
+  };
 
   const handleUtilizar = (containerType: string, selected: boolean) => {
     setSelectedContainers(prev => {
@@ -1020,6 +1084,7 @@ function AuthenticatedApp() {
         <SectorFeed
           department={activeDepartment as Exclude<DepartmentId, 'geral'>}
           feeds={PROFILE_SECTOR_FEEDS[activeSector] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
+          onOpenWorkspace={openWorkspaceFromCard}
         />
       )}
 
@@ -1060,7 +1125,10 @@ function AuthenticatedApp() {
               <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
                 <AnimatePresence>
                   <motion.div layout exit={{ opacity: 0, height: 0, marginBottom: 0 }} transition={{ duration: 0.25 }}>
-                    <FeedCard>
+                    <FeedCard
+                      onWorkspaceIntent={(intent) => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), intent)}
+                      onFullscreen={() => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), 'utilizar')}
+                    >
                       <div className="relative">
                         {roleConfig.showPendingBadge && card.isPending && (
                           <span className="absolute -top-0.5 right-0 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full">Pendente</span>
@@ -1152,7 +1220,10 @@ function AuthenticatedApp() {
         {/* Cards do role no topo do feed (codify/afiliado/parceiro/franquia na aba Demos ou useDefaultSectors) */}
         {isPersonalizedRole(role) && roleConfig.feedCards.length > 0 && roleConfig.feedCards.map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
-            <FeedCard>
+            <FeedCard
+              onWorkspaceIntent={(intent) => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), intent)}
+              onFullscreen={() => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), 'utilizar')}
+            >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.tags[0]}</p>
@@ -1168,7 +1239,10 @@ function AuthenticatedApp() {
         {/* Cards reais do backend (intelligence_cards via /api/orchestrator/feed) */}
         {orchCards.map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
-            <FeedCard>
+            <FeedCard
+              onWorkspaceIntent={(intent) => openWorkspaceFromCard(card, intent)}
+              onFullscreen={() => openWorkspaceFromCard(card, 'utilizar')}
+            >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.dominio}</p>
@@ -1406,15 +1480,14 @@ function AuthenticatedApp() {
         onBrowser={() => setBrowserOpen(true)}
         onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         activeSector={activeSector}
+        workspaceContext={workspaceContext}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
-      <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} />
+      <ChatMobile open={chatOpen} onClose={() => setChatOpen(false)} workspaceContext={workspaceContext} />
 
       {/* Fullscreen */}
       <AnimatePresence>
-        {fullscreenCard?.type === 'workspace' && (
-          <WorkspacePanel card={fullscreenCard.card} onClose={() => setFullscreenCard(null)} />
-        )}
+        {/* WorkspacePanel fullscreen removido — cards do feed agora alimentam o chat. */}
         {fullscreenCard && fullscreenCard.type !== 'workspace' && (() => {
           const META: Record<string, { icon: React.ReactNode; title: string; color: string }> = {
             plano:     { icon: <Trophy size={20} className="text-[#3b82f6]" />,   title: 'Plano de Ação',  color: '#3b82f6' },

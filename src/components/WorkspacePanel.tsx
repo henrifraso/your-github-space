@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { apiFetch } from '../api';
 import {
-  X, Search, Zap, BookOpen, BarChart2, RefreshCw, Sliders,
+  X, Search, Zap, BookOpen, BarChart2, RefreshCw,
   Share2, ChevronRight, AlertTriangle, TrendingUp, Info, Shield,
   CheckSquare, Target, MessageSquare, LayoutList, Loader2,
   ExternalLink, Star, Wrench, Package, Handshake, BadgeDollarSign, Sparkles,
@@ -37,11 +37,23 @@ export interface IntelligenceCard {
   }>;
   share_token?: string;
   publicado_em?: string;
+  // Sintético = card mockado que não existe no backend. WorkspacePanel não chama API.
+  _synthetic?: boolean;
 }
 
 type ActionType = 'pesquisar' | 'executar' | 'aprender' | 'simular' | 'regenerar' | 'estender';
 type Dificuldade = 'muito_facil' | 'facil' | 'dificil' | 'muito_dificil';
 type ExecutarTipo = 'campanha' | 'checklist' | 'mensagem' | 'plano' | 'simulacao' | 'tarefa';
+
+export type WorkspaceIntent = 'utilizar' | 'perguntas' | 'exemplos' | 'compartilhar';
+
+// Mapa intent → ação inicial no painel
+const INTENT_TO_ACTION: Record<WorkspaceIntent, ActionType | null> = {
+  utilizar:     'executar',   // mostra o picker de tipo (campanha, checklist, ...)
+  perguntas:    'pesquisar',  // dispara a pesquisa (perguntas a investigar)
+  exemplos:     'aprender',   // exemplos práticos
+  compartilhar: null,         // só abre o painel
+};
 
 interface Shortcut {
   id: string;
@@ -75,6 +87,19 @@ const TIPO_ICON: Record<string, React.ReactNode> = {
   informacao:   <Info size={14} />,
 };
 
+// Cada chamada de ação gera um bloco que entra no histórico local da sessão.
+type WorkspaceBlock = {
+  id: string;
+  cardId: string;
+  mode: string;
+  action: string;
+  title: string;
+  result: Record<string, unknown>;
+  difficulty?: string;
+  pinned?: boolean;
+  createdAt: string;
+};
+
 const EXECUTAR_OPTIONS: { tipo: ExecutarTipo; label: string; icon: React.ReactNode }[] = [
   { tipo: 'campanha',  label: 'Campanha',    icon: <Target size={16} /> },
   { tipo: 'checklist', label: 'Checklist',   icon: <CheckSquare size={16} /> },
@@ -86,14 +111,15 @@ const EXECUTAR_OPTIONS: { tipo: ExecutarTipo; label: string; icon: React.ReactNo
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onClose: () => void }) {
+export function WorkspacePanel({ card, onClose, initialIntent }: { card: IntelligenceCard; onClose: () => void; initialIntent?: WorkspaceIntent }) {
   const [dificuldade, setDificuldade]   = useState<Dificuldade>((card.dificuldade as Dificuldade) || 'facil');
   const [activeAction, setActiveAction] = useState<ActionType | null>(null);
-  const [actionResult, setActionResult] = useState<Record<string, unknown> | null>(null);
+  const [blocks, setBlocks]             = useState<WorkspaceBlock[]>([]);
   const [loading, setLoading]           = useState(false);
   const [executarStep, setExecutarStep] = useState<'choose' | 'result'>('choose');
   const [executarTipo, setExecutarTipo] = useState<ExecutarTipo>('checklist');
   const [shortcuts, setShortcuts]       = useState<Shortcut[]>([]);
+  const scrollEndRef                    = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     apiFetch<{ shortcuts?: Shortcut[] }>('/api/shortcuts/para-card', {
@@ -114,23 +140,62 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
     o_que_fazer:      v?.o_que_fazer      || card.o_que_fazer      || '',
   };
 
+  const appendBlock = (action: ActionType, result: Record<string, unknown>, extra: Record<string, string>) => {
+    const subtipo = extra.tipo || extra.cenario;
+    const label = LABEL_BY_ACTION[action] || action;
+    setBlocks(prev => [...prev, {
+      id:         `blk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      cardId:     card.id,
+      mode:       action,
+      action,
+      title:      subtipo ? `${label} · ${subtipo}` : label,
+      result,
+      difficulty: dificuldade,
+      pinned:     false,
+      createdAt:  new Date().toISOString(),
+    }]);
+  };
+
   const callApi = async (action: ActionType, extra: Record<string, string> = {}) => {
     setLoading(true);
     setActiveAction(action);
-    setActionResult(null);
+    // Card sintético (mock) — não chama API, gera bloco demonstrativo local.
+    if (card._synthetic) {
+      setTimeout(() => {
+        appendBlock(action, {
+          demo: true,
+          mensagem: 'Este card é demonstrativo — quando a IA estiver conectada, este modo gerará a resposta real.',
+          referencia: card.resumo || card.titulo,
+        }, extra);
+        setLoading(false);
+      }, 350);
+      return;
+    }
     try {
       const data = await apiFetch<Record<string, unknown>>(`/api/workspace/${action}`, {
         method: 'POST',
         body: JSON.stringify({ card_id: card.id, ...extra }),
       });
-      setActionResult(data);
+      appendBlock(action, data, extra);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Não foi possível conectar ao servidor.';
-      setActionResult({ erro: msg });
+      appendBlock(action, { erro: msg }, extra);
     } finally {
       setLoading(false);
     }
   };
+
+  // Reservado pra próxima etapa (botão Fixar nos blocos).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const togglePinBlock = (blockId: string) => {
+    setBlocks(prev => prev.map(b => b.id === blockId ? { ...b, pinned: !b.pinned } : b));
+  };
+
+  // Scroll suave pro último bloco quando algo novo é gerado.
+  useEffect(() => {
+    if (blocks.length === 0) return;
+    scrollEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [blocks.length]);
 
   const handleAction = (action: ActionType) => {
     if (action === 'executar') { setActiveAction('executar'); setExecutarStep('choose'); return; }
@@ -143,6 +208,25 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
     setExecutarStep('result');
     callApi('executar', { tipo });
   };
+
+  // Pré-seleciona ação com base no intent que abriu o painel.
+  // Para perguntas/exemplos: dispara a API automaticamente (backend tem fallback).
+  // Para utilizar: deixa no step 'choose' para o usuário escolher o tipo.
+  // Para compartilhar: não pré-seleciona nada.
+  // Card sintético: skip auto-dispatch (evita 404 confuso na abertura).
+  useEffect(() => {
+    if (!initialIntent) return;
+    const action = INTENT_TO_ACTION[initialIntent];
+    if (!action) return;
+    if (action === 'executar') {
+      setActiveAction('executar');
+      setExecutarStep('choose');
+      return;
+    }
+    if (card._synthetic) return;
+    handleAction(action);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialIntent, card.id]);
 
   return (
     <motion.div
@@ -196,11 +280,27 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
           {/* Barra de ações */}
           <div className="pt-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-3">Área de Decisão</p>
-            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-              {ACTION_BUTTONS.map(btn => (
-                <ActionBtn key={btn.action} {...btn}
-                  active={activeAction === btn.action}
-                  onClick={() => handleAction(btn.action as ActionType)} />
+
+            {/* 3 modos principais — dominantes */}
+            <div className="grid grid-cols-3 gap-2">
+              {PRIMARY_MODES.map(m => (
+                <ActionBtn key={m.action} {...m}
+                  active={activeAction === m.action}
+                  onClick={() => handleAction(m.action)} />
+              ))}
+            </div>
+
+            {/* Outras ações — discretas */}
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-600">Outras ações</span>
+              {SECONDARY_ACTIONS.map(a => (
+                <button key={a.action} onClick={() => handleAction(a.action)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${activeAction === a.action
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white dark:bg-[#242424] text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-[#2e2e2e] hover:border-blue-300 dark:hover:border-blue-700 hover:text-neutral-800 dark:hover:text-neutral-200'}`}>
+                  {a.icon}
+                  {a.label}
+                </button>
               ))}
             </div>
           </div>
@@ -224,28 +324,39 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
             )}
           </AnimatePresence>
 
-          {/* Resultado da ação */}
-          <AnimatePresence>
+          {/* Histórico de blocos gerados nesta sessão */}
+          <AnimatePresence initial={false}>
+            {blocks.map(block => (
+              <motion.div key={block.id}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                className="bg-white dark:bg-[#242424] border border-neutral-200 dark:border-[#303030] rounded-2xl overflow-hidden">
+                <div className="px-5 py-3 border-b border-neutral-100 dark:border-[#2e2e2e] flex items-center gap-2">
+                  <ChevronRight size={14} className="text-neutral-400" />
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 flex-1 truncate">
+                    {block.title}
+                  </p>
+                  {block.difficulty && (
+                    <span className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500">
+                      {DIFICULDADE_LABELS[block.difficulty as Dificuldade] || block.difficulty}
+                    </span>
+                  )}
+                  <span className="text-[10px] tabular-nums text-neutral-400 dark:text-neutral-600">
+                    {new Date(block.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+                <div className="px-5 py-4">
+                  <ActionResult result={block.result} action={block.action as ActionType} />
+                </div>
+              </motion.div>
+            ))}
             {loading && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="flex items-center gap-3 px-5 py-4 bg-white dark:bg-[#242424] rounded-2xl border border-neutral-200 dark:border-[#303030]">
                 <Loader2 size={16} className="animate-spin text-blue-500" />
-                <span className="text-sm text-neutral-500 dark:text-neutral-400">Processando...</span>
-              </motion.div>
-            )}
-            {actionResult && !loading && (
-              <motion.div key={activeAction} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className="bg-white dark:bg-[#242424] border border-neutral-200 dark:border-[#303030] rounded-2xl overflow-hidden">
-                <div className="px-5 py-3 border-b border-neutral-100 dark:border-[#2e2e2e] flex items-center gap-2">
-                  <ChevronRight size={14} className="text-neutral-400" />
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
-                    {ACTION_BUTTONS.find(b => b.action === activeAction)?.label}
-                    {activeAction === 'executar' && ` · ${executarTipo}`}
-                  </p>
-                </div>
-                <div className="px-5 py-4">
-                  <ActionResult result={actionResult} action={activeAction} />
-                </div>
+                <span className="text-sm text-neutral-500 dark:text-neutral-400">
+                  Processando · {activeAction ? (LABEL_BY_ACTION[activeAction] || activeAction) : ''}
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -260,7 +371,7 @@ export function WorkspacePanel({ card, onClose }: { card: IntelligenceCard; onCl
             </div>
           )}
 
-          <div className="h-8" />
+          <div ref={scrollEndRef} className="h-8" />
         </div>
       </div>
     </motion.div>
@@ -311,8 +422,36 @@ function ActionBtn({ action, label, icon, active, onClick }: {
   );
 }
 
-function ActionResult({ result, action }: { result: Record<string, unknown>; action: ActionType | null }) {
+export function ActionResult({ result, action }: { result: Record<string, unknown>; action: string | null }) {
   if (result.erro) return <p className="text-sm text-red-500">{String(result.erro)}</p>;
+  if (result.demo) return (
+    <div className="space-y-2">
+      <p className="text-sm text-neutral-700 dark:text-neutral-300">{String(result.mensagem)}</p>
+      {result.referencia ? (
+        <p className="text-xs text-neutral-500 italic border-l-2 border-neutral-200 dark:border-[#3a3a3a] pl-3">{String(result.referencia)}</p>
+      ) : null}
+    </div>
+  );
+
+  // Mensagem pronta (sub: mensagem) — bloco de texto monoespaço pra copiar/colar.
+  if (typeof result.texto_mensagem === 'string') {
+    return (
+      <pre className="whitespace-pre-wrap font-sans text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+        {result.texto_mensagem}
+      </pre>
+    );
+  }
+
+  // Conteúdo livre em parágrafos (comparar, risco, oportunidade, etc.)
+  if (Array.isArray(result.paragrafos)) {
+    return (
+      <div className="space-y-2">
+        {(result.paragrafos as string[]).map((p, i) => (
+          <p key={i} className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">{p}</p>
+        ))}
+      </div>
+    );
+  }
 
   if (action === 'pesquisar') return <PesquisarResult r={result} />;
   if (action === 'executar')  return <ExecutarResult  r={result} />;
@@ -518,14 +657,28 @@ function ShortcutCard({ shortcut: s }: { shortcut: Shortcut }) {
   );
 }
 
-// ── Configuração dos botões de ação ───────────────────────────────────────────
+// ── Configuração dos modos de ação ────────────────────────────────────────────
 
-const ACTION_BUTTONS = [
-  { action: 'pesquisar', label: 'Pesquisar',   icon: <Search size={15} /> },
-  { action: 'executar',  label: 'Executar',    icon: <Zap size={15} /> },
-  { action: 'aprender',  label: 'Aprender',    icon: <BookOpen size={15} /> },
-  { action: 'simular',   label: 'Simular',     icon: <BarChart2 size={15} /> },
-  { action: 'regenerar', label: 'Regenerar',   icon: <RefreshCw size={15} /> },
-  { action: 'estender',  label: 'Estender',    icon: <Share2 size={15} /> },
-  { action: '_dific',    label: 'Dificuldade', icon: <Sliders size={15} /> },
+// Modos principais — UI dominante. Cada um chama o endpoint já existente.
+const PRIMARY_MODES: { action: ActionType; label: string; icon: React.ReactNode }[] = [
+  { action: 'pesquisar', label: 'Entender', icon: <Search size={16} /> },
+  { action: 'executar',  label: 'Executar', icon: <Zap size={16} /> },
+  { action: 'aprender',  label: 'Aprender', icon: <BookOpen size={16} /> },
 ];
+
+// Ações secundárias — chips discretos abaixo.
+const SECONDARY_ACTIONS: { action: ActionType; label: string; icon: React.ReactNode }[] = [
+  { action: 'simular',   label: 'Simular',   icon: <BarChart2 size={13} /> },
+  { action: 'regenerar', label: 'Regenerar', icon: <RefreshCw size={13} /> },
+  { action: 'estender',  label: 'Estender',  icon: <Share2 size={13} /> },
+];
+
+// Label amigável usada no título do bloco e no estado de loading.
+const LABEL_BY_ACTION: Record<string, string> = {
+  pesquisar: 'Entender',
+  executar:  'Executar',
+  aprender:  'Aprender',
+  simular:   'Simular',
+  regenerar: 'Regenerar',
+  estender:  'Estender',
+};

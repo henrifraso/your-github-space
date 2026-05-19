@@ -188,11 +188,14 @@ function AnimatedDots() {
   );
 }
 
-export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, locked, children }: {
+type WorkspaceIntent = 'utilizar' | 'perguntas' | 'exemplos' | 'compartilhar';
+
+export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onWorkspaceIntent, locked, children }: {
   onClick?: () => void;
   onFullscreen?: () => void;
   containerType?: string;
   onUtilizar?: (containerType: string, selected: boolean) => void;
+  onWorkspaceIntent?: (intent: WorkspaceIntent) => void;
   locked?: boolean;
   children: React.ReactNode;
 }) {
@@ -263,6 +266,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
 
   function handleLike(e: React.MouseEvent) {
     e.stopPropagation();
+    if (onWorkspaceIntent) { onWorkspaceIntent('utilizar'); return; }
     if (utilStatus === 'loading') return;
     if (utilStatus === 'done') {
       setUtilStatus('idle');
@@ -275,6 +279,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
 
   function handlePerguntas(e: React.MouseEvent) {
     e.stopPropagation();
+    if (onWorkspaceIntent) { onWorkspaceIntent('perguntas'); return; }
     if (pergStatus === 'idle') setPergStatus('picking');
     else if (pergStatus === 'picking') setPergStatus('idle');
   }
@@ -287,6 +292,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
 
   function handleExemplos(e: React.MouseEvent) {
     e.stopPropagation();
+    if (onWorkspaceIntent) { onWorkspaceIntent('exemplos'); return; }
     if (ideiaStatus === 'idle') setIdeiaStatus('picking');
     else if (ideiaStatus === 'picking') setIdeiaStatus('idle');
   }
@@ -299,15 +305,22 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
 
   function handleShare(e: React.MouseEvent) {
     e.stopPropagation();
-    if (shareStatus !== 'idle') return;
-    setShareStatus('loading');
+    // Mantém o comportamento de share/copy e dispara o workspace em paralelo.
     if (navigator.share) navigator.share({ title: 'Omni', text: 'Confira essa informação no Omni' }).catch(() => {});
     else navigator.clipboard.writeText(window.location.href).catch(() => {});
+    if (onWorkspaceIntent) { onWorkspaceIntent('compartilhar'); return; }
+    if (shareStatus !== 'idle') return;
+    setShareStatus('loading');
   }
+
+  // Cards locked não recebem callbacks de workspace — escondem os 4 botões para
+  // não parecerem clicáveis (estão bloqueados de propósito: dados antigos/containers PEP).
+  const showActionButtons = !locked;
 
   const cardContent = (
     <>
       <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl p-3 sm:p-4">{children}</div>
+      {showActionButtons && (
       <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#414141] grid grid-cols-2 lg:grid-cols-4 gap-1.5">
 
         {/* ── Utilizar ── */}
@@ -480,6 +493,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, loc
         </div>
 
       </div>
+      )}
 
       {/* ── Picker de Perguntas ── */}
       <AnimatePresence>

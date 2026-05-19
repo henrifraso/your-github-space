@@ -1,49 +1,694 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target, Send, Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp, Map, Plus, Globe, Settings2, Bell } from 'lucide-react';
+import {
+  X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
+  Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
+  Plus, Globe, Settings2, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
+  Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
+  Sparkles, Loader2,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
+import { ActionResult } from './WorkspacePanel';
+import { apiFetch } from '../api';
+
+// Card vindo do feed, anexado ao chat para alimentar o modo selecionado.
+export type WorkspaceContext = { card: IntelligenceCard; intent: WorkspaceIntent; seq: number };
 
 type Phase = 'init' | 'expanded' | 'selected';
 type MainKey = 'pesquisar' | 'executar' | 'aprender';
 
 const MAIN_BTNS: { key: MainKey; label: string; Icon: React.ElementType }[] = [
-  { key: 'pesquisar', label: 'Pesquisar', Icon: Search    },
-  { key: 'executar',  label: 'Executar',  Icon: Zap       },
-  { key: 'aprender',  label: 'Aprender',  Icon: BookOpen  },
+  { key: 'pesquisar', label: 'Entender', Icon: Search    },
+  { key: 'executar',  label: 'Executar', Icon: Zap       },
+  { key: 'aprender',  label: 'Aprender', Icon: BookOpen  },
 ];
 
-const SUB_BTNS: Record<MainKey, { key: string; label: string; Icon: React.ElementType }[]> = {
+const INTENT_TO_MAIN: Record<WorkspaceIntent, MainKey | null> = {
+  utilizar:     'executar',
+  perguntas:    'pesquisar',
+  exemplos:     'aprender',
+  compartilhar: null,
+};
+
+// ── Dificuldade ───────────────────────────────────────────────────────────────
+type Dificuldade = 'muito_facil' | 'facil' | 'dificil' | 'muito_dificil';
+const DIFICULDADE_LABELS: Record<Dificuldade, string> = {
+  muito_facil:   'Muito fácil',
+  facil:         'Fácil',
+  dificil:       'Difícil',
+  muito_dificil: 'Muito difícil',
+};
+
+// ── Atalhos do card ───────────────────────────────────────────────────────────
+// Atalho local executa uma sub-ação existente. Atalho remoto abre URL.
+type LocalShortcut =
+  | { id: string; label: string; kind: 'local'; mode: MainKey; subKey: string }
+  | { id: string; label: string; kind: 'remote'; url: string; url_label: string };
+
+// Atalhos do backend (/api/shortcuts/para-card)
+interface RemoteShortcut {
+  id: string;
+  titulo: string;
+  descricao?: string;
+  tipo?: string;
+  url: string;
+  url_label?: string;
+}
+
+function shortcutsForCard(card: IntelligenceCard): LocalShortcut[] {
+  const d = ((card.dominio || '') + ' ' + (card.area || '')).toLowerCase();
+  if (/reput|nota|avalia|review/.test(d)) return [
+    { id: 'sc-r1', kind: 'local', label: 'Responder avaliações pendentes', mode: 'executar', subKey: 'mensagem' },
+    { id: 'sc-r2', kind: 'local', label: 'Criar plano de recuperação de nota', mode: 'executar', subKey: 'plano' },
+    { id: 'sc-r3', kind: 'local', label: 'Gerar mensagem para equipe', mode: 'executar', subKey: 'mensagem' },
+    { id: 'sc-r4', kind: 'local', label: 'Criar checklist de atendimento', mode: 'executar', subKey: 'checklist' },
+    { id: 'sc-r5', kind: 'local', label: 'Ver concorrentes com melhor avaliação', mode: 'pesquisar', subKey: 'comparar' },
+  ];
+  if (/concorr|posicio/.test(d)) return [
+    { id: 'sc-c1', kind: 'local', label: 'Comparar concorrente',         mode: 'pesquisar', subKey: 'comparar' },
+    { id: 'sc-c2', kind: 'local', label: 'Criar resposta comercial',     mode: 'executar',  subKey: 'campanha' },
+    { id: 'sc-c3', kind: 'local', label: 'Monitorar este concorrente',   mode: 'executar',  subKey: 'tarefa' },
+    { id: 'sc-c4', kind: 'local', label: 'Analisar raio no mapa',        mode: 'pesquisar', subKey: 'cruzar' },
+    { id: 'sc-c5', kind: 'local', label: 'Criar campanha local',         mode: 'executar',  subKey: 'campanha' },
+  ];
+  if (/forneced|supply|estoque/.test(d)) return [
+    { id: 'sc-f1', kind: 'local', label: 'Comparar fornecedor',          mode: 'pesquisar', subKey: 'comparar' },
+    { id: 'sc-f2', kind: 'local', label: 'Criar mensagem de cotação',    mode: 'executar',  subKey: 'mensagem' },
+    { id: 'sc-f3', kind: 'local', label: 'Simular economia',             mode: 'executar',  subKey: 'simular' },
+    { id: 'sc-f4', kind: 'local', label: 'Criar checklist de troca',     mode: 'executar',  subKey: 'checklist' },
+    { id: 'sc-f5', kind: 'local', label: 'Validar risco operacional',    mode: 'executar',  subKey: 'validar' },
+  ];
+  if (/marketing|midia|trafego|presenca/.test(d)) return [
+    { id: 'sc-m1', kind: 'local', label: 'Criar campanha',               mode: 'executar',  subKey: 'campanha' },
+    { id: 'sc-m2', kind: 'local', label: 'Gerar post',                   mode: 'executar',  subKey: 'mensagem' },
+    { id: 'sc-m3', kind: 'local', label: 'Criar WhatsApp',               mode: 'executar',  subKey: 'mensagem' },
+    { id: 'sc-m4', kind: 'local', label: 'Atualizar Google Maps',        mode: 'executar',  subKey: 'tarefa' },
+    { id: 'sc-m5', kind: 'local', label: 'Calendário de ação',           mode: 'executar',  subKey: 'plano' },
+  ];
+  // Genérico
+  return [
+    { id: 'sc-g1', kind: 'local', label: 'Entender melhor',  mode: 'pesquisar', subKey: 'explicar' },
+    { id: 'sc-g2', kind: 'local', label: 'Criar plano',      mode: 'executar',  subKey: 'plano' },
+    { id: 'sc-g3', kind: 'local', label: 'Criar checklist',  mode: 'executar',  subKey: 'checklist' },
+    { id: 'sc-g4', kind: 'local', label: 'Gerar mensagem',   mode: 'executar',  subKey: 'mensagem' },
+    { id: 'sc-g5', kind: 'local', label: 'Simular resultado',mode: 'executar',  subKey: 'simular' },
+  ];
+}
+
+// ── Sub-actions: 10 por modo, todas com label e função ────────────────────────
+type SubAction = {
+  key: string;
+  label: string;
+  Icon: React.ElementType;
+  endpoint: 'pesquisar' | 'executar' | 'aprender' | 'simular' | 'regenerar' | 'estender' | null;
+  extra?: Record<string, string>;
+};
+
+const SUB_BTNS: Record<MainKey, SubAction[]> = {
   pesquisar: [
-    { key: 's1', label: '', Icon: BarChart2  },
-    { key: 's2', label: '', Icon: BarChart2  },
-    { key: 's3', label: '', Icon: BarChart2  },
-    { key: 's4', label: '', Icon: BarChart2  },
-    { key: 's5', label: '', Icon: BarChart2  },
+    { key: 'resumir',         label: 'Resumir',              Icon: AlignLeft,    endpoint: 'pesquisar' },
+    { key: 'explicar',        label: 'Explicar',             Icon: Info,         endpoint: 'pesquisar' },
+    { key: 'aprofundar',      label: 'Aprofundar',           Icon: Layers,       endpoint: 'estender'  },
+    { key: 'evidencias',      label: 'Ver evidências',       Icon: FileText,     endpoint: 'pesquisar' },
+    { key: 'comparar',        label: 'Comparar',             Icon: GitCompare,   endpoint: 'pesquisar' },
+    { key: 'risco',           label: 'Ver risco',            Icon: AlertTriangle, endpoint: 'pesquisar' },
+    { key: 'oportunidade',    label: 'Ver oportunidade',     Icon: TrendingUp,   endpoint: 'pesquisar' },
+    { key: 'confianca',       label: 'Ver confiança',        Icon: Gauge,        endpoint: 'pesquisar' },
+    { key: 'cruzar',          label: 'Cruzar sinais',        Icon: Compass,      endpoint: 'pesquisar' },
+    { key: 'negocio',         label: 'Traduzir p/ negócio',  Icon: Languages,    endpoint: 'pesquisar' },
   ],
   executar: [
-    { key: 'e1', label: '', Icon: BarChart2  },
-    { key: 'e2', label: '', Icon: BarChart2  },
-    { key: 'e3', label: '', Icon: BarChart2  },
-    { key: 'e4', label: '', Icon: BarChart2  },
-    { key: 'e5', label: '', Icon: BarChart2  },
+    { key: 'checklist',       label: 'Criar checklist',      Icon: ClipboardList, endpoint: 'executar', extra: { tipo: 'checklist' } },
+    { key: 'plano',           label: 'Criar plano',          Icon: FileText,     endpoint: 'executar', extra: { tipo: 'plano' } },
+    { key: 'campanha',        label: 'Criar campanha',       Icon: Target,       endpoint: 'executar', extra: { tipo: 'campanha' } },
+    { key: 'tarefa',          label: 'Criar tarefa',         Icon: CheckCircle,  endpoint: 'executar', extra: { tipo: 'tarefa' } },
+    { key: 'delegar',         label: 'Delegar',              Icon: Users,        endpoint: 'executar', extra: { tipo: 'tarefa' } },
+    { key: 'mensagem',        label: 'Criar mensagem',       Icon: MessageSquare, endpoint: 'executar', extra: { tipo: 'mensagem' } },
+    { key: 'roteiro',         label: 'Criar roteiro',        Icon: AlignLeft,    endpoint: 'executar', extra: { tipo: 'plano' } },
+    { key: 'simular',         label: 'Simular resultado',    Icon: FlaskConical, endpoint: 'simular',  extra: { cenario: 'realista' } },
+    { key: 'validar',         label: 'Validar antes',        Icon: Eye,          endpoint: 'simular',  extra: { cenario: 'realista' } },
+    { key: 'missao',          label: 'Marcar como missão',   Icon: StarIcon,     endpoint: null },
   ],
   aprender: [
-    { key: 'a1', label: '', Icon: BarChart2  },
-    { key: 'a2', label: '', Icon: BarChart2  },
-    { key: 'a3', label: '', Icon: BarChart2  },
-    { key: 'a4', label: '', Icon: BarChart2  },
-    { key: 'a5', label: '', Icon: BarChart2  },
+    { key: 'conceito',        label: 'Ensinar conceito',     Icon: Brain,        endpoint: 'aprender' },
+    { key: 'exemplo',         label: 'Mostrar exemplo',      Icon: Lightbulb,    endpoint: 'aprender' },
+    { key: 'referencia',      label: 'Mostrar referência',   Icon: BookOpen,     endpoint: 'aprender' },
+    { key: 'erro',            label: 'Explicar erro comum',  Icon: AlertTriangle, endpoint: 'aprender' },
+    { key: 'medir',           label: 'Como medir',           Icon: Gauge,        endpoint: 'aprender' },
+    { key: 'aula',            label: 'Criar aula rápida',    Icon: BookOpen,     endpoint: 'aprender' },
+    { key: 'perguntas',       label: 'Criar perguntas',      Icon: FileQuestion, endpoint: 'aprender' },
+    { key: 'analogia',        label: 'Criar analogia',       Icon: Sparkles,     endpoint: 'aprender' },
+    { key: 'nivel',           label: 'Próximo nível',        Icon: Award,        endpoint: 'aprender' },
+    { key: 'memoria',         label: 'Criar memória',        Icon: Bookmark,     endpoint: null },
   ],
 };
 
-function InitializerButtons() {
+const MODE_LABEL: Record<MainKey, string> = {
+  pesquisar: 'Entender',
+  executar:  'Executar',
+  aprender:  'Aprender',
+};
+
+// ── Bloco gerado por uma ação ─────────────────────────────────────────────────
+type BlockKind = 'standard' | 'initial' | 'share';
+
+type WorkspaceBlock = {
+  id: string;
+  cardId: string;
+  mode: MainKey;
+  subKey: string;
+  subLabel: string;
+  endpoint: SubAction['endpoint'];
+  extra?: Record<string, string>;
+  result: Record<string, unknown>;
+  difficulty: Dificuldade;
+  pinned: boolean;
+  createdAt: string;
+  kind?: BlockKind;
+};
+
+// Fallback local específico por sub-ação. Cada botão gera conteúdo distinto,
+// no shape compatível com o renderer do endpoint (pesquisar/executar/aprender/...).
+function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, difficulty: Dificuldade): Record<string, unknown> {
+  const titulo  = card.titulo;
+  const resumo  = card.resumo || titulo;
+  const dom     = card.area || card.dominio || 'operação';
+  const urg     = card.urgencia || 'media';
+  const acao    = card.o_que_fazer || 'definir próximo passo';
+  const _dif    = DIFICULDADE_LABELS[difficulty];
+
+  switch (sub.key) {
+    // ── ENTENDER ────────────────────────────────────────────────────────────
+    case 'resumir':
+      return {
+        pontos_chave: [`Em uma frase: ${resumo}`],
+        contexto_setorial: `Resumo executivo (${_dif}) sobre ${dom}.`,
+      };
+    case 'explicar':
+      return {
+        pontos_chave: [resumo, `Impacto em ${dom}.`, `Urgência: ${urg}.`],
+        contexto_setorial: `Este sinal indica mudança na dinâmica de ${dom}. ${card.por_que_importa || ''}`.trim(),
+        perguntas_a_investigar: [`Quem é responsável por ${dom}?`, `Quais dados confirmam essa mudança?`],
+      };
+    case 'aprofundar':
+      return {
+        contexto_setorial: `Análise profunda de ${titulo}.`,
+        pontos_chave: [
+          `Origem do sinal: ${dom}`,
+          `Mecanismo provável: ${resumo}`,
+          `Impacto secundário: atendimento e conversão`,
+          `Janela de reação: ${urg === 'alta' ? '48–72h' : urg === 'media' ? '2 semanas' : '30 dias'}`,
+        ],
+      };
+    case 'evidencias':
+      return {
+        pontos_chave: [
+          `Histórico interno de ${dom}`,
+          `Avaliações públicas (Google, redes sociais)`,
+          `Movimentação de concorrentes próximos`,
+          `Indicadores operacionais relacionados`,
+        ],
+        contexto_setorial: `Fontes recomendadas para validar "${titulo}".`,
+      };
+    case 'comparar':
+      return {
+        paragrafos: [
+          `Cenário atual: ${resumo}`,
+          `Cenário ideal: ${dom} performando acima da média regional, com ${acao} já em execução.`,
+        ],
+      };
+    case 'risco':
+      return {
+        paragrafos: [
+          urg === 'alta'
+            ? `Risco alto. Reação rápida necessária — concorrentes podem capturar demanda.`
+            : urg === 'media'
+              ? `Risco moderado. Monitorar evolução nas próximas semanas.`
+              : `Risco baixo. Acompanhar periodicamente.`,
+          `Áreas mais expostas: ${dom}, atendimento, reputação.`,
+        ],
+      };
+    case 'oportunidade':
+      return {
+        paragrafos: [
+          `Reagindo antes dos concorrentes, ${dom} pode se reposicionar como referência local.`,
+          `Atalho prático: ${acao}.`,
+        ],
+      };
+    case 'confianca':
+      return {
+        paragrafos: [
+          `Confiança no sinal: ${card.confianca || 'média'} (score ${Math.round((card.confianca_score || 0.5) * 100)}%).`,
+          `Risco de interpretação: ${Math.round((card.risco_erro || 0.5) * 100)}%.`,
+        ],
+      };
+    case 'cruzar':
+      return {
+        pontos_chave: [
+          `Sinal A: ${titulo}`,
+          `Sinal B: indicadores operacionais de ${dom}`,
+          `Sinal C: movimentos competitivos locais`,
+        ],
+        contexto_setorial: `Cruzando os 3 sinais acima, ${dom} merece prioridade ${urg}.`,
+      };
+    case 'negocio':
+      return {
+        paragrafos: [
+          `Em linguagem de negócio: ${resumo}`,
+          `O que isso significa hoje: ${acao}.`,
+        ],
+      };
+
+    // ── EXECUTAR ────────────────────────────────────────────────────────────
+    case 'checklist':
+      return {
+        itens: [
+          { tarefa: `Mapear situação atual de ${dom}`,            responsavel: 'Gestor',     prazo: 'Hoje',     prioridade: urg },
+          { tarefa: `Definir responsável por ${acao}`,            responsavel: 'Liderança',  prazo: 'Esta semana', prioridade: 'alta' },
+          { tarefa: `Executar primeira ação`,                     responsavel: 'Operação',   prazo: '7 dias',   prioridade: 'alta' },
+          { tarefa: `Medir resultado preliminar`,                 responsavel: 'Gestor',     prazo: '15 dias',  prioridade: 'media' },
+          { tarefa: `Ajustar plano com base no resultado`,        responsavel: 'Liderança',  prazo: '30 dias',  prioridade: 'media' },
+        ],
+      };
+    case 'plano':
+      return {
+        itens: [
+          { tarefa: `Passo 1 — Diagnóstico de ${dom}`,            responsavel: 'Gestor',     prazo: 'Semana 1', prioridade: 'alta' },
+          { tarefa: `Passo 2 — Definir alvo e responsável`,       responsavel: 'Liderança',  prazo: 'Semana 1', prioridade: 'alta' },
+          { tarefa: `Passo 3 — Execução piloto`,                  responsavel: 'Operação',   prazo: 'Semana 2', prioridade: 'media' },
+          { tarefa: `Passo 4 — Avaliar e escalar`,                responsavel: 'Liderança',  prazo: 'Semana 4', prioridade: 'media' },
+        ],
+      };
+    case 'campanha':
+      return {
+        paragrafos: [
+          `Nome sugerido: "${dom} em foco".`,
+          `Público-alvo: clientes recorrentes da unidade + público da região.`,
+          `Mensagem-chave: reagir a "${titulo}" com proposta diferenciada de ${dom}.`,
+          `Canais: redes sociais locais, WhatsApp da base, parcerias regionais.`,
+        ],
+      };
+    case 'tarefa':
+      return {
+        itens: [
+          { tarefa: acao, responsavel: 'A definir', prazo: urg === 'alta' ? 'Hoje' : '7 dias', prioridade: urg },
+        ],
+      };
+    case 'delegar':
+      return {
+        paragrafos: [
+          `Responsável sugerido: gestor de ${dom}.`,
+          `Prazo: ${urg === 'alta' ? 'esta semana' : '15 dias'}.`,
+          `Entregável: relatório com ação executada + medição de resultado.`,
+        ],
+      };
+    case 'mensagem':
+      return {
+        texto_mensagem:
+          `Equipe, atenção:\n\n` +
+          `${titulo}\n\n` +
+          `${resumo}\n\n` +
+          `Próximo passo: ${acao}.\n\n` +
+          `Urgência: ${urg}. Quem tocar essa ação me avise hoje.`,
+      };
+    case 'roteiro':
+      return {
+        itens: [
+          { tarefa: 'Abertura — contexto', responsavel: 'Apresentador', prazo: '2 min',  prioridade: 'media' },
+          { tarefa: `Problema — ${titulo}`,            responsavel: 'Apresentador', prazo: '3 min',  prioridade: 'alta' },
+          { tarefa: `Causas — análise de ${dom}`,      responsavel: 'Apresentador', prazo: '4 min',  prioridade: 'alta' },
+          { tarefa: `Plano de ação — ${acao}`,         responsavel: 'Apresentador', prazo: '4 min',  prioridade: 'alta' },
+          { tarefa: 'Próximos passos e responsáveis',  responsavel: 'Apresentador', prazo: '2 min',  prioridade: 'media' },
+        ],
+      };
+    case 'simular':
+      return {
+        cenarios: [
+          { nome: 'Otimista',  resultado_30d: `+8% em ${dom}`,      resultado_90d: `+18% sustentado` },
+          { nome: 'Realista',  resultado_30d: `+3% em ${dom}`,      resultado_90d: `+8% sustentado` },
+          { nome: 'Pessimista',resultado_30d: `estável`,             resultado_90d: `-2% se sem ação` },
+        ],
+        recomendacao: `Em 30d, execução do plano sugere ganho moderado em ${dom}.`,
+      };
+    case 'validar':
+      return {
+        pontos_chave: [
+          `Critério 1: dado de origem do sinal está atualizado?`,
+          `Critério 2: existe ação semelhante em andamento?`,
+          `Critério 3: orçamento e equipe disponíveis?`,
+          `Critério 4: o ganho esperado supera o esforço?`,
+          `Critério 5: existe risco regulatório/operacional?`,
+        ],
+        contexto_setorial: 'Validar antes de executar — checklist de sanidade.',
+      };
+    case 'missao':
+      return {
+        paragrafos: [
+          `Missão criada: "${titulo}".`,
+          `Responsável a definir. Prazo: ${urg === 'alta' ? '7 dias' : '30 dias'}. Esta missão fica no seu painel de execução.`,
+        ],
+      };
+
+    // ── APRENDER ────────────────────────────────────────────────────────────
+    case 'conceito':
+      return {
+        conceito: `${dom} — conceito central observado neste sinal.`,
+        por_que_importa_para_negocios: card.por_que_importa || resumo,
+        exemplos_praticos: [
+          `Como ${dom} aparece no dia-a-dia operacional`,
+          `Como rede competitiva trata ${dom}`,
+        ],
+      };
+    case 'exemplo':
+      return {
+        exemplos_praticos: [
+          `Caso A: unidade comparável reagiu a sinal similar com ${acao}.`,
+          `Caso B: rede regional ignorou sinal parecido e perdeu fluxo em 60 dias.`,
+          `Caso C: ação preventiva em ${dom} dobrou taxa de conversão local.`,
+        ],
+      };
+    case 'referencia':
+      return {
+        pontos_chave: [
+          `Estudo setorial: tendências em ${dom}.`,
+          `Benchmark interno: unidades referência.`,
+          `Manual operacional: protocolos para ${dom}.`,
+        ],
+        contexto_setorial: 'Referências sugeridas para aprofundamento.',
+      };
+    case 'erro':
+      return {
+        pontos_chave: [
+          `Erro comum 1: agir sem dados de origem.`,
+          `Erro comum 2: delegar sem responsável claro.`,
+          `Erro comum 3: ignorar a janela de reação adequada.`,
+        ],
+        contexto_setorial: `Armadilhas frequentes ao tratar sinais de ${dom}.`,
+      };
+    case 'medir':
+      return {
+        pontos_chave: [
+          `KPI 1: indicador direto de ${dom} (medido semanalmente).`,
+          `KPI 2: NPS ou nota pública local.`,
+          `KPI 3: variação de ticket médio na unidade.`,
+        ],
+        contexto_setorial: 'Como medir o efeito da ação tomada.',
+      };
+    case 'aula':
+      return {
+        paragrafos: [
+          `Aula rápida — ${dom}.`,
+          `1) Contexto: ${resumo}.`,
+          `2) Mecanismo: por que esse sinal aparece e o que ele indica.`,
+          `3) Ação: ${acao}, com responsáveis e prazo definidos.`,
+        ],
+      };
+    case 'perguntas':
+      return {
+        perguntas_a_investigar: [
+          `O que causou o sinal "${titulo}"?`,
+          `Quanto tempo o problema vem se desenvolvendo?`,
+          `Quais unidades estão sendo afetadas?`,
+          `Existe ação semelhante já em curso?`,
+          `Como medir o resultado da resposta?`,
+        ],
+      };
+    case 'analogia':
+      return {
+        paragrafos: [
+          `Pense em ${dom} como o termostato da operação: indica quando algo está fora da temperatura ideal.`,
+          `Sinais como "${titulo}" são alertas iniciais — agir cedo é mais barato que reagir tarde.`,
+        ],
+      };
+    case 'nivel':
+      return {
+        paragrafos: [
+          `Próximo nível: cruzar este sinal com outros 2 indicadores de ${dom}.`,
+          `Quando dominar, considere automatizar alerta antes do impacto.`,
+        ],
+      };
+    case 'memoria':
+      return {
+        paragrafos: [
+          `Memória salva: "${titulo}" será lembrada quando padrões similares aparecerem.`,
+        ],
+      };
+
+    default:
+      return {
+        paragrafos: [`${sub.label}: ${resumo}`],
+      };
+  }
+}
+
+// Expande o card num bloco inicial com 8 campos preenchidos via fallback local
+// quando o backend não forneceu detalhes específicos.
+function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
+  const dom = (card.area || card.dominio || 'área de operação').toLowerCase();
+  const o_que_aconteceu =
+    card.resumo ||
+    `Detectamos um sinal relevante relacionado a ${dom}. ${card.titulo}`;
+  const por_que_importa =
+    card.por_que_importa ||
+    `Esse tipo de sinal costuma afetar a percepção de clientes próximos, a operação local e a competitividade da unidade.`;
+  const onde_afeta =
+    card.onde_afeta ||
+    `Principalmente em ${dom}, com efeito secundário em atendimento, conversão e reputação local.`;
+  const risco =
+    card.urgencia === 'alta'
+      ? 'Alto — exige reação rápida. Concorrentes podem capturar demanda enquanto o problema persiste.'
+      : card.urgencia === 'media'
+        ? 'Moderado — monitorar evolução nos próximos dias.'
+        : 'Baixo — manter sob acompanhamento periódico.';
+  const oportunidade =
+    `Reagir antes dos concorrentes pode reposicionar a unidade como referência em ${dom}.`;
+  const acao_recomendada =
+    card.o_que_fazer ||
+    `Revisar o contexto, definir responsável e prazo, e gerar plano de ação operacional.`;
+  const proximo_passo =
+    `Use os atalhos abaixo ou clique em "Entender melhor" para aprofundar antes de decidir.`;
+  return {
+    id:         `blk-init-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    cardId:     card.id,
+    mode:       'pesquisar',
+    subKey:     'inicial',
+    subLabel:   'Análise inicial',
+    endpoint:   null,
+    result: {
+      o_que_aconteceu,
+      por_que_importa,
+      onde_afeta,
+      risco,
+      oportunidade,
+      dominio: dom,
+      acao_recomendada,
+      proximo_passo,
+    },
+    difficulty,
+    pinned:     false,
+    createdAt:  new Date().toISOString(),
+    kind:       'initial',
+  };
+}
+
+// Bloco com opções de compartilhamento (intent === 'compartilhar').
+function buildShareBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
+  return {
+    id:         `blk-share-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    cardId:     card.id,
+    mode:       'executar',
+    subKey:     'compartilhar',
+    subLabel:   'Compartilhar',
+    endpoint:   null,
+    result:     { share: true, titulo: card.titulo, resumo: card.resumo },
+    difficulty,
+    pinned:     false,
+    createdAt:  new Date().toISOString(),
+    kind:       'share',
+  };
+}
+
+// Atalhos contextuais que aparecem abaixo de cada bloco gerado.
+// Reaproveita o tipo LocalShortcut.kind='local' — clicar dispara handleSubAction.
+function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
+  const m = block.mode;
+  const s = block.subKey;
+  const mk = (label: string, mode: MainKey, subKey: string, suffix: string): LocalShortcut =>
+    ({ id: `bsc-${block.id}-${suffix}`, kind: 'local', label, mode, subKey });
+
+  // ── EXECUTAR — atalhos por sub ────────────────────────────────────────────
+  if (s === 'checklist') return [
+    mk('Transformar em missão',         'executar',  'missao',    '1'),
+    mk('Definir responsável',           'executar',  'delegar',   '2'),
+    mk('Adicionar prazo',               'executar',  'tarefa',    '3'),
+    mk('Gerar mensagem p/ equipe',      'executar',  'mensagem',  '4'),
+    mk('Compartilhar checklist',        'executar',  'mensagem',  '5'),
+  ];
+  if (s === 'plano') return [
+    mk('Quebrar em tarefas',            'executar',  'checklist', '1'),
+    mk('Criar cronograma',              'executar',  'roteiro',   '2'),
+    mk('Definir prioridades',           'executar',  'validar',   '3'),
+    mk('Simular resultado',             'executar',  'simular',   '4'),
+    mk('Validar antes de executar',     'executar',  'validar',   '5'),
+  ];
+  if (s === 'campanha') return [
+    mk('Gerar post',                    'executar',  'mensagem',  '1'),
+    mk('Gerar WhatsApp',                'executar',  'mensagem',  '2'),
+    mk('Versão mais agressiva',         'executar',  'campanha',  '3'),
+    mk('Versão premium',                'executar',  'campanha',  '4'),
+    mk('Simular impacto',               'executar',  'simular',   '5'),
+  ];
+  if (s === 'mensagem') return [
+    mk('Adaptar para WhatsApp',         'executar',  'mensagem',  '1'),
+    mk('Adaptar para e-mail',           'executar',  'mensagem',  '2'),
+    mk('Deixar mais direto',            'executar',  'mensagem',  '3'),
+    mk('Deixar mais premium',           'executar',  'mensagem',  '4'),
+    mk('Versão para equipe',            'executar',  'mensagem',  '5'),
+  ];
+  if (s === 'tarefa' || s === 'delegar') return [
+    mk('Adicionar prazo',               'executar',  'tarefa',    '1'),
+    mk('Definir responsável',           'executar',  'delegar',   '2'),
+    mk('Criar checklist',               'executar',  'checklist', '3'),
+    mk('Marcar como missão',            'executar',  'missao',    '4'),
+    mk('Compartilhar tarefa',           'executar',  'mensagem',  '5'),
+  ];
+  if (s === 'simular' || s === 'validar') return [
+    mk('Plano para melhor cenário',     'executar',  'plano',     '1'),
+    mk('Riscos do pior cenário',        'pesquisar', 'risco',     '2'),
+    mk('Comparar cenários',             'pesquisar', 'comparar',  '3'),
+    mk('Transformar em decisão',        'executar',  'missao',    '4'),
+    mk('Checklist de validação',        'executar',  'checklist', '5'),
+  ];
+  if (s === 'missao') return [
+    mk('Criar checklist',               'executar',  'checklist', '1'),
+    mk('Definir responsável',           'executar',  'delegar',   '2'),
+    mk('Criar cronograma',              'executar',  'roteiro',   '3'),
+    mk('Gerar mensagem',                'executar',  'mensagem',  '4'),
+    mk('Simular impacto',               'executar',  'simular',   '5'),
+  ];
+  if (s === 'roteiro') return [
+    mk('Criar checklist',               'executar',  'checklist', '1'),
+    mk('Definir responsáveis',          'executar',  'delegar',   '2'),
+    mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
+    mk('Marcar como missão',            'executar',  'missao',    '4'),
+    mk('Simular resultado',             'executar',  'simular',   '5'),
+  ];
+
+  // ── ENTENDER — atalhos por sub ────────────────────────────────────────────
+  if (s === 'risco') return [
+    mk('Plano de prevenção',            'executar',  'plano',     '1'),
+    mk('Simular impacto',               'executar',  'simular',   '2'),
+    mk('Checklist de risco',            'executar',  'checklist', '3'),
+    mk('Alerta para equipe',            'executar',  'mensagem',  '4'),
+    mk('Ver sinais relacionados',       'pesquisar', 'cruzar',    '5'),
+  ];
+  if (s === 'evidencias') return [
+    mk('Resumir evidências',            'pesquisar', 'resumir',   '1'),
+    mk('Comparar com concorrente',      'pesquisar', 'comparar',  '2'),
+    mk('Ver confiança',                 'pesquisar', 'confianca', '3'),
+    mk('Cruzar sinais',                 'pesquisar', 'cruzar',    '4'),
+    mk('Criar relatório curto',         'executar',  'plano',     '5'),
+  ];
+  if (s === 'comparar') return [
+    mk('Resposta competitiva',          'executar',  'campanha',  '1'),
+    mk('Gerar campanha',                'executar',  'campanha',  '2'),
+    mk('Ver pontos fracos',             'pesquisar', 'risco',     '3'),
+    mk('Ver oportunidade',              'pesquisar', 'oportunidade','4'),
+    mk('Plano de ação',                 'executar',  'plano',     '5'),
+  ];
+  if (m === 'pesquisar') return [
+    mk('Explicar mais simples',         'pesquisar', 'explicar',  '1'),
+    mk('Ver evidências',                'pesquisar', 'evidencias','2'),
+    mk('Ver risco',                     'pesquisar', 'risco',     '3'),
+    mk('Ver oportunidade',              'pesquisar', 'oportunidade','4'),
+    mk('Traduzir para ação',            'executar',  'tarefa',    '5'),
+  ];
+
+  // ── APRENDER — atalhos por sub ────────────────────────────────────────────
+  if (s === 'exemplo') return [
+    mk('Exemplo p/ meu negócio',        'aprender',  'exemplo',   '1'),
+    mk('Transformar em checklist',      'executar',  'checklist', '2'),
+    mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
+    mk('Criar plano',                   'executar',  'plano',     '4'),
+    mk('Próximo nível',                 'aprender',  'nivel',     '5'),
+  ];
+  if (s === 'conceito') return [
+    mk('Explicar mais simples',         'pesquisar', 'explicar',  '1'),
+    mk('Criar analogia',                'aprender',  'analogia',  '2'),
+    mk('Mostrar caso real',             'aprender',  'exemplo',   '3'),
+    mk('Criar perguntas',               'aprender',  'perguntas', '4'),
+    mk('Salvar aprendizado',            'aprender',  'memoria',   '5'),
+  ];
+  if (m === 'aprender') return [
+    mk('Mostrar exemplo prático',       'aprender',  'exemplo',   '1'),
+    mk('Criar aula rápida',             'aprender',  'aula',      '2'),
+    mk('Explicar erro comum',           'aprender',  'erro',      '3'),
+    mk('Mostrar como medir',            'aprender',  'medir',     '4'),
+    mk('Salvar como referência',        'aprender',  'memoria',   '5'),
+  ];
+
+  // ── Fallback genérico ─────────────────────────────────────────────────────
+  return [
+    mk('Entender melhor',               'pesquisar', 'explicar',  '1'),
+    mk('Criar checklist',               'executar',  'checklist', '2'),
+    mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
+    mk('Simular resultado',             'executar',  'simular',   '4'),
+    mk('Salvar referência',             'aprender',  'memoria',   '5'),
+  ];
+}
+
+// 5 botões de ação rápida no rodapé do bloco inicial.
+const INITIAL_ACTIONS: { key: string; label: string; mode: MainKey; subKey: string }[] = [
+  { key: 'i-entender',  label: 'Entender melhor', mode: 'pesquisar', subKey: 'explicar' },
+  { key: 'i-checklist', label: 'Criar checklist', mode: 'executar',  subKey: 'checklist' },
+  { key: 'i-msg',       label: 'Gerar mensagem',  mode: 'executar',  subKey: 'mensagem' },
+  { key: 'i-exemplos',  label: 'Ver exemplos',    mode: 'aprender',  subKey: 'exemplo' },
+  { key: 'i-simular',   label: 'Simular impacto', mode: 'executar',  subKey: 'simular' },
+];
+
+// Opções no bloco de compartilhamento.
+const SHARE_OPTIONS: { id: string; label: string; Icon: React.ElementType; text: (c: IntelligenceCard) => string }[] = [
+  { id: 'wa',      label: 'WhatsApp',                Icon: MessageSquare, text: c => `${c.titulo}\n\n${c.resumo || ''}` },
+  { id: 'email',   label: 'E-mail',                  Icon: SendIcon,      text: c => `Assunto: ${c.titulo}\n\n${c.resumo || ''}\n\nAção recomendada: ${c.o_que_fazer || '—'}` },
+  { id: 'resumo',  label: 'Resumo executivo',        Icon: AlignLeft,     text: c => `RESUMO EXECUTIVO\n• ${c.titulo}\n• Domínio: ${c.dominio || '—'}\n• Urgência: ${c.urgencia}\n• Ação: ${c.o_que_fazer || '—'}` },
+  { id: 'equipe',  label: 'Mensagem para equipe',    Icon: Users,         text: c => `Equipe, atenção:\n${c.titulo}\n\nPróximo passo: ${c.o_que_fazer || 'revisar e discutir'}` },
+  { id: 'unidade', label: 'Mensagem para unidade',   Icon: Bell,          text: c => `Unidade — alerta:\n${c.titulo}\n${c.resumo || ''}` },
+];
+
+function InitializerButtons({ initialMain, triggerKey, onSubAction, disabled }: {
+  initialMain?: MainKey | null;
+  triggerKey?: number;
+  onSubAction?: (mode: MainKey, sub: SubAction) => void;
+  disabled?: boolean;
+}) {
   const [phase,      setPhase]      = useState<Phase>('init');
   const [activeMain, setActiveMain] = useState<MainKey | null>(null);
   const [activeSub,  setActiveSub]  = useState<string | null>(null);
+
+  // Card chegou do feed com modo pré-selecionado.
+  useEffect(() => {
+    if (triggerKey === undefined) return;
+    if (initialMain) {
+      setActiveMain(initialMain);
+      setActiveSub(null);
+      setPhase('selected');
+    } else {
+      setPhase('expanded');
+      setActiveMain(null);
+      setActiveSub(null);
+    }
+  }, [triggerKey, initialMain]);
 
   function handleMain(key: MainKey) {
     setActiveMain(key);
     setActiveSub(null);
     setPhase('selected');
+  }
+
+  function handleSubClick(sub: SubAction) {
+    if (disabled || !activeMain) return;
+    setActiveSub(sub.key);
+    if (onSubAction) onSubAction(activeMain, sub);
   }
 
   function handleReset() {
@@ -52,8 +697,8 @@ function InitializerButtons() {
     setActiveSub(null);
   }
 
-  const subIdle   = "flex-1 min-w-[28%] flex flex-col items-center justify-center gap-1 h-10 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2 bg-transparent border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] dark:hover:text-[#3b82f6]";
-  const subActive = "flex-1 min-w-[28%] flex flex-col items-center justify-center gap-1 h-10 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2 bg-[#3b82f6] border-[#3b82f6] text-white";
+  const subIdle   = "flex items-center justify-start gap-1.5 h-9 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2.5 bg-transparent border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] dark:hover:text-[#3b82f6]";
+  const subActive = "flex items-center justify-start gap-1.5 h-9 rounded-xl border text-[10px] sm:text-[11px] font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer px-2.5 bg-[#3b82f6] border-[#3b82f6] text-white";
 
   return (
     <div className="flex flex-col gap-2">
@@ -150,20 +795,21 @@ function InitializerButtons() {
             transition={{ duration: 0.2 }}
             className="flex flex-col gap-2"
           >
-            {/* Sub-botões — aparecem acima */}
-            <div className="flex flex-wrap gap-1.5">
+            {/* Sub-botões — 10 ações nomeadas, dispara handler ao clicar */}
+            <div className="grid grid-cols-2 gap-1.5">
               {SUB_BTNS[activeMain].map((sub, i) => (
                 <motion.button
                   key={sub.key}
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 14 }}
-                  transition={{ duration: 0.25, delay: i * 0.08, ease: 'easeOut' }}
-                  onClick={() => setActiveSub(sub.key)}
-                  className={activeSub === sub.key ? subActive : subIdle}
+                  transition={{ duration: 0.22, delay: Math.min(i, 5) * 0.04, ease: 'easeOut' }}
+                  onClick={() => handleSubClick(sub)}
+                  disabled={disabled}
+                  className={`${activeSub === sub.key ? subActive : subIdle} disabled:opacity-40 disabled:cursor-default`}
                 >
-                  <sub.Icon size={12} />
-                  <span>{sub.label}</span>
+                  <sub.Icon size={12} className="flex-shrink-0" />
+                  <span className="text-left truncate">{sub.label}</span>
                 </motion.button>
               ))}
             </div>
@@ -203,21 +849,153 @@ function InitializerButtons() {
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'card' | 'block';
   text: string;
+  card?: IntelligenceCard;
+  block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: boolean }) {
+function ChatBody({ onClose, showClose, workspaceContext }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
+  const [initMain, setInitMain] = useState<MainKey | null>(null);
+  const [triggerKey, setTriggerKey] = useState<number | undefined>(undefined);
+  const [activeCard, setActiveCard] = useState<IntelligenceCard | null>(null);
+  const [dificuldade, setDificuldade] = useState<Dificuldade>('facil');
+  const [shortcuts, setShortcuts] = useState<LocalShortcut[]>([]);
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // sub.key em execução
+  const lastCardIdRef = useRef<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, loading, actionLoading]);
+
+  // Card chegou do feed — anexa ao histórico, define card ativo, carrega atalhos,
+  // gera bloco inicial expandido + bloco de compartilhamento quando aplicável.
+  useEffect(() => {
+    if (!workspaceContext) return;
+    const { card, intent, seq } = workspaceContext;
+
+    // Mesmo card reativado: só atualiza modo, sem duplicar conteúdo.
+    if (lastCardIdRef.current === card.id) {
+      setInitMain(INTENT_TO_MAIN[intent]);
+      setTriggerKey(seq);
+      // Pra intent compartilhar reaberto, adiciona bloco de share novo (utilitário).
+      if (intent === 'compartilhar') {
+        const shareBlock = buildShareBlock(card, dificuldade);
+        setMessages(prev => [...prev, { id: shareBlock.id, role: 'block', text: shareBlock.subLabel, block: shareBlock }]);
+      }
+      return;
+    }
+    lastCardIdRef.current = card.id;
+    setActiveCard(card);
+
+    // 1) Card pequeno na conversa
+    const cardMsg: Message = { id: `card-${seq}-${card.id}`, role: 'card', text: card.titulo, card };
+    // 2) Bloco inicial expandido (fallback local — usa dados do card)
+    const initialBlock = buildInitialBlock(card, dificuldade);
+    const initialMsg: Message = { id: initialBlock.id, role: 'block', text: initialBlock.subLabel, block: initialBlock };
+
+    const newMessages: Message[] = [cardMsg, initialMsg];
+
+    // 3) Bloco de compartilhamento (apenas para intent='compartilhar')
+    if (intent === 'compartilhar') {
+      const shareBlock = buildShareBlock(card, dificuldade);
+      newMessages.push({ id: shareBlock.id, role: 'block', text: shareBlock.subLabel, block: shareBlock });
+    }
+    setMessages(prev => [...prev, ...newMessages]);
+
+    // 4) Atalhos: começa com fallback local por domínio; tenta backend e mescla
+    setShortcuts(shortcutsForCard(card));
+    if (!card._synthetic) {
+      apiFetch<{ shortcuts?: RemoteShortcut[] }>('/api/shortcuts/para-card', {
+        method: 'POST',
+        body: JSON.stringify({ card_id: card.id, limit: 3 }),
+      })
+        .then(d => {
+          const remote = (d?.shortcuts || []).map<LocalShortcut>(s => ({
+            id: `rs-${s.id}`, kind: 'remote', label: s.titulo, url: s.url, url_label: s.url_label || 'Abrir',
+          }));
+          if (remote.length) {
+            // Mescla: 2 remotos + 3 locais
+            setShortcuts(prev => [...remote.slice(0, 2), ...prev.slice(0, 3)]);
+          }
+        })
+        .catch(() => { /* mantém locais */ });
+    }
+
+    setInitMain(INTENT_TO_MAIN[intent]);
+    setTriggerKey(seq);
+  }, [workspaceContext]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Dispara uma sub-ação: chama endpoint ou usa fallback local, gera bloco.
+  async function handleSubAction(mode: MainKey, sub: SubAction) {
+    if (!activeCard) return;
+    setActionLoading(sub.key);
+    const blockId = `blk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    let result: Record<string, unknown>;
+    const useFallback = !sub.endpoint || activeCard._synthetic;
+    if (useFallback) {
+      await new Promise(r => setTimeout(r, 300));
+      result = buildFallbackForSub(activeCard, sub, dificuldade);
+    } else {
+      try {
+        result = await apiFetch<Record<string, unknown>>(`/api/workspace/${sub.endpoint}`, {
+          method: 'POST',
+          body: JSON.stringify({ card_id: activeCard.id, ...(sub.extra || {}) }),
+        });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Falha ao conectar';
+        result = { erro: msg };
+      }
+    }
+    const block: WorkspaceBlock = {
+      id:         blockId,
+      cardId:     activeCard.id,
+      mode,
+      subKey:     sub.key,
+      subLabel:   sub.label,
+      endpoint:   sub.endpoint,
+      extra:      sub.extra,
+      result,
+      difficulty: dificuldade,
+      pinned:     false,
+      createdAt:  new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, { id: blockId, role: 'block', text: sub.label, block }]);
+    setActionLoading(null);
+  }
+
+  // Re-dispara a mesma ação que gerou um bloco anterior.
+  function regenerateBlock(block: WorkspaceBlock) {
+    const sub = SUB_BTNS[block.mode].find(s => s.key === block.subKey);
+    if (!sub) return;
+    handleSubAction(block.mode, sub);
+  }
+
+  function togglePinBlock(blockId: string) {
+    setMessages(prev => prev.map(m => {
+      if (m.role !== 'block' || !m.block || m.block.id !== blockId) return m;
+      return { ...m, block: { ...m.block, pinned: !m.block.pinned } };
+    }));
+  }
+
+  function copyBlock(block: WorkspaceBlock) {
+    try {
+      const txt = JSON.stringify(block.result, null, 2);
+      navigator.clipboard?.writeText(txt).catch(() => {});
+    } catch { /* ignore */ }
+  }
+
+  // "Exemplos" no bloco: chama Aprender · exemplo pro mesmo card.
+  function blockExamples() {
+    const sub = SUB_BTNS.aprender.find(s => s.key === 'exemplo');
+    if (sub) handleSubAction('aprender', sub);
+  }
 
   async function handleSend() {
     const text = input.trim();
@@ -258,25 +1036,140 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-3">
-        {messages.map((msg, i) => (
+        {messages.map((msg) => {
+          if (msg.role === 'card' && msg.card) {
+            const c = msg.card;
+            const urgColor = c.urgencia === 'alta' ? '#ef4444' : c.urgencia === 'media' ? '#f59e0b' : '#6b7280';
+            return (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="flex justify-start"
+              >
+                <div className="max-w-[92%] w-full p-3.5 rounded-2xl rounded-bl-sm bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgColor }}>{c.dominio || c.area || 'Card'}</p>
+                  <p className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{c.titulo}</p>
+                  {c.resumo && (
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{c.resumo}</p>
+                  )}
+                </div>
+              </motion.div>
+            );
+          }
+          if (msg.role === 'block' && msg.block) {
+            const b = msg.block;
+            const isInitial = b.kind === 'initial';
+            const isShare   = b.kind === 'share';
+            const headerColor = isInitial ? '#10b981' : isShare ? '#f59e0b' : '#3b82f6';
+            return (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="flex justify-start"
+              >
+                <div className="max-w-[94%] w-full rounded-2xl rounded-bl-sm bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141] overflow-hidden">
+                  <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
+                    <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: headerColor }}>
+                      {isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : MODE_LABEL[b.mode]}
+                    </span>
+                    {!isInitial && !isShare && (
+                      <>
+                        <span className="text-[10px] text-neutral-400">·</span>
+                        <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{b.subLabel}</span>
+                      </>
+                    )}
+                    {(isInitial || isShare) && <div className="flex-1" />}
+                    {b.pinned && <Pin size={10} className="text-amber-500 flex-shrink-0" />}
+                    <span className="text-[9px] text-neutral-400 tabular-nums">
+                      {new Date(b.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="px-3.5 py-3 text-[12px] text-neutral-700 dark:text-neutral-300">
+                    {isInitial ? (
+                      <InitialBlockContent result={b.result} />
+                    ) : isShare ? (
+                      <ShareOptionsContent card={activeCard} />
+                    ) : (
+                      <ActionResult result={b.result} action={b.endpoint || null} />
+                    )}
+                  </div>
+                  {/* Rodapé: ações + seletor de dificuldade no próprio bloco */}
+                  {isInitial ? (
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-1.5">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {INITIAL_ACTIONS.map(a => {
+                          const sub = SUB_BTNS[a.mode].find(s => s.key === a.subKey);
+                          return (
+                            <BlockCtrl
+                              key={a.key}
+                              Icon={sub?.Icon || Sparkles}
+                              label={a.label}
+                              onClick={() => { if (sub) handleSubAction(a.mode, sub); }}
+                            />
+                          );
+                        })}
+                      </div>
+                      <DifficultyRow value={dificuldade} onChange={setDificuldade} />
+                    </div>
+                  ) : isShare ? (
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
+                      <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
+                      <BlockCtrl Icon={Copy} label="Copiar tudo" onClick={() => copyBlock(b)} />
+                    </div>
+                  ) : (
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => regenerateBlock(b)} />
+                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"     onClick={blockExamples} />
+                        <BlockCtrl Icon={Pin}        label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
+                        <BlockCtrl Icon={Copy}       label="Copiar"       onClick={() => copyBlock(b)} />
+                      </div>
+                      <DifficultyRow value={dificuldade} onChange={setDificuldade} />
+                      <BlockShortcutsRow shortcuts={buildBlockShortcuts(b)} onPick={(mode, subKey) => {
+                        const sub = SUB_BTNS[mode].find(x => x.key === subKey);
+                        if (sub) handleSubAction(mode, sub);
+                      }} />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            );
+          }
+          return (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`
+                max-w-[88%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed
+                ${msg.role === 'user'
+                  ? 'bg-[#3b82f6] text-white rounded-br-sm'
+                  : 'bg-neutral-100 dark:bg-[#373737] text-neutral-700 dark:text-neutral-300 rounded-bl-sm'
+                }
+              `}>
+                {msg.text}
+              </div>
+            </motion.div>
+          );
+        })}
+
+        {/* Loader da ação em curso */}
+        {actionLoading && (
           <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-neutral-100 dark:bg-[#373737] w-fit"
           >
-            <div className={`
-              max-w-[88%] px-3.5 py-2.5 rounded-2xl text-[13px] leading-relaxed
-              ${msg.role === 'user'
-                ? 'bg-[#3b82f6] text-white rounded-br-sm'
-                : 'bg-neutral-100 dark:bg-[#373737] text-neutral-700 dark:text-neutral-300 rounded-bl-sm'
-              }
-            `}>
-              {msg.text}
-            </div>
+            <Loader2 size={12} className="animate-spin text-[#3b82f6]" />
+            <span className="text-[11px] text-neutral-500 dark:text-neutral-400">Gerando · {SUB_BTNS[Object.keys(SUB_BTNS).find(k => SUB_BTNS[k as MainKey].some(s => s.key === actionLoading)) as MainKey]?.find(s => s.key === actionLoading)?.label || actionLoading}</span>
           </motion.div>
-        ))}
+        )}
 
         {/* Typing indicator */}
         {loading && (
@@ -312,7 +1205,12 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.2 }}
             >
-              <InitializerButtons />
+              <InitializerButtons
+                initialMain={initMain}
+                triggerKey={triggerKey}
+                onSubAction={handleSubAction}
+                disabled={!activeCard || actionLoading !== null}
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -353,15 +1251,128 @@ function ChatBody({ onClose, showClose }: { onClose?: () => void; showClose?: bo
   );
 }
 
+// Renderiza os 8 campos do bloco inicial em formato de lista.
+function InitialBlockContent({ result }: { result: Record<string, unknown> }) {
+  const fields: { label: string; key: string; emphasis?: boolean }[] = [
+    { label: 'O que aconteceu',   key: 'o_que_aconteceu' },
+    { label: 'Por que importa',   key: 'por_que_importa', emphasis: true },
+    { label: 'Onde afeta',        key: 'onde_afeta' },
+    { label: 'Risco',             key: 'risco' },
+    { label: 'Oportunidade',      key: 'oportunidade' },
+    { label: 'Domínio',           key: 'dominio' },
+    { label: 'Ação recomendada',  key: 'acao_recomendada', emphasis: true },
+    { label: 'Próximo passo',     key: 'proximo_passo' },
+  ];
+  return (
+    <div className="space-y-2.5">
+      {fields.map(f => {
+        const v = result[f.key];
+        if (!v) return null;
+        return (
+          <div key={f.key}>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-0.5">{f.label}</p>
+            <p className={`text-[12px] leading-relaxed ${f.emphasis ? 'text-neutral-800 dark:text-neutral-200 font-medium' : 'text-neutral-600 dark:text-neutral-400'}`}>
+              {String(v)}
+            </p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Render do bloco de compartilhamento — 5 opções, cada uma copia/envia o texto formatado.
+function ShareOptionsContent({ card }: { card: IntelligenceCard | null }) {
+  function fire(textBuilder: (c: IntelligenceCard) => string) {
+    if (!card) return;
+    const txt = textBuilder(card);
+    try {
+      if (navigator.share) {
+        navigator.share({ title: card.titulo, text: txt }).catch(() => {
+          navigator.clipboard?.writeText(txt).catch(() => {});
+        });
+      } else {
+        navigator.clipboard?.writeText(txt).catch(() => {});
+      }
+    } catch { /* noop */ }
+  }
+  return (
+    <div className="grid grid-cols-1 gap-1.5">
+      {SHARE_OPTIONS.map(opt => (
+        <button key={opt.id} onClick={() => fire(opt.text)}
+          className="flex items-center gap-2 px-2 py-2 rounded-lg border border-neutral-200 dark:border-[#4e4e4e] hover:bg-neutral-50 dark:hover:bg-[#414141] transition-colors cursor-pointer text-left">
+          <opt.Icon size={13} className="text-[#f59e0b] flex-shrink-0" />
+          <span className="text-[11px] font-medium text-neutral-700 dark:text-neutral-200">{opt.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function BlockShortcutsRow({ shortcuts, onPick }: {
+  shortcuts: LocalShortcut[];
+  onPick: (mode: MainKey, subKey: string) => void;
+}) {
+  if (!shortcuts.length) return null;
+  return (
+    <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
+      <span className="text-[9px] uppercase tracking-wider text-neutral-400 mr-1">Atalhos</span>
+      {shortcuts.slice(0, 5).map(s => {
+        if (s.kind !== 'local') return null;
+        return (
+          <button key={s.id} type="button" onClick={() => onPick(s.mode, s.subKey)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] hover:border-[#3b82f6]/40 dark:hover:text-[#60a5fa] transition-colors cursor-pointer">
+            {s.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function DifficultyRow({ value, onChange }: { value: Dificuldade; onChange: (d: Dificuldade) => void }) {
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      <span className="text-[9px] uppercase tracking-wider text-neutral-400 mr-1">Dificuldade</span>
+      {(Object.keys(DIFICULDADE_LABELS) as Dificuldade[]).map(d => (
+        <button key={d} onClick={() => onChange(d)}
+          className={`px-1.5 py-0.5 rounded-md text-[9px] font-semibold transition-colors cursor-pointer ${value === d
+            ? 'bg-[#3b82f6] text-white'
+            : 'text-neutral-500 dark:text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300'}`}>
+          {DIFICULDADE_LABELS[d]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function BlockCtrl({ Icon, label, onClick, active, dimmed }: {
+  Icon: React.ElementType; label: string; onClick?: () => void; active?: boolean; dimmed?: boolean;
+}) {
+  const base = "inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold transition-colors cursor-pointer";
+  const cls = active
+    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+    : dimmed
+      ? "text-neutral-400 dark:text-neutral-500 cursor-default"
+      : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-[#414141] hover:text-neutral-700 dark:hover:text-neutral-200";
+  return (
+    <button type="button" onClick={onClick} disabled={dimmed} className={`${base} ${cls}`}>
+      <Icon size={10} />
+      <span>{label}</span>
+    </button>
+  );
+}
+
 interface ChatDesktopProps {
   wide?: boolean;
   onSector?: () => void;
   onBrowser?: () => void;
   onDifficulty?: () => void;
   activeSector?: string;
+  workspaceContext?: WorkspaceContext | null;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-400 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
@@ -386,7 +1397,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
           <Bell size={22} />
         </button>
       </div>
-      <ChatBody />
+      <ChatBody workspaceContext={workspaceContext} />
     </div>
   );
 }
@@ -428,7 +1439,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
   );
 }
 
-export function ChatMobile({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function ChatMobile({ open, onClose, workspaceContext }: { open: boolean; onClose: () => void; workspaceContext?: WorkspaceContext | null }) {
   return (
     <AnimatePresence>
       {open && (
@@ -439,7 +1450,7 @@ export function ChatMobile({ open, onClose }: { open: boolean; onClose: () => vo
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b]"
         >
-          <ChatBody onClose={onClose} showClose />
+          <ChatBody onClose={onClose} showClose workspaceContext={workspaceContext} />
         </motion.div>
       )}
     </AnimatePresence>
