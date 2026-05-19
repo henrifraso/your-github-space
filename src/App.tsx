@@ -273,7 +273,8 @@ function AuthenticatedApp() {
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
-  // Altura medida da navbar — usada pra alinhar o topo do ChatPanel com o topo do feed.
+  // Mede a altura da navbar pra calcular o paddingTop do <main> quando
+  // scrolled=true (alinha topo do feed com top-[72px] do ChatPanel).
   const navRef = useRef<HTMLElement>(null);
   const [navHeight, setNavHeight] = useState(56);
   useEffect(() => {
@@ -282,6 +283,9 @@ function AuthenticatedApp() {
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
   }, []);
+  // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
+  // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
+  const mainPadTop = scrolled ? Math.max(0, 72 - navHeight) : undefined;
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -812,7 +816,10 @@ function AuthenticatedApp() {
       className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[380px] xl:pr-[396px]"
     >
 
-      <main className="max-w-[935px] mx-auto pt-3 sm:pt-4 md:pt-8">
+      <main
+        style={mainPadTop !== undefined ? { paddingTop: mainPadTop } : undefined}
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8'}`}
+      >
         {/* Perfil — colapsa ao rolar */}
         <motion.div
           initial={false}
@@ -1108,7 +1115,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
+            className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1206,7 +1213,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className="max-w-[935px] mx-auto mt-3 sm:mt-4 pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5"
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
@@ -1484,7 +1491,6 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
         dark={dark}
         onToggleTheme={toggleTheme}
-        topOffset={navHeight}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile

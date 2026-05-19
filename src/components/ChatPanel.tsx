@@ -1462,19 +1462,14 @@ interface ChatDesktopProps {
   workspaceContext?: WorkspaceContext | null;
   dark?: boolean;
   onToggleTheme?: () => void;
-  topOffset?: number;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme, topOffset }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-400 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
-      style={{
-        width: wide ? 'calc(50vw - 16px)' : '380px',
-        top: topOffset ?? 72,
-        transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)',
-      }}
-      className="fixed right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+      style={{ width: wide ? 'calc(50vw - 16px)' : '380px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
       {/* Header com ícones — ordem: Plus / Globe / Bell / Sun-Moon / Settings */}
       <div className="flex items-center justify-between gap-6 px-6 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
