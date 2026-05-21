@@ -848,7 +848,17 @@ function AuthenticatedApp() {
                     initial={{ strokeDashoffset: 2 * Math.PI * 47 }} animate={{ strokeDashoffset: 0 }}
                     transition={{ duration: 2.8, ease: 'easeOut' }} />
                 </svg>
-                <div className="w-full h-full rounded-full overflow-hidden p-[3px] md:p-[5px]">
+                <div className="w-full h-full rounded-full overflow-hidden p-[3px] md:p-[5px] relative">
+                  {/* Botão de trocar foto — disponível em todos os perfis demo */}
+                  {activeSector !== 'os1' && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPhotoEditorOpen(true); }}
+                      title="Trocar foto"
+                      className="absolute bottom-1 right-1 z-[5] w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#414141] shadow-md flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-[#353535] active:scale-90 transition-all duration-150 cursor-pointer"
+                    >
+                      <Camera size={14} className="text-neutral-700 dark:text-neutral-200" />
+                    </button>
+                  )}
                   <div
                     className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
                     onClick={() => { setBioOpen(true); setDestaqueOpen(d => !d); }}
