@@ -136,27 +136,19 @@ export default function App() {
 
   const [auth, setAuth] = useState(() => getAuthState());
 
-  // Auto-autentica direto quando vem de os1.space — pula a animação cinemática
-  // de ~15s (GIF + Phase B + typewriter) que estava confundindo o usuário.
-  useEffect(() => {
-    if (!autoLogin) return;
-    if (auth.isAuthenticated) return;
-    setAuthState(autoLogin.token, autoLogin.buId);
-    localStorage.setItem('os1_org_id', autoLogin.orgId);
-    localStorage.setItem('os1_bu_id', autoLogin.buId);
-    if (autoLogin.role) localStorage.setItem('os1_role', autoLogin.role);
-    setAuth(getAuthState());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   if (!auth.isAuthenticated) {
-    // Tela preta enquanto o useEffect acima autentica (1 frame).
-    if (autoLogin) return <div className="fixed inset-0 bg-black" />;
+    // Sempre passa autoLogin pro LoginScreen — a animação cinemática
+    // (GIF + Phase B + typewriter) roda toda vez, vindo do site ou do login direto.
     return (
       <LoginScreen
-        autoLogin={null}
+        autoLogin={autoLogin}
         onAuthenticated={(token, negocioId) => {
           setAuthState(token, negocioId);
+          if (autoLogin) {
+            localStorage.setItem('os1_org_id', autoLogin.orgId);
+            localStorage.setItem('os1_bu_id', autoLogin.buId);
+            if (autoLogin.role) localStorage.setItem('os1_role', autoLogin.role);
+          }
           setAuth(getAuthState());
         }}
       />
