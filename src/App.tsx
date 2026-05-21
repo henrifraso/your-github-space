@@ -100,6 +100,26 @@ import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard, WorkspaceIntent } from './components/WorkspacePanel';
 import type { WorkspaceContext } from './components/ChatPanel';
 import { DEMO_FEED_CARDS } from './data/demo-feed-cards';
+
+// Presets de logo por demo — usados como avatar default quando o usuário
+// ainda não fez upload de uma foto custom via PhotoEditor.
+const DEMO_LOGOS: Record<string, { src: string; bg: string; pad?: string }> = {
+  mcdonalds: { src: '/logos/mcdonalds.png', bg: '#ffffff', pad: '18%' },
+  natura:    { src: '/logos/natura.png',    bg: '#ffffff', pad: '18%' },
+  nike:      { src: '/logos/nike.png',      bg: '#ffffff', pad: '22%' },
+  nubank:    { src: '/logos/nubank.png',    bg: '#ffffff', pad: '18%' },
+  ifood:     { src: '/logos/ifood.svg',     bg: '#ffffff', pad: '22%' },
+  ambev:     { src: '/logos/ambev.png',     bg: '#ffffff', pad: '15%' },
+  magalu:    { src: '/logos/magalu.png',    bg: '#ffffff', pad: '16%' },
+  embraer:   { src: '/logos/embraer.png',   bg: '#ffffff', pad: '12%' },
+  tesla:     { src: '/logos/tesla.png',     bg: '#ffffff', pad: '20%' },
+  netflix:   { src: '/logos/netflix.png',   bg: '#000000', pad: '14%' },
+  spotify:   { src: '/logos/spotify.png',   bg: '#000000', pad: '20%' },
+  airbnb:    { src: '/logos/airbnb.png',    bg: '#ffffff', pad: '22%' },
+  uber:      { src: '/logos/uber.png',      bg: '#ffffff', pad: '20%' },
+  apple:     { src: '/logos/apple.png',     bg: '#ffffff', pad: '22%' },
+  amazon:    { src: '/logos/amazon.png',    bg: '#ffffff', pad: '15%' },
+};
 import { useGoogleMaps } from './components/maps/GoogleMapWrapper';
 import { getRoleConfig } from './config/roleConfig';
 import type { RoleFeedCard } from './config/roleConfig';
@@ -890,6 +910,20 @@ function AuthenticatedApp() {
                           position: 'relative', zIndex: 2,
                         }}
                       />
+                    ) : !isRoleView && DEMO_LOGOS[activeSector] ? (
+                      <div style={{
+                        width: '100%', height: '100%',
+                        background: DEMO_LOGOS[activeSector].bg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: DEMO_LOGOS[activeSector].pad ?? '18%',
+                        position: 'relative', zIndex: 2,
+                      }}>
+                        <img
+                          src={DEMO_LOGOS[activeSector].src}
+                          alt={activeSector}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
                     ) : (() => {
                       if (isRoleView) {
                         return (
