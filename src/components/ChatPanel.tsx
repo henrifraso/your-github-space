@@ -1471,7 +1471,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
       style={{ width: wide ? 'calc(50vw - 16px)' : '380px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="fixed top-[72px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.13)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
     >
-      {/* Header com ícones — ordem: Plus / Globe / Bell / Sun-Moon / Settings */}
+      {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell */}
       <div className="flex items-center justify-between gap-6 px-6 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
         <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
           <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
@@ -1482,16 +1482,16 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
         <button onClick={onBrowser} className={btnCls} title="Sincronizar">
           <Globe size={22} />
         </button>
-        <button className={btnCls} title="Notificações">
-          <Bell size={22} />
+        <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
+          <Settings2 size={22} />
         </button>
         {onToggleTheme && (
           <button onClick={onToggleTheme} className={btnCls} title={dark ? 'Modo claro' : 'Modo escuro'}>
             {dark ? <Sun size={22} /> : <Moon size={22} />}
           </button>
         )}
-        <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
-          <Settings2 size={22} />
+        <button className={btnCls} title="Notificações">
+          <Bell size={22} />
         </button>
       </div>
       <div className="flex-1 min-h-0">
@@ -1565,7 +1565,7 @@ export function ChatMobile({
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b] flex flex-col"
         >
-          {/* Header com ícones — ordem: Plus / Globe / Bell / Sun-Moon / Settings / X */}
+          {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell / X */}
           <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
             <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
               <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
@@ -1576,19 +1576,19 @@ export function ChatMobile({
             <button onClick={onBrowser} className={btnCls} title="Sincronizar">
               <Globe size={22} />
             </button>
-            <button className={`${btnCls} relative`} title="Notificações">
-              <Bell size={22} />
-              {(unreadCount ?? 0) > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-              )}
+            <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
+              <Settings2 size={22} />
             </button>
             {onToggleTheme && (
               <button onClick={onToggleTheme} className={btnCls} title={dark ? 'Modo claro' : 'Modo escuro'}>
                 {dark ? <Sun size={22} /> : <Moon size={22} />}
               </button>
             )}
-            <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
-              <Settings2 size={22} />
+            <button className={`${btnCls} relative`} title="Notificações">
+              <Bell size={22} />
+              {(unreadCount ?? 0) > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </button>
             <button onClick={onClose} className={btnCls} title="Fechar">
               <X size={20} />
