@@ -142,8 +142,9 @@ interface AutoLoginParams {
 
 export default function App() {
   // Detecta redirect vindo de os1.space (?token=...&org=...&bu=...&role=...)
-  // Não autentica direto: passa pro LoginScreen executar a animação cinemática
-  const [autoLogin] = useState<AutoLoginParams | null>(() => {
+  // Quando vem do site, força um novo ciclo de animação cinemática mesmo se
+  // o usuário já tava logado antes (limpa auth anterior pra LoginScreen rodar).
+  const [autoLogin, setAutoLogin] = useState<AutoLoginParams | null>(() => {
     const p = new URLSearchParams(window.location.search);
     const urlToken = p.get('token');
     if (!urlToken) return null;
@@ -151,14 +152,14 @@ export default function App() {
     const org = p.get('org') || 'org-mcdonalds-brasil';
     const role = p.get('role') || '';
     window.history.replaceState({}, '', window.location.pathname);
+    // Limpa auth anterior — força LoginScreen a renderizar e tocar a animação.
+    clearAuthState();
     return { token: urlToken, orgId: org, buId: bu, role };
   });
 
   const [auth, setAuth] = useState(() => getAuthState());
 
   if (!auth.isAuthenticated) {
-    // Sempre passa autoLogin pro LoginScreen — a animação cinemática
-    // (GIF + Phase B + typewriter) roda toda vez, vindo do site ou do login direto.
     return (
       <LoginScreen
         autoLogin={autoLogin}
@@ -169,6 +170,7 @@ export default function App() {
             localStorage.setItem('os1_bu_id', autoLogin.buId);
             if (autoLogin.role) localStorage.setItem('os1_role', autoLogin.role);
           }
+          setAutoLogin(null);
           setAuth(getAuthState());
         }}
       />
