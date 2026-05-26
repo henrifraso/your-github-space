@@ -855,13 +855,15 @@ function AuthenticatedApp() {
         >
 
           {/* Foto + bio + botões */}
-          <section className="mb-0 px-4 sm:px-5">
+          <section className="px-4 sm:px-5 flex flex-col gap-3 sm:gap-4">
             {(() => {
               const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
               return (
-            <div className="flex flex-row gap-3 sm:gap-4 md:gap-24 items-center mb-4 sm:mb-5">
+            <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 md:gap-24 items-center">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
+                {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
+                <div className="absolute inset-0 rounded-full shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <defs>
                     <linearGradient id="profileGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -871,12 +873,18 @@ function AuthenticatedApp() {
                       <stop offset="100%" stopColor="#2563eb"/>
                     </linearGradient>
                   </defs>
-                  <motion.circle cx="50" cy="50" r="47" fill="none" stroke="url(#profileGrad)" strokeWidth="4"
-                    strokeLinecap="round" strokeDasharray={2 * Math.PI * 47}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 47 }} animate={{ strokeDashoffset: 0 }}
+                  {/* Anel base cinza — mais largo que o gradient pra criar borda visível
+                      ao redor do anel colorido, mesma cor dos CircleProgress */}
+                  <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" strokeWidth="14"
+                    className="text-neutral-200 dark:text-[#262626]" />
+                  <motion.circle cx="50" cy="50" r="41" fill="none" stroke="url(#profileGrad)" strokeWidth="6"
+                    strokeLinecap="round" strokeDasharray={2 * Math.PI * 41}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 41 }} animate={{ strokeDashoffset: 0 }}
                     transition={{ duration: 2.8, ease: 'easeOut' }} />
                 </svg>
-                <div className="w-full h-full rounded-full overflow-hidden p-[3px] md:p-[5px] relative">
+                {/* Sombra interna do miolo — separa a foto do anel (igual destaques) */}
+                <div className="absolute inset-[18%] rounded-full shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]" />
+                <div className="w-full h-full rounded-full overflow-hidden p-[10px] md:p-[18px] relative">
                   {/* Botão de trocar foto — disponível em todos os perfis demo */}
                   {activeSector !== 'os1' && (
                     <button
