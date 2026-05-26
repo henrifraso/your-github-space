@@ -14,7 +14,7 @@ export function MarketMapButton({ bioOpen, onHome: _onHome, onMap }: ButtonProps
   return (
     <button
       onClick={onMap}
-      className="w-full h-9 md:h-11 flex items-center justify-center px-4 md:px-5 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
+      className="w-full h-9 md:h-11 flex items-center justify-center px-4 md:px-5 bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-200 transition-all duration-200 cursor-pointer"
     >
       Concorrentes
     </button>

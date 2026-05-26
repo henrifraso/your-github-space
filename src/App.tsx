@@ -287,6 +287,9 @@ function AuthenticatedApp() {
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
+  // Ref espelha workspaceContext pra ser lido dentro de listeners do useEffect[scrolled].
+  const workspaceContextRef = useRef<WorkspaceContext | null>(null);
+  useEffect(() => { workspaceContextRef.current = workspaceContext; }, [workspaceContext]);
   // Mede a altura da navbar pra calcular o paddingTop do <main> quando
   // scrolled=true (alinha topo do feed com top-[72px] do ChatPanel).
   const navRef = useRef<HTMLElement>(null);
@@ -512,6 +515,9 @@ function AuthenticatedApp() {
       const t = setTimeout(() => { document.body.style.overflow = ''; released = true; }, 400);
       const showProfile = () => {
         if (!released) return;
+        // Enquanto houver card ativo na Área de Trabalho, mantém o split fixo.
+        // Rolar pra cima não reabre o perfil — só fica meio a meio.
+        if (workspaceContextRef.current) return;
         scrollCooldownRef.current = true;
         setScrolled(false);
         setTimeout(() => { scrollCooldownRef.current = false; }, 700);
@@ -765,7 +771,7 @@ function AuthenticatedApp() {
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+      <nav ref={navRef} className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_-1px_2px_rgba(0,0,0,0.05),0_3px_14px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
@@ -1008,7 +1014,7 @@ function AuthenticatedApp() {
                           <button
                             onClick={() => setInviteOpen(o => !o)}
                             style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
-                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-opacity duration-150 cursor-pointer"
+                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-opacity duration-150 cursor-pointer"
                           >
                             <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
                             <span>Convite</span>
@@ -1085,15 +1091,17 @@ function AuthenticatedApp() {
             </div>
               );
             })()}
-            <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
             {bioOpen && (
-              <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2">
-                {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
-                  <button key={label as string} onClick={fn as () => void}
-                    className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold transition-all duration-200 active:scale-[0.97] cursor-pointer">
-                    {label as string}
-                  </button>
-                ))}
+              <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-col gap-2">
+                <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
+                    <button key={label as string} onClick={fn as () => void}
+                      className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                      {label as string}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </section>
@@ -1107,11 +1115,13 @@ function AuthenticatedApp() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar px-4 sm:px-5 pt-1 pb-2 md:justify-between overflow-hidden"
+                className="px-4 sm:px-5 pt-3 sm:pt-4 overflow-hidden"
               >
-                {circleData.map((c, i) => (
-                  <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
-                ))}
+                <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
+                  {circleData.map((c, i) => (
+                    <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
+                  ))}
+                </div>
               </motion.section>
             )}
           </AnimatePresence>
