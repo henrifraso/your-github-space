@@ -302,7 +302,8 @@ function AuthenticatedApp() {
   }, []);
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
-  const mainPadTop = scrolled ? Math.max(0, 72 - navHeight) : undefined;
+  // 84 (top ChatPanel) − 16 (sticky top-4 da navbar) − navHeight = padding alinhado
+  const mainPadTop = scrolled ? Math.max(0, 84 - 16 - navHeight) : undefined;
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -456,7 +457,10 @@ function AuthenticatedApp() {
 
   useEffect(() => {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
-    document.body.style.backgroundColor = dark ? '#000000' : '#dcdfe2';
+    document.body.style.backgroundColor = dark ? '#181818' : '#dcdfe2';
+    // Sincroniza classe dark no html pra o CSS global (html.dark) responder
+    if (dark) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, [dark]);
 
   useEffect(() => {
@@ -759,19 +763,19 @@ function AuthenticatedApp() {
 
       {/* Botão deslogar — desktop only (modo escuro foi pro header da Área de Trabalho) */}
       {!browserOpen && !esferaOpen && !mapOpen && (
-        <div className="fixed top-3 right-4 z-[999] hidden lg:flex items-center gap-1">
+        <div className="fixed top-[22px] sm:top-[26px] right-9 sm:right-11 z-[999] hidden lg:flex items-center gap-1">
           <button
             onClick={handleLogout}
             title="Sair"
-            className="flex items-center justify-center p-2 rounded-xl text-neutral-800 dark:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer active:scale-90"
+            className="flex items-center justify-center p-2 rounded-xl text-neutral-400 dark:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90"
           >
-            <Power size={18} />
+            <Power size={22} />
           </button>
         </div>
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-0 z-50 bg-white/80 dark:bg-[#2d2d2d]/80 backdrop-blur-xl border-b border-neutral-100 dark:border-[#414141] py-2.5 sm:py-3 relative shadow-[inset_0_1px_0_rgba(255,255,255,0.7),inset_0_-1px_2px_rgba(0,0,0,0.05),0_3px_14px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]"
+      <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl py-2.5 sm:py-3 relative shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
@@ -838,7 +842,7 @@ function AuthenticatedApp() {
 
       <main
         style={mainPadTop !== undefined ? { paddingTop: mainPadTop } : undefined}
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8'}`}
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8 lg:pt-3'}`}
       >
         {/* Perfil — colapsa ao rolar */}
         <motion.div
