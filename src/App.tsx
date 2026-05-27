@@ -280,7 +280,7 @@ function AuthenticatedApp() {
   const [selectedTimelineEvent, setSelectedTimelineEvent] = useState<TimelineEvent | null>(null);
   const [savedItems, setSavedItems] = useState<{ id: string; title: string; section: string; preview: string }[]>([]);
   const [mapOpen, setMapOpen] = useState(false);
-  const [bioOpen, setBioOpen] = useState(false);
+  const [bioOpen, setBioOpen] = useState(true);
   const bioOpenRef = useRef(false);
   useEffect(() => { bioOpenRef.current = bioOpen; }, [bioOpen]);
   const [destaqueOpen, setDestaqueOpen] = useState(false);
@@ -894,7 +894,7 @@ function AuthenticatedApp() {
                 <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative bg-white dark:bg-[#1a1a1a]`}>
                   <div
                     className="w-full h-full rounded-xl overflow-hidden relative cursor-pointer"
-                    onClick={() => { setBioOpen(true); setDestaqueOpen(d => !d); }}
+                    onClick={() => { setDestaqueOpen(d => !d); }}
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
                       background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
                     } : undefined}
