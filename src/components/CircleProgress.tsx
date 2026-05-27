@@ -59,11 +59,11 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
             transition={{ duration: 2.8, ease: 'easeOut', delay }}
           />
         </svg>
-        {/* Sombra interna do miolo — separa o número do anel colorido */}
-        <div className="absolute inset-[18%] rounded-lg shadow-[inset_0_2px_5px_rgba(0,0,0,0.18),inset_0_-1px_2px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.55),inset_0_-1px_3px_rgba(0,0,0,0.3)] pointer-events-none" />
+        {/* Background claro circular do miolo — botão redondo no centro */}
+        <div className="absolute inset-[20%] rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] pointer-events-none" />
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.span
-            className="text-[10px] sm:text-xs md:text-base font-bold text-neutral-800 dark:text-neutral-100"
+            className="text-[9px] sm:text-[11px] md:text-sm font-bold text-neutral-800 dark:text-neutral-100"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: delay + 0.4, duration: 0.3 }}
