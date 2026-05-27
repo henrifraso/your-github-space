@@ -889,16 +889,6 @@ function AuthenticatedApp() {
                 {/* Sombra interna do miolo — separa a foto do anel */}
                 <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]`} />
                 <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative bg-white dark:bg-[#1a1a1a]`}>
-                  {/* Botão de trocar foto — disponível em todos os perfis demo */}
-                  {activeSector !== 'os1' && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setPhotoEditorOpen(true); }}
-                      title="Trocar foto"
-                      className="absolute bottom-1 right-1 z-[5] w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#414141] shadow-md flex items-center justify-center hover:bg-neutral-100 dark:hover:bg-[#353535] active:scale-90 transition-all duration-150 cursor-pointer"
-                    >
-                      <Camera size={14} className="text-neutral-700 dark:text-neutral-200" />
-                    </button>
-                  )}
                   <div
                     className="w-full h-full rounded-xl overflow-hidden relative cursor-pointer"
                     onClick={() => { setBioOpen(true); setDestaqueOpen(d => !d); }}
