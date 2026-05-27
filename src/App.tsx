@@ -581,7 +581,6 @@ function AuthenticatedApp() {
     const circles = [
       { label: 'Concorrência', pct: Math.min(100, Math.round((comNota / n) * 100)),              color: '#ef4444' },
       { label: 'Mercado',      pct: notaMedia,                                                    color: '#3b82f6' },
-      { label: 'Geografia',    pct: Math.max(20, 100 - (data.previsao_clima[0]?.chuva_mm ?? 0) * 5), color: '#3b82f6' },
       { label: 'Economia',     pct: Math.min(100, Math.round((comFaixa / n) * 100)),              color: '#3b82f6' },
       { label: 'Legislação',   pct: 72,                                                           color: '#3b82f6' },
       { label: 'Produtos',     pct: Math.min(100, comPreco * 10),                                 color: '#3b82f6' },
@@ -846,6 +845,11 @@ function AuthenticatedApp() {
         style={mainPadTop !== undefined ? { paddingTop: mainPadTop } : undefined}
         className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8 lg:pt-3'}`}
       >
+        {/* Container unificado de fundo — os elementos internos flutuam por cima */}
+        <div className="mx-4 sm:mx-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative overflow-hidden">
+        {/* Sombras de scroll — aparecem quando há conteúdo escondido em cima/baixo */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-6 z-10 bg-gradient-to-b from-black/10 to-transparent dark:from-black/30" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 z-10 bg-gradient-to-t from-black/10 to-transparent dark:from-black/30" />
         {/* Perfil — colapsa ao rolar */}
         <motion.div
           initial={false}
@@ -870,7 +874,7 @@ function AuthenticatedApp() {
               const photoShapeMid   = photoShape === 'round' ? 'rounded-full' : 'rounded-[14px] md:rounded-[18px]';
               const photoShapeInner = photoShape === 'round' ? 'rounded-full' : 'rounded-[12px] md:rounded-[14px]';
               return (
-            <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 items-center">
+            <div className="py-3 sm:py-4 flex flex-row gap-3 sm:gap-4 items-center">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
                 <div className={`absolute inset-0 ${photoShapeOuter} shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none`} />
@@ -1102,42 +1106,47 @@ function AuthenticatedApp() {
             </div>
               );
             })()}
-            {bioOpen && (
-              <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex flex-col gap-2">
-                <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
-                    <button key={label as string} onClick={fn as () => void}
-                      className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
-                      {label as string}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </section>
 
-          {/* Destaques */}
+          {/* Container unificado: Concorrentes/MVV + Destaques */}
           <AnimatePresence>
-            {destaqueOpen && (
+            {(bioOpen || destaqueOpen) && (
               <motion.section
-                key="destaques"
+                key="bio-destaques"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                className="px-4 sm:px-5 pt-3 sm:pt-4 overflow-hidden"
+                className="px-4 sm:px-5 overflow-hidden"
               >
-                <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
-                  {circleData.map((c, i) => (
-                    <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
-                  ))}
+                <div className="pb-3 sm:pb-4 flex flex-col gap-3 sm:gap-4">
+                  {bioOpen && (
+                    <div className="flex flex-col gap-2">
+                      <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
+                          <button key={label as string} onClick={fn as () => void}
+                            className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                            {label as string}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {destaqueOpen && (
+                    <div className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
+                      {circleData.map((c, i) => (
+                        <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </motion.section>
             )}
           </AnimatePresence>
 
         </motion.div>
+        </div>
       </main>
 
       {/* Feed de setor por empresa (não-OS1 com departamento ativo, ou Franquia em setor específico) */}
