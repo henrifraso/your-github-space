@@ -325,14 +325,16 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
         {/* ── Utilizar ── */}
         <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
-        <button onClick={handleLike} disabled={utilStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
+        <button onClick={handleLike} disabled={utilStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {utilStatus === 'idle' && (
               <motion.div key="u-idle" className="flex items-center gap-1 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Rocket size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
-                <Rocket size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                <div className="flex items-center justify-center p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                  <Rocket size={18} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
+                  <Rocket size={22} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                </div>
                 <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Executar</span>
                 <span className="hidden lg:inline text-sm text-neutral-500 dark:text-white">· {likes}</span>
               </motion.div>
@@ -366,14 +368,16 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
         {/* ── Perguntas ── */}
         <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
-        <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
+        <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {pergStatus === 'idle' && (
               <motion.div key="p-idle" className="flex items-center gap-1 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <MessageCircle size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
-                <MessageCircle size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                <div className="flex items-center justify-center p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                  <MessageCircle size={18} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
+                  <MessageCircle size={22} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                </div>
                 <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Entender</span>
               </motion.div>
             )}
@@ -414,14 +418,16 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
         {/* ── Exemplos ── */}
         <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
-        <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
+        <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {ideiaStatus === 'idle' && (
               <motion.div key="i-idle" className="flex items-center gap-1 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Lightbulb size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
-                <Lightbulb size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                <div className="flex items-center justify-center p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                  <Lightbulb size={18} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
+                  <Lightbulb size={22} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                </div>
                 <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Aprender</span>
               </motion.div>
             )}
@@ -462,14 +468,16 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
         {/* ── Compartilhar ── */}
         <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
-        <button onClick={handleShare} disabled={shareStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
+        <button onClick={handleShare} disabled={shareStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {shareStatus === 'idle' && (
               <motion.div key="sh-idle" className="flex items-center gap-1 sm:gap-2"
                 initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.2 }}>
-                <Share2 size={14} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
-                <Share2 size={20} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                <div className="flex items-center justify-center p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                  <Share2 size={18} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
+                  <Share2 size={22} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
+                </div>
                 <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Compartilhar</span>
               </motion.div>
             )}
