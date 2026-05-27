@@ -287,7 +287,7 @@ function AuthenticatedApp() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
-  const [archivedSessions, setArchivedSessions] = useState<Array<{ id: string; ts: number; cardTitle: string; sector: string }>>([]);
+  const [archivedSessions, setArchivedSessions] = useState<Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: any }>>([]);
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
@@ -1600,9 +1600,13 @@ function AuthenticatedApp() {
         onShowHistory={() => setChatHistoryOpen(o => !o)}
         chatHistoryOpen={chatHistoryOpen}
         archivedSessions={archivedSessions}
-        onArchive={(cardTitle, sector) => {
-          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector }]);
+        onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
+        onArchive={(cardTitle, sector, snapshot) => {
+          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot }]);
           setWorkspaceContext(null);
+          setScrolled(false);
+          setBioOpen(true);
+          setDestaqueOpen(true);
         }}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
@@ -1620,9 +1624,13 @@ function AuthenticatedApp() {
         onShowHistory={() => setChatHistoryOpen(o => !o)}
         chatHistoryOpen={chatHistoryOpen}
         archivedSessions={archivedSessions}
-        onArchive={(cardTitle, sector) => {
-          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector }]);
+        onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
+        onArchive={(cardTitle, sector, snapshot) => {
+          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot }]);
           setWorkspaceContext(null);
+          setScrolled(false);
+          setBioOpen(true);
+          setDestaqueOpen(true);
         }}
       />
 

@@ -968,7 +968,7 @@ interface Message {
   block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchive, chatHistoryOpen, archivedSessions }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; onArchive?: (cardTitle: string, sector: string) => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string }> }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchive, chatHistoryOpen, archivedSessions, onSelectHistorySession }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1013,7 +1013,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
   function handleAreaTrabalhoClick() {
     // Se está aberto e vai recolher: arquiva sessão atual + limpa container
     if (workspaceOpen && activeCard && messages.length > 0) {
-      onArchive?.(activeCard.titulo, activeSector ?? 'os1');
+      onArchive?.(activeCard.titulo, activeSector ?? 'os1', { messages, activeCard, activeMode });
       setMessages([]);
       setActiveCard(null);
       setActiveMode(null);
@@ -1022,6 +1022,15 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
     }
     setWorkspaceOpen(prev => !prev);
   }
+
+  // Restaura uma sessão arquivada — chamado quando user clica num item da lista de histórico.
+  const restoreSession = (s: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => {
+    setMessages(s.messages);
+    setActiveCard(s.activeCard);
+    setActiveMode(s.activeMode);
+    if (s.activeCard) lastCardIdRef.current = s.activeCard.id;
+    setWorkspaceOpen(true);
+  };
 
   // Card chegou do feed — anexa ao histórico, define card ativo, carrega atalhos,
   // gera bloco inicial expandido + bloco de compartilhamento quando aplicável.
@@ -1191,10 +1200,17 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
           <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-8">Nenhuma conversa anterior.</p>
         ) : (
           [...archivedSessions].reverse().map(s => (
-            <div key={s.id} className="px-4 py-3 rounded-xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+            <button
+              key={s.id}
+              onClick={() => {
+                if (s.snapshot) restoreSession(s.snapshot);
+                onSelectHistorySession?.(s.id);
+              }}
+              className="text-left px-4 py-3 rounded-xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] transition-colors duration-150 cursor-pointer active:scale-[0.99]"
+            >
               <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate">{s.cardTitle}</p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">{new Date(s.ts).toLocaleString('pt-BR')} · {s.sector}</p>
-            </div>
+            </button>
           ))
         )}
       </div>
@@ -1645,11 +1661,12 @@ interface ChatDesktopProps {
   onToggleTheme?: () => void;
   onShowHistory?: () => void;
   chatHistoryOpen?: boolean;
-  archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string }>;
-  onArchive?: (cardTitle: string, sector: string) => void;
+  archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>;
+  onSelectHistorySession?: (id: string) => void;
+  onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onArchive }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
@@ -1666,8 +1683,16 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
           )}
         </button>
         <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-          <Upload size={22} />
+          <Globe size={22} />
         </button>
+        <label className={`${btnCls} relative`} title="Enviar arquivo">
+          <Upload size={22} />
+          <input type="file" className="hidden" onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) alert(`Arquivo selecionado: ${f.name}`);
+            e.currentTarget.value = '';
+          }} />
+        </label>
         <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
           <Settings2 size={22} />
         </button>
@@ -1680,7 +1705,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
       </div>
       </div>
       <div className="flex-1 min-h-0">
-        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} />
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
       </div>
     </div>
   );
@@ -1726,7 +1751,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 export function ChatMobile({
   open, onClose, workspaceContext, activeSector,
   onSector, onBrowser, onDifficulty, unreadCount,
-  dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onArchive,
+  dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1740,8 +1765,9 @@ export function ChatMobile({
   onToggleTheme?: () => void;
   onShowHistory?: () => void;
   chatHistoryOpen?: boolean;
-  archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string }>;
-  onArchive?: (cardTitle: string, sector: string) => void;
+  archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>;
+  onSelectHistorySession?: (id: string) => void;
+  onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
 }) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
@@ -1764,8 +1790,16 @@ export function ChatMobile({
               )}
             </button>
             <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-              <Upload size={22} />
+              <Globe size={22} />
             </button>
+            <label className={`${btnCls} relative`} title="Enviar arquivo">
+              <Upload size={22} />
+              <input type="file" className="hidden" onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) alert(`Arquivo selecionado: ${f.name}`);
+                e.currentTarget.value = '';
+              }} />
+            </label>
             <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
               <Settings2 size={22} />
             </button>
@@ -1784,7 +1818,7 @@ export function ChatMobile({
           </div>
           </div>
           <div className="flex-1 min-h-0">
-            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} />
+            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
           </div>
         </motion.div>
       )}
