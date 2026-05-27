@@ -23,8 +23,6 @@ export function PieChart({ segments }: { segments: { label: string; value: numbe
 export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
   pct: number; label: string; color: string; delay?: number; onClick?: () => void;
 }) {
-  const r = 26;
-  const circ = 2 * Math.PI * r;
   const [displayPct, setDisplayPct] = React.useState(0);
 
   React.useEffect(() => {
@@ -47,21 +45,22 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
     <div className="flex flex-col items-center gap-1 sm:gap-1.5 flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95" onClick={onClick}>
       <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20">
         {/* Sombra externa do disco — separa do fundo do container */}
-        <div className="absolute inset-0 rounded-full shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
-        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64">
-          <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="3.5" className="text-neutral-200 dark:text-[#262626]" />
-          <motion.circle
-            cx="32" cy="32" r={r}
-            fill="none" stroke={color} strokeWidth="3.5"
-            strokeLinecap="round"
-            strokeDasharray={circ}
-            initial={{ strokeDashoffset: circ }}
-            animate={{ strokeDashoffset: circ * (1 - pct / 100) }}
+        <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
+        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64" style={{ filter: `drop-shadow(0 0 1.5px ${color}55)` }}>
+          <rect x="6" y="6" width="52" height="52" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="5" strokeLinejoin="round" className="text-neutral-200 dark:text-[#3d3d3d]" />
+          <motion.rect
+            x="6" y="6" width="52" height="52" rx="16" ry="16"
+            fill="none" stroke={color} strokeWidth="5"
+            strokeLinejoin="round" strokeLinecap="butt"
+            pathLength={100}
+            strokeDasharray="100"
+            initial={{ strokeDashoffset: 100 }}
+            animate={{ strokeDashoffset: 100 - pct }}
             transition={{ duration: 2.8, ease: 'easeOut', delay }}
           />
         </svg>
         {/* Sombra interna do miolo — separa o número do anel colorido */}
-        <div className="absolute inset-[18%] rounded-full shadow-[inset_0_2px_5px_rgba(0,0,0,0.18),inset_0_-1px_2px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.55),inset_0_-1px_3px_rgba(0,0,0,0.3)] pointer-events-none" />
+        <div className="absolute inset-[18%] rounded-lg shadow-[inset_0_2px_5px_rgba(0,0,0,0.18),inset_0_-1px_2px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.55),inset_0_-1px_3px_rgba(0,0,0,0.3)] pointer-events-none" />
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.span
             className="text-[10px] sm:text-xs md:text-base font-bold text-neutral-800 dark:text-neutral-100"

@@ -302,8 +302,8 @@ function AuthenticatedApp() {
   }, []);
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
-  // 84 (top ChatPanel) − 16 (sticky top-4 da navbar) − navHeight = padding alinhado
-  const mainPadTop = scrolled ? Math.max(0, 84 - 16 - navHeight) : undefined;
+  // 92 (top ChatPanel) − 16 (sticky top-4 da navbar) − navHeight = padding alinhado
+  const mainPadTop = scrolled ? Math.max(0, 92 - 16 - navHeight) : undefined;
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -546,7 +546,7 @@ function AuthenticatedApp() {
         window.removeEventListener('touchmove', onTouchMove);
       };
     }
-  }, [scrolled]);
+  }, [scrolled, workspaceContext]);
 
   const stories = useMemo(() => buildStories(data), [data]);
 
@@ -763,11 +763,11 @@ function AuthenticatedApp() {
 
       {/* Botão deslogar — desktop only (modo escuro foi pro header da Área de Trabalho) */}
       {!browserOpen && !esferaOpen && !mapOpen && (
-        <div className="fixed top-[22px] sm:top-[26px] right-9 sm:right-11 z-[999] hidden lg:flex items-center gap-1">
+        <div className="fixed top-[26px] sm:top-[30px] right-9 sm:right-11 z-[999] hidden lg:flex items-center gap-1">
           <button
             onClick={handleLogout}
             title="Sair"
-            className="flex items-center justify-center p-2 rounded-xl text-neutral-400 dark:text-neutral-200 hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90"
+            className="flex items-center justify-center p-2 rounded-xl text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90"
           >
             <Power size={22} />
           </button>
@@ -775,7 +775,7 @@ function AuthenticatedApp() {
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-2.5 sm:py-3 relative shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)]"
+      <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
@@ -864,31 +864,22 @@ function AuthenticatedApp() {
               const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
               return (
-            <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 md:gap-24 items-center">
+            <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 items-center">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
-                <div className="absolute inset-0 rounded-full shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
-                <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  <defs>
-                    <linearGradient id="profileGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%"   stopColor="#2563eb"/>
-                      <stop offset="33%"  stopColor="#3b82f6"/>
-                      <stop offset="66%"  stopColor="#60a5fa"/>
-                      <stop offset="100%" stopColor="#2563eb"/>
-                    </linearGradient>
-                  </defs>
-                  {/* Anel base cinza — mais largo que o gradient pra criar borda visível
-                      ao redor do anel colorido, mesma cor dos CircleProgress */}
-                  <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" strokeWidth="14"
-                    className="text-neutral-200 dark:text-[#262626]" />
-                  <motion.circle cx="50" cy="50" r="41" fill="none" stroke="url(#profileGrad)" strokeWidth="6"
-                    strokeLinecap="round" strokeDasharray={2 * Math.PI * 41}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 41 }} animate={{ strokeDashoffset: 0 }}
-                    transition={{ duration: 2.8, ease: 'easeOut' }} />
-                </svg>
-                {/* Sombra interna do miolo — separa a foto do anel (igual destaques) */}
-                <div className="absolute inset-[18%] rounded-full shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]" />
-                <div className="w-full h-full rounded-full overflow-hidden p-[10px] md:p-[18px] relative">
+                <div className="absolute inset-0 rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none" />
+                {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
+                <div className="absolute inset-0 rounded-2xl bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]">
+                  {/* Camada 2: anel gradient azul (CSS gradient border via padding + bg) */}
+                  <div
+                    className="w-full h-full rounded-[14px] md:rounded-[18px] p-[3px] md:p-[5px] relative overflow-hidden"
+                    style={{
+                      background: 'conic-gradient(from 135deg at 50% 50%, #2563eb, #60a5fa, #3b82f6, #2563eb, #60a5fa, #2563eb)',
+                    }}
+                  >
+                {/* Sombra interna do miolo — separa a foto do anel */}
+                <div className="absolute inset-[6px] md:inset-[10px] rounded-[12px] md:rounded-[14px] shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]" />
+                <div className="w-full h-full rounded-[12px] md:rounded-[14px] overflow-hidden relative bg-white dark:bg-[#1a1a1a]">
                   {/* Botão de trocar foto — disponível em todos os perfis demo */}
                   {activeSector !== 'os1' && (
                     <button
@@ -900,7 +891,7 @@ function AuthenticatedApp() {
                     </button>
                   )}
                   <div
-                    className="w-full h-full rounded-full overflow-hidden relative cursor-pointer"
+                    className="w-full h-full rounded-xl overflow-hidden relative cursor-pointer"
                     onClick={() => { setBioOpen(true); setDestaqueOpen(d => !d); }}
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
                       background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
@@ -984,8 +975,10 @@ function AuthenticatedApp() {
                     })()}
                   </div>
                 </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-w-0 flex flex-col gap-2 sm:gap-3 mt-0 md:mt-4">
+              <div className="flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 justify-center !h-20 md:!h-[150px] overflow-hidden bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4">
                 {isRoleView ? (
                   <>
                     {/* Barra de resumo — só codify */}
@@ -1104,12 +1097,12 @@ function AuthenticatedApp() {
               );
             })()}
             {bioOpen && (
-              <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-col gap-2">
+              <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex flex-col gap-2">
                 <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
                     <button key={label as string} onClick={fn as () => void}
-                      className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                      className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
                       {label as string}
                     </button>
                   ))}
@@ -1129,7 +1122,7 @@ function AuthenticatedApp() {
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                 className="px-4 sm:px-5 pt-3 sm:pt-4 overflow-hidden"
               >
-                <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
+                <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
                   {circleData.map((c, i) => (
                     <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
                   ))}
