@@ -59,7 +59,7 @@ export function PEPItemRow({
 
   // ── Passo numerado (Prática) ──
   if (item.tipo === 'passo') return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-neutral-100 dark:border-[#414141] last:border-0">
+    <div className="flex items-start gap-3 py-2.5 border-b-[0.5px] border-neutral-300 dark:border-[#414141] last:border-0">
       <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
         <span className="text-[10px] font-bold text-[#3b82f6]">{stepIndex ?? ''}</span>
       </div>
@@ -77,7 +77,7 @@ export function PEPItemRow({
 
   // ── Parágrafo narrativo (Estratégia) ──
   if (item.tipo === 'paragrafo') return (
-    <div className="py-2.5 border-b border-neutral-100 dark:border-[#414141] last:border-0">
+    <div className="py-2.5 border-b-[0.5px] border-neutral-300 dark:border-[#414141] last:border-0">
       <p className="text-sm text-neutral-700 dark:text-neutral-200 leading-relaxed">{item.texto}</p>
     </div>
   );
@@ -123,7 +123,7 @@ export function PEPItemRow({
                 <span className="text-xs text-neutral-400">Gerando...</span>
               </div>
             ) : (
-              <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed bg-neutral-50 dark:bg-[#353535] rounded-xl p-3 border border-neutral-100 dark:border-[#414141]">
+              <p className="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed bg-neutral-50 dark:bg-[#353535] rounded-xl p-3 border-[0.5px] border-neutral-300 dark:border-[#414141]">
                 {content}
               </p>
             )}
@@ -319,12 +319,12 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
   const cardContent = (
     <>
-      <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl p-3 sm:p-4">{children}</div>
+      <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl p-3 sm:p-4">{children}</div>
       {showActionButtons && (
-      <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-neutral-100 dark:border-[#414141] grid grid-cols-2 lg:grid-cols-4 gap-1.5">
+      <div className="mt-2 sm:mt-2.5 grid grid-cols-2 lg:grid-cols-4 gap-1.5">
 
         {/* ── Utilizar ── */}
-        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
         <button onClick={handleLike} disabled={utilStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {utilStatus === 'idle' && (
@@ -365,7 +365,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
         </div>
 
         {/* ── Perguntas ── */}
-        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
         <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {pergStatus === 'idle' && (
@@ -413,7 +413,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
         </div>
 
         {/* ── Exemplos ── */}
-        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
         <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {ideiaStatus === 'idle' && (
@@ -461,7 +461,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
         </div>
 
         {/* ── Compartilhar ── */}
-        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
+        <div className="bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] rounded-xl overflow-hidden">
         <button onClick={handleShare} disabled={shareStatus === 'loading'} className="w-full h-9 sm:h-10 flex items-center justify-center gap-1 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {shareStatus === 'idle' && (
@@ -548,7 +548,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
   const isClickable = !locked && !!(onClick || onFullscreen);
   const cls = "relative w-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
-    (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-neutral-100 dark:border-[#414141] ") +
+    (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-[0.5px] border-neutral-300 dark:border-[#414141] ") +
     (locked ? "cursor-default hover:bg-[#e4e7ea] dark:hover:bg-[#353535] " : "") +
     (isClickable ? "hover:bg-[#e4e7ea] dark:hover:bg-[#353535] active:scale-[0.99] cursor-pointer" : "");
 

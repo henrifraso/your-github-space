@@ -639,7 +639,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {CODIFY_TAB_DATA.empresas.map(emp => (
-              <div key={emp.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+              <div key={emp.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{emp.nome}</p>
                   <p className="text-xs text-neutral-500 mt-0.5">{emp.segmento} · {emp.cidade}</p>
@@ -656,7 +656,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {CODIFY_TAB_DATA.afiliados.length > 0 ? CODIFY_TAB_DATA.afiliados.map(afl => (
-              <div key={afl.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+              <div key={afl.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{afl.nome}</p>
                   <span className="text-sm font-bold text-[#3b82f6]">{afl.conversao}</span>
@@ -671,7 +671,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {CODIFY_TAB_DATA.parceiros.length > 0 ? CODIFY_TAB_DATA.parceiros.map(par => (
-              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
                   <span className="text-xs text-neutral-500">{par.oportunidades} oportunidade{par.oportunidades !== 1 ? 's' : ''}</span>
@@ -688,7 +688,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {AFFILIATE_TAB_DATA['meus-clientes'].map(cli => (
-              <div key={cli.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+              <div key={cli.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{cli.nome}</p>
                   <p className="text-xs text-neutral-500 mt-0.5">Último contato: {cli.ultimaInteracao}</p>
@@ -705,7 +705,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {AFFILIATE_TAB_DATA.parceiros.map(par => (
-              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
                   <span className="text-sm font-bold text-[#3b82f6]">{par.comissao}</span>
@@ -727,7 +727,7 @@ function AuthenticatedApp() {
           ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
           : 'bg-blue-500/15 text-blue-600 dark:text-blue-400';
       return (
-        <div className="bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl p-5 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-base sm:text-lg font-bold text-neutral-800 dark:text-neutral-100">{company.nome}</p>
@@ -775,7 +775,7 @@ function AuthenticatedApp() {
       )}
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl py-2.5 sm:py-3 relative shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)]"
+      <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-2.5 sm:py-3 relative shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
@@ -864,7 +864,7 @@ function AuthenticatedApp() {
               const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
               return (
-            <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 md:gap-24 items-center">
+            <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 md:gap-24 items-center">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
                 <div className="absolute inset-0 rounded-full shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
@@ -1026,7 +1026,7 @@ function AuthenticatedApp() {
                           <button
                             onClick={() => setInviteOpen(o => !o)}
                             style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
-                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-opacity duration-150 cursor-pointer"
+                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-opacity duration-150 cursor-pointer"
                           >
                             <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
                             <span>Convite</span>
@@ -1104,12 +1104,12 @@ function AuthenticatedApp() {
               );
             })()}
             {bioOpen && (
-              <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-col gap-2">
+              <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex flex-col gap-2">
                 <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
                     <button key={label as string} onClick={fn as () => void}
-                      className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-neutral-200/50 dark:bg-[#2b2b2b] border border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
+                      className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
                       {label as string}
                     </button>
                   ))}
@@ -1129,7 +1129,7 @@ function AuthenticatedApp() {
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                 className="px-4 sm:px-5 pt-3 sm:pt-4 overflow-hidden"
               >
-                <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
+                <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_24px_-6px_rgba(0,0,0,0.18),0_2px_6px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_28px_-6px_rgba(0,0,0,0.55),0_2px_8px_rgba(0,0,0,0.35)] p-3 sm:p-4 flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
                   {circleData.map((c, i) => (
                     <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
                   ))}
@@ -1406,7 +1406,7 @@ function AuthenticatedApp() {
 
         {/* Carregar mais */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <button className="w-full py-4 flex items-center justify-between px-4 md:px-5 bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-2xl text-sm font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer active:scale-[0.99]">
+          <button className="w-full py-4 flex items-center justify-between px-4 md:px-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-2xl text-sm font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer active:scale-[0.99]">
             <ChevronDown size={14} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
             <span>Mais feed</span>
             <ChevronDown size={14} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
@@ -1677,12 +1677,12 @@ function AuthenticatedApp() {
         {selectedItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedItem(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl overflow-hidden shadow-2xl border border-neutral-100 dark:border-[#414141]">
+            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl overflow-hidden shadow-2xl border-[0.5px] border-neutral-100 dark:border-[#414141]">
               <div className="p-6 flex flex-col items-center text-center">
                 <div className="text-5xl mb-4">{gridItems.find(i => i.id === selectedItem.id)?.emoji}</div>
                 <h3 className="text-xl font-bold mb-1">{gridItems.find(i => i.id === selectedItem.id)?.title}</h3>
                 <p className="text-neutral-500 text-xs uppercase tracking-widest font-bold mb-8">{gridItems.find(i => i.id === selectedItem.id)?.subtitle}</p>
-                <div className="w-full space-y-5 text-left bg-neutral-50 dark:bg-[#323232] p-5 rounded-xl border border-neutral-100 dark:border-[#414141]">
+                <div className="w-full space-y-5 text-left bg-neutral-50 dark:bg-[#323232] p-5 rounded-xl border-[0.5px] border-neutral-100 dark:border-[#414141]">
                   {selectedItem.type === 'competitor' && (<>
                     <div className="flex justify-between items-center"><span className="text-neutral-500 text-sm">Nota Google</span><span className="font-bold text-[#f9ce34]">⭐ {selectedItem.content.nota_google}</span></div>
                     <div className="flex justify-between items-center"><span className="text-neutral-500 text-sm">Faixa de Preço</span><span className="font-bold text-[#3b82f6]">{selectedItem.content.faixa_preco}</span></div>

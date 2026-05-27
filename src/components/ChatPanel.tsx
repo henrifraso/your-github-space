@@ -911,7 +911,7 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
   onWorkspaceClick: () => void;
   disabled?: boolean;
 }) {
-  const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border text-[11px] font-semibold transition-all duration-150 active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:cursor-default";
+  const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border-[0.5px] transition-all duration-150 active:scale-[0.97] cursor-pointer disabled:cursor-default shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)]";
   return (
     <div className="flex flex-col gap-1.5">
       {/* Área de Trabalho — toggle dos 3 modos */}
@@ -919,11 +919,11 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
         type="button"
         onClick={onWorkspaceClick}
         disabled={disabled}
-        className={`${chipBase} w-full ${workspaceOpen
-          ? 'bg-[#3b82f6]/10 border-[#3b82f6]/40 text-[#3b82f6] dark:text-[#60a5fa]'
-          : 'bg-neutral-100 dark:bg-[#2b2b2b] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-200/70 dark:hover:bg-[#353535]'}`}
+        className={`${chipBase} w-full !h-11 ${workspaceOpen
+          ? 'bg-[#f2f2f2] dark:bg-[#2b2b2b] border-neutral-300 dark:border-[#3d3d3d]'
+          : 'bg-[#f2f2f2] dark:bg-[#2b2b2b] border-neutral-300 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]'}`}
       >
-        Área de Trabalho
+        <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Área de Trabalho</span>
       </button>
       {/* 3 modos — chips (só aparecem quando workspaceOpen) */}
       <AnimatePresence initial={false}>
@@ -944,12 +944,12 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
                   type="button"
                   onClick={() => onModeClick(btn.key)}
                   disabled={disabled}
-                  className={`${chipBase} ${isActive
-                    ? 'bg-[#3b82f6] border-[#3b82f6] text-white'
-                    : 'bg-white dark:bg-[#373737] border-neutral-200 dark:border-[#4e4e4e] text-neutral-600 dark:text-neutral-300 hover:border-[#3b82f6]/40 hover:text-[#3b82f6] dark:hover:text-[#60a5fa]'}`}
+                  className={`${chipBase} !h-11 ${isActive
+                    ? 'bg-[#3b82f6] border-[#3b82f6]'
+                    : 'bg-[#f2f2f2] dark:bg-[#2b2b2b] border-neutral-300 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]'}`}
                 >
-                  <btn.Icon size={12} />
-                  {btn.label}
+                  <btn.Icon size={12} className={isActive ? 'text-white' : 'text-neutral-400 dark:text-white'} />
+                  <span className={`text-[10px] lg:text-sm font-medium whitespace-nowrap ${isActive ? 'text-white' : 'text-neutral-500 dark:text-white'}`}>{btn.label}</span>
                 </button>
               );
             })}
@@ -1203,7 +1203,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
                 transition={{ duration: 0.2, ease: 'easeOut' }}
                 className="flex justify-start"
               >
-                <div className="max-w-[92%] w-full p-3.5 rounded-2xl rounded-bl-sm bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141]">
+                <div className="max-w-[92%] w-full p-3.5 rounded-2xl bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141]">
                   <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgColor }}>{c.dominio || c.area || 'Card'}</p>
                   <p className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{c.titulo}</p>
                   {c.resumo && (
@@ -1228,7 +1228,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
                 transition={{ duration: 0.22, ease: 'easeOut' }}
                 className="flex justify-start"
               >
-                <div className="max-w-[94%] w-full rounded-2xl rounded-bl-sm bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141] overflow-hidden">
+                <div className="max-w-[94%] w-full rounded-2xl bg-white dark:bg-[#373737] border border-neutral-200 dark:border-[#414141] overflow-hidden">
                   <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
                     <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: headerColor }}>
                       {isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : isMode ? MODE_LABEL[b.mode] : MODE_LABEL[b.mode]}
@@ -1375,7 +1375,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-start"
           >
-            <div className="bg-neutral-100 dark:bg-[#373737] rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1">
+            <div className="bg-neutral-100 dark:bg-[#373737] rounded-2xl px-4 py-3 flex items-center gap-1">
               {[0, 1, 2].map(i => (
                 <motion.span
                   key={i}
@@ -1619,14 +1619,15 @@ interface ChatDesktopProps {
 }
 
 export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme }: ChatDesktopProps) {
-  const btnCls = "cursor-pointer text-neutral-400 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
+  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-xl bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
       style={{ width: wide ? 'calc(50vw - 16px)' : '380px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed top-[84px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_18px_50px_-12px_rgba(0,0,0,0.28),0_6px_16px_-4px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.7),0_6px_18px_rgba(0,0,0,0.45)]"
+      className="fixed top-[84px] right-4 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_18px_50px_-12px_rgba(0,0,0,0.28),0_6px_16px_-4px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.7),0_6px_18px_rgba(0,0,0,0.45)]"
     >
       {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell */}
-      <div className="flex items-center justify-between gap-6 px-6 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
+      <div className="px-4 pt-4 pb-3 flex-shrink-0">
+      <div className="flex items-center justify-between gap-3 px-3 py-3 bg-neutral-100/70 dark:bg-[#2a2a2a]/70 border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] rounded-xl shadow-[0_4px_12px_-2px_rgba(0,0,0,0.14),0_2px_6px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_6px_18px_-4px_rgba(0,0,0,0.55),0_2px_6px_rgba(0,0,0,0.3)]">
         <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
           <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
           {activeSector && activeSector !== 'geral' && (
@@ -1647,6 +1648,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
         <button className={btnCls} title="Notificações">
           <Bell size={22} />
         </button>
+      </div>
       </div>
       <div className="flex-1 min-h-0">
         <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
@@ -1708,7 +1710,7 @@ export function ChatMobile({
   dark?: boolean;
   onToggleTheme?: () => void;
 }) {
-  const btnCls = "cursor-pointer text-neutral-600 dark:text-neutral-200 p-2 rounded-xl hover:bg-neutral-200/60 dark:hover:bg-white/5 hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
+  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-xl bg-neutral-200/50 dark:bg-[#2b2b2b] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_3px_10px_rgba(0,0,0,0.12)] dark:shadow-[0_3px_10px_rgba(0,0,0,0.45)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <AnimatePresence>
       {open && (
@@ -1720,7 +1722,8 @@ export function ChatMobile({
           className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b] flex flex-col"
         >
           {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell / X */}
-          <div className="flex items-center justify-between gap-3 px-5 pt-5 pb-2 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
+          <div className="px-4 pt-4 pb-3 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2 px-3 py-3 bg-neutral-100/70 dark:bg-[#2a2a2a]/70 border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] rounded-xl shadow-[0_4px_12px_-2px_rgba(0,0,0,0.14),0_2px_6px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_6px_18px_-4px_rgba(0,0,0,0.55),0_2px_6px_rgba(0,0,0,0.3)]">
             <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
               <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
               {activeSector && activeSector !== 'geral' && (
@@ -1747,6 +1750,7 @@ export function ChatMobile({
             <button onClick={onClose} className={btnCls} title="Fechar">
               <X size={20} />
             </button>
+          </div>
           </div>
           <div className="flex-1 min-h-0">
             <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
