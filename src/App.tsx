@@ -1475,39 +1475,6 @@ function AuthenticatedApp() {
         )}
       </AnimatePresence>
 
-      {/* Histórico de Conversas */}
-      <AnimatePresence>
-        {chatHistoryOpen && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[300] flex items-end md:items-center justify-center"
-          >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setChatHistoryOpen(false)} />
-            <motion.div
-              initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full md:max-w-md max-h-[80vh] overflow-y-auto bg-[#f0f2f4] dark:bg-[#323232] rounded-t-2xl md:rounded-2xl p-6 border border-transparent dark:border-[#414141]"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Conversas anteriores</h2>
-                <button onClick={() => setChatHistoryOpen(false)} className="text-neutral-400 hover:text-neutral-700 dark:hover:text-white cursor-pointer">✕</button>
-              </div>
-              {archivedSessions.length === 0 ? (
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-8">Nenhuma conversa anterior. Use a Área de Trabalho com um card do feed e clique em "Área de Trabalho" novamente pra arquivar a sessão.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {archivedSessions.map(s => (
-                    <li key={s.id} className="px-3 py-2 rounded-xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d]">
-                      <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate">{s.cardTitle}</p>
-                      <p className="text-xs text-neutral-500 dark:text-neutral-400">{new Date(s.ts).toLocaleString('pt-BR')} · {s.sector}</p>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Modal Mapa do Mercado */}
       <AnimatePresence>
@@ -1630,7 +1597,13 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
         dark={dark}
         onToggleTheme={toggleTheme}
-        onShowHistory={() => setChatHistoryOpen(true)}
+        onShowHistory={() => setChatHistoryOpen(o => !o)}
+        chatHistoryOpen={chatHistoryOpen}
+        archivedSessions={archivedSessions}
+        onArchive={(cardTitle, sector) => {
+          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector }]);
+          setWorkspaceContext(null);
+        }}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile
@@ -1644,7 +1617,13 @@ function AuthenticatedApp() {
         unreadCount={unreadCount}
         dark={dark}
         onToggleTheme={toggleTheme}
-        onShowHistory={() => setChatHistoryOpen(true)}
+        onShowHistory={() => setChatHistoryOpen(o => !o)}
+        chatHistoryOpen={chatHistoryOpen}
+        archivedSessions={archivedSessions}
+        onArchive={(cardTitle, sector) => {
+          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector }]);
+          setWorkspaceContext(null);
+        }}
       />
 
       {/* Fullscreen */}

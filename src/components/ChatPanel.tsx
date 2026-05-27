@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
-  Plus, Globe, Settings2, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
+  Plus, Globe, Upload, Settings2, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
   Sparkles, Loader2, History,
 } from 'lucide-react';
@@ -968,7 +968,7 @@ interface Message {
   block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchive, chatHistoryOpen, archivedSessions }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; onArchive?: (cardTitle: string, sector: string) => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string }> }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1011,6 +1011,15 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
   // Clique em "Área de Trabalho" — alterna a visibilidade dos 3 modos no toolbar.
   // NÃO gera bloco, NÃO apaga conteúdo, NÃO abre fullscreen.
   function handleAreaTrabalhoClick() {
+    // Se está aberto e vai recolher: arquiva sessão atual + limpa container
+    if (workspaceOpen && activeCard && messages.length > 0) {
+      onArchive?.(activeCard.titulo, activeSector ?? 'os1');
+      setMessages([]);
+      setActiveCard(null);
+      setActiveMode(null);
+      lastCardIdRef.current = null;
+      setActionLoading(null);
+    }
     setWorkspaceOpen(prev => !prev);
   }
 
@@ -1172,6 +1181,24 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector }: { onCl
       e.preventDefault();
       handleSend();
     }
+  }
+
+  // Quando histórico está aberto, mostra apenas a lista de conversas arquivadas
+  if (chatHistoryOpen) {
+    return (
+      <div className="flex flex-col h-full overflow-y-auto px-4 py-4 gap-2">
+        {(!archivedSessions || archivedSessions.length === 0) ? (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 text-center py-8">Nenhuma conversa anterior.</p>
+        ) : (
+          [...archivedSessions].reverse().map(s => (
+            <div key={s.id} className="px-4 py-3 rounded-xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate">{s.cardTitle}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">{new Date(s.ts).toLocaleString('pt-BR')} · {s.sector}</p>
+            </div>
+          ))
+        )}
+      </div>
+    );
   }
 
   return (
@@ -1617,9 +1644,12 @@ interface ChatDesktopProps {
   dark?: boolean;
   onToggleTheme?: () => void;
   onShowHistory?: () => void;
+  chatHistoryOpen?: boolean;
+  archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string }>;
+  onArchive?: (cardTitle: string, sector: string) => void;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme, onShowHistory }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onArchive }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
@@ -1636,7 +1666,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
           )}
         </button>
         <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-          <Globe size={22} />
+          <Upload size={22} />
         </button>
         <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
           <Settings2 size={22} />
@@ -1650,7 +1680,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
       </div>
       </div>
       <div className="flex-1 min-h-0">
-        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} />
       </div>
     </div>
   );
@@ -1696,7 +1726,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 export function ChatMobile({
   open, onClose, workspaceContext, activeSector,
   onSector, onBrowser, onDifficulty, unreadCount,
-  dark, onToggleTheme, onShowHistory,
+  dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onArchive,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1709,6 +1739,9 @@ export function ChatMobile({
   dark?: boolean;
   onToggleTheme?: () => void;
   onShowHistory?: () => void;
+  chatHistoryOpen?: boolean;
+  archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string }>;
+  onArchive?: (cardTitle: string, sector: string) => void;
 }) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
@@ -1731,7 +1764,7 @@ export function ChatMobile({
               )}
             </button>
             <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-              <Globe size={22} />
+              <Upload size={22} />
             </button>
             <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
               <Settings2 size={22} />
@@ -1751,7 +1784,7 @@ export function ChatMobile({
           </div>
           </div>
           <div className="flex-1 min-h-0">
-            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} />
+            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} />
           </div>
         </motion.div>
       )}
