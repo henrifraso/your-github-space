@@ -982,7 +982,8 @@ function AuthenticatedApp() {
                   <>
                     {/* Barra de resumo — só codify */}
                     {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
-                      <div className="flex gap-2 items-center text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                      <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                        <div className="flex items-center gap-2">
                         <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                           <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                             <strong>{roleConfig.summaryNumbers.empresas}</strong>
@@ -1001,6 +1002,54 @@ function AuthenticatedApp() {
                           </div>
                           parceiros
                         </div>
+                        </div>
+                        {bio.showInviteButton && (
+                          <div ref={inviteContainerRef} className="hidden lg:block relative flex-shrink-0">
+                            <button
+                              onClick={() => setInviteOpen(o => !o)}
+                              style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
+                              className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
+                            >
+                              <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
+                              <span>Convite</span>
+                            </button>
+                            <AnimatePresence>
+                            {inviteOpen && (
+                              <motion.div
+                                key="invite-panel"
+                                initial={{ opacity: 0, x: 40, scaleX: 0.6 }}
+                                animate={{ opacity: 1, x: 0,  scaleX: 1   }}
+                                exit={{    opacity: 0, x: 40, scaleX: 0.6 }}
+                                transition={{ duration: 0.26, ease: [0.22, 0.9, 0.3, 1] }}
+                                style={{ transformOrigin: 'right center' }}
+                                className="absolute right-0 top-0 flex gap-2 w-[280px] z-50 bg-[#f0f2f4] dark:bg-[#2a2a2a] border border-neutral-200 dark:border-white/10 rounded-xl p-1 shadow-[0_8px_30px_rgba(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+                              >
+                                <input
+                                  value={inviteInput}
+                                  onChange={e => setInviteInput(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter' && inviteInput.trim()) {
+                                      setInviteInput('');
+                                      setInviteOpen(false);
+                                      showToast('Convite enviado', 'blue');
+                                    }
+                                    if (e.key === 'Escape') { setInviteOpen(false); setInviteInput(''); }
+                                  }}
+                                  placeholder="Email ou @handle"
+                                  className="flex-1 min-w-0 bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
+                                  className="px-3 py-1.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex-shrink-0"
+                                >
+                                  Enviar
+                                </button>
+                              </motion.div>
+                            )}
+                            </AnimatePresence>
+                          </div>
+                        )}
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1026,65 +1075,15 @@ function AuthenticatedApp() {
                         })}
                       </div>
                     )}
-                    <div className="flex items-center gap-3 mt-0.5 sm:mt-1">
-                      <p className="flex-1 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">{bio.bioText}</p>
-                      {bio.showInviteButton && (
-                        <div ref={inviteContainerRef} className="hidden lg:block relative flex-shrink-0">
-                          <button
-                            onClick={() => setInviteOpen(o => !o)}
-                            style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
-                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
-                          >
-                            <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                              <Mail size={22} className="text-neutral-400 dark:text-white" />
-                            </div>
-                            <span>Convite</span>
-                          </button>
-                          <AnimatePresence>
-                          {inviteOpen && (
-                            <motion.div
-                              key="invite-panel"
-                              initial={{ opacity: 0, x: 40, scaleX: 0.6 }}
-                              animate={{ opacity: 1, x: 0,  scaleX: 1   }}
-                              exit={{    opacity: 0, x: 40, scaleX: 0.6 }}
-                              transition={{ duration: 0.26, ease: [0.22, 0.9, 0.3, 1] }}
-                              style={{ transformOrigin: 'right center' }}
-                              className="absolute right-0 top-0 flex gap-2 w-[280px] z-50 bg-[#f0f2f4] dark:bg-[#2a2a2a] border border-neutral-200 dark:border-white/10 rounded-xl p-1 shadow-[0_8px_30px_rgba(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
-                            >
-                              <input
-                                value={inviteInput}
-                                onChange={e => setInviteInput(e.target.value)}
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter' && inviteInput.trim()) {
-                                    setInviteInput('');
-                                    setInviteOpen(false);
-                                    showToast('Convite enviado', 'blue');
-                                  }
-                                  if (e.key === 'Escape') { setInviteOpen(false); setInviteInput(''); }
-                                }}
-                                placeholder="Email ou @handle"
-                                className="flex-1 min-w-0 bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
-                                autoFocus
-                              />
-                              <button
-                                onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
-                                className="px-3 py-1.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex-shrink-0"
-                              >
-                                Enviar
-                              </button>
-                            </motion.div>
-                          )}
-                          </AnimatePresence>
-                        </div>
-                      )}
-                    </div>
+                    <p className="text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium mt-0.5 sm:mt-1">{bio.bioText}</p>
                     {bio.bioSubtext && (
                       <p className="text-[11px] sm:text-xs md:text-sm text-neutral-800 dark:text-neutral-200">{bio.bioSubtext}</p>
                     )}
                   </>
                 ) : (
                   <>
-                <div className="flex gap-2 items-center text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                <div className="flex items-center gap-2">
                   <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                     <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                       <strong>{gridItems.length}</strong>
@@ -1104,7 +1103,17 @@ function AuthenticatedApp() {
                     {txt('stat_nivel')}
                   </div>
                 </div>
-                <div className="space-y-0.5 sm:space-y-1">
+                <div className="hidden lg:block relative flex-shrink-0">
+                  <button
+                    onClick={() => setInviteOpen(o => !o)}
+                    className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
+                  >
+                    <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
+                    <span>Convite</span>
+                  </button>
+                </div>
+                </div>
+                <div className="space-y-0.5 sm:space-y-1 mt-2 sm:mt-3">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
@@ -1119,17 +1128,6 @@ function AuthenticatedApp() {
                     <Zap size={13} className="sm:hidden text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
                     <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
-                  </div>
-                </div>
-                <div className="flex items-center mt-0.5 sm:mt-1">
-                  <div className="hidden lg:block relative flex-shrink-0 ml-auto">
-                    <button
-                      onClick={() => setInviteOpen(o => !o)}
-                      className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
-                    >
-                      <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
-                      <span>Convite</span>
-                    </button>
                   </div>
                 </div>
                   </>
