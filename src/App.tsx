@@ -846,10 +846,8 @@ function AuthenticatedApp() {
         className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8 lg:pt-3'}`}
       >
         {/* Container unificado de fundo — os elementos internos flutuam por cima */}
-        <div className="mx-4 sm:mx-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative overflow-hidden">
-        {/* Sombras de scroll — aparecem quando há conteúdo escondido em cima/baixo */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-6 z-10 bg-gradient-to-b from-black/10 to-transparent dark:from-black/30" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 z-10 bg-gradient-to-t from-black/10 to-transparent dark:from-black/30" />
+        <div className="mx-4 sm:mx-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative"
+          style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
           initial={false}
@@ -993,10 +991,16 @@ function AuthenticatedApp() {
                   <>
                     {/* Barra de resumo — só codify */}
                     {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
-                      <div className="flex gap-3 sm:gap-4 md:gap-10 items-center text-[11px] sm:text-xs md:text-base text-neutral-800 dark:text-neutral-200">
-                        <span><strong>{roleConfig.summaryNumbers.empresas}</strong> empresas</span>
-                        <span><strong>{roleConfig.summaryNumbers.afiliados}</strong> afiliados</span>
-                        <span><strong>{roleConfig.summaryNumbers.parceiros}</strong> parceiros</span>
+                      <div className="flex gap-2 items-center text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                          <strong>{roleConfig.summaryNumbers.empresas}</strong> empresas
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                          <strong>{roleConfig.summaryNumbers.afiliados}</strong> afiliados
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                          <strong>{roleConfig.summaryNumbers.parceiros}</strong> parceiros
+                        </div>
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1023,13 +1027,13 @@ function AuthenticatedApp() {
                       </div>
                     )}
                     <div className="flex items-center gap-3 mt-0.5 sm:mt-1">
-                      <p className="flex-1 text-[11px] sm:text-xs md:text-sm text-neutral-800 dark:text-neutral-200">{bio.bioText}</p>
+                      <p className="flex-1 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">{bio.bioText}</p>
                       {bio.showInviteButton && (
                         <div ref={inviteContainerRef} className="hidden lg:block relative flex-shrink-0">
                           <button
                             onClick={() => setInviteOpen(o => !o)}
                             style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
-                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-base font-semibold text-neutral-800 dark:text-neutral-200 transition-opacity duration-150 cursor-pointer"
+                            className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
                           >
                             <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
                             <span>Convite</span>
@@ -1078,10 +1082,16 @@ function AuthenticatedApp() {
                   </>
                 ) : (
                   <>
-                <div className="flex gap-3 sm:gap-4 md:gap-10 items-center text-[11px] sm:text-xs md:text-base">
-                  <span><strong>{gridItems.length}</strong> {txt('stat_opor')}</span>
-                  <span><strong>{data.concorrentes.length}</strong> Oponentes</span>
-                  <span><strong>{data.negocio.nivel}</strong> {txt('stat_nivel')}</span>
+                <div className="flex gap-2 items-center text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                    <strong>{gridItems.length}</strong> {txt('stat_opor')}
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                    <strong>{data.concorrentes.length}</strong> Oponentes
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                    <strong>{data.negocio.nivel}</strong> {txt('stat_nivel')}
+                  </div>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
