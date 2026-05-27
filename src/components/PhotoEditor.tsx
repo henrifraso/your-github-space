@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Camera, Check, Minus, Plus } from 'lucide-react';
+import { Camera, Check, Minus, Plus, Circle, Square } from 'lucide-react';
 import { ModalHeader } from './BottomModal';
+
+export type PhotoShape = 'round' | 'square';
 
 export interface PhotoSettings {
   src: string;
@@ -9,6 +11,7 @@ export interface PhotoSettings {
   y: number;
   zoom: number;
   locked?: boolean;
+  shape?: PhotoShape;
 }
 
 const LS_KEY = 'omni_profile_photo';
@@ -58,6 +61,7 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
   const [src, setSrc] = useState(initial.src || defaultSrc);
   const [zoom, setZoom] = useState(initial.zoom);
   const [pos, setPos] = useState({ x: initial.x, y: initial.y });
+  const [shape, setShape] = useState<PhotoShape>(initial.shape ?? 'round');
   const fileRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<{ px: number; py: number; ix: number; iy: number } | null>(null);
 
@@ -100,7 +104,7 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
   };
 
   const handleSave = () => {
-    const s: PhotoSettings = { src, x: pos.x, y: pos.y, zoom, locked: true };
+    const s: PhotoSettings = { src, x: pos.x, y: pos.y, zoom, locked: true, shape };
     savePhotoSettings(s);
     onSave(s);
     onClose();
@@ -123,7 +127,7 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
 
         <div className="flex flex-col items-center gap-5">
           <div
-            className="rounded-full overflow-hidden cursor-grab active:cursor-grabbing select-none border-4 border-[#3b82f6]/25"
+            className={`${shape === 'round' ? 'rounded-full' : 'rounded-3xl'} overflow-hidden cursor-grab active:cursor-grabbing select-none border-4 border-[#3b82f6]/25`}
             style={{ width: PREVIEW, height: PREVIEW, touchAction: 'none' }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
@@ -139,6 +143,20 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
           </div>
 
           <p className="text-xs text-neutral-500">Arraste para reposicionar</p>
+
+          {/* Escolha de formato da moldura */}
+          <div className="flex items-center gap-2 w-full">
+            <button onClick={() => setShape('round')}
+              className={`flex-1 h-10 rounded-xl border-[0.5px] flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-150 cursor-pointer ${shape === 'round' ? 'bg-[#3b82f6] border-[#3b82f6] text-white' : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200'}`}>
+              <Circle size={14} />
+              Redonda
+            </button>
+            <button onClick={() => setShape('square')}
+              className={`flex-1 h-10 rounded-xl border-[0.5px] flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-150 cursor-pointer ${shape === 'square' ? 'bg-[#3b82f6] border-[#3b82f6] text-white' : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200'}`}>
+              <Square size={14} />
+              Quadrada
+            </button>
+          </div>
 
           <div className="flex items-center gap-3 w-full">
             <button onClick={() => changeZoom(-0.1)}

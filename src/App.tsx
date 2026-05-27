@@ -326,7 +326,9 @@ function AuthenticatedApp() {
   function loadPhotoForProfile(profileId: string): PhotoSettings {
     const saved = localStorage.getItem(`photo_settings_${profileId}`);
     if (saved) { try { return JSON.parse(saved); } catch {} }
-    return { src: '', x: 0, y: 0, zoom: 1, locked: true };
+    // Default: codify (perfil personalizado em os1) usa moldura quadrada; demos usam redonda.
+    const defaultShape: 'round' | 'square' = profileId === 'os1' ? 'square' : 'round';
+    return { src: '', x: 0, y: 0, zoom: 1, locked: true, shape: defaultShape };
   }
 
   const [photoSettings, setPhotoSettings] = useState<PhotoSettings>(
@@ -863,23 +865,27 @@ function AuthenticatedApp() {
             {(() => {
               const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
+              const photoShape: 'round' | 'square' = photoSettings.shape ?? (activeSector === 'os1' ? 'square' : 'round');
+              const photoShapeOuter = photoShape === 'round' ? 'rounded-full' : 'rounded-2xl';
+              const photoShapeMid   = photoShape === 'round' ? 'rounded-full' : 'rounded-[14px] md:rounded-[18px]';
+              const photoShapeInner = photoShape === 'round' ? 'rounded-full' : 'rounded-[12px] md:rounded-[14px]';
               return (
             <div className="bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4 flex flex-row gap-3 sm:gap-4 items-center">
               <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
                 {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
-                <div className="absolute inset-0 rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none" />
+                <div className={`absolute inset-0 ${photoShapeOuter} shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none`} />
                 {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
-                <div className="absolute inset-0 rounded-2xl bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]">
+                <div className={`absolute inset-0 ${photoShapeOuter} bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]`}>
                   {/* Camada 2: anel gradient azul (CSS gradient border via padding + bg) */}
                   <div
-                    className="w-full h-full rounded-[14px] md:rounded-[18px] p-[3px] md:p-[5px] relative overflow-hidden"
+                    className={`w-full h-full ${photoShapeMid} p-[3px] md:p-[5px] relative overflow-hidden`}
                     style={{
                       background: 'conic-gradient(from 135deg at 50% 50%, #2563eb, #60a5fa, #3b82f6, #2563eb, #60a5fa, #2563eb)',
                     }}
                   >
                 {/* Sombra interna do miolo — separa a foto do anel */}
-                <div className="absolute inset-[6px] md:inset-[10px] rounded-[12px] md:rounded-[14px] shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]" />
-                <div className="w-full h-full rounded-[12px] md:rounded-[14px] overflow-hidden relative bg-white dark:bg-[#1a1a1a]">
+                <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]`} />
+                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative bg-white dark:bg-[#1a1a1a]`}>
                   {/* Botão de trocar foto — disponível em todos os perfis demo */}
                   {activeSector !== 'os1' && (
                     <button
