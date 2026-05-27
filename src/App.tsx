@@ -1121,6 +1121,17 @@ function AuthenticatedApp() {
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
                   </div>
                 </div>
+                <div className="flex items-center mt-0.5 sm:mt-1">
+                  <div className="hidden lg:block relative flex-shrink-0 ml-auto">
+                    <button
+                      onClick={() => setInviteOpen(o => !o)}
+                      className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
+                    >
+                      <Mail size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400" />
+                      <span>Convite</span>
+                    </button>
+                  </div>
+                </div>
                   </>
                 )}
               </div>
