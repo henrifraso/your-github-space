@@ -287,7 +287,9 @@ function AuthenticatedApp() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
-  const [archivedSessions, setArchivedSessions] = useState<Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: any }>>([]);
+  // Sessões arquivadas separadas POR SECTOR — cada perfil tem seu próprio histórico.
+  const [archivedSessionsBySector, setArchivedSessionsBySector] = useState<Record<string, Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: any }>>>({});
+  const archivedSessions = archivedSessionsBySector[activeSector] ?? [];
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
@@ -1602,7 +1604,8 @@ function AuthenticatedApp() {
         archivedSessions={archivedSessions}
         onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
         onArchive={(cardTitle, sector, snapshot) => {
-          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot }]);
+          const newSession = { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot };
+          setArchivedSessionsBySector(prev => ({ ...prev, [sector]: [...(prev[sector] ?? []), newSession] }));
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
@@ -1625,7 +1628,8 @@ function AuthenticatedApp() {
         archivedSessions={archivedSessions}
         onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
         onArchive={(cardTitle, sector, snapshot) => {
-          setArchivedSessions(prev => [...prev, { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot }]);
+          const newSession = { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot };
+          setArchivedSessionsBySector(prev => ({ ...prev, [sector]: [...(prev[sector] ?? []), newSession] }));
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
