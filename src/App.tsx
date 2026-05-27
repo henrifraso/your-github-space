@@ -256,9 +256,10 @@ function AuthenticatedApp() {
       .catch(() => {});
   }, []);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
-  const [dark, setDark] = useState<boolean>(() => localStorage.getItem('os1_theme') !== 'light');
-  useEffect(() => { localStorage.setItem('os1_theme', dark ? 'dark' : 'light'); }, [dark]);
-  const toggleTheme = () => setDark(d => !d);
+  // Modo escuro travado — o botão Sun/Moon será reaproveitado pra outra função.
+  const [dark] = useState<boolean>(true);
+  useEffect(() => { localStorage.setItem('os1_theme', 'dark'); }, []);
+  const toggleTheme = () => {};
   const [difficulty, setDifficulty] = useState<Difficulty>(() => (localStorage.getItem('difficulty') as Difficulty) ?? 'normal');
   const [difficultyOpen, setDifficultyOpen] = useState(false);
   const txt = (key: TextKey) => TEXTS[key][difficulty];
