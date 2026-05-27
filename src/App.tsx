@@ -289,7 +289,6 @@ function AuthenticatedApp() {
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
   // Sessões arquivadas separadas POR SECTOR — cada perfil tem seu próprio histórico.
   const [archivedSessionsBySector, setArchivedSessionsBySector] = useState<Record<string, Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: any }>>>({});
-  const archivedSessions = archivedSessionsBySector[activeSector] ?? [];
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
@@ -1601,7 +1600,7 @@ function AuthenticatedApp() {
         onToggleTheme={toggleTheme}
         onShowHistory={() => setChatHistoryOpen(o => !o)}
         chatHistoryOpen={chatHistoryOpen}
-        archivedSessions={archivedSessions}
+        archivedSessions={archivedSessionsBySector[activeSector] ?? []}
         onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
         onArchive={(cardTitle, sector, snapshot) => {
           const newSession = { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot };
@@ -1625,7 +1624,7 @@ function AuthenticatedApp() {
         onToggleTheme={toggleTheme}
         onShowHistory={() => setChatHistoryOpen(o => !o)}
         chatHistoryOpen={chatHistoryOpen}
-        archivedSessions={archivedSessions}
+        archivedSessions={archivedSessionsBySector[activeSector] ?? []}
         onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
         onArchive={(cardTitle, sector, snapshot) => {
           const newSession = { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot };
