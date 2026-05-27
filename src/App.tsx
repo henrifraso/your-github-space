@@ -1606,7 +1606,6 @@ function AuthenticatedApp() {
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
-          setDestaqueOpen(true);
         }}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
@@ -1630,7 +1629,6 @@ function AuthenticatedApp() {
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
-          setDestaqueOpen(true);
         }}
       />
 
