@@ -769,7 +769,7 @@ function AuthenticatedApp() {
 
       {/* Botão deslogar — desktop only (modo escuro foi pro header da Área de Trabalho) */}
       {!browserOpen && !esferaOpen && !mapOpen && (
-        <div className="fixed top-[26px] sm:top-[30px] right-9 sm:right-11 z-[999] hidden lg:flex items-center gap-1">
+        <div className="fixed top-[26px] sm:top-[30px] right-9 sm:right-11 z-[51] hidden lg:flex items-center gap-1">
           <button
             onClick={handleLogout}
             title="Sair"
