@@ -126,7 +126,7 @@ import type { RoleFeedCard } from './config/roleConfig';
 import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES, PARTNER_SOLD_COMPANIES } from './data/roleMocks';
 import { isPersonalizedRole, filterFranchisorCardsByTab, shouldShowRoleDemos } from './utils/roleUtils';
 import { Toast, useToast } from './components/Toast';
-import { Mail } from 'lucide-react';
+import { Mail, MapPinned, Target, Eye, Award } from 'lucide-react';
 
 function GoogleMapsPreloader() {
   useGoogleMaps();
@@ -283,7 +283,7 @@ function AuthenticatedApp() {
   const [bioOpen, setBioOpen] = useState(true);
   const bioOpenRef = useRef(false);
   useEffect(() => { bioOpenRef.current = bioOpen; }, [bioOpen]);
-  const [destaqueOpen, setDestaqueOpen] = useState(false);
+  const [destaqueOpen, setDestaqueOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
@@ -421,7 +421,6 @@ function AuthenticatedApp() {
     } else {
       // Esconde o bio (se aberto) e aciona o split — mesmo estado do deslize manual.
       setBioOpen(false);
-      setDestaqueOpen(false);
       setScrolled(true);
     }
   };
@@ -501,7 +500,7 @@ function AuthenticatedApp() {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
         if (e.deltaY > 5) {
           if (!bioOpenRef.current) { setBioOpen(true); }
-          else { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
+          else { setScrolled(true); setBioOpen(false); }
         }
       };
       const onTouchStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
@@ -509,7 +508,7 @@ function AuthenticatedApp() {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
         if (touchStartY.current - e.touches[0].clientY > 15) {
           if (!bioOpenRef.current) { setBioOpen(true); }
-          else { setScrolled(true); setBioOpen(false); setDestaqueOpen(false); }
+          else { setScrolled(true); setBioOpen(false); }
         }
       };
       window.addEventListener('wheel', onWheel);
@@ -894,8 +893,7 @@ function AuthenticatedApp() {
                 <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]`} />
                 <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative bg-white dark:bg-[#1a1a1a]`}>
                   <div
-                    className="w-full h-full rounded-xl overflow-hidden relative cursor-pointer"
-                    onClick={() => { setDestaqueOpen(d => !d); }}
+                    className="w-full h-full rounded-xl overflow-hidden relative"
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
                       background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
                     } : undefined}
@@ -981,81 +979,39 @@ function AuthenticatedApp() {
                   </div>
                 </div>
               </div>
-              <div className={`flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 ${isRoleView ? 'justify-start !h-[72px] md:!h-[138px]' : 'justify-center !h-24 md:!h-[170px]'} overflow-hidden bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4`}>
+              <div className={`flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 ${isRoleView ? 'justify-start' : 'justify-center'} min-h-[140px] md:min-h-[180px] bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4`}>
                 {isRoleView ? (
                   <>
                     {/* Barra de resumo — só codify */}
                     {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
-                      <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
-                        <div className="flex items-center gap-2">
-                        <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                        <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                           <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                             <strong>{roleConfig.summaryNumbers.empresas}</strong>
                           </div>
                           empresas
                         </div>
-                        <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                        <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                           <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                             <strong>{roleConfig.summaryNumbers.afiliados}</strong>
                           </div>
                           afiliados
                         </div>
-                        <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                        <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                           <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                             <strong>{roleConfig.summaryNumbers.parceiros}</strong>
                           </div>
                           parceiros
                         </div>
-                        </div>
-                        {bio.showInviteButton && (
-                          <div ref={inviteContainerRef} className="hidden lg:block relative flex-shrink-0">
-                            <button
-                              onClick={() => setInviteOpen(o => !o)}
-                              style={saibaMaisWidth ? { width: saibaMaisWidth, opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' } : { opacity: inviteOpen ? 0 : 1, pointerEvents: inviteOpen ? 'none' : 'auto' }}
-                              className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
-                            >
-                              <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                                <Mail size={22} className="text-neutral-400 dark:text-white" />
-                              </div>
-                              <span>Convite</span>
-                            </button>
-                            <AnimatePresence>
-                            {inviteOpen && (
-                              <motion.div
-                                key="invite-panel"
-                                initial={{ opacity: 0, x: 40, scaleX: 0.6 }}
-                                animate={{ opacity: 1, x: 0,  scaleX: 1   }}
-                                exit={{    opacity: 0, x: 40, scaleX: 0.6 }}
-                                transition={{ duration: 0.26, ease: [0.22, 0.9, 0.3, 1] }}
-                                style={{ transformOrigin: 'right center' }}
-                                className="absolute right-0 top-0 flex gap-2 w-[280px] z-50 bg-[#f0f2f4] dark:bg-[#2a2a2a] border border-neutral-200 dark:border-white/10 rounded-xl p-1 shadow-[0_8px_30px_rgba(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
-                              >
-                                <input
-                                  value={inviteInput}
-                                  onChange={e => setInviteInput(e.target.value)}
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter' && inviteInput.trim()) {
-                                      setInviteInput('');
-                                      setInviteOpen(false);
-                                      showToast('Convite enviado', 'blue');
-                                    }
-                                    if (e.key === 'Escape') { setInviteOpen(false); setInviteInput(''); }
-                                  }}
-                                  placeholder="Email ou @handle"
-                                  className="flex-1 min-w-0 bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-sm text-neutral-800 dark:text-white placeholder-neutral-400 dark:placeholder-white/25 outline-none focus:border-neutral-300 dark:focus:border-white/25 transition-colors"
-                                  autoFocus
-                                />
-                                <button
-                                  onClick={() => { if (inviteInput.trim()) { setInviteInput(''); setInviteOpen(false); showToast('Convite enviado', 'blue'); } }}
-                                  className="px-3 py-1.5 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-lg transition-all cursor-pointer flex-shrink-0"
-                                >
-                                  Enviar
-                                </button>
-                              </motion.div>
-                            )}
-                            </AnimatePresence>
+                        <button
+                          onClick={() => setMapOpen(true)}
+                          className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer flex-shrink-0"
+                        >
+                          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                            <MapPinned size={22} className="text-neutral-400 dark:text-white" />
                           </div>
-                        )}
+                          <span>Concorrentes</span>
+                        </button>
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1088,38 +1044,34 @@ function AuthenticatedApp() {
                   </>
                 ) : (
                   <>
-                <div className="flex items-center justify-between gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
-                <div className="flex items-center gap-2">
-                  <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                  <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                     <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                       <strong>{gridItems.length}</strong>
                     </div>
                     {txt('stat_opor')}
                   </div>
-                  <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                  <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                     <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                       <strong>{data.concorrentes.length}</strong>
                     </div>
                     Oponentes
                   </div>
-                  <div className="inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
+                  <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
                     <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                       <strong>{data.negocio.nivel}</strong>
                     </div>
                     {txt('stat_nivel')}
                   </div>
-                </div>
-                <div className="hidden lg:block relative flex-shrink-0">
-                  <button
-                    onClick={() => setInviteOpen(o => !o)}
-                    className="inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
-                  >
-                    <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                      <Mail size={22} className="text-neutral-400 dark:text-white" />
-                    </div>
-                    <span>Convite</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => setMapOpen(true)}
+                  className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer flex-shrink-0"
+                >
+                  <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                    <MapPinned size={22} className="text-neutral-400 dark:text-white" />
+                  </div>
+                  <span>Concorrentes</span>
+                </button>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
@@ -1146,9 +1098,9 @@ function AuthenticatedApp() {
             })()}
           </section>
 
-          {/* Container unificado: Concorrentes/MVV + Destaques */}
+          {/* Destaques */}
           <AnimatePresence>
-            {(bioOpen || destaqueOpen) && (
+            {destaqueOpen && (
               <motion.section
                 key="bio-destaques"
                 initial={{ opacity: 0, height: 0 }}
@@ -1158,19 +1110,6 @@ function AuthenticatedApp() {
                 className="px-4 sm:px-5 overflow-hidden"
               >
                 <div className="pb-3 sm:pb-4 flex flex-col gap-3 sm:gap-4">
-                  {bioOpen && (
-                    <div className="flex flex-col gap-2">
-                      <MarketMapButton bioOpen={bioOpen} onHome={() => setBioOpen(true)} onMap={() => setMapOpen(true)} />
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        {[['Missão', () => setFullscreenCard({ type: 'plano' })], ['Visão', () => setFullscreenCard({ type: 'estrategia' })], ['Valores', () => setFullscreenCard({ type: 'pratica' })]].map(([label, fn]) => (
-                          <button key={label as string} onClick={fn as () => void}
-                            className="flex-[2] h-8 sm:h-9 md:h-11 flex items-center justify-center bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-all duration-200 active:scale-[0.97] cursor-pointer">
-                            {label as string}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                   {destaqueOpen && (
                     <div className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
                       {circleData.map((c, i) => (
@@ -1608,6 +1547,7 @@ function AuthenticatedApp() {
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
+          setDestaqueOpen(true);
         }}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
@@ -1632,6 +1572,7 @@ function AuthenticatedApp() {
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
+          setDestaqueOpen(true);
         }}
       />
 
