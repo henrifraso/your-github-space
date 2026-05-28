@@ -990,29 +990,37 @@ function AuthenticatedApp() {
                   <>
                     {/* Barra de resumo — só codify */}
                     {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
-                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                      <div className="flex items-center gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                         {[
                           { label: 'empresas',  value: roleConfig.summaryNumbers.empresas,  description: `${roleConfig.summaryNumbers.empresas} empresas ativas no sistema. Aqui você vê o pipeline de cada uma, o status (ativo/em risco/inativo), nível, faturamento estimado e próximas ações de gestão.` },
                           { label: 'afiliados', value: roleConfig.summaryNumbers.afiliados, description: `${roleConfig.summaryNumbers.afiliados} afiliados vendendo. Lista de afiliados ativos com seus indicadores de performance — comissão acumulada, conversões, lifetime value e ranking.` },
                           { label: 'parceiros', value: roleConfig.summaryNumbers.parceiros, description: `${roleConfig.summaryNumbers.parceiros} parceiro(s) conectado(s). Lista de parceiros estratégicos — categoria, contratos ativos, datas de renovação, contatos comerciais e métricas conjuntas.` },
                         ].map(({ label, value, description }) => (
                           <button key={label} onClick={() => setStatInfo({ label, value, description })}
-                            className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
-                            <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
+                            className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                            <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                               <strong>{value}</strong>
                             </div>
                             {label}
                           </button>
                         ))}
+                        <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => setMapOpen(true)}
-                          className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer flex-shrink-0"
+                          className="inline-flex justify-center items-center gap-1 pl-1 pr-2 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
                         >
                           <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                             <MapPinned size={22} className="text-neutral-400 dark:text-white" />
                           </div>
                           <span>Concorrentes</span>
                         </button>
+                        <button onClick={() => setInviteOpen(true)} title="Convite"
+                          className="inline-flex items-center justify-center p-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                            <Mail size={18} className="text-neutral-400 dark:text-white" />
+                          </div>
+                        </button>
+                        </div>
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1045,29 +1053,37 @@ function AuthenticatedApp() {
                   </>
                 ) : (
                   <>
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                   {[
                     { label: txt('stat_opor'),  value: gridItems.length,           description: `${gridItems.length} ${txt('stat_opor')} no seu negócio. Cada uma tem prioridade, prazo, esforço estimado e impacto potencial. Aqui você vê o pipeline completo, status e próximos passos.` },
                     { label: 'Oponentes',       value: data.concorrentes.length,   description: `${data.concorrentes.length} Oponentes monitorados na região. Lista detalhada com posicionamento, faixa de preço, força de marca, atividade recente e nível de ameaça.` },
                     { label: txt('stat_nivel'), value: data.negocio.nivel,         description: `${txt('stat_nivel')} ${data.negocio.nivel}. Progressão do negócio — métricas que compõem o nível atual, o que falta pra subir, comparativo com pares e ações recomendadas pra evolução.` },
                   ].map(({ label, value, description }) => (
                     <button key={String(label)} onClick={() => setStatInfo({ label: String(label), value, description })}
-                      className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
-                      <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
+                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                      <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                         <strong>{value}</strong>
                       </div>
                       {label}
                     </button>
                   ))}
+                <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => setMapOpen(true)}
-                  className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer flex-shrink-0"
+                  className="inline-flex justify-center items-center gap-1 pl-1 pr-2 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
                 >
                   <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                     <MapPinned size={22} className="text-neutral-400 dark:text-white" />
                   </div>
                   <span>Concorrentes</span>
                 </button>
+                <button onClick={() => setInviteOpen(true)} title="Convite"
+                  className="inline-flex items-center justify-center p-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                  <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                    <Mail size={18} className="text-neutral-400 dark:text-white" />
+                  </div>
+                </button>
+                </div>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
