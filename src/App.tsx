@@ -785,20 +785,14 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
-          <div className="flex items-center gap-2"
+          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            <button onClick={(e) => { e.stopPropagation(); setInviteOpen(true); }} title="Convite"
-              className="flex-shrink-0 flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90">
-              <Mail size={22} />
-            </button>
-            <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
-              <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
-                {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
-              </h1>
-              <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
-              <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
-            </button>
-          </div>
+            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
+            </h1>
+            <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
+            <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
+          </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
               Modo escuro foi movido pro header da Área de Trabalho. */}
           <div className="flex items-center lg:hidden"
@@ -848,7 +842,7 @@ function AuthenticatedApp() {
 
     <div
       style={{ paddingRight: (scrolled && isDesktop) ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[380px] xl:pr-[396px]"
+      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[320px] xl:pr-[336px]"
     >
 
       <main
@@ -856,7 +850,7 @@ function AuthenticatedApp() {
         className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8 lg:pt-3'}`}
       >
         {/* Container unificado de fundo — os elementos internos flutuam por cima */}
-        <div className="mx-4 sm:mx-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative"
+        <div className="ml-4 mr-6 sm:ml-5 sm:mr-8 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative"
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -873,7 +867,7 @@ function AuthenticatedApp() {
         >
 
           {/* Foto + bio + botões */}
-          <section className="px-4 sm:px-5 flex flex-col gap-3 sm:gap-4">
+          <section className="pl-2 pr-0 sm:pl-3 sm:pr-1 flex flex-col gap-3 sm:gap-4">
             {(() => {
               const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
@@ -985,12 +979,12 @@ function AuthenticatedApp() {
                   </div>
                 </div>
               </div>
-              <div className={`flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 ${isRoleView ? 'justify-start' : 'justify-center'} min-h-[140px] md:min-h-[180px] bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] p-3 sm:p-4`}>
+              <div className="flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 justify-start min-h-[140px] md:min-h-[180px] bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pl-3 pr-3 py-3 sm:pl-4 sm:pr-4 sm:py-4 mr-2 sm:mr-4">
                 {isRoleView ? (
                   <>
                     {/* Barra de resumo — só codify */}
                     {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
-                      <div className="flex items-center gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                      <div className="flex items-center gap-1.5 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                         {[
                           { label: 'empresas',  value: roleConfig.summaryNumbers.empresas,  description: `${roleConfig.summaryNumbers.empresas} empresas ativas no sistema. Aqui você vê o pipeline de cada uma, o status (ativo/em risco/inativo), nível, faturamento estimado e próximas ações de gestão.` },
                           { label: 'afiliados', value: roleConfig.summaryNumbers.afiliados, description: `${roleConfig.summaryNumbers.afiliados} afiliados vendendo. Lista de afiliados ativos com seus indicadores de performance — comissão acumulada, conversões, lifetime value e ranking.` },
@@ -1015,10 +1009,11 @@ function AuthenticatedApp() {
                           <span>Concorrentes</span>
                         </button>
                         <button onClick={() => setInviteOpen(true)} title="Convite"
-                          className="inline-flex items-center justify-center p-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                           <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                             <Mail size={18} className="text-neutral-400 dark:text-white" />
                           </div>
+                          Convite
                         </button>
                         </div>
                       </div>
@@ -1053,7 +1048,7 @@ function AuthenticatedApp() {
                   </>
                 ) : (
                   <>
-                <div className="flex items-center gap-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                   {[
                     { label: txt('stat_opor'),  value: gridItems.length,           description: `${gridItems.length} ${txt('stat_opor')} no seu negócio. Cada uma tem prioridade, prazo, esforço estimado e impacto potencial. Aqui você vê o pipeline completo, status e próximos passos.` },
                     { label: 'Oponentes',       value: data.concorrentes.length,   description: `${data.concorrentes.length} Oponentes monitorados na região. Lista detalhada com posicionamento, faixa de preço, força de marca, atividade recente e nível de ameaça.` },
@@ -1078,14 +1073,15 @@ function AuthenticatedApp() {
                   <span>Concorrentes</span>
                 </button>
                 <button onClick={() => setInviteOpen(true)} title="Convite"
-                  className="inline-flex items-center justify-center p-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-lg cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                   <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                     <Mail size={18} className="text-neutral-400 dark:text-white" />
                   </div>
+                  Convite
                 </button>
                 </div>
                 </div>
-                <div className="space-y-0.5 sm:space-y-1">
+                <div className="space-y-0.5 sm:space-y-1 pr-8 sm:pr-12">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
@@ -1119,7 +1115,7 @@ function AuthenticatedApp() {
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-                className="px-4 sm:px-5 overflow-hidden"
+                className="pl-4 pr-6 sm:pl-5 sm:pr-8 overflow-hidden"
               >
                 <div className="pb-3 sm:pb-4 flex flex-col gap-3 sm:gap-4">
                   {destaqueOpen && (
@@ -1172,7 +1168,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5`}
+            className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 pl-4 pr-6 sm:pl-5 sm:pr-8`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1270,7 +1266,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 px-4 sm:px-5`}
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 pl-4 pr-6 sm:pl-5 sm:pr-8`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
