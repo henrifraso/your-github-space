@@ -923,27 +923,25 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="overflow-hidden"
+            className="grid grid-cols-3 gap-1.5"
           >
-            <div className="grid grid-cols-3 gap-0 rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
-              {MAIN_BTNS.map((btn, i) => {
-                const isActive = activeMode === btn.key;
-                return (
-                  <button
-                    key={btn.key}
-                    type="button"
-                    onClick={() => onModeClick(btn.key)}
-                    disabled={disabled}
-                    className={`flex items-center justify-center gap-1.5 !h-11 cursor-pointer disabled:cursor-default transition-colors duration-150 ${i > 0 ? 'border-l-[0.5px] border-neutral-200 dark:border-[#3d3d3d]' : ''} ${isActive
-                      ? 'bg-[#3b82f6]'
-                      : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] hover:bg-neutral-200 dark:hover:bg-[#353535]'}`}
-                  >
-                    <btn.Icon size={12} className={isActive ? 'text-white' : 'text-neutral-400 dark:text-white'} />
-                    <span className={`text-[10px] lg:text-sm font-medium whitespace-nowrap ${isActive ? 'text-white' : 'text-neutral-500 dark:text-white'}`}>{btn.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {MAIN_BTNS.map(btn => {
+              const isActive = activeMode === btn.key;
+              return (
+                <button
+                  key={btn.key}
+                  type="button"
+                  onClick={() => onModeClick(btn.key)}
+                  disabled={disabled}
+                  className={`${chipBase} !h-11 ${isActive
+                    ? 'bg-[#3b82f6] border-[#3b82f6]'
+                    : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]'}`}
+                >
+                  <btn.Icon size={12} className={isActive ? 'text-white' : 'text-neutral-400 dark:text-white'} />
+                  <span className={`text-[10px] lg:text-sm font-medium whitespace-nowrap ${isActive ? 'text-white' : 'text-neutral-500 dark:text-white'}`}>{btn.label}</span>
+                </button>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
