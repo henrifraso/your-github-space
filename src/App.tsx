@@ -126,7 +126,7 @@ import type { RoleFeedCard } from './config/roleConfig';
 import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES, PARTNER_SOLD_COMPANIES } from './data/roleMocks';
 import { isPersonalizedRole, filterFranchisorCardsByTab, shouldShowRoleDemos } from './utils/roleUtils';
 import { Toast, useToast } from './components/Toast';
-import { Mail, MapPinned, Target, Eye, Award } from 'lucide-react';
+import { Mail, MapPinned, Target, Eye, Award, Search, Sparkles, Layers3, UserCircle } from 'lucide-react';
 
 function GoogleMapsPreloader() {
   useGoogleMaps();
@@ -286,6 +286,7 @@ function AuthenticatedApp() {
   const [destaqueOpen, setDestaqueOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
+  const [statInfo, setStatInfo] = useState<{ label: string; value: any; description: string } | null>(null);
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
   // Sessões arquivadas separadas POR SECTOR — cada perfil tem seu próprio histórico.
   const [archivedSessionsBySector, setArchivedSessionsBySector] = useState<Record<string, Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: any }>>>({});
@@ -766,7 +767,7 @@ function AuthenticatedApp() {
 
       <GoogleMapsPreloader />
 
-      {/* Botão deslogar — desktop only (modo escuro foi pro header da Área de Trabalho) */}
+      {/* Botão deslogar + Convite + placeholders — desktop only */}
       {!browserOpen && !esferaOpen && !mapOpen && (
         <div className="fixed top-[26px] sm:top-[30px] right-9 sm:right-11 z-[51] hidden lg:flex items-center gap-1">
           <button
@@ -784,15 +785,20 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
-          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
+          <div className="flex items-center gap-2"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            <span className="flex-shrink-0 w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#16a34a] shadow-[0_0_6px_2px_rgba(34,197,94,0.7)] animate-pulse" />
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
-              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
-            </h1>
-            <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
-            <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
-          </button>
+            <button onClick={(e) => { e.stopPropagation(); setInviteOpen(true); }} title="Convite"
+              className="flex-shrink-0 flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90">
+              <Mail size={22} />
+            </button>
+            <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]">
+              <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+                {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
+              </h1>
+              <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
+              <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
+            </button>
+          </div>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
               Modo escuro foi movido pro header da Área de Trabalho. */}
           <div className="flex items-center lg:hidden"
@@ -985,24 +991,19 @@ function AuthenticatedApp() {
                     {/* Barra de resumo — só codify */}
                     {roleConfig.showSummaryBar && roleConfig.summaryNumbers && (
                       <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
-                        <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
-                            <strong>{roleConfig.summaryNumbers.empresas}</strong>
-                          </div>
-                          empresas
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
-                            <strong>{roleConfig.summaryNumbers.afiliados}</strong>
-                          </div>
-                          afiliados
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
-                            <strong>{roleConfig.summaryNumbers.parceiros}</strong>
-                          </div>
-                          parceiros
-                        </div>
+                        {[
+                          { label: 'empresas',  value: roleConfig.summaryNumbers.empresas,  description: `${roleConfig.summaryNumbers.empresas} empresas ativas no sistema. Aqui você vê o pipeline de cada uma, o status (ativo/em risco/inativo), nível, faturamento estimado e próximas ações de gestão.` },
+                          { label: 'afiliados', value: roleConfig.summaryNumbers.afiliados, description: `${roleConfig.summaryNumbers.afiliados} afiliados vendendo. Lista de afiliados ativos com seus indicadores de performance — comissão acumulada, conversões, lifetime value e ranking.` },
+                          { label: 'parceiros', value: roleConfig.summaryNumbers.parceiros, description: `${roleConfig.summaryNumbers.parceiros} parceiro(s) conectado(s). Lista de parceiros estratégicos — categoria, contratos ativos, datas de renovação, contatos comerciais e métricas conjuntas.` },
+                        ].map(({ label, value, description }) => (
+                          <button key={label} onClick={() => setStatInfo({ label, value, description })}
+                            className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                            <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
+                              <strong>{value}</strong>
+                            </div>
+                            {label}
+                          </button>
+                        ))}
                         <button
                           onClick={() => setMapOpen(true)}
                           className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer flex-shrink-0"
@@ -1045,24 +1046,19 @@ function AuthenticatedApp() {
                 ) : (
                   <>
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
-                  <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                    <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
-                      <strong>{gridItems.length}</strong>
-                    </div>
-                    {txt('stat_opor')}
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                    <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
-                      <strong>{data.concorrentes.length}</strong>
-                    </div>
-                    Oponentes
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                    <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
-                      <strong>{data.negocio.nivel}</strong>
-                    </div>
-                    {txt('stat_nivel')}
-                  </div>
+                  {[
+                    { label: txt('stat_opor'),  value: gridItems.length,           description: `${gridItems.length} ${txt('stat_opor')} no seu negócio. Cada uma tem prioridade, prazo, esforço estimado e impacto potencial. Aqui você vê o pipeline completo, status e próximos passos.` },
+                    { label: 'Oponentes',       value: data.concorrentes.length,   description: `${data.concorrentes.length} Oponentes monitorados na região. Lista detalhada com posicionamento, faixa de preço, força de marca, atividade recente e nível de ameaça.` },
+                    { label: txt('stat_nivel'), value: data.negocio.nivel,         description: `${txt('stat_nivel')} ${data.negocio.nivel}. Progressão do negócio — métricas que compõem o nível atual, o que falta pra subir, comparativo com pares e ações recomendadas pra evolução.` },
+                  ].map(({ label, value, description }) => (
+                    <button key={String(label)} onClick={() => setStatInfo({ label: String(label), value, description })}
+                      className="inline-flex items-center gap-1.5 pl-1.5 pr-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                      <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
+                        <strong>{value}</strong>
+                      </div>
+                      {label}
+                    </button>
+                  ))}
                 <button
                   onClick={() => setMapOpen(true)}
                   className="hidden lg:inline-flex justify-center items-center gap-2 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer flex-shrink-0"
@@ -1402,6 +1398,34 @@ function AuthenticatedApp() {
 
       {/* Stories */}
       {storyIndex !== null && <StoryViewer groups={stories} startIndex={storyIndex} onClose={() => setStoryIndex(null)} />}
+
+      {/* Detalhes do Stat (3 empresas / 2 afiliados / etc) */}
+      <AnimatePresence>
+        {statInfo && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-end md:items-center justify-center"
+          >
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setStatInfo(null)} />
+            <motion.div
+              initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="relative w-full md:max-w-md bg-[#f0f2f4] dark:bg-[#323232] rounded-t-2xl md:rounded-2xl p-6 border border-transparent dark:border-[#414141]"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-base font-bold text-neutral-800 dark:text-white">
+                    {statInfo.value}
+                  </div>
+                  <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100 capitalize">{statInfo.label}</h2>
+                </div>
+                <button onClick={() => setStatInfo(null)} className="text-neutral-400 hover:text-neutral-700 dark:hover:text-white cursor-pointer">✕</button>
+              </div>
+              <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">{statInfo.description}</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Editor de Foto */}
       <AnimatePresence>
