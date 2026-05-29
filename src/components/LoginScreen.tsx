@@ -3,6 +3,20 @@ import { motion, AnimatePresence, useAnimation, useMotionValue, animate } from '
 import { Eye, EyeOff, ChevronRight, Check, Shield, Building2, X } from 'lucide-react';
 import { BrowserView } from './BrowserView';
 import { setRole } from '../hooks/useAuth';
+import {
+  loadOnboarding,
+  saveOnboardingField,
+  saveOnboardingContext,
+  isOnboardingComplete,
+  OB_PHASES_ORDER,
+  OB_PHASE_LABELS,
+  OB_PHASE_FIELD,
+  OB_PHASE_OPTIONS,
+  type OnboardingPhase,
+  type OnboardingContext,
+} from '../lib/onboarding';
+
+type LoginPhase = 'idle' | OnboardingPhase | 'user' | 'pass';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Step = 'landing' | 'auth' | 'business' | 'consent';
@@ -108,15 +122,19 @@ function LupaIcon({ size, strokeWidth, style, className }: { size: number; strok
 // ── RippleButton ──────────────────────────────────────────────────────────────
 function RippleButton({
   onTap, loginPhase, onNextPhase, onSubmitLogin, loginLoading, started, overlayDone, autoFill,
+  onAnswerOnboarding, onBackOnboarding, currentObAnswer,
 }: {
   onTap: () => void;
-  loginPhase: 'idle' | 'user' | 'pass';
+  loginPhase: LoginPhase;
   onNextPhase: () => void;
   onSubmitLogin: (handle: string, password: string) => void;
   loginLoading: boolean;
   started: boolean;
   overlayDone: boolean;
   autoFill?: { handle: string; password: string } | null;
+  onAnswerOnboarding: (phase: OnboardingPhase, value: string) => void;
+  onBackOnboarding: () => void;
+  currentObAnswer: string;
 }) {
   const FULL_TEXT    = 'Um lugar único. Milhões de possibilidades.';
   const MOBILE_TEXTS = ['Um lugar único.', 'Milhões de possibilidades.'] as const;
@@ -293,8 +311,19 @@ function RippleButton({
     setRipples(r => [...r, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
     setTimeout(() => setRipples(r => r.filter(rp => rp.id !== id)), 700);
     onTap();
-    startPhaseAnim('user');
-  }, [loginPhase, onTap, startPhaseAnim]);
+    // Animação do typewriter "Usuário" é disparada via useEffect quando loginPhase muda pra 'user'.
+    // Isso cobre tanto tap direto (sem onboarding) quanto saída do onboarding pra 'user'.
+  }, [loginPhase, onTap]);
+
+  // Dispara a animação do typewriter quando entra em 'user' pela primeira vez.
+  // Cobre o caso de transição direta (sem onboarding) E saída do onboarding.
+  const userPhaseAnimedRef = useRef(false);
+  useEffect(() => {
+    if (loginPhase === 'user' && !userPhaseAnimedRef.current && !autoFill) {
+      userPhaseAnimedRef.current = true;
+      startPhaseAnim('user');
+    }
+  }, [loginPhase, startPhaseAnim, autoFill]);
 
   const submitOrAdvance = useCallback(() => {
     if (!inputVal.trim()) return;
@@ -366,6 +395,15 @@ function RippleButton({
   }, []);
 
   const isLogin = loginPhase !== 'idle';
+  const isOb = loginPhase.startsWith('ob-');
+  const isObCnpj = loginPhase === 'ob-cnpj';
+  const obPhase: OnboardingPhase | null = isOb ? (loginPhase as OnboardingPhase) : null;
+  const obOptions: readonly string[] = obPhase && obPhase !== 'ob-cnpj' ? OB_PHASE_OPTIONS[obPhase as Exclude<OnboardingPhase, 'ob-cnpj'>] : [];
+  const obQuestion = obPhase ? OB_PHASE_LABELS[obPhase] : '';
+  const obStepIdx = obPhase ? OB_PHASES_ORDER.indexOf(obPhase) : -1;
+  const [cnpjDraft, setCnpjDraft] = useState<string>('');
+  // Quando entra em ob-cnpj, semeia o draft com o valor salvo (caso usuário tenha voltado)
+  useEffect(() => { if (isObCnpj) setCnpjDraft(currentObAnswer); }, [isObCnpj, currentObAnswer]);
   const kbOpen  = kbHeight > 0;
 
   const lupaSize   = isMobile ? 60 : 48;
@@ -393,7 +431,7 @@ function RippleButton({
         animate={controls}
         onClick={handleClick}
         whileTap={!isLogin && introDone ? { scale: 0.994 } : {}}
-        className="login-btn relative w-full rounded-[20px] sm:rounded-[20px] px-6 py-5 min-h-[84px] sm:min-h-[88px] flex items-center overflow-hidden outline-none"
+        className={`login-btn relative w-full rounded-[20px] sm:rounded-[20px] px-6 py-5 flex overflow-hidden outline-none ${isOb ? 'items-stretch flex-col' : 'items-center'}`}
         style={{
           cursor: isLogin ? 'default' : 'pointer',
           background: '#F5F1EA',
@@ -401,6 +439,8 @@ function RippleButton({
           boxShadow: '0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5), 0 0 80px rgba(245,241,234,0.06), inset 0 0 24px rgba(28,23,18,0.07), inset 0 2px 8px rgba(28,23,18,0.05)',
           touchAction: 'manipulation',
           outline: 'none',
+          minHeight: isOb ? (isObCnpj ? 280 : 460) : (isMobile ? 84 : 88),
+          transition: 'min-height 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
         {ripples.map(rp => (
@@ -432,6 +472,115 @@ function RippleButton({
 
         {introDone && (<>
 
+          {/* ── Onboarding ── pergunta + opções no mesmo container ───────── */}
+          {isOb && obPhase && (
+            <div
+              className="relative w-full flex flex-col gap-3 z-20"
+              style={{ color: '#1C1712', fontFamily: "'Inter', sans-serif", ...TEXT_SHADOW }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header — voltar + indicador de passos */}
+              <div className="flex items-center justify-between">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => { e.stopPropagation(); onBackOnboarding(); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onBackOnboarding(); } }}
+                  className="flex items-center gap-1 text-[12px] font-medium opacity-60 hover:opacity-100 cursor-pointer transition-opacity"
+                  style={{ color: '#1C1712' }}
+                >
+                  <span aria-hidden>‹</span> {obStepIdx === 0 ? 'Cancelar' : 'Voltar'}
+                </div>
+                <div className="flex gap-1.5">
+                  {OB_PHASES_ORDER.map((_, i) => (
+                    <span
+                      key={i}
+                      className="block rounded-full transition-all"
+                      style={{
+                        width: i === obStepIdx ? 18 : 6,
+                        height: 6,
+                        background: i <= obStepIdx ? '#1C1712' : 'rgba(28,23,18,0.18)',
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Pergunta */}
+              <h3
+                className="text-left"
+                style={{ fontSize: isMobile ? 20 : 24, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.2, marginTop: 4 }}
+              >
+                {obQuestion}
+              </h3>
+
+              {/* Opções ou input CNPJ */}
+              {isObCnpj ? (
+                <div className="flex flex-col gap-3 mt-1">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="00.000.000/0000-00 (opcional)"
+                    value={cnpjDraft}
+                    onChange={(e) => setCnpjDraft(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        onAnswerOnboarding('ob-cnpj', cnpjDraft.trim());
+                      }
+                    }}
+                    className="bg-white/40 outline-none rounded-xl px-4 py-3 w-full"
+                    style={{
+                      color: '#1C1712',
+                      WebkitTextFillColor: '#1C1712',
+                      fontSize: isMobile ? 16 : 18,
+                      fontWeight: 400,
+                      caretColor: '#B8913A',
+                      border: '1px solid rgba(28,23,18,0.12)',
+                    }}
+                  />
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); onAnswerOnboarding('ob-cnpj', cnpjDraft.trim()); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAnswerOnboarding('ob-cnpj', cnpjDraft.trim()); } }}
+                    className="self-end inline-flex items-center gap-1 px-4 py-2 rounded-xl text-[14px] font-semibold cursor-pointer transition-all"
+                    style={{ background: '#1C1712', color: '#F5F1EA' }}
+                  >
+                    Continuar <ChevronRight size={16} />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1.5 mt-1 overflow-y-auto" style={{ maxHeight: isMobile ? 280 : 320 }}>
+                  {obOptions.map((opt) => {
+                    const selected = opt === currentObAnswer;
+                    return (
+                      <div
+                        key={opt}
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => { e.stopPropagation(); onAnswerOnboarding(obPhase, opt); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAnswerOnboarding(obPhase, opt); } }}
+                        className="text-left rounded-xl px-4 py-3 cursor-pointer transition-all flex items-center justify-between"
+                        style={{
+                          background: selected ? 'rgba(28,23,18,0.12)' : 'rgba(255,255,255,0.45)',
+                          border: selected ? '1px solid rgba(28,23,18,0.3)' : '1px solid rgba(28,23,18,0.08)',
+                          color: '#1C1712',
+                          fontSize: isMobile ? 15 : 16,
+                          fontWeight: 400,
+                        }}
+                      >
+                        <span>{opt}</span>
+                        {selected && <Check size={16} style={{ color: '#1C1712' }} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Idle — typewriter */}
           {loginPhase === 'idle' && (
             <div style={{ position: 'absolute', left: 24, right: isMobile ? 84 : 80, top: '50%', transform: 'translateY(-50%)', direction: 'ltr', textAlign: 'left', overflow: 'hidden', whiteSpace: 'nowrap' }}>
@@ -445,7 +594,7 @@ function RippleButton({
           )}
 
           {/* Fases user/pass — typewriter + input */}
-          {loginPhase !== 'idle' && (() => {
+          {(loginPhase === 'user' || loginPhase === 'pass') && (() => {
             const target = loginPhase === 'user' ? 'Usuário' : 'Senha';
             const isDone = phaseTyped.length >= target.length;
             return (
@@ -480,7 +629,7 @@ function RippleButton({
           })()}
 
           {/* Lupa fases login — clicável (vira spinner enquanto autentica) */}
-          {loginPhase !== 'idle' && (
+          {(loginPhase === 'user' || loginPhase === 'pass') && (
             <div
               className={`absolute ${isMobile ? 'right-4' : 'right-6'} top-1/2 -translate-y-1/2 z-10 ${loginLoading ? 'cursor-default' : 'cursor-pointer'}`}
               style={{ color: '#1C1712', filter: LUPA_SHADOW }}
@@ -612,7 +761,36 @@ export default function LoginScreen({ onAuthenticated, autoLogin }: Props) {
     onAuthenticated(token, selectedBiz);
   }
 
-  const [loginPhase, setLoginPhase] = useState<'idle'|'user'|'pass'>('idle');
+  const [loginPhase, setLoginPhase] = useState<LoginPhase>('idle');
+  // Snapshot do onboarding já salvo no localStorage (carregado uma vez no mount)
+  const [obAnswers, setObAnswers] = useState<Partial<OnboardingContext>>(() => loadOnboarding());
+
+  // ── Onboarding helpers (precisa estar DEPOIS dos states acima) ────────────
+  function isObPhase(p: LoginPhase): p is OnboardingPhase { return p.startsWith('ob-'); }
+  function nextObPhaseAfter(current: OnboardingPhase): OnboardingPhase | 'user' {
+    const idx = OB_PHASES_ORDER.indexOf(current);
+    return idx >= 0 && idx < OB_PHASES_ORDER.length - 1 ? OB_PHASES_ORDER[idx + 1] : 'user';
+  }
+  function prevObPhaseOf(current: OnboardingPhase): OnboardingPhase | 'idle' {
+    const idx = OB_PHASES_ORDER.indexOf(current);
+    return idx > 0 ? OB_PHASES_ORDER[idx - 1] : 'idle';
+  }
+  function answerOnboarding(phase: OnboardingPhase, value: string) {
+    const field = OB_PHASE_FIELD[phase];
+    saveOnboardingField(field, value);
+    const next = { ...obAnswers, [field]: value };
+    setObAnswers(next);
+    const persisted = saveOnboardingContext(next);
+    setObAnswers(persisted);
+    setLoginPhase(nextObPhaseAfter(phase));
+  }
+  function backOnboarding() {
+    if (!isObPhase(loginPhase)) return;
+    setLoginPhase(prevObPhaseOf(loginPhase));
+  }
+  const currentObAnswer: string = isObPhase(loginPhase)
+    ? (obAnswers[OB_PHASE_FIELD[loginPhase]] ?? '')
+    : '';
   const [lightBrowser, setLightBrowser] = useState(false);
   const pendingAuth = useRef<{ tkn: string; nid: string } | null>(null);
   const [containerError, setContainerError] = useState('');
@@ -698,6 +876,9 @@ export default function LoginScreen({ onAuthenticated, autoLogin }: Props) {
 
   function handleContainerTap() {
     if (loginPhase !== 'idle') return;
+    // App vai direto pro login. Onboarding (perguntas da empresa) fica SÓ no
+    // fluxo Clientes do site (Fase 3, em ~/codify/omni/convite/index.html),
+    // que é a jornada de compra. App é pra quem já é cliente/colaborador.
     setLoginPhase('user');
   }
 
@@ -776,6 +957,9 @@ export default function LoginScreen({ onAuthenticated, autoLogin }: Props) {
         started={gifStarted}
         overlayDone={overlayDone}
         autoFill={autoLogin ? { handle: ROLE_TO_HANDLE[autoLogin.role] ?? autoLogin.role, password: '1234' } : null}
+        onAnswerOnboarding={answerOnboarding}
+        onBackOnboarding={backOnboarding}
+        currentObAnswer={currentObAnswer}
       />
 
       {/* Erro de login — mensagem inline embaixo do container */}

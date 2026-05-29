@@ -32,10 +32,12 @@ export const AFFILIATE_TAB_DATA = {
   ],
 };
 
+// Nomes das unidades conectadas exibidos para o Perfil Central.
+// Chave do export mantida (compat de import); valores atualizados pra nova linguagem.
 export const FRANCHISOR_FRANCHISE_NAMES = [
-  'Franquia Paulista',
-  'Franquia Morumbi',
-  'Franquia Campinas',
+  'Unidade Paulista',
+  'Unidade Morumbi',
+  'Unidade Campinas',
 ];
 
 export type PartnerSoldCompany = {

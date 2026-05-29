@@ -1,6 +1,21 @@
 import React, { useRef, useState, useEffect, useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw, Plus, Monitor } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw, Plus, Monitor, Sparkles, Send, Target, FileText, LayoutGrid, BarChart3, Layers, Bell, Scissors, FolderOpen, Bot } from 'lucide-react';
+import {
+  dispatchBrowserAction,
+  recordVisit,
+  saveEvidence,
+  buildMission,
+  buildFeedCard,
+  buildSessionReport,
+  // P4 novas
+  buildTabComparison,
+  addWatcher,
+  captureSnippet,
+  quickAddToSectorDossier,
+  buildSectorAgentAnswer,
+  type BrowserActionContext,
+} from '../lib/browser-actions';
 import { libcurl as _libcurl } from 'libcurl.js';
 import { DesktopView } from './DesktopView';
 
@@ -89,6 +104,108 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
   const [desktopEnabled, setDesktopEnabled] = useState(false);
   // Detecta página de bloqueio do Google (captcha / unusual traffic).
   const [googleBlocked, setGoogleBlocked] = useState(false);
+  // Fase 5 — menu de Ações universais do navegador (5 funções)
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<string>('');
+  const actionFeedbackTimerRef = useRef<number | null>(null);
+  function flashFeedback(msg: string) {
+    setActionFeedback(msg);
+    if (actionFeedbackTimerRef.current) window.clearTimeout(actionFeedbackTimerRef.current);
+    actionFeedbackTimerRef.current = window.setTimeout(() => setActionFeedback(''), 2400) as unknown as number;
+  }
+  async function captureContext(): Promise<BrowserActionContext> {
+    const wv = webviewRefs.current.get(activeId) as any;
+    const url = wv?.getURL?.() || activeTab?.url || '';
+    const title = wv?.getTitle?.() || activeTab?.title || '';
+    let capturedText = '';
+    try {
+      const txt = await wv?.executeJavaScript?.(
+        'try { (document.body && document.body.innerText) ? document.body.innerText.slice(0, 2000) : "" } catch(e){ "" }'
+      );
+      if (typeof txt === 'string') capturedText = txt;
+    } catch { /* webview indisponível ou bloqueado por CSP — segue sem texto */ }
+    return { url, title, capturedText, capturedAt: new Date().toISOString(), origin: 'navegador' };
+  }
+  type BrowserActionId =
+    | 'send-to-workspace' | 'create-mission' | 'save-evidence' | 'generate-feed-card' | 'analyze-session'
+    | 'compare-tabs' | 'monitor-page' | 'capture-snippet' | 'create-dossier' | 'ask-sector-agent';
+  async function runAction(type: BrowserActionId) {
+    setActionsOpen(false);
+    if (activeTab && activeTab.url === DESKTOP_URL) {
+      flashFeedback('Sem URL ativa nesta aba');
+      return;
+    }
+    const ctx = await captureContext();
+    if (!ctx.url || !/^https?:\/\//i.test(ctx.url)) {
+      flashFeedback('Página não-navegável');
+      return;
+    }
+    if (type === 'save-evidence') {
+      const ev = saveEvidence(ctx, {});
+      dispatchBrowserAction({ type, context: ctx, payload: ev });
+      flashFeedback('Evidência salva');
+      return;
+    }
+    if (type === 'create-mission') {
+      const m = buildMission(ctx, {});
+      dispatchBrowserAction({ type, context: ctx, payload: m });
+      flashFeedback('Missão proposta enviada');
+      return;
+    }
+    if (type === 'generate-feed-card') {
+      const fc = buildFeedCard(ctx, {});
+      dispatchBrowserAction({ type, context: ctx, payload: fc });
+      flashFeedback('Card adicionado ao feed');
+      return;
+    }
+    if (type === 'analyze-session') {
+      const r = buildSessionReport({});
+      dispatchBrowserAction({ type, context: ctx, payload: r });
+      flashFeedback('Sessão analisada');
+      return;
+    }
+    // ── P4: novas 5 ──
+    if (type === 'compare-tabs') {
+      const cmp = buildTabComparison();
+      dispatchBrowserAction({ type, context: ctx, payload: cmp });
+      flashFeedback('Comparação de abas enviada');
+      return;
+    }
+    if (type === 'monitor-page') {
+      const w = addWatcher(ctx, 'mudança');
+      dispatchBrowserAction({ type, context: ctx, payload: w });
+      flashFeedback('Monitoramento desta página ativado');
+      return;
+    }
+    if (type === 'capture-snippet') {
+      // Tenta pegar texto selecionado pelo user (no Electron, executeJavaScript ainda funciona)
+      let selectedText = '';
+      try {
+        const wv = webviewRefs.current.get(activeId) as any;
+        const sel = await wv?.executeJavaScript?.('window.getSelection()?.toString() || ""');
+        if (typeof sel === 'string') selectedText = sel;
+      } catch { /* ignore */ }
+      const ev = captureSnippet(ctx, { selectedText });
+      dispatchBrowserAction({ type, context: ctx, payload: ev });
+      flashFeedback(selectedText ? 'Trecho selecionado salvo' : 'Trecho da página salvo');
+      return;
+    }
+    if (type === 'create-dossier') {
+      const d = quickAddToSectorDossier(ctx);
+      dispatchBrowserAction({ type, context: ctx, payload: d as any });
+      flashFeedback(`Página adicionada ao "${d.nome}"`);
+      return;
+    }
+    if (type === 'ask-sector-agent') {
+      const a = buildSectorAgentAnswer(ctx);
+      dispatchBrowserAction({ type, context: ctx, payload: a });
+      flashFeedback('Pergunta enviada ao agente do setor');
+      return;
+    }
+    // default: send-to-workspace
+    dispatchBrowserAction({ type, context: ctx });
+    flashFeedback('Enviado para Área de Trabalho');
+  }
 
   const activeTab = tabs.find(t => t.id === activeId) ?? tabs[0];
   const isDesktopTab = activeTab?.url === DESKTOP_URL;
@@ -133,7 +250,16 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
     });
 
     const onStart = () => update({ loading: true });
-    const onStop = () => { update({ loading: false }); refreshNav(); };
+    const onStop = () => {
+      update({ loading: false });
+      refreshNav();
+      // Registra visita pra alimentar análise de sessão (Fase 5, F5).
+      try {
+        const u = (wv as any).getURL?.() || wv.src || '';
+        const t = (wv as any).getTitle?.() || '';
+        if (u && !u.startsWith('about:')) recordVisit(u, t);
+      } catch { /* ignore */ }
+    };
     const onNavigate = (e: any) => {
       const url = e.url || '';
       if (url && !url.startsWith('about:')) {
@@ -307,6 +433,68 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
             placeholder={isDesktopTab ? 'Desktop ativo — digite uma URL pra abrir um site' : 'Endereço ou busca...'} />
         </div>
 
+        {/* Fase 5 — Botão Ações universais do navegador (5 funções OS¹) */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <button
+            onClick={() => setActionsOpen(o => !o)}
+            title="OS¹ — ações sobre a página atual"
+            style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', transition: 'all 0.15s',
+              ...(actionsOpen ? btnActive : btnBase) }}>
+            <Sparkles size={15} strokeWidth={1.8} />
+          </button>
+          {actionsOpen && (
+            <>
+              {/* clique fora fecha o menu */}
+              <div onClick={() => setActionsOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 49, background: 'transparent' }} />
+              <div style={{
+                position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 50,
+                width: 280, background: '#0f0f10',
+                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14,
+                boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+                padding: 6, color: '#d0d0d0',
+              }}>
+                <div style={{ padding: '8px 12px 6px', fontSize: 10, letterSpacing: '0.12em',
+                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>OS¹ · Ações</div>
+                {[
+                  { id: 'send-to-workspace', label: 'Enviar para Área de Trabalho', Icon: Send },
+                  { id: 'create-mission',    label: 'Transformar em missão',         Icon: Target },
+                  { id: 'save-evidence',     label: 'Salvar como evidência',         Icon: FileText },
+                  { id: 'generate-feed-card', label: 'Gerar card no feed',           Icon: LayoutGrid },
+                  { id: 'analyze-session',   label: 'Analisar sessão inteira',       Icon: BarChart3 },
+                  { id: 'compare-tabs',      label: 'Comparar abas abertas',         Icon: Layers },
+                  { id: 'monitor-page',      label: 'Monitorar página',              Icon: Bell },
+                  { id: 'capture-snippet',   label: 'Capturar trecho',               Icon: Scissors },
+                  { id: 'create-dossier',    label: 'Criar dossiê',                  Icon: FolderOpen },
+                  { id: 'ask-sector-agent',  label: 'Perguntar ao agente do setor',  Icon: Bot },
+                ].map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => runAction(id as any)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+                      background: 'transparent', border: 'none', color: '#d0d0d0',
+                      fontSize: 13, textAlign: 'left', transition: 'background 0.12s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <Icon size={14} strokeWidth={1.8} style={{ color: 'rgba(255,255,255,0.55)', flexShrink: 0 }} />
+                    <span style={{ flex: 1 }}>{label}</span>
+                  </button>
+                ))}
+                <div style={{ padding: '10px 12px 8px', fontSize: 10, color: 'rgba(255,255,255,0.32)',
+                  borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: 4, lineHeight: 1.4 }}>
+                  Você controla o que o OS¹ salva. As ações são manuais e nada é capturado sem você clicar.
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Abrir no navegador externo do SO (Safari/Chrome padrão) */}
         <button
           onClick={() => {
@@ -378,6 +566,21 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
             </div>
           );
         })}
+
+        {/* Toast de feedback das ações OS¹ (Fase 5) */}
+        {actionFeedback && (
+          <div style={{
+            position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 6, background: 'rgba(20,20,22,0.94)',
+            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12,
+            padding: '10px 16px', display: 'inline-flex', alignItems: 'center', gap: 8,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.92)',
+            fontSize: 13, fontWeight: 500,
+          }}>
+            <Sparkles size={13} strokeWidth={2} style={{ color: '#fbbf24' }} />
+            {actionFeedback}
+          </div>
+        )}
 
         {/* Overlay amigável quando Google bloqueia com captcha (não burla — só oferece saída) */}
         {googleBlocked && !isDesktopTab && (
@@ -604,6 +807,71 @@ function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncC
   const didInitRef = useRef(false);
   const currentUrlRef = useRef(initialUrl); // URL atual para deduplicação
   const lm = lightMode;
+  // ── Menu OS¹ Ações (10 funções) — mesmo do ElectronBrowser, sem executeJavaScript
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<string>('');
+  const actionFeedbackTimerRef = useRef<number | null>(null);
+  function flashFeedback(msg: string) {
+    setActionFeedback(msg);
+    if (actionFeedbackTimerRef.current) window.clearTimeout(actionFeedbackTimerRef.current);
+    actionFeedbackTimerRef.current = window.setTimeout(() => setActionFeedback(''), 2400) as unknown as number;
+  }
+  function getIframeCtx(): BrowserActionContext {
+    const url = currentUrlRef.current || inputVal || '';
+    // No web (CORS) não conseguimos ler innerText do iframe — capturedText fica vazio.
+    return { url, title: '', capturedText: '', capturedAt: new Date().toISOString(), origin: 'navegador' };
+  }
+  type BrowserActionId =
+    | 'send-to-workspace' | 'create-mission' | 'save-evidence' | 'generate-feed-card' | 'analyze-session'
+    | 'compare-tabs' | 'monitor-page' | 'capture-snippet' | 'create-dossier' | 'ask-sector-agent';
+  function runAction(type: BrowserActionId) {
+    setActionsOpen(false);
+    const ctx = getIframeCtx();
+    if (!ctx.url || !/^https?:\/\//i.test(ctx.url)) { flashFeedback('Página não-navegável'); return; }
+    if (type === 'save-evidence') {
+      const ev = saveEvidence(ctx, {});
+      dispatchBrowserAction({ type, context: ctx, payload: ev });
+      flashFeedback('Evidência salva'); return;
+    }
+    if (type === 'create-mission') {
+      dispatchBrowserAction({ type, context: ctx, payload: buildMission(ctx, {}) });
+      flashFeedback('Missão proposta enviada'); return;
+    }
+    if (type === 'generate-feed-card') {
+      dispatchBrowserAction({ type, context: ctx, payload: buildFeedCard(ctx, {}) });
+      flashFeedback('Card adicionado ao feed'); return;
+    }
+    if (type === 'analyze-session') {
+      dispatchBrowserAction({ type, context: ctx, payload: buildSessionReport({}) });
+      flashFeedback('Sessão analisada'); return;
+    }
+    if (type === 'compare-tabs') {
+      dispatchBrowserAction({ type, context: ctx, payload: buildTabComparison() });
+      flashFeedback('Comparação de abas enviada'); return;
+    }
+    if (type === 'monitor-page') {
+      addWatcher(ctx, 'mudança');
+      dispatchBrowserAction({ type, context: ctx });
+      flashFeedback('Monitoramento ativado'); return;
+    }
+    if (type === 'capture-snippet') {
+      captureSnippet(ctx, {});
+      dispatchBrowserAction({ type, context: ctx });
+      flashFeedback('Trecho da página salvo'); return;
+    }
+    if (type === 'create-dossier') {
+      const d = quickAddToSectorDossier(ctx);
+      dispatchBrowserAction({ type, context: ctx });
+      flashFeedback(`Página adicionada ao "${d.nome}"`); return;
+    }
+    if (type === 'ask-sector-agent') {
+      dispatchBrowserAction({ type, context: ctx, payload: buildSectorAgentAnswer(ctx) });
+      flashFeedback('Pergunta enviada ao agente do setor'); return;
+    }
+    // default: send-to-workspace
+    dispatchBrowserAction({ type, context: ctx });
+    flashFeedback('Enviado para Área de Trabalho');
+  }
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -774,6 +1042,62 @@ function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncC
           <ExternalLink size={15} strokeWidth={1.8} />
         </button>
 
+        {/* Botão OS¹ Ações (10 funções) — antes do "Ir" e do "Sincronizar" */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <button
+            onClick={() => setActionsOpen(o => !o)}
+            title="OS¹ — ações sobre a página atual"
+            style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', transition: 'all 0.15s',
+              ...(actionsOpen ? btnActive : btnBase) }}>
+            <Sparkles size={15} strokeWidth={1.8} />
+          </button>
+          {actionsOpen && (
+            <>
+              <div onClick={() => setActionsOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 49, background: 'transparent' }} />
+              <div style={{
+                position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 50,
+                width: 300, background: '#0f0f10', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 14, boxShadow: '0 24px 60px rgba(0,0,0,0.6)', padding: 6, color: '#d0d0d0',
+              }}>
+                <div style={{ padding: '8px 12px 6px', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>OS¹ · Ações</div>
+                {[
+                  { id: 'send-to-workspace', label: 'Enviar para Área de Trabalho', Icon: Send },
+                  { id: 'create-mission',    label: 'Transformar em missão',         Icon: Target },
+                  { id: 'save-evidence',     label: 'Salvar como evidência',         Icon: FileText },
+                  { id: 'generate-feed-card', label: 'Gerar card no feed',           Icon: LayoutGrid },
+                  { id: 'analyze-session',   label: 'Analisar sessão inteira',       Icon: BarChart3 },
+                  { id: 'compare-tabs',      label: 'Comparar abas abertas',         Icon: Layers },
+                  { id: 'monitor-page',      label: 'Monitorar página',              Icon: Bell },
+                  { id: 'capture-snippet',   label: 'Capturar trecho',               Icon: Scissors },
+                  { id: 'create-dossier',    label: 'Criar dossiê',                  Icon: FolderOpen },
+                  { id: 'ask-sector-agent',  label: 'Perguntar ao agente do setor',  Icon: Bot },
+                ].map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => runAction(id as any)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+                      background: 'transparent', border: 'none', color: '#d0d0d0',
+                      fontSize: 13, textAlign: 'left', transition: 'background 0.12s ease',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <Icon size={14} strokeWidth={1.8} style={{ color: 'rgba(255,255,255,0.55)', flexShrink: 0 }} />
+                    <span style={{ flex: 1 }}>{label}</span>
+                  </button>
+                ))}
+                <div style={{ padding: '10px 12px 8px', fontSize: 10, color: 'rgba(255,255,255,0.32)', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: 4, lineHeight: 1.4 }}>
+                  Você controla o que o OS¹ salva. As ações são manuais.
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Botão Ir */}
         <button onClick={() => navigate(inputVal)}
           style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
@@ -800,6 +1124,20 @@ function IframeBrowser({ initialUrl, lightMode = false, syncing = false, onSyncC
       </div>
 
       <div className="flex-1 relative min-h-0" style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>
+        {/* Toast feedback das ações OS¹ */}
+        {actionFeedback && (
+          <div style={{
+            position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 20, background: 'rgba(20,20,22,0.94)',
+            border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12,
+            padding: '10px 16px', display: 'inline-flex', alignItems: 'center', gap: 8,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.92)',
+            fontSize: 13, fontWeight: 500,
+          }}>
+            <Sparkles size={13} strokeWidth={2} style={{ color: '#fbbf24' }} />
+            {actionFeedback}
+          </div>
+        )}
         {(loading || isInit) && (
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none"
             style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}>

@@ -7,7 +7,14 @@ import { CompetitiveMap } from './maps/CompetitiveMap';
 // Backup do Leaflet em backup/leaflet-original/MarketMap.tsx
 
 interface ButtonProps { bioOpen: boolean; onHome: () => void; onMap: () => void; }
-interface ContentProps { open: boolean; onClose: () => void; competitors: Competitor[]; onCompetitorClick?: (c: Competitor) => void; }
+interface ContentProps {
+  open: boolean;
+  onClose: () => void;
+  competitors: Competitor[];
+  onCompetitorClick?: (c: Competitor) => void;
+  sector?: string;
+  businessName?: string;
+}
 
 export function MarketMapButton({ bioOpen, onHome: _onHome, onMap }: ButtonProps) {
   if (!bioOpen) return null;
@@ -21,7 +28,7 @@ export function MarketMapButton({ bioOpen, onHome: _onHome, onMap }: ButtonProps
   );
 }
 
-export function MarketMapContent({ open, onClose, competitors }: ContentProps) {
+export function MarketMapContent({ open, onClose, competitors, sector, businessName }: ContentProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -29,7 +36,7 @@ export function MarketMapContent({ open, onClose, competitors }: ContentProps) {
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <CompetitiveMap competitors={competitors} onClose={onClose} />
+      <CompetitiveMap competitors={competitors} onClose={onClose} sector={sector} businessName={businessName} />
     </motion.div>
   );
 }

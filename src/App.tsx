@@ -272,6 +272,10 @@ function AuthenticatedApp() {
   }, []);
   const touchStartY = useRef(0);
   const scrollCooldownRef = useRef(false);
+  // P3: marca quando a primeira rolagem encaixou no split view.
+  // Antes do primeiro encaixe, a rolagem PARA no split (não passa direto).
+  // Depois, scroll segue natural.
+  const firstScrollSplitDoneRef = useRef(false);
   const [storyIndex, setStoryIndex] = useState<number | null>(null);
   const [evolucaoOpen, setEvolucaoOpen] = useState(false);
   const [empresaOpen, setEmpresaOpen] = useState(false);
@@ -321,6 +325,10 @@ function AuthenticatedApp() {
   const [consentAccepted, setConsentAccepted] = useState(true);
   const [consentChecks, setConsentChecks] = useState({ termos: false, navegador: false, lido: false });
   const [browserOpen, setBrowserOpen] = useState(false);
+  // Fase 5 — cards gerados pelo navegador interno (Função 4 / Função 5)
+  const [browserFeedCards, setBrowserFeedCards] = useState<RoleFeedCard[]>([]);
+  // Fase 6 — cards gerados pelo Mapa Competitivo (F1 + outras saídas com `tipo='card'`)
+  const [mapFeedCards, setMapFeedCards] = useState<RoleFeedCard[]>([]);
   const [esferaOpen, setEsferaOpen] = useState(false);
   const ESFERA_URL = '/esfera-ontologica.html';
   const [sectorOpen, setSectorOpen] = useState(false);
@@ -389,6 +397,349 @@ function AuthenticatedApp() {
     risco_erro:      c.urgencia === 'alta' ? 0.6 : c.urgencia === 'media' ? 0.4 : 0.2,
     _synthetic:      true,
   });
+
+  // ─── Fase 5: ponte BrowserView → workspace/feed ─────────────────────────
+  // Listener escuta 'os1:browser-action' (disparado pelo BrowserView) e roteia
+  // pra workspace (F1/F2/F5) ou injeta no feed (F4). F3 já salva localStorage.
+  useEffect(() => {
+    function handler(e: Event) {
+      const ce = e as CustomEvent<{
+        type: 'send-to-workspace' | 'create-mission' | 'save-evidence' | 'generate-feed-card' | 'analyze-session'
+            | 'compare-tabs' | 'monitor-page' | 'capture-snippet' | 'create-dossier' | 'ask-sector-agent';
+        context: { url: string; title: string; capturedText?: string; capturedAt: string };
+        payload?: any;
+      }>;
+      const d = ce.detail;
+      if (!d) return;
+      const sector = activeSector || 'os1';
+      const fechaUrl = d.context.url;
+      const synthBase = {
+        id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        confianca: 'media' as const,
+        confianca_score: 0.5,
+        impacto: 'a avaliar',
+        risco_erro: 0.4,
+        _synthetic: true as const,
+      };
+      if (d.type === 'send-to-workspace') {
+        const card: IntelligenceCard = {
+          ...synthBase,
+          titulo: d.context.title || 'Página do navegador',
+          resumo: (d.context.capturedText || 'Conteúdo capturado do navegador interno.').slice(0, 280),
+          por_que_importa: `Origem: ${fechaUrl}`,
+          onde_afeta: sector,
+          o_que_fazer: 'Decidir próxima ação (missão, card no feed, descarte).',
+          dominio: sector,
+          area: sector,
+          urgencia: 'media',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setBrowserOpen(false);
+        return;
+      }
+      if (d.type === 'create-mission') {
+        const m = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          titulo: m?.titulo ?? 'Missão sugerida',
+          resumo: m?.objetivo ?? '',
+          por_que_importa: `Evidência: ${fechaUrl}`,
+          onde_afeta: sector,
+          o_que_fazer: (m?.etapas ?? []).join(' · '),
+          dominio: sector,
+          area: 'missao',
+          urgencia: 'media',
+          tipo_card: 'missao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setBrowserOpen(false);
+        return;
+      }
+      if (d.type === 'analyze-session') {
+        const r = d.payload;
+        const sinais = (r?.sinaisDetectados ?? []).join(' · ');
+        const card: IntelligenceCard = {
+          ...synthBase,
+          titulo: 'Análise da sessão de navegação',
+          resumo: r?.resumo ?? 'Resumo da sessão atual.',
+          por_que_importa: sinais,
+          onde_afeta: sector,
+          o_que_fazer: (r?.proximosPassos ?? []).join(' · '),
+          dominio: sector,
+          area: 'analise',
+          urgencia: 'baixa',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setBrowserOpen(false);
+        return;
+      }
+      if (d.type === 'generate-feed-card') {
+        const fc = d.payload;
+        const newCard: RoleFeedCard = {
+          id: fc?.id ?? `bfc-${Date.now()}`,
+          titulo: fc?.titulo ?? 'Card do navegador',
+          resumo: fc?.resumo ?? '',
+          tipo: 'informacao',
+          urgencia: fc?.urgencia ?? 'media',
+          tags: ['navegador', sector],
+        };
+        setBrowserFeedCards(prev => [newCard, ...prev]);
+        return;
+      }
+      // 'save-evidence', 'monitor-page', 'capture-snippet', 'create-dossier':
+      // já persistem em localStorage no próprio BrowserView; aqui são silenciosos.
+
+      // P4: comparação de abas → workspace
+      if (d.type === 'compare-tabs') {
+        const cmp = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: 'Comparação de abas abertas',
+          resumo: cmp?.resumo ?? '',
+          por_que_importa: (cmp?.diferencas ?? []).slice(0, 4).join(' · '),
+          onde_afeta: sector,
+          o_que_fazer: cmp?.recomendacao ?? '',
+          dominio: sector,
+          area: 'comparacao',
+          urgencia: 'baixa',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setBrowserOpen(false);
+        return;
+      }
+      // P4: agente do setor → workspace
+      if (d.type === 'ask-sector-agent') {
+        const a = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: a?.agente ?? 'Agente do setor',
+          resumo: a?.analise ?? '',
+          por_que_importa: (a?.observacoes ?? []).join(' · '),
+          onde_afeta: sector,
+          o_que_fazer: (a?.proximosPassos ?? []).join(' · '),
+          dominio: sector,
+          area: 'agente',
+          urgencia: 'baixa',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setBrowserOpen(false);
+        return;
+      }
+    }
+    window.addEventListener('os1:browser-action', handler as EventListener);
+    return () => window.removeEventListener('os1:browser-action', handler as EventListener);
+  }, [activeSector]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Fase 6: ponte Mapa Competitivo → workspace/feed ────────────────────
+  useEffect(() => {
+    function handler(e: Event) {
+      const ce = e as CustomEvent<{
+        type: 'feed-from-radius' | 'analyze-competition' | 'find-opportunities' | 'compare-regions' | 'territory-to-mission' | 'monitor-territory' | 'risk-map' | 'sector-opportunities' | 'nearby-partners' | 'simulate-territory-action';
+        context: { center: { lat: number; lng: number }; radius: number; sector: string };
+        payload?: any;
+      }>;
+      const d = ce.detail;
+      if (!d) return;
+      const sector = (d.context.sector || activeSector || 'os1');
+      const synthBase = {
+        confianca: 'media' as const,
+        confianca_score: 0.5,
+        impacto: 'a avaliar',
+        risco_erro: 0.4,
+        _synthetic: true as const,
+      };
+
+      // F1 — Gerar feed do raio: injeta múltiplos cards no feed
+      if (d.type === 'feed-from-radius') {
+        const cards = (d.payload ?? []) as Array<{
+          id: string; titulo: string; resumo: string; urgencia: 'alta'|'media'|'baixa'; dominio: string;
+        }>;
+        const novos: RoleFeedCard[] = cards.map(c => ({
+          id: c.id,
+          titulo: c.titulo,
+          resumo: c.resumo,
+          tipo: 'informacao',
+          urgencia: c.urgencia,
+          tags: ['mapa', sector, c.dominio].filter(Boolean) as string[],
+        }));
+        setMapFeedCards(prev => [...novos, ...prev]);
+        return;
+      }
+
+      // F2 — Analisar concorrência local: card pra workspace
+      if (d.type === 'analyze-competition') {
+        const a = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: 'Análise de concorrência local',
+          resumo: a?.resumo ?? 'Análise gerada pelo mapa.',
+          por_que_importa: `Riscos: ${(a?.riscos ?? []).join(' · ')}`,
+          onde_afeta: sector,
+          o_que_fazer: a?.recomendacao ?? '',
+          dominio: sector,
+          area: 'concorrencia',
+          urgencia: 'media',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+
+      // F3 — Encontrar oportunidades
+      if (d.type === 'find-opportunities') {
+        const op = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: 'Oportunidades no território',
+          resumo: op?.resumo ?? 'Oportunidades detectadas no raio.',
+          por_que_importa: (op?.oportunidades ?? []).slice(0, 3).join(' · '),
+          onde_afeta: sector,
+          o_que_fazer: op?.acaoRecomendada ?? '',
+          dominio: sector,
+          area: 'oportunidade',
+          urgencia: 'media',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+
+      // F4 — Comparar regiões
+      if (d.type === 'compare-regions') {
+        const cmp = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: `Comparação ${cmp?.regiaoA?.label ?? 'A'} vs ${cmp?.regiaoB?.label ?? 'B'}`,
+          resumo: cmp?.resumo ?? 'Comparação de regiões.',
+          por_que_importa: `A: ${cmp?.regiaoA?.total ?? 0} (★ ${(cmp?.regiaoA?.avg ?? 0).toFixed?.(1) ?? '0.0'}, densidade ${cmp?.regiaoA?.densidade}) · B: ${cmp?.regiaoB?.total ?? 0} (★ ${(cmp?.regiaoB?.avg ?? 0).toFixed?.(1) ?? '0.0'}, densidade ${cmp?.regiaoB?.densidade})`,
+          onde_afeta: sector,
+          o_que_fazer: cmp?.recomendacao ?? '',
+          dominio: sector,
+          area: 'territorio',
+          urgencia: 'baixa',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+
+      // F5 — Transformar território em missão
+      if (d.type === 'territory-to-mission') {
+        const m = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: m?.titulo ?? 'Missão territorial sugerida',
+          resumo: m?.objetivo ?? '',
+          por_que_importa: m?.contextoTerritorial ?? '',
+          onde_afeta: sector,
+          o_que_fazer: (m?.etapas ?? []).join(' · '),
+          dominio: sector,
+          area: 'missao',
+          urgencia: 'media',
+          tipo_card: 'missao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+      // ── P5: 5 novas ──
+      if (d.type === 'monitor-territory') {
+        // Silencioso — só persiste em LS. Mapa continua aberto pro user seguir.
+        return;
+      }
+      if (d.type === 'risk-map') {
+        const r = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: 'Mapa de risco territorial',
+          resumo: r?.resumo ?? '',
+          por_que_importa: (r?.riscos ?? []).slice(0, 3).map((x: any) => `${x.nivel.toUpperCase()}: ${x.tipo}`).join(' · '),
+          onde_afeta: sector,
+          o_que_fazer: r?.recomendacao ?? '',
+          dominio: sector,
+          area: 'risco',
+          urgencia: ((r?.riscos ?? []).some((x: any) => x.nivel === 'alto') ? 'alta' : 'media') as 'alta' | 'media',
+          tipo_card: 'alerta',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+      if (d.type === 'sector-opportunities') {
+        const op = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: `Oportunidades para ${sector}`,
+          resumo: op?.resumo ?? '',
+          por_que_importa: (op?.oportunidades ?? []).slice(0, 3).map((x: any) => `${x.tipo}: ${x.descricao}`).join(' · '),
+          onde_afeta: sector,
+          o_que_fazer: op?.acaoRecomendada ?? '',
+          dominio: sector,
+          area: 'oportunidade',
+          urgencia: 'media',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+      if (d.type === 'nearby-partners') {
+        const np = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: 'Parceiros/fornecedores próximos',
+          resumo: np?.resumo ?? '',
+          por_que_importa: (np?.candidatos ?? []).slice(0, 3).map((x: any) => `${x.nome} (${x.tipo})`).join(' · '),
+          onde_afeta: sector,
+          o_que_fazer: np?.recomendacao ?? '',
+          dominio: sector,
+          area: 'parceiros',
+          urgencia: 'baixa',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+      if (d.type === 'simulate-territory-action') {
+        const s = d.payload;
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: `Simulação: ${s?.acao ?? 'ação territorial'}`,
+          resumo: s?.resumo ?? '',
+          por_que_importa: `Conservador: ${s?.cenarios?.conservador?.metrica} · Provável: ${s?.cenarios?.provavel?.metrica} · Agressivo: ${s?.cenarios?.agressivo?.metrica}`,
+          onde_afeta: sector,
+          o_que_fazer: s?.proximaAcao ?? '',
+          dominio: sector,
+          area: 'simulacao',
+          urgencia: 'media',
+          tipo_card: 'informacao',
+        };
+        openWorkspaceFromCard(card, 'utilizar');
+        setMapOpen(false);
+        return;
+      }
+    }
+    window.addEventListener('os1:map-action', handler as EventListener);
+    return () => window.removeEventListener('os1:map-action', handler as EventListener);
+  }, [activeSector]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Abre o WorkspacePanel a partir de um card real do feed.
   // Registra a interação correspondente (best-effort, não bloqueia abertura).
@@ -497,11 +848,21 @@ function AuthenticatedApp() {
   useEffect(() => {
     if (!scrolled) {
       document.body.style.overflow = 'hidden';
+      // P3: aplica cooldown ao encaixar split pela primeira vez — impede
+      // que rolagens agressivas passem direto pelo split e levem o feed
+      // pra baixo de imediato.
+      const lockSplit = () => {
+        setScrolled(true);
+        setBioOpen(false);
+        firstScrollSplitDoneRef.current = true;
+        scrollCooldownRef.current = true;
+        window.setTimeout(() => { scrollCooldownRef.current = false; }, 750);
+      };
       const onWheel = (e: WheelEvent) => {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
         if (e.deltaY > 5) {
           if (!bioOpenRef.current) { setBioOpen(true); }
-          else { setScrolled(true); setBioOpen(false); }
+          else { lockSplit(); }
         }
       };
       const onTouchStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
@@ -509,7 +870,7 @@ function AuthenticatedApp() {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
         if (touchStartY.current - e.touches[0].clientY > 15) {
           if (!bioOpenRef.current) { setBioOpen(true); }
-          else { setScrolled(true); setBioOpen(false); }
+          else { lockSplit(); }
         }
       };
       window.addEventListener('wheel', onWheel);
@@ -779,6 +1140,11 @@ function AuthenticatedApp() {
           </button>
         </div>
       )}
+
+      {/* P2: máscara de topo — cobre a faixa acima do nav (sticky top-3/4 + margens
+          laterais mx-4/5) pra o feed não atravessar visualmente quando scrolla.
+          pointer-events-none mantém clique passando pra navbar. */}
+      <div className="fixed top-0 inset-x-0 z-[49] h-3 sm:h-4 pointer-events-none bg-[#0a0a0a] dark:bg-[#0a0a0a]" />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
       <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
@@ -1156,12 +1522,12 @@ function AuthenticatedApp() {
         // Determina quais cards mostrar
         let cards: RoleFeedCard[] = [];
 
-        // Cards do franchisor por aba
+        // Cards do franchisor por aba (cards do navegador e do mapa entram em todas as abas).
         if (role === 'franchisor') {
           const relevantCards = filterFranchisorCardsByTab(roleConfig.feedCards, activeRoleTab);
-          cards = relevantCards.filter(c => !dismissedCards.has(c.id));
+          cards = [...mapFeedCards, ...browserFeedCards, ...relevantCards].filter(c => !dismissedCards.has(c.id));
         } else {
-          cards = roleConfig.feedCards.filter(c => !dismissedCards.has(c.id));
+          cards = [...mapFeedCards, ...browserFeedCards, ...roleConfig.feedCards].filter(c => !dismissedCards.has(c.id));
         }
 
         const urgenciaColor = (u: string) => u === 'alta' ? '#ef4444' : u === 'media' ? '#f59e0b' : '#6b7280';
@@ -1454,7 +1820,7 @@ function AuthenticatedApp() {
 
       {/* Modal Mapa do Mercado */}
       <AnimatePresence>
-        {mapOpen && <MarketMapContent open={mapOpen} onClose={() => setMapOpen(false)} competitors={data.concorrentes} onCompetitorClick={setSelectedConcorrente} />}
+        {mapOpen && <MarketMapContent open={mapOpen} onClose={() => setMapOpen(false)} competitors={data.concorrentes} onCompetitorClick={setSelectedConcorrente} sector={activeSector} businessName={data.negocio?.nome_fantasia} />}
       </AnimatePresence>
 
 
