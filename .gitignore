@@ -8,3 +8,8 @@ dist/
 .vercel
 dist-electron/
 .env.local
+
+# Native module artifacts (rebuild local com node-gyp / @electron/rebuild)
+electron/native/*/build/
+electron/native/*/bin/
+electron/native/**/*.node

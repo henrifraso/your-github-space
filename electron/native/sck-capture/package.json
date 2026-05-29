@@ -1,0 +1,8 @@
+{
+  "name": "sck-capture",
+  "version": "0.0.1",
+  "private": true,
+  "description": "SPIKE: ScreenCaptureKit nativo p/ Electron com exclusão da própria janela.",
+  "main": "build/Release/sck_capture.node",
+  "gypfile": true
+}

@@ -1,18 +1,43 @@
 import React, { useRef, useState, useEffect, useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw, Plus } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, RotateCcw, ExternalLink, Globe, RefreshCw, Plus, Monitor } from 'lucide-react';
 import { libcurl as _libcurl } from 'libcurl.js';
+import { DesktopView } from './DesktopView';
 
 declare global {
   interface Window {
     electron?: {
       isElectron: boolean;
+      platform?: string;
       captureNavigation: (data: { url: string; title: string; ts: number }) => void;
       saveOffline: (key: string, data: unknown) => Promise<{ ok: boolean; file?: string }>;
       onNavigationUpdate: (cb: (data: unknown) => void) => void;
+      openExternal?: (url: string) => Promise<boolean>;
+      desktop?: {
+        isEnabled: () => Promise<boolean>;
+        listSources: () => Promise<{ ok: boolean; reason?: string; message?: string; sources: any[]; displays?: any[]; hostDisplayId?: string | null; primaryDisplayId?: string | null; windowState?: { isMaximized: boolean; isFullScreen: boolean; isMinimized: boolean; compactModeActive: boolean } | null }>;
+        getPrimaryDisplay: () => Promise<any>;
+        openSystemScreenPrefs: () => Promise<boolean>;
+        hideWindow: () => Promise<boolean>;
+        showWindow: () => Promise<boolean>;
+        setCompactMode: (enable: boolean) => Promise<boolean>;
+        isCompactMode: () => Promise<boolean>;
+        getWindowState: () => Promise<{ isMaximized: boolean; isFullScreen: boolean; isMinimized: boolean; isAlwaysOnTop: boolean; bounds: { x: number; y: number; width: number; height: number }; displayCount: number; compactModeActive: boolean } | null>;
+      };
+      sck?: {
+        status: () => Promise<{ enabled: boolean; available: boolean; loadError: string | null; platform: string; pid: number; isMacOS: boolean }>;
+        listContent: () => Promise<{ ok: boolean; error?: string; windows?: any[]; displays?: any[]; selfWindowIds?: number[]; selfPid?: number }>;
+        start: (opts?: { fps?: number; scale?: number; jpegQuality?: number }) => Promise<{ ok: boolean; error?: string; selfWindowIds?: number[]; targetDisplayId?: number }>;
+        stop: () => Promise<{ ok: boolean; error?: string }>;
+        getFrame: () => Promise<Uint8Array | null>;
+        getStats: () => Promise<{ running: boolean; frameCount: number; latestSize: number; available: boolean }>;
+      };
     };
   }
 }
+
+// URL sentinela: representa a "tela do desktop real". Não navega — apenas marca a aba como modo desktop.
+const DESKTOP_URL = 'omni://desktop';
 
 // webview é um elemento Chromium/Electron — React já tem tipos parciais; usamos any no ref
 type WebviewElement = HTMLElement & {
@@ -61,11 +86,38 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
   const [inputVal, setInputVal] = useState(initialUrl);
   const webviewRefs = useRef<Map<string, WebviewElement>>(new Map());
   const inputRef = useRef<HTMLInputElement>(null);
+  const [desktopEnabled, setDesktopEnabled] = useState(false);
+  // Detecta página de bloqueio do Google (captcha / unusual traffic).
+  const [googleBlocked, setGoogleBlocked] = useState(false);
 
   const activeTab = tabs.find(t => t.id === activeId) ?? tabs[0];
+  const isDesktopTab = activeTab?.url === DESKTOP_URL;
 
-  // Sincroniza input com a aba ativa
-  useEffect(() => { setInputVal(activeTab?.url ?? ''); }, [activeId]);
+  // Detecta se ALGUMA flag de Desktop está ligada (Capture/Control/SCK).
+  // Default: false (pausado em 2026-05-28). Quando off:
+  //  • botão Monitor não aparece
+  //  • DesktopView não monta
+  //  • aba que está em omni://desktop é forçada de volta pra google.com
+  useEffect(() => {
+    let cancelled = false;
+    window.electron?.desktop?.isEnabled?.().then(enabled => {
+      if (!cancelled) {
+        setDesktopEnabled(!!enabled);
+        if (!enabled) {
+          // Defesa em profundidade: limpa qualquer aba persistida em omni://desktop.
+          setTabs(prev => prev.map(t => t.url === DESKTOP_URL ? { ...t, url: 'https://www.google.com', title: 'google.com', loading: true } : t));
+        }
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  // Sincroniza input com a aba ativa — vazio na aba desktop.
+  useEffect(() => {
+    if (!activeTab) return;
+    setInputVal(activeTab.url === DESKTOP_URL ? '' : activeTab.url);
+    setGoogleBlocked(/google\.[a-z.]+\/sorry/i.test(activeTab.url) || /\/recaptcha\//i.test(activeTab.url));
+  }, [activeId, activeTab?.url]);
 
   // Registra eventos de uma webview quando ela é montada
   const bindWebview = useCallback((id: string, wv: WebviewElement | null) => {
@@ -87,7 +139,11 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
       if (url && !url.startsWith('about:')) {
         update({ url });
         setTabs(prev => prev.map(t => t.id === id && id === activeId ? { ...t, url } : t));
-        if (id === activeId) setInputVal(url);
+        if (id === activeId) {
+          setInputVal(url);
+          // Detecta página de captcha/bloqueio do Google (.com/.com.br/qualquer TLD).
+          setGoogleBlocked(/google\.[a-z.]+\/sorry/i.test(url) || /\/recaptcha\//i.test(url));
+        }
       }
       refreshNav();
       if (url && window.electron) {
@@ -126,16 +182,32 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
   }
 
   function navigate(target: string) {
-    const resolved = normalizeUrl(target);
+    const trimmed = target.trim();
+    // URL vazia + flag ligada → modo desktop. Sem navegar.
+    if (!trimmed && desktopEnabled) {
+      goDesktop();
+      return;
+    }
+    const resolved = normalizeUrl(trimmed);
     if (!resolved) return;
     webviewRefs.current.get(activeId)?.loadURL?.(resolved);
-    setTabs(prev => prev.map(t => t.id === activeId ? { ...t, url: resolved, loading: true } : t));
+    setTabs(prev => prev.map(t => t.id === activeId ? { ...t, url: resolved, loading: true, title: 'Carregando...', favicon: '' } : t));
     setInputVal(resolved);
+  }
+
+  function goDesktop() {
+    // Marca a aba ativa como modo desktop. Não chama loadURL — o <webview> é desmontado pelo render condicional.
+    setTabs(prev => prev.map(t => t.id === activeId ? { ...t, url: DESKTOP_URL, title: 'Desktop', loading: false, favicon: '', canGoBack: false, canGoFwd: false } : t));
+    setInputVal('');
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') { navigate(inputVal); inputRef.current?.blur(); }
-    if (e.key === 'Escape') { setInputVal(activeTab?.url ?? ''); inputRef.current?.blur(); }
+    if (e.key === 'Escape') {
+      const cur = activeTab?.url === DESKTOP_URL ? '' : (activeTab?.url ?? '');
+      setInputVal(cur);
+      inputRef.current?.blur();
+    }
   }
 
   const wv = webviewRefs.current.get(activeId);
@@ -200,30 +272,48 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
         borderBottom: '1px solid rgba(255,255,255,0.05)',
         display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
       }}>
+        {/* Botão Desktop — só se a feature flag estiver ligada */}
+        {desktopEnabled && (
+          <button onClick={goDesktop} title="Mostrar tela real do desktop"
+            style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', transition: 'all 0.15s',
+              ...(isDesktopTab ? btnActive : btnBase) }}>
+            <Monitor size={16} strokeWidth={1.8} />
+          </button>
+        )}
+
         {/* URL input */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10,
           paddingLeft: 16, paddingRight: 16, height: 52, borderRadius: 16,
           background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-          {activeTab?.loading
-            ? <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
-                border: '1.5px solid rgba(255,255,255,0.12)',
-                borderTopColor: 'rgba(255,255,255,0.55)',
-                animation: 'spin 0.7s linear infinite' }} />
-            : activeTab?.favicon
-              ? <img src={activeTab.favicon} style={{ width: 17, height: 17, flexShrink: 0 }} alt=""
-                  onError={e => (e.currentTarget.style.display = 'none')} />
-              : <Globe size={17} style={{ color: '#464646', flexShrink: 0 }} />
+          {isDesktopTab
+            ? <Monitor size={17} style={{ color: '#464646', flexShrink: 0 }} />
+            : activeTab?.loading
+              ? <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+                  border: '1.5px solid rgba(255,255,255,0.12)',
+                  borderTopColor: 'rgba(255,255,255,0.55)',
+                  animation: 'spin 0.7s linear infinite' }} />
+              : activeTab?.favicon
+                ? <img src={activeTab.favicon} style={{ width: 17, height: 17, flexShrink: 0 }} alt=""
+                    onError={e => (e.currentTarget.style.display = 'none')} />
+                : <Globe size={17} style={{ color: '#464646', flexShrink: 0 }} />
           }
           <input ref={inputRef} value={inputVal}
             onChange={e => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
             style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: '#d0d0d0', fontSize: 15, minWidth: 0 }}
-            placeholder="Endereço ou busca..." />
+            placeholder={isDesktopTab ? 'Desktop ativo — digite uma URL pra abrir um site' : 'Endereço ou busca...'} />
         </div>
 
-        {/* Nova aba */}
-        <button onClick={() => openTab(inputVal)}
+        {/* Abrir no navegador externo do SO (Safari/Chrome padrão) */}
+        <button
+          onClick={() => {
+            const u = activeTab?.url && activeTab.url !== DESKTOP_URL ? activeTab.url : (inputVal && normalizeUrl(inputVal)) || '';
+            if (u && /^https?:\/\//i.test(u)) window.electron?.openExternal?.(u);
+          }}
+          title="Abrir esta página no navegador externo do sistema"
           style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', transition: 'all 0.15s', ...btnBase }}>
@@ -257,21 +347,89 @@ function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
 
       {/* ── Webviews — uma por aba, mostrar/ocultar via CSS ────────── */}
       <div className="flex-1 relative min-h-0 bg-[#0a0a0a]">
-        {tabs.map(tab => (
-          <div
-            key={tab.id}
-            style={{ position: 'absolute', inset: 0, display: tab.id === activeId ? 'flex' : 'none' }}>
-            {/* @ts-ignore */}
-            <webview
-              ref={(el: any) => bindWebview(tab.id, el)}
-              src={tab.url}
-              partition="persist:omni-browser"
-              disablewebsecurity
-              allowpopups
-              style={{ width: '100%', height: '100%', display: 'flex' }}
-            />
+        {tabs.map(tab => {
+          const isDesktop = tab.url === DESKTOP_URL;
+          // Desktop só monta se a flag estiver ligada. Pausado em 2026-05-28.
+          if (isDesktop && !desktopEnabled) {
+            return (
+              <div key={tab.id}
+                style={{ position: 'absolute', inset: 0, display: tab.id === activeId ? 'flex' : 'none' }} />
+            );
+          }
+          return (
+            <div
+              key={tab.id}
+              style={{ position: 'absolute', inset: 0, display: tab.id === activeId ? 'flex' : 'none' }}>
+              {isDesktop ? (
+                <DesktopView />
+              ) : (
+                // @ts-ignore — <webview> é elemento nativo do Electron, tipos parciais
+                // Sem disablewebsecurity: preserva SameSite, Trust Tokens, COOP/COEP.
+                // UA setado tanto via `useragent` aqui quanto via `ses.setUserAgent` no main (defesa em profundidade).
+                <webview
+                  ref={(el: any) => bindWebview(tab.id, el)}
+                  src={tab.url}
+                  partition="persist:omni-browser"
+                  useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                  allowpopups
+                  style={{ width: '100%', height: '100%', display: 'flex' }}
+                />
+              )}
+            </div>
+          );
+        })}
+
+        {/* Overlay amigável quando Google bloqueia com captcha (não burla — só oferece saída) */}
+        {googleBlocked && !isDesktopTab && (
+          <div style={{
+            position: 'absolute', top: 12, left: 12, right: 12, zIndex: 5,
+            background: 'rgba(20, 20, 22, 0.96)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 14, padding: '14px 16px',
+            display: 'flex', alignItems: 'center', gap: 14,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.45)'
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: 'rgba(245, 158, 11, 0.15)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
+              <Globe size={18} style={{ color: '#fbbf24' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ color: '#f5f5f5', fontSize: 13, fontWeight: 600, margin: 0, marginBottom: 2 }}>
+                O Google pediu verificação
+              </p>
+              <p style={{ color: '#a3a3a3', fontSize: 12, margin: 0, lineHeight: 1.4 }}>
+                Você pode concluir manualmente aqui ou abrir no navegador externo.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const u = activeTab?.url;
+                if (u && /^https?:\/\//i.test(u)) window.electron?.openExternal?.(u);
+              }}
+              style={{
+                padding: '8px 14px', borderRadius: 10, flexShrink: 0,
+                background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+                color: '#f5f5f5', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', gap: 6
+              }}>
+              <ExternalLink size={13} strokeWidth={1.8} />
+              Abrir no navegador externo
+            </button>
+            <button
+              onClick={() => setGoogleBlocked(false)}
+              title="Fechar aviso"
+              style={{
+                width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                color: '#737373', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+              <X size={15} strokeWidth={1.8} />
+            </button>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
