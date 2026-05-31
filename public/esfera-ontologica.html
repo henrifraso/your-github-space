@@ -188,6 +188,20 @@
 <canvas id="c"></canvas>
 <div id="tip"></div>
 
+<div id="emptyMsg" style="
+  display:none; position:fixed; inset:0; z-index:15;
+  align-items:center; justify-content:center; flex-direction:column; gap:14px;
+  pointer-events:none; color:rgba(255,255,255,0.55); text-align:center;
+">
+  <div style="font-family:'Orbitron',monospace; font-size:14px; letter-spacing:0.14em; color:rgba(255,255,255,0.45);">
+    NENHUM TERMO COMBINA COM OS FILTROS
+  </div>
+  <div style="font-size:11px; max-width:340px; opacity:0.6; font-family:'Inter',sans-serif;">
+    Tente afrouxar a busca ou trocar a sensibilidade.
+    Domínios pequenos podem não ter termos de todos os níveis.
+  </div>
+</div>
+
 <div id="topbar" style="display:none;">
   <input id="searchInput" type="text" placeholder="Buscar termo…" autocomplete="off" />
   <select id="areaFilter"><option value="">Todas as áreas</option></select>
@@ -327,8 +341,13 @@ function applyFilters(){
     ids.add(t.id);
   }
   visibleSet = (q||area||dom||sens) ? ids : null;
-  document.getElementById('count').textContent =
-    (visibleSet ? ids.size : ONTOLOGY_TERMS.length) + ' termos';
+  const cnt = visibleSet ? ids.size : ONTOLOGY_TERMS.length;
+  const countEl = document.getElementById('count');
+  countEl.textContent = cnt + ' termos';
+  countEl.style.color = cnt === 0 ? '#ef4444' : 'rgba(255,255,255,0.55)';
+  // Mensagem visual quando filtro zera resultados
+  const empty = document.getElementById('emptyMsg');
+  if (empty) empty.style.display = cnt === 0 ? 'flex' : 'none';
   rebuildVisualArray();
   rebuildSlots();
 }

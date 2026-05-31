@@ -86,7 +86,9 @@ import { CircleProgress, PieChart } from './components/CircleProgress';
 import { StoryViewer } from './components/StoryViewer';
 import { ConcorrenteModal } from './components/ConcorrenteModal';
 import { BrowserView } from './components/BrowserView';
+import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
+import type { CompanyDiagnosticPayload } from './components/ChatPanel';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -741,6 +743,28 @@ function AuthenticatedApp() {
     return () => window.removeEventListener('os1:map-action', handler as EventListener);
   }, [activeSector]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ─── Diagnóstico Ontológico → feed ──────────────────────────────────────
+  // Quando user clica "Enviar cards ao feed" no painel de diagnóstico,
+  // os cards entram em mapFeedCards (mesma infra de cards locais).
+  useEffect(() => {
+    function handler(e: Event) {
+      const ce = e as CustomEvent<any[]>;
+      const cards = ce.detail || [];
+      const sector = activeSector || 'os1';
+      const novos: RoleFeedCard[] = cards.map((c: any) => ({
+        id: c.id,
+        titulo: c.titulo,
+        resumo: c.resumo,
+        tipo: c.tipo === 'risco' || c.tipo === 'lacuna' ? 'alerta' : 'informacao',
+        urgencia: c.urgencia,
+        tags: ['ontologia', sector, c.dominio].filter(Boolean) as string[],
+      }));
+      setMapFeedCards(prev => [...novos, ...prev]);
+    }
+    window.addEventListener('os1:ontology-diagnosis-cards-to-feed', handler as EventListener);
+    return () => window.removeEventListener('os1:ontology-diagnosis-cards-to-feed', handler as EventListener);
+  }, [activeSector]);
+
   // Abre o WorkspacePanel a partir de um card real do feed.
   // Registra a interação correspondente (best-effort, não bloqueia abertura).
   const openWorkspaceFromCard = (card: IntelligenceCard, intent: WorkspaceIntent) => {
@@ -776,6 +800,102 @@ function AuthenticatedApp() {
       setScrolled(true);
     }
   };
+
+  // Envia o Diagnóstico da empresa pra Área de Trabalho como bloco — NÃO abre
+  // overlay sobre o feed. Roda a análise local, monta card sintético + payload
+  // e usa o mesmo canal de openWorkspaceFromCard (setWorkspaceContext).
+  const openDiagnosisInWorkspace = async () => {
+    try {
+      const diag = await runFullDiagnosis({
+        role,
+        activeSector,
+        businessName: data?.negocio?.nome_fantasia,
+      });
+
+      // Resumo de áreas fortes/lacunas vem dos arrays já estruturados pelo motor.
+      const strongDomains = diag.strongestDomains || [];
+      const weakDomains   = diag.weakestDomains   || [];
+      const gaps          = diag.criticalGaps     || [];
+      const risks         = diag.domains
+        .filter(d => d.status === 'risco' || d.riskLevel === 'alto' || d.riskLevel === 'critico')
+        .slice(0, 6)
+        .map(d => `${d.dominio} — risco ${d.riskLevel}${d.requerValidacaoHumana ? ' (revisar com responsável)' : ''}`)
+        .filter(Boolean);
+      const opportunities = diag.opportunities || [];
+      const nextSteps     = diag.recommendedActions || [];
+
+      const payload: CompanyDiagnosticPayload = {
+        summary: diag.summary || 'Leitura inicial da empresa com base nos dados disponíveis.',
+        strongDomains,
+        weakDomains,
+        gaps,
+        risks,
+        opportunities,
+        nextSteps,
+        maturityScore: diag.maturityScore,
+        legalNotice: LEGAL_NOTICE,
+      };
+
+      const businessName = data?.negocio?.nome_fantasia || 'sua empresa';
+      const ts = Date.now();
+      const card: IntelligenceCard = {
+        id: `ontodiag-summary-${ts}`,
+        titulo: 'Diagnóstico da empresa',
+        resumo: `Com base nos dados disponíveis de ${businessName}, o OS¹ identificou pontos fortes, lacunas, riscos potenciais e oportunidades de ação.`,
+        dominio: 'Diagnóstico',
+        area: 'Diagnóstico',
+        confianca: 'média',
+        confianca_score: 0.7,
+        impacto: 'estrutural',
+        risco_erro: 0.2,
+        tipo_card: 'diagnostico',
+        urgencia: 'media',
+        o_que_fazer: nextSteps[0] || 'Revisar áreas fortes e lacunas antes de definir prioridade.',
+        por_que_importa: 'Diagnóstico estrutural ajuda a priorizar onde investir nas próximas semanas.',
+        onde_afeta: strongDomains.length || weakDomains.length
+          ? `Áreas fortes: ${strongDomains.slice(0,3).join(', ') || '—'}. Lacunas: ${weakDomains.slice(0,3).join(', ') || '—'}.`
+          : 'Estrutura geral da empresa.',
+        _synthetic: true,
+      };
+
+      // Fecha a esfera antes de transferir o foco pra Área de Trabalho.
+      setEsferaOpen(false);
+
+      workspaceSeqRef.current += 1;
+      setWorkspaceContext({
+        card,
+        intent: 'utilizar',
+        seq: workspaceSeqRef.current,
+        diagnostic: payload,
+      });
+
+      // Mesma orquestração de tela usada por openWorkspaceFromCard.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        setChatOpen(true);
+      } else {
+        setBioOpen(false);
+        setScrolled(true);
+      }
+    } catch (err) {
+      console.warn('[diag] falha ao rodar diagnóstico:', err);
+    }
+  };
+
+  // Listener postMessage: caso o iframe da esfera (ou outra origem confiável)
+  // queira disparar a Análise da empresa via postMessage. Filtra por tipo e
+  // origem (mesma janela ou subframe da mesma origem).
+  const openDiagnosisRef = useRef(openDiagnosisInWorkspace);
+  useEffect(() => { openDiagnosisRef.current = openDiagnosisInWorkspace; });
+  useEffect(() => {
+    const onMessage = (ev: MessageEvent) => {
+      const d = ev.data;
+      if (!d || typeof d !== 'object') return;
+      if (d.type !== 'OS1_ANALYZE_COMPANY') return;
+      void openDiagnosisRef.current();
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
 
   const handleUtilizar = (containerType: string, selected: boolean) => {
     setSelectedContainers(prev => {
@@ -1936,6 +2056,7 @@ function AuthenticatedApp() {
         onBrowser={() => setBrowserOpen(true)}
         onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         activeSector={activeSector}
+        userRole={role}
         workspaceContext={workspaceContext}
         dark={dark}
         onToggleTheme={toggleTheme}
@@ -1958,6 +2079,7 @@ function AuthenticatedApp() {
         onClose={() => setChatOpen(false)}
         workspaceContext={workspaceContext}
         activeSector={activeSector}
+        userRole={role}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
@@ -2222,8 +2344,28 @@ function AuthenticatedApp() {
             className="w-full h-full border-0"
             title="Esfera Ontológica"
           />
+          {/* Botão sobreposto: "Analisar empresa" + Fechar */}
+          <div className="fixed top-4 right-4 z-[310] flex items-center gap-2">
+            <button
+              onClick={() => { void openDiagnosisInWorkspace(); }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[rgba(184,145,58,0.16)] hover:bg-[rgba(184,145,58,0.28)] border border-[rgba(184,145,58,0.45)] text-white text-[12px] font-semibold shadow-2xl backdrop-blur transition-colors"
+            >
+              <Sparkles size={13} className="text-[#fbbf24]" />
+              Analisar minha empresa
+            </button>
+            <button
+              onClick={() => setEsferaOpen(false)}
+              className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-black/55 hover:bg-black/75 border border-white/10 text-white/70 hover:text-white backdrop-blur"
+              title="Fechar esfera"
+            >
+              <X size={14} />
+            </button>
+          </div>
         </div>
       )}
+
+      {/* Diagnóstico da empresa agora entra na Área de Trabalho via
+          openDiagnosisInWorkspace(); o antigo overlay foi removido. */}
 
       {/* Overlay de Consentimento */}
       {!consentAccepted && (

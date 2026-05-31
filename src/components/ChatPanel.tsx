@@ -10,9 +10,37 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
 import { ActionResult } from './WorkspacePanel';
 import { apiFetch } from '../api';
+import { WorkspaceTools, ToolBlockContent } from './WorkspaceTools';
+import type {
+  WorkspaceTool,
+  WorkspaceToolContext,
+  ToolOutput,
+  ToolMode,
+  ToolSource,
+} from '../lib/workspace-tools';
+import { isSensitiveDomain, inferSourceFromCardId } from '../lib/workspace-tools';
 
 // Card vindo do feed, anexado ao chat para alimentar o modo selecionado.
-export type WorkspaceContext = { card: IntelligenceCard; intent: WorkspaceIntent; seq: number };
+// `diagnostic` (opcional) carrega payload do Diagnóstico da empresa — quando
+// presente, ChatBody cria um bloco kind='diagnostico' em vez do bloco inicial
+// genérico. É como o resultado da Análise de Empresa entra na Área de Trabalho.
+export interface CompanyDiagnosticPayload {
+  summary: string;
+  strongDomains: string[];
+  weakDomains: string[];
+  gaps: string[];
+  risks: string[];
+  opportunities: string[];
+  nextSteps: string[];
+  maturityScore?: number;
+  legalNotice?: string;
+}
+export type WorkspaceContext = {
+  card: IntelligenceCard;
+  intent: WorkspaceIntent;
+  seq: number;
+  diagnostic?: CompanyDiagnosticPayload;
+};
 
 type Phase = 'init' | 'expanded' | 'selected';
 type MainKey = 'pesquisar' | 'executar' | 'aprender';
@@ -150,7 +178,7 @@ const MODE_LABEL: Record<MainKey, string> = {
 };
 
 // ── Bloco gerado por uma ação ─────────────────────────────────────────────────
-type BlockKind = 'standard' | 'initial' | 'share' | 'mode';
+type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico';
 
 const MODE_TITLES: Record<MainKey, string> = {
   pesquisar: 'Entendendo este sinal',
@@ -664,6 +692,26 @@ function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldade): Wor
   };
 }
 
+// Bloco de Diagnóstico da empresa — gerado quando "Analisar minha empresa"
+// é chamado a partir da Esfera. Renderizado como conteúdo estruturado
+// (resumo / áreas fortes / lacunas / riscos / oportunidades / próximos passos)
+// dentro do ChatPanel — NÃO abre overlay nem cobre o feed.
+function buildDiagnosticBlock(card: IntelligenceCard, payload: CompanyDiagnosticPayload, difficulty: Dificuldade): WorkspaceBlock {
+  return {
+    id:         `blk-diag-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    cardId:     card.id,
+    mode:       'pesquisar',
+    subKey:     'diagnostico',
+    subLabel:   'Diagnóstico da empresa',
+    endpoint:   null,
+    result:     payload as unknown as Record<string, unknown>,
+    difficulty,
+    pinned:     false,
+    createdAt:  new Date().toISOString(),
+    kind:       'diagnostico',
+  };
+}
+
 // Bloco com opções de compartilhamento (intent === 'compartilhar').
 function buildShareBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
   return {
@@ -968,7 +1016,7 @@ interface Message {
   block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchive, chatHistoryOpen, archivedSessions, onSelectHistorySession }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, chatHistoryOpen, archivedSessions, onSelectHistorySession }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -1059,9 +1107,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
 
     // 1) Card pequeno na conversa
     const cardMsg: Message = { id: `card-${seq}-${card.id}`, role: 'card', text: card.titulo, card };
-    // 2) Bloco inicial expandido (fallback local — usa dados do card)
-    const initialBlock = buildInitialBlock(card, dificuldade);
-    const initialMsg: Message = { id: initialBlock.id, role: 'block', text: initialBlock.subLabel, block: initialBlock };
+
+    // 2) Bloco principal:
+    //    - Se o contexto carrega payload de Diagnóstico → bloco de diagnóstico.
+    //    - Caso contrário → bloco inicial expandido padrão.
+    const mainBlock = workspaceContext.diagnostic
+      ? buildDiagnosticBlock(card, workspaceContext.diagnostic, dificuldade)
+      : buildInitialBlock(card, dificuldade);
+    const initialMsg: Message = { id: mainBlock.id, role: 'block', text: mainBlock.subLabel, block: mainBlock };
 
     const newMessages: Message[] = [cardMsg, initialMsg];
 
@@ -1164,6 +1217,51 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
     } catch { /* ignore */ }
   }
 
+  // Constrói o contexto da Área de Trabalho a partir do card e do bloco atual.
+  // Bloco "share", "tool" e "initial" não geram contexto.
+  // O perfil vem do userRole real do usuário; activeSector é só contexto de setor.
+  function buildToolCtx(card: IntelligenceCard | null, b: WorkspaceBlock | null): WorkspaceToolContext | null {
+    if (!card) return null;
+    const mode: ToolMode | undefined =
+      b?.kind === 'mode' || b?.kind === 'standard'
+        ? (b.mode === 'pesquisar' ? 'entender' : (b.mode as ToolMode))
+        : (b?.kind === 'share' ? 'compartilhar' : 'entender');
+    const source: ToolSource = inferSourceFromCardId(card.id) || 'feed';
+    return {
+      source,
+      mode,
+      role: userRole,
+      activeSector: activeSector,
+      domain: card.dominio,
+      areaMacro: card.area,
+      cardTitle: card.titulo,
+      cardSummary: card.resumo,
+      isSensitive: isSensitiveDomain(card.dominio, card.area),
+      urgency: card.urgencia,
+      tipo: card.tipo_card,
+    };
+  }
+
+  // Executa uma ferramenta da Área de Trabalho — cria um novo bloco com o
+  // resultado abaixo do bloco atual (não substitui o conteúdo anterior).
+  function handleRunTool(tool: WorkspaceTool, output: ToolOutput) {
+    const blockId = `tool-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const block: WorkspaceBlock = {
+      id: blockId,
+      cardId: activeCard?.id || '',
+      mode: 'executar',
+      subKey: tool.id,
+      subLabel: tool.label,
+      endpoint: 'executar',
+      result: output as unknown as Record<string, unknown>,
+      difficulty: dificuldade,
+      pinned: false,
+      createdAt: new Date().toISOString(),
+      kind: 'tool',
+    };
+    setMessages(prev => [...prev, { id: blockId, role: 'block', text: tool.label, block }]);
+  }
+
   // "Exemplos" no bloco: chama Aprender · exemplo pro mesmo card.
   function blockExamples() {
     const sub = SUB_BTNS.aprender.find(s => s.key === 'exemplo');
@@ -1261,7 +1359,12 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
             const isInitial = b.kind === 'initial';
             const isShare   = b.kind === 'share';
             const isMode    = b.kind === 'mode';
-            const headerColor = isInitial ? '#10b981' : isShare ? '#f59e0b' : isMode ? '#3b82f6' : '#3b82f6';
+            const isTool    = b.kind === 'tool';
+            const isDiag    = b.kind === 'diagnostico';
+            const headerColor = isDiag ? '#0ea5e9' : isInitial ? '#10b981' : isShare ? '#f59e0b' : isTool ? '#8b5cf6' : isMode ? '#3b82f6' : '#3b82f6';
+            // Tools aparecem em blocos com conteúdo gerado (mode, standard, diagnostico).
+            // Initial / share / tool não geram contêiner.
+            const toolCtx = !isShare && !isTool && !isInitial ? buildToolCtx(activeCard, b) : null;
             return (
               <motion.div
                 ref={isInitial ? firstBlockRef : undefined}
@@ -1274,15 +1377,15 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
                 <div className="max-w-[94%] w-full rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
                   <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
                     <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: headerColor }}>
-                      {isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : isMode ? MODE_LABEL[b.mode] : MODE_LABEL[b.mode]}
+                      {isDiag ? 'Análise da empresa' : isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : isTool ? 'Ferramenta da Área de Trabalho' : isMode ? MODE_LABEL[b.mode] : MODE_LABEL[b.mode]}
                     </span>
-                    {isMode && (
+                    {(isMode || isTool || isDiag) && (
                       <>
                         <span className="text-[10px] text-neutral-400">·</span>
                         <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{b.subLabel}</span>
                       </>
                     )}
-                    {!isInitial && !isShare && !isMode && (
+                    {!isInitial && !isShare && !isMode && !isTool && !isDiag && (
                       <>
                         <span className="text-[10px] text-neutral-400">·</span>
                         <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{b.subLabel}</span>
@@ -1299,6 +1402,10 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
                       <InitialBlockContent result={b.result} />
                     ) : isShare ? (
                       <ShareOptionsContent card={activeCard} />
+                    ) : isTool ? (
+                      <ToolBlockContent output={b.result as unknown as ToolOutput} />
+                    ) : isDiag ? (
+                      <DiagnosticBlockContent payload={b.result as unknown as CompanyDiagnosticPayload} />
                     ) : isMode ? (
                       <ModeBlockContent result={b.result} mode={b.mode} />
                     ) : (
@@ -1340,6 +1447,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
                       <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
                       <BlockCtrl Icon={Copy} label="Copiar tudo" onClick={() => copyBlock(b)} />
                     </div>
+                  ) : isTool ? (
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
+                      <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
+                      <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
+                    </div>
+                  ) : isDiag ? (
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
+                      <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
+                      <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
+                    </div>
                   ) : isMode ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
                       <ModeShortcuts
@@ -1374,6 +1491,9 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, onArchiv
                         if (sub) handleSubAction(mode, sub);
                       }} />
                     </div>
+                  )}
+                  {toolCtx && (
+                    <WorkspaceTools ctx={toolCtx} onRun={handleRunTool} defaultOpen={true} />
                   )}
                 </div>
               </motion.div>
@@ -1522,6 +1642,63 @@ function InitialBlockContent({ result }: { result: Record<string, unknown> }) {
   );
 }
 
+// Render do bloco de Diagnóstico da empresa.
+// 6 seções claras: resumo · áreas fortes · lacunas · riscos · oportunidades · próximos passos.
+// Linguagem de produto — sem jargão técnico de ontologia.
+function DiagnosticBlockContent({ payload }: { payload: CompanyDiagnosticPayload }) {
+  const sections: { label: string; items?: string[]; text?: string; emphasis?: boolean }[] = [
+    { label: 'Resumo',              text: payload.summary, emphasis: true },
+    { label: 'Áreas fortes',        items: payload.strongDomains },
+    { label: 'Lacunas',             items: payload.gaps },
+    { label: 'Riscos potenciais',   items: payload.risks },
+    { label: 'Oportunidades',       items: payload.opportunities },
+    { label: 'Próximos passos',     items: payload.nextSteps, emphasis: true },
+  ];
+  return (
+    <div className="space-y-3">
+      {typeof payload.maturityScore === 'number' && (
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-[#eff6ff] dark:bg-[#1e3a5f]/40 border border-[#bfdbfe] dark:border-[#3b82f6]/30">
+          <div className="flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#1e40af] dark:text-[#93c5fd]">Maturidade</p>
+            <p className="text-[11px] text-neutral-600 dark:text-neutral-300">Leitura geral da estrutura observada.</p>
+          </div>
+          <div className="text-[20px] font-bold tabular-nums text-[#1e40af] dark:text-[#93c5fd]">{payload.maturityScore}</div>
+        </div>
+      )}
+      {sections.map((s, idx) => {
+        const hasItems = s.items && s.items.length > 0;
+        const hasText  = !!s.text;
+        if (!hasItems && !hasText) return null;
+        return (
+          <div key={idx}>
+            <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-1">{s.label}</p>
+            {hasText && (
+              <p className={`text-[12px] leading-relaxed ${s.emphasis ? 'text-neutral-800 dark:text-neutral-200 font-medium' : 'text-neutral-600 dark:text-neutral-400'}`}>
+                {s.text}
+              </p>
+            )}
+            {hasItems && (
+              <ul className="flex flex-col gap-1">
+                {s.items!.map((item, i) => (
+                  <li key={i} className={`text-[12px] leading-relaxed pl-3 relative ${s.emphasis ? 'text-neutral-800 dark:text-neutral-200' : 'text-neutral-600 dark:text-neutral-300'}`}>
+                    <span className="absolute left-0 top-[0.45em] w-1 h-1 rounded-full bg-[#0ea5e9]" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
+      {payload.legalNotice && (
+        <div className="text-[10.5px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1.5 rounded-md border border-amber-200 dark:border-amber-800/40 leading-relaxed">
+          {payload.legalNotice}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Render do bloco de compartilhamento — 5 opções, cada uma copia/envia o texto formatado.
 function ShareOptionsContent({ card }: { card: IntelligenceCard | null }) {
   function fire(textBuilder: (c: IntelligenceCard) => string) {
@@ -1656,6 +1833,7 @@ interface ChatDesktopProps {
   onBrowser?: () => void;
   onDifficulty?: () => void;
   activeSector?: string;
+  userRole?: string;
   workspaceContext?: WorkspaceContext | null;
   dark?: boolean;
   onToggleTheme?: () => void;
@@ -1666,7 +1844,7 @@ interface ChatDesktopProps {
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
@@ -1705,7 +1883,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
       </div>
       </div>
       <div className="flex-1 min-h-0">
-        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
       </div>
     </div>
   );
@@ -1749,7 +1927,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 }
 
 export function ChatMobile({
-  open, onClose, workspaceContext, activeSector,
+  open, onClose, workspaceContext, activeSector, userRole,
   onSector, onBrowser, onDifficulty, unreadCount,
   dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive,
 }: {
@@ -1757,6 +1935,7 @@ export function ChatMobile({
   onClose: () => void;
   workspaceContext?: WorkspaceContext | null;
   activeSector?: string;
+  userRole?: string;
   onSector?: () => void;
   onBrowser?: () => void;
   onDifficulty?: () => void;
@@ -1818,7 +1997,7 @@ export function ChatMobile({
           </div>
           </div>
           <div className="flex-1 min-h-0">
-            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
+            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
           </div>
         </motion.div>
       )}
