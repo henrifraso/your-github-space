@@ -481,7 +481,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.22, ease: 'easeOut' }}
-                className="flex justify-start"
+                className="flex flex-col items-start gap-2.5"
               >
                 <div className="max-w-[94%] w-full rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
                   <WorkspaceBlockHeader
@@ -587,10 +587,12 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       }} />
                     </div>
                   )}
-                  {toolCtx && (
-                    <WorkspaceTools ctx={toolCtx} onRun={handleRunTool} defaultOpen={true} />
-                  )}
                 </div>
+                {toolCtx && (
+                  <div className="max-w-[94%] w-full">
+                    <WorkspaceTools ctx={toolCtx} onRun={handleRunTool} defaultOpen={true} />
+                  </div>
+                )}
               </motion.div>
             );
           }

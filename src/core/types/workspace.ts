@@ -77,3 +77,35 @@ export interface WorkspaceTool {
   profile?: string[];      // perfis específicos (codify/franchisor/franchise/affiliate/partner)
   template: (ctx: WorkspaceToolContext) => ToolOutput;
 }
+
+// ── Shortcuts (atalhos compactos da Área de Trabalho) ───────────────
+// Sob o bloco gerado aparece 1-3 atalhos no formato:
+//   [Tipo] Frase curta descritiva. CTA →
+//
+// Tipos:
+//   - dado:        somente leitura (não clicável). Mostra um indício ou número.
+//   - referencia:  abre exemplo/benchmark/padrão comparável.
+//   - ferramenta:  abre uma função prática (simulador, checklist, calculadora).
+//   - atalho:      executa caminho rápido de trabalho (criar plano, missão, ...).
+//   - conexao:     mostra fornecedores/parceiros/contatos/opções externas.
+export type ShortcutKind = 'dado' | 'referencia' | 'ferramenta' | 'atalho' | 'conexao';
+
+export interface WorkspaceShortcut {
+  id: string;
+  kind: ShortcutKind;
+  /** Frase curta descritiva (1 linha, foco no que faz e por quê). */
+  tagline: string;
+  /** Texto do call-to-action (ex.: "Abrir simulador"). Omitido se kind='dado'. */
+  cta?: string;
+  /** Áreas/setores onde o atalho faz sentido. ['*'] = universal. */
+  appliesTo?: string[];
+  sensitive?: boolean;
+  source?: ToolSource[];
+  modes?: ToolMode[];
+  profile?: string[];
+  /**
+   * Gerador do bloco que aparece abaixo quando o usuário clica.
+   * Atalhos do tipo 'dado' não têm template (não são clicáveis).
+   */
+  template?: (ctx: WorkspaceToolContext) => ToolOutput;
+}
