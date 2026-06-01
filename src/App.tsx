@@ -1227,7 +1227,7 @@ function AuthenticatedApp() {
                   </>
                 ) : (
                   <>
-                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                <div className="flex items-center gap-1.5 -ml-2 text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                   {[
                     { label: txt('stat_opor'),  value: gridItems.length,           description: `${gridItems.length} ${txt('stat_opor')} no seu negócio. Cada uma tem prioridade, prazo, esforço estimado e impacto potencial. Aqui você vê o pipeline completo, status e próximos passos.` },
                     { label: 'Oponentes',       value: data.concorrentes.length,   description: `${data.concorrentes.length} Oponentes monitorados na região. Lista detalhada com posicionamento, faixa de preço, força de marca, atividade recente e nível de ameaça.` },
