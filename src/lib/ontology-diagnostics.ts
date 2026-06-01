@@ -2,133 +2,21 @@
 // Compara empresa real vs estrutura ideal definida pela Ontologia v1.2
 // Tudo local, determinístico, sem LLM, sem backend, sem token.
 
-// ── Tipos do termo da ontologia (espelha public/ontology-data.json) ──
-export interface OntologyTerm {
-  id: string;
-  termo: string;
-  termoNormalizado: string;
-  areaMacro: string;
-  dominio: string;
-  subdominio: string;
-  categoriaOriginal: string | null;
-  camada: string;
-  tipo: string[];
-  sensibilidade: 'baixa' | 'media' | 'alta' | 'critica';
-  aplicavelA: string[];
-  portes: string[];
-  estruturas: string[];
-  segmentos: string[];
-  sinaisRelacionados: string[];
-  riscosRelacionados: string[];
-  oportunidadesRelacionadas: string[];
-  acoesPossiveis: string[];
-  agentesSugeridos: string[];
-  requerValidacaoHumana: boolean;
-  paisBase: string;
-  escopo: string;
-  pesoBase: number;
-  maturidadeEsperada: string;
-  setoresEspecificos?: string[];
-  sinonimos?: string[];
-}
+// Tipos públicos vivem em core/types/ontology.ts.
+// Reexportamos aqui para manter compatibilidade com imports existentes.
+import type {
+  OntologyTerm, CompanyProfileInput, IdealDomainProfile, CompanyDomainSignal,
+  DomainStatus, DomainDiagnosis, DiagnosisCardSuggestion, CompanyOntologyDiagnosis,
+  BuildProfileInput, RankedDiagnosis,
+} from '../core/types/ontology';
+export type {
+  OntologyTerm, CompanyProfileInput, IdealDomainProfile, CompanyDomainSignal,
+  DomainStatus, DomainDiagnosis, DiagnosisCardSuggestion, CompanyOntologyDiagnosis,
+  BuildProfileInput, RankedDiagnosis,
+};
 
-// ── Perfil declarado da empresa ──
-export interface CompanyProfileInput {
-  companyType: string;
-  cnpj: string;
-  employeeCount: string;
-  revenueRange: string;
-  segment: string;
-  structure: string;
-  role: string;
-  activeSector: string;
-  businessName: string;
-  unitsCount?: number;
-  country: 'BR';
-}
-
-// ── Perfil ideal da empresa segundo a ontologia ──
-export interface IdealDomainProfile {
-  requiredDomains: string[];
-  recommendedDomains: string[];
-  advancedDomains: string[];
-  sensitiveDomains: string[];
-  strategicDomains: string[];
-}
-
-// ── Sinal coletado dos dados locais ──
-export interface CompanyDomainSignal {
-  source: 'onboarding' | 'browser' | 'map' | 'feed' | 'workspace' | 'profile';
-  text: string;
-  url?: string;
-  domainGuess?: string;
-  areaGuess?: string;
-  confidence: number; // 0..1
-  createdAt?: string;
-}
-
-// ── Status possíveis de um domínio ──
-export type DomainStatus =
-  | 'forte'
-  | 'presente'
-  | 'fraco'
-  | 'ausente'
-  | 'risco'
-  | 'oportunidade'
-  | 'monitorado';
-
-// ── Diagnóstico de um domínio ──
-export interface DomainDiagnosis {
-  areaMacro: string;
-  dominio: string;
-  status: DomainStatus;
-  coverageScore: number; // 0..100
-  evidenceCount: number;
-  matchedTerms: string[];      // termos com sinal
-  missingTerms: string[];      // termos centrais ausentes
-  riskLevel: 'baixo' | 'medio' | 'alto' | 'critico';
-  opportunityLevel: 'baixo' | 'medio' | 'alto';
-  sensitivity: 'baixa' | 'media' | 'alta' | 'critica';
-  requerValidacaoHumana: boolean;
-  isRequired: boolean;
-  isStrategic: boolean;
-  totalTermsOnArea: number;
-}
-
-// ── Card sugerido (compatível com RoleFeedCard quando injetado no feed) ──
-export interface DiagnosisCardSuggestion {
-  id: string;
-  titulo: string;
-  resumo: string;
-  origem: 'diagnostico_ontologico';
-  dominio: string;
-  areaMacro: string;
-  tipo: 'lacuna' | 'risco' | 'oportunidade' | 'fraco' | 'acao' | 'analise' | 'missao';
-  urgencia: 'alta' | 'media' | 'baixa';
-  risco: string;
-  oportunidade: string;
-  acaoRecomendada: string;
-  requerValidacaoHumana: boolean;
-  evidencias: string[];
-  createdAt: string;
-}
-
-// ── Diagnóstico geral ──
-export interface CompanyOntologyDiagnosis {
-  version: 'ontology-diagnostics-v1';
-  generatedAt: string;
-  companyProfile: CompanyProfileInput;
-  summary: string;
-  legalNotice: string;
-  maturityScore: number; // 0..100
-  domains: DomainDiagnosis[];
-  strongestDomains: string[];
-  weakestDomains: string[];
-  criticalGaps: string[];
-  opportunities: string[];
-  recommendedActions: string[];
-  cards: DiagnosisCardSuggestion[];
-}
+import { safeGetString, safeGetJSON, safeSetJSON } from '../core/storage/local-storage';
+import { dispatchOS1Event, OS1_EVENTS } from '../core/events/os1-events';
 
 // ── Constantes ──
 export const ONTOLOGY_DIAGNOSIS_LS = {
@@ -171,21 +59,14 @@ export async function loadOntologyTerms(): Promise<OntologyTerm[]> {
 }
 
 // 2. Monta CompanyProfileInput a partir do localStorage + props
-export interface BuildProfileInput {
-  role?: string;
-  activeSector?: string;
-  businessName?: string;
-  segment?: string;
-  unitsCount?: number;
-}
+// (BuildProfileInput agora vem de core/types/ontology.ts via re-export acima)
 export function buildCompanyProfile(opts: BuildProfileInput = {}): CompanyProfileInput {
-  const ls = (k: string) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
   let ctx: any = {};
   try {
-    const raw = ls('os1_onboarding_context');
+    const raw = safeGetString('os1_onboarding_context');
     if (raw) ctx = JSON.parse(raw);
   } catch { /* ignore */ }
-  const role = opts.role || ls('os1_role') || 'codify';
+  const role = opts.role || safeGetString('os1_role') || 'codify';
   const activeSector = opts.activeSector || 'os1';
   // Heurística de estrutura por role interno (preservado conforme Fase 2)
   const structureByRole: Record<string, string> = {
@@ -199,25 +80,25 @@ export function buildCompanyProfile(opts: BuildProfileInput = {}): CompanyProfil
   const segment =
     opts.segment ||
     ctx.segment ||
-    ls('os1_onboarding_segment') ||
+    safeGetString('os1_onboarding_segment') ||
     (activeSector === 'mcdonalds' ? 'Alimentação'
       : activeSector === 'natura' ? 'Beleza/estética'
       : activeSector === 'nubank' ? 'Tecnologia'
       : activeSector === 'magalu' || activeSector === 'amazon' ? 'Varejo'
       : 'Serviços');
   return {
-    companyType: ctx.companyType || ls('os1_onboarding_company_type') ||
+    companyType: ctx.companyType || safeGetString('os1_onboarding_company_type') ||
       (role === 'franchisor' ? 'Franquia/franqueadora'
         : role === 'franchise' ? 'Loja/unidade'
         : 'Empresa com múltiplos setores'),
-    cnpj: ctx.cnpj || ls('os1_onboarding_cnpj') || '',
-    employeeCount: ctx.employeeCount || ls('os1_onboarding_employee_count') || '21–50',
-    revenueRange: ctx.revenueRange || ls('os1_onboarding_revenue_range') || 'não informado',
+    cnpj: ctx.cnpj || safeGetString('os1_onboarding_cnpj') || '',
+    employeeCount: ctx.employeeCount || safeGetString('os1_onboarding_employee_count') || '21–50',
+    revenueRange: ctx.revenueRange || safeGetString('os1_onboarding_revenue_range') || 'não informado',
     segment,
     structure: structureByRole[role] || 'central',
     role,
     activeSector,
-    businessName: opts.businessName || ls('os1_negocio_id') || activeSector,
+    businessName: opts.businessName || safeGetString('os1_negocio_id') || activeSector,
     unitsCount: opts.unitsCount,
     country: 'BR',
   };
@@ -327,10 +208,9 @@ export function buildIdealDomainProfile(
 function normalizar(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
 }
-function safeReadLS<T>(key: string, fb: T): T {
-  try { const r = localStorage.getItem(key); if (r) return JSON.parse(r) as T; } catch { /* ignore */ }
-  return fb;
-}
+// safeReadLS substituído por safeGetJSON de core/storage/local-storage.
+// Mantemos alias com mesma assinatura pra não tocar nos call sites.
+const safeReadLS = <T,>(key: string, fb: T): T => safeGetJSON<T>(key, fb);
 
 // 4. Extrai sinais reais da empresa a partir dos dados locais
 export function extractCompanySignals(profile: CompanyProfileInput): CompanyDomainSignal[] {
@@ -500,13 +380,7 @@ export function diagnoseCompanyAgainstOntology(
 }
 
 // 7. Ranking — separa em strongest/weakest/critical/opportunities
-export interface RankedDiagnosis {
-  strongest: DomainDiagnosis[];
-  weakest: DomainDiagnosis[];
-  critical: DomainDiagnosis[];
-  opportunities: DomainDiagnosis[];
-  sensitiveRisks: DomainDiagnosis[];
-}
+// (RankedDiagnosis agora vem de core/types/ontology.ts via re-export acima)
 export function rankDiagnosis(diags: DomainDiagnosis[]): RankedDiagnosis {
   const sortedScore = [...diags].sort((a, b) => b.coverageScore - a.coverageScore);
   const strongest = sortedScore.filter(d => d.status === 'forte' || d.status === 'presente').slice(0, 5);
@@ -643,17 +517,15 @@ export async function runFullDiagnosis(opts: BuildProfileInput = {}): Promise<Co
     recommendedActions: cards.map(c => c.acaoRecomendada),
     cards,
   };
-  // Persiste
-  try {
-    localStorage.setItem(ONTOLOGY_DIAGNOSIS_LS.latest, JSON.stringify(diagnosis));
-    localStorage.setItem(ONTOLOGY_DIAGNOSIS_LS.cards, JSON.stringify(cards));
-    localStorage.setItem(ONTOLOGY_DIAGNOSIS_LS.scores,
-      JSON.stringify(Object.fromEntries(diags.map(d => [d.dominio, d.coverageScore]))));
-  } catch { /* ignore quota */ }
+  // Persiste (helpers do core protegem contra quota/JSON inválido)
+  safeSetJSON(ONTOLOGY_DIAGNOSIS_LS.latest, diagnosis);
+  safeSetJSON(ONTOLOGY_DIAGNOSIS_LS.cards, cards);
+  safeSetJSON(
+    ONTOLOGY_DIAGNOSIS_LS.scores,
+    Object.fromEntries(diags.map(d => [d.dominio, d.coverageScore])),
+  );
   // Emite evento (App.tsx pode escutar pra injetar cards no feed)
-  try {
-    window.dispatchEvent(new CustomEvent('os1:ontology-diagnosis', { detail: diagnosis }));
-  } catch { /* ignore */ }
+  dispatchOS1Event(OS1_EVENTS.ONTOLOGY_DIAGNOSIS, diagnosis);
   return diagnosis;
 }
 

@@ -10,42 +10,14 @@ import {
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
-export interface IntelligenceCard {
-  id: string;
-  titulo: string;
-  resumo: string;
-  por_que_importa?: string;
-  onde_afeta?: string;
-  o_que_fazer?: string;
-  dominio: string;
-  area: string;
-  dificuldade?: string;
-  confianca: string;
-  confianca_score: number;
-  impacto: string;
-  risco_erro: number;
-  sinais_usados?: string[];
-  gap_id?: string;
-  tipo_card: string;
-  urgencia: string;
-  versoes?: Record<string, {
-    titulo: string;
-    o_que_aconteceu: string;
-    por_que_importa: string;
-    onde_afeta: string;
-    o_que_fazer: string;
-  }>;
-  share_token?: string;
-  publicado_em?: string;
-  // Sintético = card mockado que não existe no backend. WorkspacePanel não chama API.
-  _synthetic?: boolean;
-}
+// Tipos públicos foram movidos para core/types/card.ts.
+// Reexportamos aqui para manter compatibilidade com imports existentes.
+import type { IntelligenceCard, WorkspaceIntent } from '../core/types/card';
+export type { IntelligenceCard, WorkspaceIntent };
 
 type ActionType = 'pesquisar' | 'executar' | 'aprender' | 'simular' | 'regenerar' | 'estender';
 type Dificuldade = 'muito_facil' | 'facil' | 'dificil' | 'muito_dificil';
 type ExecutarTipo = 'campanha' | 'checklist' | 'mensagem' | 'plano' | 'simulacao' | 'tarefa';
-
-export type WorkspaceIntent = 'utilizar' | 'perguntas' | 'exemplos' | 'compartilhar';
 
 // Mapa intent → ação inicial no painel
 const INTENT_TO_ACTION: Record<WorkspaceIntent, ActionType | null> = {

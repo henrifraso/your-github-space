@@ -22,90 +22,24 @@ type LoginPhase = 'idle' | OnboardingPhase | 'user' | 'pass';
 type Step = 'landing' | 'auth' | 'business' | 'consent';
 type AuthMode = 'login' | 'register';
 
-interface Business { id: string; orgId: string; nome: string; segmento: string; cidade: string; estado: string; }
+// Tipos / API / role mapping movidos pra features/auth (Fase 19).
+// Re-exports mantêm compatibilidade com imports históricos.
+import type { AutoLoginParams } from '../core/types/profile';
+export type { AutoLoginParams };
+import { ROLE_TO_HANDLE } from '../features/profiles/profile-labels';
+import {
+  type Business,
+  apiLogin,
+  apiRegister,
+  apiBusinesses,
+  apiConsent,
+} from '../features/auth/login-api';
+import { PasswordField } from '../features/auth/PasswordField';
+import { BusinessCard } from '../features/onboarding/BusinessCard';
 
-export interface AutoLoginParams { token: string; orgId: string; buId: string; role: string; }
 export interface Props {
   onAuthenticated: (token: string, negocioId: string) => void;
   autoLogin?: AutoLoginParams | null;
-}
-
-// Role do backend → handle visível no typewriter
-const ROLE_TO_HANDLE: Record<string, string> = {
-  codify: 'codify',
-  franchisor: 'franqueador',
-  franchise: 'franquia',
-  team_member: 'afiliado',
-  affiliate: 'afiliado',
-  partner: 'parceiro',
-};
-
-// ── Phrases ───────────────────────────────────────────────────────────────────
-// ── API ───────────────────────────────────────────────────────────────────────
-function formatBackendDetail(detail: unknown): string {
-  if (typeof detail === 'string' && detail.trim()) return detail;
-  if (Array.isArray(detail)) {
-    const msgs = detail
-      .map(d => (d && typeof d === 'object' && 'msg' in (d as any) ? String((d as any).msg) : ''))
-      .filter(Boolean);
-    if (msgs.length) return msgs.join(' · ');
-  }
-  return 'Credenciais inválidas';
-}
-
-async function apiLogin(handle: string, password: string) {
-  const isHandle = handle.startsWith('@') || !handle.includes('@');
-  const body = isHandle
-    ? { handle: handle.replace(/^@+/, ''), password }
-    : { email: handle, password };
-  try {
-    const r = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if (r.ok) return await r.json();
-    const e = await r.json().catch(() => ({}));
-    throw new Error(formatBackendDetail(e.detail));
-  } catch (err: any) {
-    if (err?.message && err.message !== 'Failed to fetch') throw err;
-  }
-  throw new Error('Credenciais inválidas');
-}
-
-async function apiRegister(nome: string, email: string, password: string) {
-  try {
-    const r = await fetch('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome, email, password }) });
-    if (r.ok) return await r.json();
-    const e = await r.json().catch(() => ({}));
-    throw new Error(e.detail || 'Erro ao criar conta');
-  } catch (err: any) {
-    if (err?.message === 'Failed to fetch') return { access_token: `demo.${Date.now()}`, user: { nome, email } };
-    throw err;
-  }
-}
-
-const FALLBACK_BUSINESSES: Business[] = [
-  { id: 'bu-mcdo-paulista', orgId: 'org-mcdonalds-brasil', nome: "McDonald's Avenida Paulista", segmento: 'fast_food', cidade: 'São Paulo', estado: 'SP' },
-];
-
-async function apiBusinesses(token: string): Promise<Business[]> {
-  try {
-    const headers = { Authorization: `Bearer ${token}` };
-    const orgs: { id: string; name: string }[] = await fetch('/api/organizations', { headers })
-      .then(r => (r.ok ? r.json() : []));
-    const all: Business[] = [];
-    for (const org of orgs) {
-      const units: { id: string; organization_id: string; name: string; segment: string; city: string | null }[] =
-        await fetch(`/api/organizations/${org.id}/units`, { headers }).then(r => (r.ok ? r.json() : []));
-      for (const u of units) {
-        all.push({ id: u.id, orgId: org.id, nome: u.name, segmento: u.segment, cidade: u.city ?? '', estado: '' });
-      }
-    }
-    return all.length > 0 ? all : FALLBACK_BUSINESSES;
-  } catch {
-    return FALLBACK_BUSINESSES;
-  }
-}
-
-async function apiConsent(token: string, negocioId: string) {
-  try { await fetch('/api/sync/consent', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ negocio_id: negocioId, consent_version: '1.0' }) }); } catch {}
 }
 
 // ── LupaIcon ──────────────────────────────────────────────────────────────────
@@ -652,46 +586,8 @@ function RippleButton({
   );
 }
 
-// ── PasswordField ─────────────────────────────────────────────────────────────
-function PasswordField({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  const [show, setShow] = useState(false);
-  return (
-    <div className="relative">
-      <input
-        type={show ? 'text' : 'password'}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder ?? 'Senha'}
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 outline-none focus:border-white/25 transition-colors duration-200"
-      />
-      <button type="button" onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors duration-200 cursor-pointer">
-        {show ? <EyeOff size={16} /> : <Eye size={16} />}
-      </button>
-    </div>
-  );
-}
-
-// ── BusinessCard ──────────────────────────────────────────────────────────────
-function BusinessCard({ b, selected, onClick }: { b: Business; selected: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-200 cursor-pointer text-left
-        ${selected
-          ? 'bg-[#3b82f6]/10 border-[#3b82f6]/50 text-white'
-          : 'bg-white/[0.03] border-white/8 text-white/70 hover:bg-white/[0.06] hover:border-white/15 hover:text-white'}`}
-    >
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${selected ? 'bg-[#3b82f6]/20' : 'bg-white/5'}`}>
-        <Building2 size={18} className={selected ? 'text-[#3b82f6]' : 'text-white/40'} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{b.nome}</p>
-        <p className="text-xs text-white/35 mt-0.5">{b.cidade}, {b.estado} · {b.segmento.replace('_', ' ')}</p>
-      </div>
-      {selected && <Check size={16} className="text-[#3b82f6] flex-shrink-0" />}
-    </button>
-  );
-}
+// PasswordField + BusinessCard movidos para features/* (Fase 19).
+// Importados no topo do arquivo.
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function LoginScreen({ onAuthenticated, autoLogin }: Props) {

@@ -7,6 +7,7 @@ import {
   type DomainDiagnosis,
   LEGAL_NOTICE,
 } from '../lib/ontology-diagnostics';
+import { dispatchOS1Event, OS1_EVENTS } from '../core/events/os1-events';
 
 interface Props {
   open: boolean;
@@ -66,7 +67,7 @@ export function CompanyDiagnosisPanel({ open, onClose, role, activeSector, busin
   function sendCardsToFeed() {
     if (!diag) return;
     // Dispara evento que App.tsx ouve pra injetar cards no feed (canal compatível)
-    window.dispatchEvent(new CustomEvent('os1:ontology-diagnosis-cards-to-feed', { detail: diag.cards }));
+    dispatchOS1Event(OS1_EVENTS.ONTOLOGY_DIAGNOSIS_TO_FEED, diag.cards);
   }
 
   return (

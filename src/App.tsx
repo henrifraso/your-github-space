@@ -87,6 +87,7 @@ import { StoryViewer } from './components/StoryViewer';
 import { ConcorrenteModal } from './components/ConcorrenteModal';
 import { BrowserView } from './components/BrowserView';
 import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
+import { OS1_EVENTS } from './core/events/os1-events';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
 import type { CompanyDiagnosticPayload } from './components/ChatPanel';
 import { TimelineModal } from './components/TimelineComponents';
@@ -129,6 +130,30 @@ import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES, PARTNE
 import { isPersonalizedRole, filterFranchisorCardsByTab, shouldShowRoleDemos } from './utils/roleUtils';
 import { Toast, useToast } from './components/Toast';
 import { Mail, MapPinned, Target, Eye, Award, Search, Sparkles, Layers3, UserCircle } from 'lucide-react';
+import {
+  appendSession,
+  createArchivedSession,
+  type ArchivedSession,
+  type HistoryBucket,
+} from './features/workspace/history/workspace-history';
+import { roleFeedCardToIntelligenceCard } from './features/feed/feed-card-adapters';
+import {
+  browserPayloadToFeedCard,
+  mapPayloadToFeedCards,
+  diagnosisPayloadToFeedCards,
+  type BrowserGeneratedPayload,
+  type MapGeneratedCard,
+  type DiagnosisGeneratedCard,
+} from './features/feed/feed-generated-cards';
+import { mergeFeedSources } from './features/feed/feed-sources';
+import { useOS1BrowserBridge } from './core/events/useOS1BrowserBridge';
+import { useOS1MapBridge } from './core/events/useOS1MapBridge';
+import { useOS1OntologyBridge } from './core/events/useOS1OntologyBridge';
+import { useOS1WorkspaceBridge } from './core/events/useOS1WorkspaceBridge';
+import { StatInfoModal } from './features/modals/StatInfoModal';
+import { EmpresaModal } from './features/modals/EmpresaModal';
+import { SettingsModal } from './features/modals/SettingsModal';
+import { OntologySphereOverlay } from './features/ontology/OntologySphereOverlay';
 
 function GoogleMapsPreloader() {
   useGoogleMaps();
@@ -295,7 +320,7 @@ function AuthenticatedApp() {
   const [statInfo, setStatInfo] = useState<{ label: string; value: any; description: string } | null>(null);
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
   // Sessões arquivadas separadas POR SECTOR — cada perfil tem seu próprio histórico.
-  const [archivedSessionsBySector, setArchivedSessionsBySector] = useState<Record<string, Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: any }>>>({});
+  const [archivedSessionsBySector, setArchivedSessionsBySector] = useState<HistoryBucket<any>>({});
   // Card enviado do feed para o contêiner do chat (botão "Área de trabalho").
   const [workspaceContext, setWorkspaceContext] = useState<WorkspaceContext | null>(null);
   const workspaceSeqRef = useRef(0);
@@ -381,389 +406,9 @@ function AuthenticatedApp() {
     );
   }
 
-  // Converte card de role/mock em IntelligenceCard sintético pro WorkspacePanel.
-  const roleFeedCardToIntelligenceCard = (c: RoleFeedCard): IntelligenceCard => ({
-    id:              `synthetic-${c.id}`,
-    titulo:          c.titulo,
-    resumo:          c.resumo,
-    por_que_importa: '',
-    onde_afeta:      '',
-    o_que_fazer:     '',
-    dominio:         c.tags[0] ?? '',
-    area:            c.tags[0] ?? '',
-    urgencia:        c.urgencia,
-    tipo_card:       c.tipo,
-    confianca:       'media',
-    confianca_score: 0.5,
-    impacto:         '',
-    risco_erro:      c.urgencia === 'alta' ? 0.6 : c.urgencia === 'media' ? 0.4 : 0.2,
-    _synthetic:      true,
-  });
-
-  // ─── Fase 5: ponte BrowserView → workspace/feed ─────────────────────────
-  // Listener escuta 'os1:browser-action' (disparado pelo BrowserView) e roteia
-  // pra workspace (F1/F2/F5) ou injeta no feed (F4). F3 já salva localStorage.
-  useEffect(() => {
-    function handler(e: Event) {
-      const ce = e as CustomEvent<{
-        type: 'send-to-workspace' | 'create-mission' | 'save-evidence' | 'generate-feed-card' | 'analyze-session'
-            | 'compare-tabs' | 'monitor-page' | 'capture-snippet' | 'create-dossier' | 'ask-sector-agent';
-        context: { url: string; title: string; capturedText?: string; capturedAt: string };
-        payload?: any;
-      }>;
-      const d = ce.detail;
-      if (!d) return;
-      const sector = activeSector || 'os1';
-      const fechaUrl = d.context.url;
-      const synthBase = {
-        id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        confianca: 'media' as const,
-        confianca_score: 0.5,
-        impacto: 'a avaliar',
-        risco_erro: 0.4,
-        _synthetic: true as const,
-      };
-      if (d.type === 'send-to-workspace') {
-        const card: IntelligenceCard = {
-          ...synthBase,
-          titulo: d.context.title || 'Página do navegador',
-          resumo: (d.context.capturedText || 'Conteúdo capturado do navegador interno.').slice(0, 280),
-          por_que_importa: `Origem: ${fechaUrl}`,
-          onde_afeta: sector,
-          o_que_fazer: 'Decidir próxima ação (missão, card no feed, descarte).',
-          dominio: sector,
-          area: sector,
-          urgencia: 'media',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setBrowserOpen(false);
-        return;
-      }
-      if (d.type === 'create-mission') {
-        const m = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          titulo: m?.titulo ?? 'Missão sugerida',
-          resumo: m?.objetivo ?? '',
-          por_que_importa: `Evidência: ${fechaUrl}`,
-          onde_afeta: sector,
-          o_que_fazer: (m?.etapas ?? []).join(' · '),
-          dominio: sector,
-          area: 'missao',
-          urgencia: 'media',
-          tipo_card: 'missao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setBrowserOpen(false);
-        return;
-      }
-      if (d.type === 'analyze-session') {
-        const r = d.payload;
-        const sinais = (r?.sinaisDetectados ?? []).join(' · ');
-        const card: IntelligenceCard = {
-          ...synthBase,
-          titulo: 'Análise da sessão de navegação',
-          resumo: r?.resumo ?? 'Resumo da sessão atual.',
-          por_que_importa: sinais,
-          onde_afeta: sector,
-          o_que_fazer: (r?.proximosPassos ?? []).join(' · '),
-          dominio: sector,
-          area: 'analise',
-          urgencia: 'baixa',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setBrowserOpen(false);
-        return;
-      }
-      if (d.type === 'generate-feed-card') {
-        const fc = d.payload;
-        const newCard: RoleFeedCard = {
-          id: fc?.id ?? `bfc-${Date.now()}`,
-          titulo: fc?.titulo ?? 'Card do navegador',
-          resumo: fc?.resumo ?? '',
-          tipo: 'informacao',
-          urgencia: fc?.urgencia ?? 'media',
-          tags: ['navegador', sector],
-        };
-        setBrowserFeedCards(prev => [newCard, ...prev]);
-        return;
-      }
-      // 'save-evidence', 'monitor-page', 'capture-snippet', 'create-dossier':
-      // já persistem em localStorage no próprio BrowserView; aqui são silenciosos.
-
-      // P4: comparação de abas → workspace
-      if (d.type === 'compare-tabs') {
-        const cmp = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: 'Comparação de abas abertas',
-          resumo: cmp?.resumo ?? '',
-          por_que_importa: (cmp?.diferencas ?? []).slice(0, 4).join(' · '),
-          onde_afeta: sector,
-          o_que_fazer: cmp?.recomendacao ?? '',
-          dominio: sector,
-          area: 'comparacao',
-          urgencia: 'baixa',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setBrowserOpen(false);
-        return;
-      }
-      // P4: agente do setor → workspace
-      if (d.type === 'ask-sector-agent') {
-        const a = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: a?.agente ?? 'Agente do setor',
-          resumo: a?.analise ?? '',
-          por_que_importa: (a?.observacoes ?? []).join(' · '),
-          onde_afeta: sector,
-          o_que_fazer: (a?.proximosPassos ?? []).join(' · '),
-          dominio: sector,
-          area: 'agente',
-          urgencia: 'baixa',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setBrowserOpen(false);
-        return;
-      }
-    }
-    window.addEventListener('os1:browser-action', handler as EventListener);
-    return () => window.removeEventListener('os1:browser-action', handler as EventListener);
-  }, [activeSector]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ─── Fase 6: ponte Mapa Competitivo → workspace/feed ────────────────────
-  useEffect(() => {
-    function handler(e: Event) {
-      const ce = e as CustomEvent<{
-        type: 'feed-from-radius' | 'analyze-competition' | 'find-opportunities' | 'compare-regions' | 'territory-to-mission' | 'monitor-territory' | 'risk-map' | 'sector-opportunities' | 'nearby-partners' | 'simulate-territory-action';
-        context: { center: { lat: number; lng: number }; radius: number; sector: string };
-        payload?: any;
-      }>;
-      const d = ce.detail;
-      if (!d) return;
-      const sector = (d.context.sector || activeSector || 'os1');
-      const synthBase = {
-        confianca: 'media' as const,
-        confianca_score: 0.5,
-        impacto: 'a avaliar',
-        risco_erro: 0.4,
-        _synthetic: true as const,
-      };
-
-      // F1 — Gerar feed do raio: injeta múltiplos cards no feed
-      if (d.type === 'feed-from-radius') {
-        const cards = (d.payload ?? []) as Array<{
-          id: string; titulo: string; resumo: string; urgencia: 'alta'|'media'|'baixa'; dominio: string;
-        }>;
-        const novos: RoleFeedCard[] = cards.map(c => ({
-          id: c.id,
-          titulo: c.titulo,
-          resumo: c.resumo,
-          tipo: 'informacao',
-          urgencia: c.urgencia,
-          tags: ['mapa', sector, c.dominio].filter(Boolean) as string[],
-        }));
-        setMapFeedCards(prev => [...novos, ...prev]);
-        return;
-      }
-
-      // F2 — Analisar concorrência local: card pra workspace
-      if (d.type === 'analyze-competition') {
-        const a = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: 'Análise de concorrência local',
-          resumo: a?.resumo ?? 'Análise gerada pelo mapa.',
-          por_que_importa: `Riscos: ${(a?.riscos ?? []).join(' · ')}`,
-          onde_afeta: sector,
-          o_que_fazer: a?.recomendacao ?? '',
-          dominio: sector,
-          area: 'concorrencia',
-          urgencia: 'media',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-
-      // F3 — Encontrar oportunidades
-      if (d.type === 'find-opportunities') {
-        const op = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: 'Oportunidades no território',
-          resumo: op?.resumo ?? 'Oportunidades detectadas no raio.',
-          por_que_importa: (op?.oportunidades ?? []).slice(0, 3).join(' · '),
-          onde_afeta: sector,
-          o_que_fazer: op?.acaoRecomendada ?? '',
-          dominio: sector,
-          area: 'oportunidade',
-          urgencia: 'media',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-
-      // F4 — Comparar regiões
-      if (d.type === 'compare-regions') {
-        const cmp = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: `Comparação ${cmp?.regiaoA?.label ?? 'A'} vs ${cmp?.regiaoB?.label ?? 'B'}`,
-          resumo: cmp?.resumo ?? 'Comparação de regiões.',
-          por_que_importa: `A: ${cmp?.regiaoA?.total ?? 0} (★ ${(cmp?.regiaoA?.avg ?? 0).toFixed?.(1) ?? '0.0'}, densidade ${cmp?.regiaoA?.densidade}) · B: ${cmp?.regiaoB?.total ?? 0} (★ ${(cmp?.regiaoB?.avg ?? 0).toFixed?.(1) ?? '0.0'}, densidade ${cmp?.regiaoB?.densidade})`,
-          onde_afeta: sector,
-          o_que_fazer: cmp?.recomendacao ?? '',
-          dominio: sector,
-          area: 'territorio',
-          urgencia: 'baixa',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-
-      // F5 — Transformar território em missão
-      if (d.type === 'territory-to-mission') {
-        const m = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: m?.titulo ?? 'Missão territorial sugerida',
-          resumo: m?.objetivo ?? '',
-          por_que_importa: m?.contextoTerritorial ?? '',
-          onde_afeta: sector,
-          o_que_fazer: (m?.etapas ?? []).join(' · '),
-          dominio: sector,
-          area: 'missao',
-          urgencia: 'media',
-          tipo_card: 'missao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-      // ── P5: 5 novas ──
-      if (d.type === 'monitor-territory') {
-        // Silencioso — só persiste em LS. Mapa continua aberto pro user seguir.
-        return;
-      }
-      if (d.type === 'risk-map') {
-        const r = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: 'Mapa de risco territorial',
-          resumo: r?.resumo ?? '',
-          por_que_importa: (r?.riscos ?? []).slice(0, 3).map((x: any) => `${x.nivel.toUpperCase()}: ${x.tipo}`).join(' · '),
-          onde_afeta: sector,
-          o_que_fazer: r?.recomendacao ?? '',
-          dominio: sector,
-          area: 'risco',
-          urgencia: ((r?.riscos ?? []).some((x: any) => x.nivel === 'alto') ? 'alta' : 'media') as 'alta' | 'media',
-          tipo_card: 'alerta',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-      if (d.type === 'sector-opportunities') {
-        const op = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: `Oportunidades para ${sector}`,
-          resumo: op?.resumo ?? '',
-          por_que_importa: (op?.oportunidades ?? []).slice(0, 3).map((x: any) => `${x.tipo}: ${x.descricao}`).join(' · '),
-          onde_afeta: sector,
-          o_que_fazer: op?.acaoRecomendada ?? '',
-          dominio: sector,
-          area: 'oportunidade',
-          urgencia: 'media',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-      if (d.type === 'nearby-partners') {
-        const np = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: 'Parceiros/fornecedores próximos',
-          resumo: np?.resumo ?? '',
-          por_que_importa: (np?.candidatos ?? []).slice(0, 3).map((x: any) => `${x.nome} (${x.tipo})`).join(' · '),
-          onde_afeta: sector,
-          o_que_fazer: np?.recomendacao ?? '',
-          dominio: sector,
-          area: 'parceiros',
-          urgencia: 'baixa',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-      if (d.type === 'simulate-territory-action') {
-        const s = d.payload;
-        const card: IntelligenceCard = {
-          ...synthBase,
-          id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: `Simulação: ${s?.acao ?? 'ação territorial'}`,
-          resumo: s?.resumo ?? '',
-          por_que_importa: `Conservador: ${s?.cenarios?.conservador?.metrica} · Provável: ${s?.cenarios?.provavel?.metrica} · Agressivo: ${s?.cenarios?.agressivo?.metrica}`,
-          onde_afeta: sector,
-          o_que_fazer: s?.proximaAcao ?? '',
-          dominio: sector,
-          area: 'simulacao',
-          urgencia: 'media',
-          tipo_card: 'informacao',
-        };
-        openWorkspaceFromCard(card, 'utilizar');
-        setMapOpen(false);
-        return;
-      }
-    }
-    window.addEventListener('os1:map-action', handler as EventListener);
-    return () => window.removeEventListener('os1:map-action', handler as EventListener);
-  }, [activeSector]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ─── Diagnóstico Ontológico → feed ──────────────────────────────────────
-  // Quando user clica "Enviar cards ao feed" no painel de diagnóstico,
-  // os cards entram em mapFeedCards (mesma infra de cards locais).
-  useEffect(() => {
-    function handler(e: Event) {
-      const ce = e as CustomEvent<any[]>;
-      const cards = ce.detail || [];
-      const sector = activeSector || 'os1';
-      const novos: RoleFeedCard[] = cards.map((c: any) => ({
-        id: c.id,
-        titulo: c.titulo,
-        resumo: c.resumo,
-        tipo: c.tipo === 'risco' || c.tipo === 'lacuna' ? 'alerta' : 'informacao',
-        urgencia: c.urgencia,
-        tags: ['ontologia', sector, c.dominio].filter(Boolean) as string[],
-      }));
-      setMapFeedCards(prev => [...novos, ...prev]);
-    }
-    window.addEventListener('os1:ontology-diagnosis-cards-to-feed', handler as EventListener);
-    return () => window.removeEventListener('os1:ontology-diagnosis-cards-to-feed', handler as EventListener);
-  }, [activeSector]);
+  // `roleFeedCardToIntelligenceCard` agora vem de
+  // features/feed/feed-card-adapters (Fase 16).
+  // Importado no topo do arquivo.
 
   // Abre o WorkspacePanel a partir de um card real do feed.
   // Registra a interação correspondente (best-effort, não bloqueia abertura).
@@ -881,21 +526,29 @@ function AuthenticatedApp() {
     }
   };
 
-  // Listener postMessage: caso o iframe da esfera (ou outra origem confiável)
-  // queira disparar a Análise da empresa via postMessage. Filtra por tipo e
-  // origem (mesma janela ou subframe da mesma origem).
-  const openDiagnosisRef = useRef(openDiagnosisInWorkspace);
-  useEffect(() => { openDiagnosisRef.current = openDiagnosisInWorkspace; });
-  useEffect(() => {
-    const onMessage = (ev: MessageEvent) => {
-      const d = ev.data;
-      if (!d || typeof d !== 'object') return;
-      if (d.type !== 'OS1_ANALYZE_COMPANY') return;
-      void openDiagnosisRef.current();
-    };
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-  }, []);
+  // ─── Bridges OS¹ (Fase 17) ────────────────────────────────────────────
+  // Cada hook escuta um canal de evento e roteia para o resto do App.tsx:
+  //   - Navegador → Área de Trabalho / cards locais (browserFeedCards)
+  //   - Mapa Competitivo → Área de Trabalho / cards locais (mapFeedCards)
+  //   - Diagnóstico ontológico legado → cards locais
+  //   - Análise da empresa (postMessage cross-frame) → Área de Trabalho
+  useOS1BrowserBridge({
+    activeSector,
+    onWorkspaceCard: openWorkspaceFromCard,
+    onBrowserCard: (card) => setBrowserFeedCards(prev => [card, ...prev]),
+    closeBrowser: () => setBrowserOpen(false),
+  });
+  useOS1MapBridge({
+    activeSector,
+    onWorkspaceCard: openWorkspaceFromCard,
+    onMapCards: (cards) => setMapFeedCards(prev => [...cards, ...prev]),
+    closeMap: () => setMapOpen(false),
+  });
+  useOS1OntologyBridge({
+    activeSector,
+    onMapCards: (cards) => setMapFeedCards(prev => [...cards, ...prev]),
+  });
+  useOS1WorkspaceBridge({ onAnalyze: openDiagnosisInWorkspace });
 
   const handleUtilizar = (containerType: string, selected: boolean) => {
     setSelectedContainers(prev => {
@@ -1645,9 +1298,9 @@ function AuthenticatedApp() {
         // Cards do franchisor por aba (cards do navegador e do mapa entram em todas as abas).
         if (role === 'franchisor') {
           const relevantCards = filterFranchisorCardsByTab(roleConfig.feedCards, activeRoleTab);
-          cards = [...mapFeedCards, ...browserFeedCards, ...relevantCards].filter(c => !dismissedCards.has(c.id));
+          cards = mergeFeedSources({ map: mapFeedCards, browser: browserFeedCards, role: relevantCards, dismissed: dismissedCards });
         } else {
-          cards = [...mapFeedCards, ...browserFeedCards, ...roleConfig.feedCards].filter(c => !dismissedCards.has(c.id));
+          cards = mergeFeedSources({ map: mapFeedCards, browser: browserFeedCards, role: roleConfig.feedCards, dismissed: dismissedCards });
         }
 
         const urgenciaColor = (u: string) => u === 'alta' ? '#ef4444' : u === 'media' ? '#f59e0b' : '#6b7280';
@@ -1897,33 +1550,8 @@ function AuthenticatedApp() {
       {/* Stories */}
       {storyIndex !== null && <StoryViewer groups={stories} startIndex={storyIndex} onClose={() => setStoryIndex(null)} />}
 
-      {/* Detalhes do Stat (3 empresas / 2 afiliados / etc) */}
-      <AnimatePresence>
-        {statInfo && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[300] flex items-end md:items-center justify-center"
-          >
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setStatInfo(null)} />
-            <motion.div
-              initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative w-full md:max-w-md bg-[#f0f2f4] dark:bg-[#323232] rounded-t-2xl md:rounded-2xl p-6 border border-transparent dark:border-[#414141]"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-base font-bold text-neutral-800 dark:text-white">
-                    {statInfo.value}
-                  </div>
-                  <h2 className="text-base font-bold text-neutral-800 dark:text-neutral-100 capitalize">{statInfo.label}</h2>
-                </div>
-                <button onClick={() => setStatInfo(null)} className="text-neutral-400 hover:text-neutral-700 dark:hover:text-white cursor-pointer">✕</button>
-              </div>
-              <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">{statInfo.description}</p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Detalhes do Stat (3 empresas / 2 afiliados / etc) — Fase 18: extraído. */}
+      <StatInfoModal info={statInfo} onClose={() => setStatInfo(null)} />
 
       {/* Editor de Foto */}
       <AnimatePresence>
@@ -1979,22 +1607,8 @@ function AuthenticatedApp() {
       </AnimatePresence>
 
 
-      {/* Modal Empresa */}
-      <AnimatePresence>
-        {empresaOpen && (
-          <BottomModal onClose={() => setEmpresaOpen(false)}>
-            <ModalHeader onClose={() => setEmpresaOpen(false)}><Info size={18} className="text-[#3b82f6]" /><h2 className="text-base font-bold">Empresa</h2></ModalHeader>
-            <div className="space-y-0">
-              {[{label:'Nome',value:data.negocio.nome_fantasia},{label:'Segmento',value:data.negocio.segmento},{label:'Cidade',value:`${data.negocio.cidade}, ${data.negocio.estado}`},{label:'Telefone',value:data.negocio.telefone},{label:'Nível',value:`${data.nivel_label} (Nível ${data.negocio.nivel})`},{label:'Pontos',value:`${data.negocio.pontos} pts`},{label:'Semana',value:data.semana_label}].map((item, i) => (
-                <div key={i} className="flex justify-between items-center py-3 border-b border-neutral-100 dark:border-[#414141] last:border-0">
-                  <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wide">{item.label}</span>
-                  <span className="text-sm font-medium text-neutral-800 dark:text-neutral-300">{item.value}</span>
-                </div>
-              ))}
-            </div>
-          </BottomModal>
-        )}
-      </AnimatePresence>
+      {/* Modal Empresa — Fase 18: extraído. */}
+      <EmpresaModal open={empresaOpen} onClose={() => setEmpresaOpen(false)} data={data} />
 
 
       {/* Modal Salvos */}
@@ -2065,8 +1679,8 @@ function AuthenticatedApp() {
         archivedSessions={archivedSessionsBySector[activeSector] ?? []}
         onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
         onArchive={(cardTitle, sector, snapshot) => {
-          const newSession = { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot };
-          setArchivedSessionsBySector(prev => ({ ...prev, [sector]: [...(prev[sector] ?? []), newSession] }));
+          const newSession: ArchivedSession<any> = createArchivedSession(cardTitle, sector, snapshot);
+          setArchivedSessionsBySector(prev => appendSession(prev, newSession));
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
@@ -2091,8 +1705,8 @@ function AuthenticatedApp() {
         archivedSessions={archivedSessionsBySector[activeSector] ?? []}
         onSelectHistorySession={() => { setChatHistoryOpen(false); setScrolled(true); }}
         onArchive={(cardTitle, sector, snapshot) => {
-          const newSession = { id: `${Date.now()}`, ts: Date.now(), cardTitle, sector, snapshot };
-          setArchivedSessionsBySector(prev => ({ ...prev, [sector]: [...(prev[sector] ?? []), newSession] }));
+          const newSession: ArchivedSession<any> = createArchivedSession(cardTitle, sector, snapshot);
+          setArchivedSessionsBySector(prev => appendSession(prev, newSession));
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
@@ -2278,91 +1892,23 @@ function AuthenticatedApp() {
         )}
       </AnimatePresence>
 
-      {/* Dificuldade — tela cheia */}
-      <AnimatePresence>
-        {difficultyOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
-          >
-            <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
-              <div>
-                <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Nível de Linguagem</h1>
-                <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajuste como as informações são apresentadas</p>
-              </div>
-              <button
-                onClick={() => setDifficultyOpen(false)}
-                className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="flex-1 px-4 sm:px-5 py-6 max-w-[935px] w-full mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {DIFF_ORDER.map((d, i) => {
-                  const meta = DIFF_META[d];
-                  const isSelected = difficulty === d;
-                  return (
-                    <motion.button
-                      key={d}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1], delay: i * 0.06 }}
-                      onClick={() => { setDifficulty(d); setDifficultyOpen(false); }}
-                      className={`flex items-center gap-4 px-5 py-4 rounded-2xl border cursor-pointer text-left transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] ${
-                        isSelected
-                          ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
-                          : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
-                      }`}
-                    >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg ${isSelected ? 'bg-[#3b82f6]/10' : 'bg-neutral-100 dark:bg-[#404040]'}`}>
-                        {meta.emoji}
-                      </div>
-                      <p className={`flex-1 text-sm font-bold ${isSelected ? 'text-[#3b82f6]' : 'text-neutral-800 dark:text-neutral-100'}`}>{meta.label}</p>
-                      {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-[#3b82f6] flex items-center justify-center flex-shrink-0">
-                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        </div>
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Dificuldade — tela cheia — Fase 18: extraído como SettingsModal. */}
+      <SettingsModal
+        open={difficultyOpen}
+        onClose={() => setDifficultyOpen(false)}
+        current={difficulty}
+        onChange={setDifficulty}
+        order={DIFF_ORDER}
+        meta={DIFF_META}
+      />
 
-      {/* Esfera Ontológica — fullscreen iframe (só perfil OS1) */}
-      {esferaOpen && (
-        <div className="fixed inset-0 z-[300] bg-black">
-          <iframe
-            src={ESFERA_URL}
-            className="w-full h-full border-0"
-            title="Esfera Ontológica"
-          />
-          {/* Botão sobreposto: "Analisar empresa" + Fechar */}
-          <div className="fixed top-4 right-4 z-[310] flex items-center gap-2">
-            <button
-              onClick={() => { void openDiagnosisInWorkspace(); }}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[rgba(184,145,58,0.16)] hover:bg-[rgba(184,145,58,0.28)] border border-[rgba(184,145,58,0.45)] text-white text-[12px] font-semibold shadow-2xl backdrop-blur transition-colors"
-            >
-              <Sparkles size={13} className="text-[#fbbf24]" />
-              Analisar minha empresa
-            </button>
-            <button
-              onClick={() => setEsferaOpen(false)}
-              className="w-9 h-9 inline-flex items-center justify-center rounded-xl bg-black/55 hover:bg-black/75 border border-white/10 text-white/70 hover:text-white backdrop-blur"
-              title="Fechar esfera"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Esfera Ontológica — fullscreen iframe (só perfil OS1) — Fase 18: extraído. */}
+      <OntologySphereOverlay
+        open={esferaOpen}
+        url={ESFERA_URL}
+        onClose={() => setEsferaOpen(false)}
+        onAnalyze={() => { void openDiagnosisInWorkspace(); }}
+      />
 
       {/* Diagnóstico da empresa agora entra na Área de Trabalho via
           openDiagnosisInWorkspace(); o antigo overlay foi removido. */}
