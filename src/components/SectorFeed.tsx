@@ -65,14 +65,17 @@ interface Props {
   department: Exclude<DepartmentId, 'geral'>;
   feeds: CompanySectorFeeds;
   onOpenWorkspace?: (card: IntelligenceCard, intent: WorkspaceIntent) => void;
+  /** Classe de margin-top do wrapper raiz. Permite que o caller sincronize o
+      gap do topo com o da Área de Trabalho em modo split (mesmo token). */
+  topGapClass?: string;
 }
 
-export function SectorFeed({ department, feeds, onOpenWorkspace }: Props) {
+export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass }: Props) {
   const sections = feeds[department] ?? [];
 
   return (
     <motion.div
-      className="max-w-[935px] mx-auto mt-4 sm:mt-6 pb-12 space-y-6 sm:space-y-8 px-4 sm:px-5"
+      className={`max-w-[935px] mx-auto ${topGapClass ?? 'mt-5'} pb-12 space-y-5 px-5`}
       initial="hidden"
       animate="visible"
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}

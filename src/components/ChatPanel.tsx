@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
-  Plus, Globe, Upload, Settings2, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
+  Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
   Sparkles, Loader2, History,
 } from 'lucide-react';
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
 import { ActionResult } from './WorkspacePanel';
 import { apiFetch } from '../api';
+import { SPLIT_TOP_GAP_PB, SPLIT_FRAME_TOP_PX } from '../constants/split-layout';
 import { WorkspaceTools, ToolBlockContent } from './WorkspaceTools';
 import {
   InitialBlockContent,
@@ -829,8 +830,11 @@ function DifficultyRow({ value, onChange }: { value: Dificuldade; onChange: (d: 
 
 interface ChatDesktopProps {
   wide?: boolean;
+  onHome?: () => void;
+  homeTitle?: string;
   onSector?: () => void;
   onBrowser?: () => void;
+  /** Mantido por compat — não renderiza mais botão dedicado. */
   onDifficulty?: () => void;
   activeSector?: string;
   userRole?: string;
@@ -844,16 +848,19 @@ interface ChatDesktopProps {
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
 }
 
-export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
-      style={{ width: wide ? 'calc(50vw - 16px)' : '340px', transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed top-[92px] right-2 bottom-4 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
+      style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
-      {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell */}
-      <div className="pl-4 pr-2 pt-4 pb-3 flex-shrink-0">
+      {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
+      <div className="px-5 py-5 flex-shrink-0">
       <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+        <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
+          <Home size={22} />
+        </button>
         <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
           <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
           {activeSector && activeSector !== 'geral' && (
@@ -861,7 +868,7 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
           )}
         </button>
         <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-          <Globe size={22} />
+          <Search size={22} />
         </button>
         <label className={`${btnCls} relative`} title="Enviar arquivo">
           <Upload size={22} />
@@ -871,9 +878,6 @@ export function ChatDesktop({ wide, onSector, onBrowser, onDifficulty, activeSec
             e.currentTarget.value = '';
           }} />
         </label>
-        <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
-          <Settings2 size={22} />
-        </button>
         <button onClick={() => onShowHistory?.()} className={btnCls} title="Conversas anteriores">
           <History size={22} />
         </button>
@@ -928,7 +932,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 
 export function ChatMobile({
   open, onClose, workspaceContext, activeSector, userRole,
-  onSector, onBrowser, onDifficulty, unreadCount,
+  onHome, homeTitle, onSector, onBrowser, unreadCount,
   dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive,
 }: {
   open: boolean;
@@ -936,8 +940,11 @@ export function ChatMobile({
   workspaceContext?: WorkspaceContext | null;
   activeSector?: string;
   userRole?: string;
+  onHome?: () => void;
+  homeTitle?: string;
   onSector?: () => void;
   onBrowser?: () => void;
+  /** Mantido por compat — não renderiza mais botão dedicado. */
   onDifficulty?: () => void;
   unreadCount?: number;
   dark?: boolean;
@@ -962,6 +969,9 @@ export function ChatMobile({
           {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell / X */}
           <div className="px-4 pt-4 pb-3 flex-shrink-0">
           <div className="flex items-center justify-between gap-2 px-3 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+            <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
+              <Home size={22} />
+            </button>
             <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
               <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
               {activeSector && activeSector !== 'geral' && (
@@ -969,7 +979,7 @@ export function ChatMobile({
               )}
             </button>
             <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-              <Globe size={22} />
+              <Search size={22} />
             </button>
             <label className={`${btnCls} relative`} title="Enviar arquivo">
               <Upload size={22} />
@@ -979,9 +989,6 @@ export function ChatMobile({
                 e.currentTarget.value = '';
               }} />
             </label>
-            <button onClick={onDifficulty} className={btnCls} title="Dificuldade">
-              <Settings2 size={22} />
-            </button>
             <button onClick={() => onShowHistory?.()} className={btnCls} title="Conversas anteriores">
               <History size={22} />
             </button>

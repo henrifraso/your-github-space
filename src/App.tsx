@@ -9,7 +9,7 @@ import {
   Lightbulb, Trophy, ChevronDown,
   Layers, Info, Bell, Camera, Plus,
   MapPin, Scale, Store, Zap,
-  Settings2, X, LayoutGrid, Power
+  Settings2, X, LayoutGrid, Power, Home
 } from 'lucide-react';
 
 const isElectron = typeof window !== 'undefined' && !!(window as any).electron?.isElectron;
@@ -90,6 +90,7 @@ import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
 import { OS1_EVENTS } from './core/events/os1-events';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
 import type { CompanyDiagnosticPayload } from './components/ChatPanel';
+import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, NAV_STICKY_TOP_PX } from './constants/split-layout';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -137,6 +138,12 @@ import {
   type HistoryBucket,
 } from './features/workspace/history/workspace-history';
 import { roleFeedCardToIntelligenceCard } from './features/feed/feed-card-adapters';
+import {
+  canAccessCompanyVision,
+  companyVisionLabel,
+  analyzeLabel as computeAnalyzeLabel,
+  analysisBlockTitle,
+} from './features/profiles/profile-permissions';
 import {
   browserPayloadToFeedCard,
   mapPayloadToFeedCards,
@@ -339,8 +346,9 @@ function AuthenticatedApp() {
   }, []);
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
-  // 92 (top ChatPanel) − 16 (sticky top-4 da navbar) − navHeight = padding alinhado
-  const mainPadTop = scrolled ? Math.max(0, 92 - 16 - navHeight) : undefined;
+  // SPLIT_FRAME_TOP_PX (top ChatPanel) − 16 (sticky top-4 da navbar) − navHeight = padding alinhado.
+  // Gap vertical nav→ChatPanel = SPLIT_FRAME_GAP_PX (20px), igual aos respiros horizontais.
+  const mainPadTop = scrolled ? Math.max(0, SPLIT_FRAME_TOP_PX - NAV_STICKY_TOP_PX - navHeight) : undefined;
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -483,9 +491,25 @@ function AuthenticatedApp() {
 
       const businessName = data?.negocio?.nome_fantasia || 'sua empresa';
       const ts = Date.now();
+      // Título contextual da análise: "Análise da empresa" no geral
+      // (codify/franchisor/affiliate/partner), "Análise da unidade" pra
+      // franquia, "Análise do setor: [nome]" quando há departamento ativo.
+      const DEPARTMENT_LABELS: Record<string, string> = {
+        marketing: 'Marketing',
+        vendas: 'Vendas',
+        financeiro: 'Financeiro',
+        rh: 'RH',
+        operacoes: 'Operações',
+        estoque: 'Estoque',
+        juridico: 'Jurídico',
+      };
+      const deptLabel = activeDepartment && activeDepartment !== 'geral'
+        ? DEPARTMENT_LABELS[activeDepartment] ?? activeDepartment
+        : undefined;
+      const tituloAnalise = analysisBlockTitle(role, activeDepartment, deptLabel);
       const card: IntelligenceCard = {
         id: `ontodiag-summary-${ts}`,
-        titulo: 'Diagnóstico da empresa',
+        titulo: tituloAnalise,
         resumo: `Com base nos dados disponíveis de ${businessName}, o OS¹ identificou pontos fortes, lacunas, riscos potenciais e oportunidades de ação.`,
         dominio: 'Diagnóstico',
         area: 'Diagnóstico',
@@ -621,15 +645,19 @@ function AuthenticatedApp() {
   useEffect(() => {
     if (!scrolled) {
       document.body.style.overflow = 'hidden';
-      // P3: aplica cooldown ao encaixar split pela primeira vez — impede
-      // que rolagens agressivas passem direto pelo split e levem o feed
-      // pra baixo de imediato.
+      // Primeira rolagem: encaixa o split. Cooldown longo (1200ms) +
+      // garantia de scrollTop=0 evitam que momentum/inertia continuem
+      // levando o feed pra baixo após o snap. Só na 2ª rolagem o
+      // conteúdo da Área de Trabalho/feed rola normalmente.
       const lockSplit = () => {
         setScrolled(true);
         setBioOpen(false);
         firstScrollSplitDoneRef.current = true;
         scrollCooldownRef.current = true;
-        window.setTimeout(() => { scrollCooldownRef.current = false; }, 750);
+        // Ancora a janela no topo durante o encaixe — sem behavior:'smooth'
+        // pra não acumular eventos em cima da animação.
+        try { window.scrollTo(0, 0); } catch { /* noop */ }
+        window.setTimeout(() => { scrollCooldownRef.current = false; }, 1200);
       };
       const onWheel = (e: WheelEvent) => {
         if (anyModalOpenRef.current || scrollCooldownRef.current) return;
@@ -657,7 +685,10 @@ function AuthenticatedApp() {
     } else {
       document.body.style.overflow = 'hidden';
       let released = false;
-      const t = setTimeout(() => { document.body.style.overflow = ''; released = true; }, 400);
+      // Release combina com a transição de 500ms do ChatDesktop (width).
+      // Antes era 400ms — abria janela em que o scroll natural disparava
+      // antes do split estar visualmente encaixado.
+      const t = setTimeout(() => { document.body.style.overflow = ''; released = true; }, 550);
       const showProfile = () => {
         if (!released) return;
         // Enquanto houver card ativo na Área de Trabalho, mantém o split fixo.
@@ -903,7 +934,7 @@ function AuthenticatedApp() {
 
       {/* Botão deslogar + Convite + placeholders — desktop only */}
       {!browserOpen && !esferaOpen && !mapOpen && (
-        <div className="fixed top-[26px] sm:top-[30px] right-9 sm:right-11 z-[51] hidden lg:flex items-center gap-1">
+        <div className="fixed top-[30px] right-12 z-[51] hidden lg:flex items-center gap-1">
           <button
             onClick={handleLogout}
             title="Sair"
@@ -917,10 +948,10 @@ function AuthenticatedApp() {
       {/* P2: máscara de topo — cobre a faixa acima do nav (sticky top-3/4 + margens
           laterais mx-4/5) pra o feed não atravessar visualmente quando scrolla.
           pointer-events-none mantém clique passando pra navbar. */}
-      <div className="fixed top-0 inset-x-0 z-[49] h-3 sm:h-4 pointer-events-none bg-[#0a0a0a] dark:bg-[#0a0a0a]" />
+      <div className="fixed top-0 inset-x-0 z-[49] h-5 pointer-events-none bg-[#dcdfe2] dark:bg-[#181818]" />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-3 sm:top-4 z-50 mx-4 sm:mx-5 mt-3 sm:mt-4 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
+      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
@@ -962,11 +993,17 @@ function AuthenticatedApp() {
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
             </button>
-            <button onClick={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)} className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90" title="Dificuldade">
-              <Settings2 size={18} className="sm:hidden" />
-              <Settings2 size={20} className="hidden sm:block lg:hidden" />
-              <Settings2 size={24} className="hidden lg:block" />
-            </button>
+            {canAccessCompanyVision(role) && (
+              <button
+                onClick={() => setEsferaOpen(v => !v)}
+                className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+                title={companyVisionLabel(role, activeDepartment)}
+              >
+                <Home size={18} className="sm:hidden" />
+                <Home size={20} className="hidden sm:block lg:hidden" />
+                <Home size={24} className="hidden lg:block" />
+              </button>
+            )}
             <button className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
               <Bell size={18} className="sm:hidden" />
               <Bell size={20} className="hidden sm:block lg:hidden" />
@@ -986,10 +1023,13 @@ function AuthenticatedApp() {
 
       <main
         style={mainPadTop !== undefined ? { paddingTop: mainPadTop } : undefined}
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'pt-3 sm:pt-4 md:pt-8 lg:pt-3'}`}
+        className={`${scrolled && isDesktop ? 'max-w-none' : 'max-w-[935px]'} mx-auto ${scrolled ? '' : 'pt-5'}`}
       >
-        {/* Container unificado de fundo — os elementos internos flutuam por cima */}
-        <div className="ml-4 mr-6 sm:ml-5 sm:mr-8 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative"
+        {/* Container unificado de fundo — os elementos internos flutuam por cima.
+            Em modo split (scrolled+desktop), o mr alinha exatamente com o
+            right-4 do ChatDesktop (16px), pra que feed e workspace tenham
+            o mesmo afastamento das bordas externas e entre si. */}
+        <div className={`ml-4 ${scrolled && isDesktop ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1279,6 +1319,7 @@ function AuthenticatedApp() {
           department={activeDepartment as Exclude<DepartmentId, 'geral'>}
           feeds={PROFILE_SECTOR_FEEDS[activeSector] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
           onOpenWorkspace={openWorkspaceFromCard}
+          topGapClass={scrolled && isDesktop ? SPLIT_TOP_GAP_MT : undefined}
         />
       )}
 
@@ -1307,7 +1348,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 pl-4 pr-6 sm:pl-5 sm:pr-8`}
+            className={`max-w-[935px] mx-auto ${scrolled && isDesktop ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-12 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1405,7 +1446,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-3 sm:mt-4'} pb-12 space-y-3 sm:space-y-4 pl-4 pr-6 sm:pl-5 sm:pr-8`}
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-5'} pb-12 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
@@ -1666,9 +1707,10 @@ function AuthenticatedApp() {
       {/* Chat */}
       <ChatDesktop
         wide={scrolled}
+        onHome={() => setEsferaOpen(v => !v)}
+        homeTitle={companyVisionLabel(role, activeDepartment)}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
-        onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         activeSector={activeSector}
         userRole={role}
         workspaceContext={workspaceContext}
@@ -1694,9 +1736,10 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
         activeSector={activeSector}
         userRole={role}
+        onHome={() => setEsferaOpen(v => !v)}
+        homeTitle={companyVisionLabel(role, activeDepartment)}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
-        onDifficulty={() => (role === 'codify' && activeSector === 'os1') ? setEsferaOpen(true) : setDifficultyOpen(true)}
         unreadCount={unreadCount}
         dark={dark}
         onToggleTheme={toggleTheme}
@@ -1902,12 +1945,26 @@ function AuthenticatedApp() {
         meta={DIFF_META}
       />
 
-      {/* Esfera Ontológica — fullscreen iframe (só perfil OS1) — Fase 18: extraído. */}
+      {/* Esfera / Visão da Empresa — fullscreen iframe disponível pra
+          codify, franchisor, franchise, affiliate, partner, team_member. */}
       <OntologySphereOverlay
         open={esferaOpen}
         url={ESFERA_URL}
         onClose={() => setEsferaOpen(false)}
         onAnalyze={() => { void openDiagnosisInWorkspace(); }}
+        analyzeLabel={computeAnalyzeLabel(role, activeDepartment)}
+        title={companyVisionLabel(role, activeDepartment)}
+        departments={activeDepartment === 'geral' ? [
+          { id: 'marketing',  label: 'Marketing' },
+          { id: 'vendas',     label: 'Vendas' },
+          { id: 'financeiro', label: 'Financeiro' },
+          { id: 'rh',         label: 'RH' },
+          { id: 'operacoes',  label: 'Operações' },
+          { id: 'estoque',    label: 'Estoque' },
+          { id: 'juridico',   label: 'Jurídico' },
+        ] : undefined}
+        activeDepartment={activeDepartment}
+        onSelectDepartment={(id) => setActiveDepartment(id as DepartmentId)}
       />
 
       {/* Diagnóstico da empresa agora entra na Área de Trabalho via

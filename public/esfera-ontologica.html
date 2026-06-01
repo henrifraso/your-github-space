@@ -238,7 +238,9 @@
 ─────────────────────────────────────────────────────────────────── */
 
 // ── Cores por ÁREA MACRO (15 áreas) ────────────────────────────────
-const AREAS = {
+// Cores originais por área — preservadas pra uso no termo central
+// (que agora alterna na cor variável que antes pintava as palavras de fora).
+const AREAS_ORIGINAL = {
   'Administrativo':            [70, 130, 255],   // azul
   'Comercial':                 [50, 205, 130],   // verde
   'Operacional':               [255, 140, 50],   // laranja
@@ -257,8 +259,33 @@ const AREAS = {
   '_fallback':                 [130, 130, 155],
 };
 
+// AREAS atual — todas as áreas usam a cor da Governança (cinza).
+// É o que pinta os termos espalhados na esfera (palavras "de fora").
+const GOV_GRAY = [150, 150, 170];
+const AREAS = {
+  'Administrativo':            GOV_GRAY,
+  'Comercial':                 GOV_GRAY,
+  'Operacional':               GOV_GRAY,
+  'Financeiro':                GOV_GRAY,
+  'Pessoas':                   GOV_GRAY,
+  'Tecnologia':                GOV_GRAY,
+  'Mercado':                   GOV_GRAY,
+  'Estratégia':                GOV_GRAY,
+  'Risco':                     GOV_GRAY,
+  'Crescimento':               GOV_GRAY,
+  'Governança':                GOV_GRAY,
+  'Dados':                     GOV_GRAY,
+  'Jurídico-Regulatório':      GOV_GRAY,
+  'Experiência do Cliente':    GOV_GRAY,
+  'Cadeia de Valor':           GOV_GRAY,
+  '_fallback':                 GOV_GRAY,
+};
+
 // Adapter: mapeia areaMacro → chave de cor
 function colorOf(areaMacro){ return AREAS[areaMacro] || AREAS._fallback; }
+
+// Cor variável original (por área) — usada apenas no termo central animado.
+function colorOfOriginal(areaMacro){ return AREAS_ORIGINAL[areaMacro] || AREAS_ORIGINAL._fallback; }
 
 // Estado global
 let ONTOLOGY_TERMS = []; // toda a base estruturada
@@ -275,10 +302,36 @@ fetch('/ontology-data.json')
     populateFilters();
     populateLegend();
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('topbar').style.display = '';
-    document.getElementById('legend').style.display = '';
+    // Topbar (busca/filtros) e legenda lateral (áreas macro) ocultados —
+    // a tela mostra apenas o canvas da esfera. O caller sobrepõe seus
+    // próprios botões (Analisar / Fechar) por cima do iframe.
+    document.getElementById('topbar').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
     document.getElementById('count').textContent = ONTOLOGY_TERMS.length + ' termos';
     initCanvas();
+    // Filtro por setor via ?dept=<id> (vindo do React caller). Mapeia o id
+    // do setor do app pra `areaMacro` desta ontologia e aplica o filtro.
+    try {
+      const dept = new URLSearchParams(window.location.search).get('dept');
+      const DEPT_TO_AREA = {
+        marketing:  'Mercado',
+        vendas:     'Comercial',
+        financeiro: 'Financeiro',
+        rh:         'Pessoas',
+        operacoes:  'Operacional',
+        estoque:    'Cadeia de Valor',
+        juridico:   'Jurídico-Regulatório',
+      };
+      const areaMacro = dept && DEPT_TO_AREA[dept];
+      if (areaMacro) {
+        const areaSel = document.getElementById('areaFilter');
+        if (areaSel) {
+          areaSel.value = areaMacro;
+          refreshDominiosFilter(areaMacro);
+          applyFilters();
+        }
+      }
+    } catch (_) { /* noop — sem filtro se algo falhar */ }
   })
   .catch(err => {
     document.getElementById('loading').innerHTML =
@@ -655,13 +708,16 @@ function draw(ts){
       const maxH = globeRadius * 0.72;
       const cfs = Math.min(cBase * perspScale * (SS / 160), maxW, maxH);
       if(cfs >= 3) {
-        ctx.shadowColor = 'rgba(255,255,255,0.25)';
+        // Cor variável por área (a mesma paleta que antes era usada nas palavras de fora).
+        const co = colorOfOriginal(centerTerm.categoria);
+        const cr = co[0], cg = co[1], cb = co[2];
+        ctx.shadowColor = 'rgba('+cr+','+cg+','+cb+',0.35)';
         ctx.shadowBlur = 10;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         const cfont = fontOk ? 'Orbitron' : 'monospace';
         ctx.font = '700 ' + Math.round(cfs) + 'px \'' + cfont + '\', monospace';
-        ctx.fillStyle = 'rgba(255,255,255,'+pulse.toFixed(3)+')';
+        ctx.fillStyle = 'rgba('+cr+','+cg+','+cb+','+pulse.toFixed(3)+')';
         ctx.fillText(centerTerm.label, CX, CY);
         ctx.shadowBlur = 0;
       }

@@ -138,14 +138,14 @@ export function FeedSection({ title, icon, count, badge, children }: {
   title: string; icon: React.ReactNode; count?: string; badge?: string; children: React.ReactNode;
 }) {
   return (
-    <section className="space-y-3 sm:space-y-4">
+    <section className="space-y-5">
       <div className="flex items-center gap-2.5 px-1 pt-1 sm:pt-2">
         <span className="text-neutral-400">{icon}</span>
         <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">{title}</h3>
         {badge && <span className="ml-auto text-[11px] sm:text-xs font-semibold text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-[#353535] px-2 sm:px-2.5 py-0.5 rounded-full">{badge}</span>}
         {count && !badge && <span className="ml-auto text-[11px] sm:text-xs text-neutral-500 dark:text-neutral-400">{count}</span>}
       </div>
-      <div className="space-y-2.5 sm:space-y-3">
+      <div className="space-y-5">
         {children}
       </div>
     </section>
