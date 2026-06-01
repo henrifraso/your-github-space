@@ -716,6 +716,11 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
 
 // Render do bloco de compartilhamento — 5 opções, cada uma copia/envia o texto formatado.
 function ShareOptionsContent({ card }: { card: IntelligenceCard | null }) {
+  // Card sintético "Convite" disparado pelo botão da bio — substitui o modal
+  // flutuante por um formulário inline no bloco da Área de Trabalho.
+  if (card?.tipo_card === 'convite' || card?.dominio === 'Convite') {
+    return <InviteForm />;
+  }
   function fire(textBuilder: (c: IntelligenceCard) => string) {
     if (!card) return;
     const txt = textBuilder(card);
@@ -738,6 +743,55 @@ function ShareOptionsContent({ card }: { card: IntelligenceCard | null }) {
           <span className="text-[11px] font-medium text-neutral-700 dark:text-neutral-200">{opt.label}</span>
         </button>
       ))}
+    </div>
+  );
+}
+
+// Formulário de convite inline — substitui o antigo modal flutuante.
+// Validação simples de email; estado local; mostra confirmação após enviar.
+function InviteForm() {
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const submit = () => {
+    if (!valid) return;
+    // TODO: integrar com endpoint real de convite. Por enquanto só simula.
+    setSent(true);
+  };
+  if (sent) {
+    return (
+      <div className="flex flex-col gap-1 text-[12px] text-neutral-700 dark:text-neutral-200">
+        <span className="font-medium text-emerald-600 dark:text-emerald-400">Convite enviado pra {email}.</span>
+        <button onClick={() => { setSent(false); setEmail(''); }}
+          className="self-start text-[11px] text-neutral-500 hover:text-neutral-800 dark:hover:text-white underline underline-offset-2">
+          Enviar outro
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
+        Digite o email da pessoa que você quer convidar:
+      </p>
+      <div className="flex items-center gap-1.5">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter' && valid) submit(); }}
+          placeholder="email@dominio.com"
+          autoFocus
+          className="flex-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-[#4e4e4e] bg-white dark:bg-[#2f2f2f] text-[12px] text-neutral-800 dark:text-neutral-100 outline-none focus:border-[#f59e0b]"
+        />
+        <button
+          onClick={submit}
+          disabled={!valid}
+          className="px-3 py-1.5 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-semibold transition-colors cursor-pointer"
+        >
+          Enviar
+        </button>
+      </div>
     </div>
   );
 }

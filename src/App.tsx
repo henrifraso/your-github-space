@@ -454,6 +454,48 @@ function AuthenticatedApp() {
     }
   };
 
+  // Envia o botão "Convite" da bio pra Área de Trabalho como card sintético do
+  // tipo 'convite'. O ShareOptionsContent detecta o dominio="Convite" e
+  // renderiza input de email + botão enviar no lugar dos botões de share.
+  const openInviteInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-invite-${Date.now()}`,
+      titulo:          'Enviar convite',
+      resumo:          'Convide outra pessoa pra entrar no sistema com seu link.',
+      dominio:         'Convite',
+      area:            'bio',
+      urgencia:        'baixa',
+      tipo_card:       'convite',
+      confianca:       'alta',
+      confianca_score: 0.9,
+      impacto:         '',
+      risco_erro:      0,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'compartilhar');
+  };
+
+  // Envia um stat clicado (chip da bio: Oportunidades / Oponentes / Nível /
+  // empresas / afiliados / parceiros / etc.) pra Área de Trabalho como card
+  // sintético — substitui o antigo StatInfoModal flutuante.
+  const openStatInWorkspace = (label: string, value: number | string, description: string) => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-stat-${String(label).toLowerCase()}-${Date.now()}`,
+      titulo:          `${value} ${label}`,
+      resumo:          description,
+      dominio:         String(label),
+      area:            'bio',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
   // Envia o Diagnóstico da empresa pra Área de Trabalho como bloco — NÃO abre
   // overlay sobre o feed. Roda a análise local, monta card sintético + payload
   // e usa o mesmo canal de openWorkspaceFromCard (setWorkspaceContext).
@@ -1169,7 +1211,7 @@ function AuthenticatedApp() {
                           { label: 'afiliados', value: roleConfig.summaryNumbers.afiliados, description: `${roleConfig.summaryNumbers.afiliados} afiliados vendendo. Lista de afiliados ativos com seus indicadores de performance — comissão acumulada, conversões, lifetime value e ranking.` },
                           { label: 'parceiros', value: roleConfig.summaryNumbers.parceiros, description: `${roleConfig.summaryNumbers.parceiros} parceiro(s) conectado(s). Lista de parceiros estratégicos — categoria, contratos ativos, datas de renovação, contatos comerciais e métricas conjuntas.` },
                         ].map(({ label, value, description }) => (
-                          <button key={label} onClick={() => setStatInfo({ label, value, description })}
+                          <button key={label} onClick={() => openStatInWorkspace(label, value, description)}
                             className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
                             <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                               <strong>{value}</strong>
@@ -1187,7 +1229,7 @@ function AuthenticatedApp() {
                           </div>
                           <span>Concorrentes</span>
                         </button>
-                        <button onClick={() => setInviteOpen(true)} title="Convite"
+                        <button onClick={() => openInviteInWorkspace()} title="Convite"
                           className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                           <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                             <Mail size={18} className="text-neutral-400 dark:text-white" />
@@ -1233,7 +1275,7 @@ function AuthenticatedApp() {
                     { label: 'Oponentes',       value: data.concorrentes.length,   description: `${data.concorrentes.length} Oponentes monitorados na região. Lista detalhada com posicionamento, faixa de preço, força de marca, atividade recente e nível de ameaça.` },
                     { label: txt('stat_nivel'), value: data.negocio.nivel,         description: `${txt('stat_nivel')} ${data.negocio.nivel}. Progressão do negócio — métricas que compõem o nível atual, o que falta pra subir, comparativo com pares e ações recomendadas pra evolução.` },
                   ].map(({ label, value, description }) => (
-                    <button key={String(label)} onClick={() => setStatInfo({ label: String(label), value, description })}
+                    <button key={String(label)} onClick={() => openStatInWorkspace(String(label), value, description)}
                       className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
                       <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                         <strong>{value}</strong>
@@ -1251,7 +1293,7 @@ function AuthenticatedApp() {
                   </div>
                   <span>Concorrentes</span>
                 </button>
-                <button onClick={() => setInviteOpen(true)} title="Convite"
+                <button onClick={() => openInviteInWorkspace()} title="Convite"
                   className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                   <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                     <Mail size={18} className="text-neutral-400 dark:text-white" />
