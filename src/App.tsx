@@ -764,26 +764,15 @@ function AuthenticatedApp() {
     } else {
       document.body.style.overflow = 'hidden';
       let released = false;
-      // Em vez de liberar após um tempo fixo, aguardamos o usuário PARAR de
-      // rolar (debounce de 280ms sem wheel/touch). Isso bloqueia o momentum/
-      // inertia da 1ª rolada (a que ativou o split) e exige que a próxima
-      // rolagem deliberada do usuário seja outra interação separada.
-      let releaseTimer: number;
-      const scheduleRelease = () => {
-        window.clearTimeout(releaseTimer);
-        releaseTimer = window.setTimeout(() => { document.body.style.overflow = ''; released = true; }, 280);
-      };
-      scheduleRelease();
-      const eatBeforeRelease = (e: Event) => {
-        if (!released) { e.preventDefault(); scheduleRelease(); }
-      };
-      window.addEventListener('wheel', eatBeforeRelease, { passive: false });
-      window.addEventListener('touchmove', eatBeforeRelease, { passive: false });
+      // Trava o feed por 1,5s após ativar o split. Após esse tempo libera o
+      // scroll natural — usuário pode rolar pra cima e, se a bio for atingida,
+      // ela reabre (mesmo com card ativo na Área de Trabalho).
+      const releaseTimer = window.setTimeout(() => {
+        document.body.style.overflow = '';
+        released = true;
+      }, 1500);
       const showProfile = () => {
         if (!released) return;
-        // Enquanto houver card ativo na Área de Trabalho, mantém o split fixo.
-        // Rolar pra cima não reabre o perfil — só fica meio a meio.
-        if (workspaceContextRef.current) return;
         scrollCooldownRef.current = true;
         setScrolled(false);
         setTimeout(() => { scrollCooldownRef.current = false; }, 700);
@@ -802,8 +791,6 @@ function AuthenticatedApp() {
       return () => {
         window.clearTimeout(releaseTimer);
         if (!released) document.body.style.overflow = '';
-        window.removeEventListener('wheel', eatBeforeRelease);
-        window.removeEventListener('touchmove', eatBeforeRelease);
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('wheel', onWheel);
         window.removeEventListener('touchstart', onTouchStart);
@@ -1423,6 +1410,7 @@ function AuthenticatedApp() {
           feeds={PROFILE_SECTOR_FEEDS[activeSector] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
           onOpenWorkspace={openWorkspaceFromCard}
           topGapClass={scrolled && isDesktop ? SPLIT_TOP_GAP_MT : undefined}
+          rightPadClass={scrolled && isDesktop ? 'pr-5' : 'pr-10'}
         />
       )}
 
@@ -1451,7 +1439,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className={`max-w-[935px] mx-auto ${scrolled && isDesktop ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-12 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
+            className={`max-w-[935px] mx-auto ${scrolled && isDesktop ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1548,7 +1536,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-5'} pb-12 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}

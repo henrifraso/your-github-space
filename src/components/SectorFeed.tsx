@@ -69,14 +69,16 @@ interface Props {
   /** Classe de margin-top do wrapper raiz. Permite que o caller sincronize o
       gap do topo com o da Área de Trabalho em modo split (mesmo token). */
   topGapClass?: string;
+  /** Classe de padding-right — caller passa pr-5 (split) ou pr-10 (normal). */
+  rightPadClass?: string;
 }
 
-export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass }: Props) {
+export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass, rightPadClass }: Props) {
   const sections = feeds[department] ?? [];
 
   return (
     <motion.div
-      className={`max-w-[935px] mx-auto ${topGapClass ?? 'mt-5'} pb-12 space-y-5 px-5`}
+      className={`max-w-[935px] mx-auto ${topGapClass ?? 'mt-5'} pb-32 space-y-5 pl-5 ${rightPadClass ?? 'pr-5'}`}
       initial="hidden"
       animate="visible"
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}

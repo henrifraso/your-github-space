@@ -304,7 +304,7 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
         )}
         {!showSubview && !hideDemoProfiles && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SECTORS.map((profile, i) => {
+          {SECTORS.filter(p => ['os1', 'mcdonalds', 'nike', 'nubank'].includes(p.id)).map((profile, i) => {
             const isActive = active === profile.id;
             return (
               <motion.div
