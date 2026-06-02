@@ -374,12 +374,20 @@ function AuthenticatedApp() {
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
 
+  // Fotos default por perfil demo (URL pública direta). Buscadas via agentes:
+  // Oscar = logo PNG do CDN S3 da Deco (header oficial do oscarcalcados.com.br).
+  // Pacheco = JPG da fachada da loja do Largo do Machado/RJ (Wikimedia Commons).
+  const DEFAULT_PHOTOS: Record<string, string> = {
+    nike:   '/profile-photos/oscar-calcados.png',
+    nubank: '/profile-photos/drogarias-pacheco.png',
+  };
+
   function loadPhotoForProfile(profileId: string): PhotoSettings {
     const saved = localStorage.getItem(`photo_settings_${profileId}`);
     if (saved) { try { return JSON.parse(saved); } catch {} }
     // Default: codify (perfil personalizado em os1) usa moldura quadrada; demos usam redonda.
     const defaultShape: 'round' | 'square' = profileId === 'os1' ? 'square' : 'round';
-    return { src: '', x: 0, y: 0, zoom: 1, locked: true, shape: defaultShape };
+    return { src: DEFAULT_PHOTOS[profileId] ?? '', x: 0, y: 0, zoom: 1, locked: true, shape: defaultShape };
   }
 
   const [photoSettings, setPhotoSettings] = useState<PhotoSettings>(
@@ -1151,9 +1159,10 @@ function AuthenticatedApp() {
                 <div className={`absolute inset-0 ${photoShapeOuter} shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none`} />
                 {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
                 <div className={`absolute inset-0 ${photoShapeOuter} bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]`}>
-                  {/* Camada 2: anel gradient azul (CSS gradient border via padding + bg) */}
+                  {/* Camada 2: anel gradient azul (CSS gradient border via padding + bg).
+                      Demos (Oscar/McDonald's/Pacheco): padding zero pra foto encostar no anel. */}
                   <div
-                    className={`w-full h-full ${photoShapeMid} p-[3px] md:p-[5px] relative overflow-hidden`}
+                    className={`w-full h-full ${photoShapeMid} ${!isRoleView ? 'p-0' : 'p-[3px] md:p-[5px]'} relative overflow-hidden`}
                     style={{
                       background: 'conic-gradient(from 135deg at 50% 50%, #2563eb, #60a5fa, #3b82f6, #2563eb, #60a5fa, #2563eb)',
                     }}
