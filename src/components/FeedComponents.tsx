@@ -336,7 +336,6 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                   <Rocket size={22} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
                 </div>
                 <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Executar</span>
-                <span className="hidden lg:inline text-sm text-neutral-500 dark:text-white">· {likes}</span>
               </motion.div>
             )}
             {utilStatus === 'loading' && (
@@ -359,7 +358,6 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                 <Check size={16} className="lg:hidden text-[#3b82f6]" strokeWidth={2.5} />
                 <Check size={20} className="hidden lg:block text-[#3b82f6]" strokeWidth={2.5} />
                 <span className="text-[10px] lg:text-sm text-[#3b82f6] font-semibold whitespace-nowrap">Implementado</span>
-                <span className="hidden lg:inline text-sm text-neutral-500 dark:text-white">· {likes}</span>
               </motion.div>
             )}
           </AnimatePresence>

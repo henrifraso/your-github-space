@@ -38,7 +38,8 @@ function SimpleCard({ color, tag, title, detail, badge, onOpenWorkspace, intelli
 }) {
   const callbacks = (onOpenWorkspace && intelligence) ? {
     onWorkspaceIntent: (intent: WorkspaceIntent) => onOpenWorkspace(intelligence, intent),
-    onFullscreen:      () => onOpenWorkspace(intelligence, 'utilizar' as WorkspaceIntent),
+    // onFullscreen removido — o clique no card inteiro NÃO deve mais abrir
+    // a Área de Trabalho. Só os botões (Aprender / Entender / Executar) levam.
   } : {};
   return (
     <FeedCard {...callbacks}>

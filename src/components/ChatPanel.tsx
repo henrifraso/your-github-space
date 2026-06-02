@@ -62,58 +62,47 @@ const MAIN_BTNS: { key: MainKey; label: string; Icon: React.ElementType }[] = [
 
 // Toolbar fixo do ChatPanel: 4 chips premium e limpos, sem expansão de listas.
 // Cada modo gera um bloco de conteúdo abaixo — os 10 atalhos vão dentro do bloco.
-function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceClick, disabled }: {
+function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceClick, disabled, hasContent, onErase, onFinish }: {
   activeMode?: MainKey | null;
   workspaceOpen: boolean;
   onModeClick: (mode: MainKey) => void;
   onWorkspaceClick: () => void;
   disabled?: boolean;
+  /** Quando true, o botão único vira 3 botões: Apagar · Salvar · Finalizar. */
+  hasContent?: boolean;
+  /** Handler do botão "Apagar" (esquerdo) — só usado quando hasContent. */
+  onErase?: () => void;
+  /** Handler do botão "Finalizar" (direito) — só usado quando hasContent. */
+  onFinish?: () => void;
 }) {
   const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border-[0.5px] transition-all duration-150 active:scale-[0.97] cursor-pointer disabled:cursor-default disabled:opacity-100 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]";
+  const sharedBg = "bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]";
+  const labelCls = "text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap";
   return (
     <div className="flex flex-col gap-1.5">
-      {/* 3 modos — chips (só aparecem quando workspaceOpen) — vêm ANTES pra ficar acima */}
-      <AnimatePresence initial={false}>
-        {workspaceOpen && (
-          <motion.div
-            key="modes"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="grid grid-cols-3 gap-1.5"
-          >
-            {MAIN_BTNS.map(btn => {
-              const isActive = activeMode === btn.key;
-              return (
-                <button
-                  key={btn.key}
-                  type="button"
-                  onClick={() => onModeClick(btn.key)}
-                  disabled={disabled}
-                  className={`${chipBase} !h-11 ${isActive
-                    ? 'bg-[#3b82f6] border-[#3b82f6]'
-                    : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]'}`}
-                >
-                  <btn.Icon size={12} className={isActive ? 'text-white' : 'text-neutral-400 dark:text-white'} />
-                  <span className={`text-[10px] lg:text-sm font-medium whitespace-nowrap ${isActive ? 'text-white' : 'text-neutral-500 dark:text-white'}`}>{btn.label}</span>
-                </button>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {/* Área de Trabalho — toggle dos 3 modos (abaixo) */}
-      <button
-        type="button"
-        onClick={onWorkspaceClick}
-        disabled={disabled}
-        className={`${chipBase} w-full !h-11 ${workspaceOpen
-          ? 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d]'
-          : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]'}`}
-      >
-        <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Área de Trabalho</span>
-      </button>
+      {hasContent ? (
+        // 3 botões: Apagar · Salvar · Finalizar
+        <div className="grid grid-cols-3 gap-1.5">
+          <button type="button" onClick={onErase} disabled={disabled}
+            className={`${chipBase} !h-11 ${sharedBg}`}>
+            <span className={labelCls}>Apagar</span>
+          </button>
+          <button type="button" onClick={onWorkspaceClick} disabled={disabled}
+            className={`${chipBase} !h-11 ${sharedBg}`}>
+            <span className={labelCls}>Salvar</span>
+          </button>
+          <button type="button" onClick={onFinish} disabled={disabled}
+            className={`${chipBase} !h-11 ${sharedBg}`}>
+            <span className={labelCls}>Finalizar</span>
+          </button>
+        </div>
+      ) : (
+        // Botão único: Área de Trabalho
+        <button type="button" onClick={onWorkspaceClick} disabled={disabled}
+          className={`${chipBase} w-full !h-11 ${workspaceOpen ? 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d]' : sharedBg}`}>
+          <span className={labelCls}>Área de Trabalho</span>
+        </button>
+      )}
     </div>
   );
 }
@@ -126,7 +115,7 @@ interface Message {
   block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, chatHistoryOpen, archivedSessions, onSelectHistorySession }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, onWorkspaceCleared, chatHistoryOpen, archivedSessions, onSelectHistorySession }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; onWorkspaceCleared?: () => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -179,6 +168,26 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       setActionLoading(null);
     }
     setWorkspaceOpen(prev => !prev);
+  }
+
+  // "Apagar" — limpa o conteúdo da Área de Trabalho SEM arquivar.
+  function handleApagar() {
+    setMessages([]);
+    setActiveCard(null);
+    setActiveMode(null);
+    lastCardIdRef.current = null;
+    setActionLoading(null);
+    // Sinaliza ao App.tsx pra reabrir a bio (mesmo comportamento de Salvar/Finalizar,
+    // que reabrem a bio via onArchive).
+    onWorkspaceCleared?.();
+  }
+
+  // "Finalizar" — arquiva a sessão atual e limpa tudo (encerra a sessão).
+  function handleFinalizar() {
+    if (activeCard && messages.length > 0) {
+      onArchive?.(activeCard.titulo, activeSector ?? 'os1', { messages, activeCard, activeMode });
+    }
+    handleApagar();
   }
 
   // Restaura uma sessão arquivada — chamado quando user clica num item da lista de histórico.
@@ -669,6 +678,9 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                 onModeClick={handleModeClick}
                 onWorkspaceClick={handleAreaTrabalhoClick}
                 disabled={!activeCard || actionLoading !== null}
+                hasContent={messages.length > 0}
+                onErase={handleApagar}
+                onFinish={handleFinalizar}
               />
             </motion.div>
           ) : (
@@ -900,13 +912,14 @@ interface ChatDesktopProps {
   archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>;
   onSelectHistorySession?: (id: string) => void;
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
+  onWorkspaceCleared?: () => void;
 }
 
-export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
   return (
     <div
-      style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX + 12}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
       {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
@@ -941,7 +954,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
       </div>
       </div>
       <div className="flex-1 min-h-0">
-        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} onWorkspaceCleared={onWorkspaceCleared} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
       </div>
     </div>
   );

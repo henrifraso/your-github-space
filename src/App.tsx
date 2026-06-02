@@ -346,9 +346,11 @@ function AuthenticatedApp() {
   }, []);
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
-  // SPLIT_FRAME_TOP_PX (top ChatPanel) − 16 (sticky top-4 da navbar) − navHeight = padding alinhado.
-  // Gap vertical nav→ChatPanel = SPLIT_FRAME_GAP_PX (20px), igual aos respiros horizontais.
-  const mainPadTop = scrolled ? Math.max(0, SPLIT_FRAME_TOP_PX - NAV_STICKY_TOP_PX - navHeight) : undefined;
+  // O ChatDesktop está em `SPLIT_FRAME_TOP_PX + 12` (offset extra aplicado no
+  // inline style do ChatPanel). O feed em modo split precisa do MESMO offset
+  // pra topo do primeiro card alinhar com o topo do ChatDesktop — assim o gap
+  // nav→feed fica igual ao gap nav→ChatDesktop.
+  const mainPadTop = scrolled ? Math.max(0, SPLIT_FRAME_TOP_PX + 12 - NAV_STICKY_TOP_PX - navHeight) : undefined;
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -762,10 +764,21 @@ function AuthenticatedApp() {
     } else {
       document.body.style.overflow = 'hidden';
       let released = false;
-      // Release combina com a transição de 500ms do ChatDesktop (width).
-      // Antes era 400ms — abria janela em que o scroll natural disparava
-      // antes do split estar visualmente encaixado.
-      const t = setTimeout(() => { document.body.style.overflow = ''; released = true; }, 550);
+      // Em vez de liberar após um tempo fixo, aguardamos o usuário PARAR de
+      // rolar (debounce de 280ms sem wheel/touch). Isso bloqueia o momentum/
+      // inertia da 1ª rolada (a que ativou o split) e exige que a próxima
+      // rolagem deliberada do usuário seja outra interação separada.
+      let releaseTimer: number;
+      const scheduleRelease = () => {
+        window.clearTimeout(releaseTimer);
+        releaseTimer = window.setTimeout(() => { document.body.style.overflow = ''; released = true; }, 280);
+      };
+      scheduleRelease();
+      const eatBeforeRelease = (e: Event) => {
+        if (!released) { e.preventDefault(); scheduleRelease(); }
+      };
+      window.addEventListener('wheel', eatBeforeRelease, { passive: false });
+      window.addEventListener('touchmove', eatBeforeRelease, { passive: false });
       const showProfile = () => {
         if (!released) return;
         // Enquanto houver card ativo na Área de Trabalho, mantém o split fixo.
@@ -787,8 +800,10 @@ function AuthenticatedApp() {
       window.addEventListener('touchstart', onTouchStart, { passive: true });
       window.addEventListener('touchmove', onTouchMove, { passive: true });
       return () => {
-        clearTimeout(t);
+        window.clearTimeout(releaseTimer);
         if (!released) document.body.style.overflow = '';
+        window.removeEventListener('wheel', eatBeforeRelease);
+        window.removeEventListener('touchmove', eatBeforeRelease);
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('wheel', onWheel);
         window.removeEventListener('touchstart', onTouchStart);
@@ -825,16 +840,28 @@ function AuthenticatedApp() {
     const chuva = data.previsao_clima.filter(w => (w.chuva_mm ?? 0) > 0).length;
     const semDad = Math.max(0, 7 - data.previsao_clima.length);
     const comPreco = data.fornecedores.filter(f => Number(f.preco_referencia) > 0).length;
+    // Cor por urgência (não escrita) — pct baixo = atenção; pct alto = tranquilo.
+    // vermelho: mais urgente · laranja: urgente · verde: veja quando puder · azul: sem urgência
+    const urg = (pct: number) => pct < 30 ? '#ef4444' : pct < 60 ? '#f59e0b' : pct < 85 ? '#10b981' : '#3b82f6';
+    const p_mkt   = Math.min(100, Math.round((comNota / n) * 100));
+    const p_vds   = notaMedia;
+    const p_fin   = Math.min(100, Math.round((comFaixa / n) * 100));
+    const p_jur   = 72;
+    const p_est   = Math.min(100, comPreco * 10);
+    const p_ops   = Math.min(100, pn * 12);
+    const p_rh    = Math.min(100, fn * 8);
+    const p_evt   = Math.max(0, 100 - (chuva / Math.max(1, data.previsao_clima.length)) * 100);
+    const p_rep   = data.progresso_pct;
     const circles = [
-      { label: 'Marketing',  pct: Math.min(100, Math.round((comNota / n) * 100)),              color: '#ec4899' },
-      { label: 'Vendas',     pct: notaMedia,                                                    color: '#10b981' },
-      { label: 'Financeiro', pct: Math.min(100, Math.round((comFaixa / n) * 100)),              color: '#f59e0b' },
-      { label: 'Jurídico',   pct: 72,                                                           color: '#f97316' },
-      { label: 'Estoque',    pct: Math.min(100, comPreco * 10),                                 color: '#84cc16' },
-      { label: 'Operações',  pct: Math.min(100, pn * 12),                                      color: '#06b6d4' },
-      { label: 'RH',         pct: Math.min(100, fn * 8),                                       color: '#8b5cf6' },
-      { label: 'Eventos',    pct: Math.max(0, 100 - (chuva / Math.max(1, data.previsao_clima.length)) * 100), color: '#3b82f6' },
-      { label: 'Reputação',  pct: data.progresso_pct,                                          color: '#3b82f6' },
+      { label: 'Marketing',  pct: p_mkt, color: urg(p_mkt) },
+      { label: 'Vendas',     pct: p_vds, color: urg(p_vds) },
+      { label: 'Financeiro', pct: p_fin, color: urg(p_fin) },
+      { label: 'Jurídico',   pct: p_jur, color: urg(p_jur) },
+      { label: 'Estoque',    pct: p_est, color: urg(p_est) },
+      { label: 'Operações',  pct: p_ops, color: urg(p_ops) },
+      { label: 'RH',         pct: p_rh,  color: urg(p_rh)  },
+      { label: 'Eventos',    pct: p_evt, color: urg(p_evt) },
+      { label: 'Reputação',  pct: p_rep, color: urg(p_rep) },
     ];
     const allSlices = [
       [{ label: `Com nota (${comNota})`, value: Math.max(1, comNota), color: '#ef4444' }, { label: `Sem nota (${n - comNota})`, value: Math.max(1, n - comNota), color: '#1e3a5f' }],
@@ -1032,13 +1059,12 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
-          <button onClick={openEmpresaInWorkspace} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
+          <button onClick={openEmpresaInWorkspace}
+            className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+            <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
               {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
             </h1>
-            <ChevronDown size={14} className="text-neutral-400 sm:hidden" />
-            <ChevronDown size={16} className="text-neutral-400 hidden sm:block" />
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
               Modo escuro foi movido pro header da Área de Trabalho. */}
@@ -1257,10 +1283,10 @@ function AuthenticatedApp() {
                         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => setMapOpen(true)}
-                          className="inline-flex justify-center items-center gap-1 pl-1 pr-2 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
+                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
                         >
-                          <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                            <MapPinned size={22} className="text-neutral-400 dark:text-white" />
+                          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                            <MapPinned size={18} className="text-neutral-400 dark:text-white" />
                           </div>
                           <span>Concorrentes</span>
                         </button>
@@ -1321,10 +1347,10 @@ function AuthenticatedApp() {
                 <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => setMapOpen(true)}
-                  className="inline-flex justify-center items-center gap-1 pl-1 pr-2 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white transition-opacity duration-150 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
                 >
-                  <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                    <MapPinned size={22} className="text-neutral-400 dark:text-white" />
+                  <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
+                    <MapPinned size={18} className="text-neutral-400 dark:text-white" />
                   </div>
                   <span>Concorrentes</span>
                 </button>
@@ -1439,7 +1465,6 @@ function AuthenticatedApp() {
                   <motion.div layout exit={{ opacity: 0, height: 0, marginBottom: 0 }} transition={{ duration: 0.25 }}>
                     <FeedCard
                       onWorkspaceIntent={(intent) => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), intent)}
-                      onFullscreen={() => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), 'utilizar')}
                     >
                       <div className="relative">
                         {roleConfig.showPendingBadge && card.isPending && (
@@ -1535,7 +1560,6 @@ function AuthenticatedApp() {
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard
               onWorkspaceIntent={(intent) => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), intent)}
-              onFullscreen={() => openWorkspaceFromCard(roleFeedCardToIntelligenceCard(card), 'utilizar')}
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
@@ -1543,7 +1567,6 @@ function AuthenticatedApp() {
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{card.titulo}</p>
                   <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
                 </div>
-                <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
               </div>
             </FeedCard>
           </motion.div>
@@ -1556,7 +1579,6 @@ function AuthenticatedApp() {
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard
               onWorkspaceIntent={(intent) => openWorkspaceFromCard(card, intent)}
-              onFullscreen={() => openWorkspaceFromCard(card, 'utilizar')}
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
@@ -1564,7 +1586,6 @@ function AuthenticatedApp() {
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{card.titulo}</p>
                   <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
                 </div>
-                <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
               </div>
             </FeedCard>
           </motion.div>
@@ -1800,6 +1821,13 @@ function AuthenticatedApp() {
         onArchive={(cardTitle, sector, snapshot) => {
           const newSession: ArchivedSession<any> = createArchivedSession(cardTitle, sector, snapshot);
           setArchivedSessionsBySector(prev => appendSession(prev, newSession));
+          setWorkspaceContext(null);
+          setScrolled(false);
+          setBioOpen(true);
+          setDestaqueOpen(true);
+        }}
+        onWorkspaceCleared={() => {
+          // Apagar (sem arquivar): reabre a bio igual ao fluxo de Salvar/Finalizar.
           setWorkspaceContext(null);
           setScrolled(false);
           setBioOpen(true);
