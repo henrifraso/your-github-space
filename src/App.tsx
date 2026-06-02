@@ -110,8 +110,8 @@ import { DEMO_FEED_CARDS } from './data/demo-feed-cards';
 const DEMO_LOGOS: Record<string, { src: string; bg: string; pad?: string }> = {
   mcdonalds: { src: '/logos/mcdonalds.png', bg: '#ffffff', pad: '18%' },
   natura:    { src: '/logos/natura.png',    bg: '#ffffff', pad: '18%' },
-  nike:      { src: '/logos/nike.png',      bg: '#ffffff', pad: '22%' },
-  nubank:    { src: '/logos/nubank.png',    bg: '#ffffff', pad: '18%' },
+  // 'nike' agora é Oscar Calçados — sem logo PNG. Fallback usa o texto "Os" do ProfileLogo.
+  // 'nubank' agora é Drogarias Pacheco — sem logo PNG. Fallback usa o texto "DP" do ProfileLogo.
   ifood:     { src: '/logos/ifood.svg',     bg: '#ffffff', pad: '22%' },
   ambev:     { src: '/logos/ambev.png',     bg: '#ffffff', pad: '15%' },
   magalu:    { src: '/logos/magalu.png',    bg: '#ffffff', pad: '16%' },
@@ -454,6 +454,41 @@ function AuthenticatedApp() {
     }
   };
 
+  // Envia o nome da empresa (botão do topo) pra Área de Trabalho como card
+  // sintético — substitui o EmpresaModal flutuante. Funciona em todos os
+  // perfis (codify + demos).
+  const openEmpresaInWorkspace = () => {
+    const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
+    const displayName = isRoleView ? roleConfig.bio.displayName : data.negocio.nome_fantasia;
+    const segmento    = data.negocio.segmento;
+    const cidade      = data.negocio.cidade;
+    const estado      = data.negocio.estado;
+    const nivel       = data.negocio.nivel;
+    const ranking     = data.ranking_local;
+    const mercado     = data.mercado_nome;
+    const mercadoTam  = data.mercado_tamanho;
+    const resumo = `${displayName} — ${segmento}. Sede em ${cidade}/${estado}. ` +
+      `Posição no mercado: ${ranking}º em ${mercado} (R$ ${mercadoTam}). ` +
+      `Nível ${nivel} no sistema OS¹. ` +
+      `Esta página reúne os dados públicos da empresa, indicadores de mercado, ` +
+      `ranking, contato e benchmark com o setor.`;
+    const card: IntelligenceCard = {
+      id:              `synthetic-empresa-${Date.now()}`,
+      titulo:          `Sobre ${displayName}`,
+      resumo,
+      dominio:         'Empresa',
+      area:            'bio',
+      urgencia:        'baixa',
+      tipo_card:       'informacao',
+      confianca:       'alta',
+      confianca_score: 0.9,
+      impacto:         '',
+      risco_erro:      0,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
   // Envia o botão "Convite" da bio pra Área de Trabalho como card sintético do
   // tipo 'convite'. O ShareOptionsContent detecta o dominio="Convite" e
   // renderiza input de email + botão enviar no lugar dos botões de share.
@@ -791,15 +826,15 @@ function AuthenticatedApp() {
     const semDad = Math.max(0, 7 - data.previsao_clima.length);
     const comPreco = data.fornecedores.filter(f => Number(f.preco_referencia) > 0).length;
     const circles = [
-      { label: 'Concorrência', pct: Math.min(100, Math.round((comNota / n) * 100)),              color: '#ef4444' },
-      { label: 'Mercado',      pct: notaMedia,                                                    color: '#3b82f6' },
-      { label: 'Economia',     pct: Math.min(100, Math.round((comFaixa / n) * 100)),              color: '#3b82f6' },
-      { label: 'Legislação',   pct: 72,                                                           color: '#3b82f6' },
-      { label: 'Produtos',     pct: Math.min(100, comPreco * 10),                                 color: '#3b82f6' },
-      { label: 'Serviços',     pct: Math.min(100, pn * 12),                                      color: '#3b82f6' },
-      { label: 'Parceiros',    pct: Math.min(100, fn * 8),                                       color: '#3b82f6' },
-      { label: 'Eventos',      pct: Math.max(0, 100 - (chuva / Math.max(1, data.previsao_clima.length)) * 100), color: '#3b82f6' },
-      { label: 'Reputação',    pct: data.progresso_pct,                                          color: '#3b82f6' },
+      { label: 'Marketing',  pct: Math.min(100, Math.round((comNota / n) * 100)),              color: '#ec4899' },
+      { label: 'Vendas',     pct: notaMedia,                                                    color: '#10b981' },
+      { label: 'Financeiro', pct: Math.min(100, Math.round((comFaixa / n) * 100)),              color: '#f59e0b' },
+      { label: 'Jurídico',   pct: 72,                                                           color: '#f97316' },
+      { label: 'Estoque',    pct: Math.min(100, comPreco * 10),                                 color: '#84cc16' },
+      { label: 'Operações',  pct: Math.min(100, pn * 12),                                      color: '#06b6d4' },
+      { label: 'RH',         pct: Math.min(100, fn * 8),                                       color: '#8b5cf6' },
+      { label: 'Eventos',    pct: Math.max(0, 100 - (chuva / Math.max(1, data.previsao_clima.length)) * 100), color: '#3b82f6' },
+      { label: 'Reputação',  pct: data.progresso_pct,                                          color: '#3b82f6' },
     ];
     const allSlices = [
       [{ label: `Com nota (${comNota})`, value: Math.max(1, comNota), color: '#ef4444' }, { label: `Sem nota (${n - comNota})`, value: Math.max(1, n - comNota), color: '#1e3a5f' }],
@@ -997,7 +1032,7 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
-          <button onClick={() => setEmpresaOpen(true)} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
+          <button onClick={openEmpresaInWorkspace} className="flex items-center gap-2 cursor-pointer transition-all duration-200 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
               {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
@@ -1342,7 +1377,7 @@ function AuthenticatedApp() {
                   {destaqueOpen && (
                     <div className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
                       {circleData.map((c, i) => (
-                        <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => setFullscreenCard({ type: 'destaque', idx: i })} />
+                        <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => openStatInWorkspace(c.label, `${c.pct}%`, `Destaque "${c.label}" — ${c.pct}% de cobertura/saturação. Análise consolidada da área "${c.label}" do perfil ${data.negocio.nome_fantasia}. Inclui indicadores, distribuição por fonte e recomendações operacionais.`)} />
                       ))}
                     </div>
                   )}
