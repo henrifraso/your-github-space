@@ -108,7 +108,7 @@ import { DEMO_FEED_CARDS } from './data/demo-feed-cards';
 // Presets de logo por demo — usados como avatar default quando o usuário
 // ainda não fez upload de uma foto custom via PhotoEditor.
 const DEMO_LOGOS: Record<string, { src: string; bg: string; pad?: string }> = {
-  mcdonalds: { src: '/logos/mcdonalds.png', bg: '#ffffff', pad: '18%' },
+  mcdonalds: { src: '/logos/mcdonalds.png', bg: '#e4e7ea', pad: '18%' },
   natura:    { src: '/logos/natura.png',    bg: '#ffffff', pad: '18%' },
   // 'nike' agora é Oscar Calçados — sem logo PNG. Fallback usa o texto "Os" do ProfileLogo.
   // 'nubank' agora é Drogarias Pacheco — sem logo PNG. Fallback usa o texto "DP" do ProfileLogo.
@@ -1159,17 +1159,15 @@ function AuthenticatedApp() {
                 <div className={`absolute inset-0 ${photoShapeOuter} shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none`} />
                 {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
                 <div className={`absolute inset-0 ${photoShapeOuter} bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]`}>
-                  {/* Camada 2: anel gradient azul (CSS gradient border via padding + bg).
-                      Demos (Oscar/McDonald's/Pacheco): padding zero pra foto encostar no anel. */}
+                  {/* Camada 2: anel cinza (mesma cor dos containers da Área de Trabalho). */}
                   <div
-                    className={`w-full h-full ${photoShapeMid} ${!isRoleView ? 'p-0' : 'p-[3px] md:p-[5px]'} relative overflow-hidden`}
-                    style={{
-                      background: 'conic-gradient(from 135deg at 50% 50%, #2563eb, #60a5fa, #3b82f6, #2563eb, #60a5fa, #2563eb)',
-                    }}
+                    className={`w-full h-full ${photoShapeMid} p-[3px] md:p-[5px] relative overflow-hidden bg-[#e4e7ea] dark:bg-[#3d3d3d]`}
                   >
-                {/* Sombra interna do miolo — separa a foto do anel */}
-                <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]`} />
-                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative bg-white dark:bg-[#1a1a1a]`}>
+                {/* Sombra interna do miolo — separa a foto do anel.
+                    Em demos: adicionado inset 0 0 0 3px cinza, criando um "ring" interno
+                    que mascara as bordas coloridas do logo (vazamento da img). */}
+                <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} ${!isRoleView ? 'shadow-[inset_0_0_0_3px_#e4e7ea,inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_3px_#3d3d3d,inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)]' : 'shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)]'} pointer-events-none z-[3]`} />
+                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative ${!isRoleView ? 'bg-[#e4e7ea] dark:bg-[#3d3d3d]' : 'bg-white dark:bg-[#1a1a1a]'}`}>
                   <div
                     className="w-full h-full rounded-xl overflow-hidden relative"
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
