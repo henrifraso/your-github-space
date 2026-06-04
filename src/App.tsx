@@ -1196,7 +1196,7 @@ function AuthenticatedApp() {
                   }}
                 />
                 {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
-                <div className={`absolute inset-0 ${photoShapeOuter} bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]`}>
+                <div className={`absolute inset-0 ${photoShapeOuter} bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]`}>
                   {/* Camada 2: anel cinza (mesma cor dos containers da Área de Trabalho). */}
                   <div
                     className={`w-full h-full ${photoShapeMid} p-[3px] md:p-[5px] relative overflow-hidden bg-[#e4e7ea] dark:bg-[#3d3d3d]`}
