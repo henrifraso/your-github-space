@@ -47,13 +47,15 @@
       "icon": "build/icon.png",
       "target": [
         { "target": "dmg", "arch": ["x64", "arm64"] }
-      ]
+      ],
+      "artifactName": "OS1-mac-${arch}.${ext}"
     },
     "win": {
       "icon": "build/icon.png",
       "target": [
         { "target": "nsis", "arch": ["x64"] }
-      ]
+      ],
+      "artifactName": "OS1-windows.${ext}"
     },
     "nsis": {
       "oneClick": false,
