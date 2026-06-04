@@ -1037,7 +1037,7 @@ function AuthenticatedApp() {
           <button
             onClick={handleLogout}
             title="Sair"
-            className="flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer active:scale-90"
+            className="flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer hover:scale-105 active:scale-90"
           >
             <Power size={22} />
           </button>
@@ -1050,12 +1050,12 @@ function AuthenticatedApp() {
       <div className="fixed top-0 inset-x-0 z-[49] h-5 pointer-events-none bg-[#dcdfe2] dark:bg-[#181818]" />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
+      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 hover:scale-[1.02]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
           <button onClick={openEmpresaInWorkspace}
-            className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 active:scale-[0.97]"
+            className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
               {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
@@ -1127,7 +1127,7 @@ function AuthenticatedApp() {
             Em modo split (scrolled+desktop), o mr alinha exatamente com o
             right-4 do ChatDesktop (16px), pra que feed e workspace tenham
             o mesmo afastamento das bordas externas e entre si. */}
-        <div className={`ml-4 ${scrolled && isDesktop ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
+        <div className={`ml-4 ${scrolled && isDesktop ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative transition-transform duration-200 hover:scale-[1.02]`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1268,7 +1268,7 @@ function AuthenticatedApp() {
                           { label: 'parceiros', value: roleConfig.summaryNumbers.parceiros, description: `${roleConfig.summaryNumbers.parceiros} parceiro(s) conectado(s). Lista de parceiros estratégicos — categoria, contratos ativos, datas de renovação, contatos comerciais e métricas conjuntas.` },
                         ].map(({ label, value, description }) => (
                           <button key={label} onClick={() => openStatInWorkspace(label, value, description)}
-                            className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                            className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
                             <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                               <strong>{value}</strong>
                             </div>
@@ -1278,7 +1278,7 @@ function AuthenticatedApp() {
                         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => setMapOpen(true)}
-                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
+                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
                         >
                           <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                             <MapPinned size={18} className="text-neutral-400 dark:text-white" />
@@ -1286,7 +1286,7 @@ function AuthenticatedApp() {
                           <span>Concorrentes</span>
                         </button>
                         <button onClick={() => openInviteInWorkspace()} title="Convite"
-                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                           <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                             <Mail size={18} className="text-neutral-400 dark:text-white" />
                           </div>
@@ -1332,7 +1332,7 @@ function AuthenticatedApp() {
                     { label: txt('stat_nivel'), value: data.negocio.nivel,         description: `${txt('stat_nivel')} ${data.negocio.nivel}. Progressão do negócio — métricas que compõem o nível atual, o que falta pra subir, comparativo com pares e ações recomendadas pra evolução.` },
                   ].map(({ label, value, description }) => (
                     <button key={String(label)} onClick={() => openStatInWorkspace(String(label), value, description)}
-                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97]">
+                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
                       <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                         <strong>{value}</strong>
                       </div>
@@ -1342,7 +1342,7 @@ function AuthenticatedApp() {
                 <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => setMapOpen(true)}
-                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
+                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
                 >
                   <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                     <MapPinned size={18} className="text-neutral-400 dark:text-white" />
@@ -1350,7 +1350,7 @@ function AuthenticatedApp() {
                   <span>Concorrentes</span>
                 </button>
                 <button onClick={() => openInviteInWorkspace()} title="Convite"
-                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
+                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
                   <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
                     <Mail size={18} className="text-neutral-400 dark:text-white" />
                   </div>

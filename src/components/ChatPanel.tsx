@@ -75,7 +75,7 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
   /** Handler do botão "Finalizar" (direito) — só usado quando hasContent. */
   onFinish?: () => void;
 }) {
-  const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border-[0.5px] transition-all duration-150 active:scale-[0.97] cursor-pointer disabled:cursor-default disabled:opacity-100 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]";
+  const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border-[0.5px] transition-all duration-150 hover:scale-105 active:scale-[0.97] cursor-pointer disabled:cursor-default disabled:opacity-100 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]";
   const sharedBg = "bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]";
   const labelCls = "text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap";
   return (
@@ -916,7 +916,7 @@ interface ChatDesktopProps {
 }
 
 export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared }: ChatDesktopProps) {
-  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
+  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
   // "overflow" pro body é prevenido.
@@ -948,11 +948,11 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
     <div
       ref={wrapperRef}
       style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX + 12}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
+      className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.02]"
     >
       {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
       <div className="px-5 py-5 flex-shrink-0">
-      <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+      <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.02]">
         <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
           <Home size={22} />
         </button>
@@ -1050,7 +1050,7 @@ export function ChatMobile({
   onSelectHistorySession?: (id: string) => void;
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
 }) {
-  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
+  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   return (
     <AnimatePresence>
       {open && (

@@ -324,7 +324,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
       <div className="mt-2 sm:mt-2.5 grid grid-cols-2 lg:grid-cols-4 gap-1.5">
 
         {/* ── Utilizar ── */}
-        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
+        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden transition-transform duration-200 hover:scale-[1.03]">
         <button onClick={handleLike} disabled={utilStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {utilStatus === 'idle' && (
@@ -365,7 +365,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
         </div>
 
         {/* ── Perguntas ── */}
-        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
+        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden transition-transform duration-200 hover:scale-[1.03]">
         <button onClick={handlePerguntas} disabled={pergStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {pergStatus === 'idle' && (
@@ -415,7 +415,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
         </div>
 
         {/* ── Exemplos ── */}
-        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
+        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden transition-transform duration-200 hover:scale-[1.03]">
         <button onClick={handleExemplos} disabled={ideiaStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {ideiaStatus === 'idle' && (
@@ -465,7 +465,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
         </div>
 
         {/* ── Compartilhar ── */}
-        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden">
+        <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl overflow-hidden transition-transform duration-200 hover:scale-[1.03]">
         <button onClick={handleShare} disabled={shareStatus === 'loading'} className="w-full h-12 sm:h-14 flex items-center justify-start pl-2 sm:pl-3 gap-2 overflow-hidden cursor-pointer hover:bg-neutral-200 dark:hover:bg-[#353535] transition-colors duration-150">
           <AnimatePresence mode="wait">
             {shareStatus === 'idle' && (
@@ -553,7 +553,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
   }
 
   const isClickable = !locked && !!(onClick || onFullscreen);
-  const cls = "relative w-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 " +
+  const cls = "relative w-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] px-4 py-4 sm:px-6 sm:py-5 text-left transition-all duration-200 hover:scale-[1.02] " +
     (utilStatus === 'done' && containerType ? "border-[#3b82f6] ring-1 ring-[#3b82f6]/30 " : "border-[0.5px] border-neutral-300 dark:border-[#414141] ") +
     (locked ? "cursor-default hover:bg-[#e4e7ea] dark:hover:bg-[#353535] " : "") +
     (isClickable ? "hover:bg-[#e4e7ea] dark:hover:bg-[#353535] active:scale-[0.99] cursor-pointer" : "");
