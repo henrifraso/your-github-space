@@ -15,6 +15,11 @@ on:
     tags:
       - 'v*'
 
+# Permissões necessárias pra o GITHUB_TOKEN poder criar/editar Releases.
+# Sem isso, softprops/action-gh-release falha com 403.
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
