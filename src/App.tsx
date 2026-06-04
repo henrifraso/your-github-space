@@ -1154,7 +1154,7 @@ function AuthenticatedApp() {
               const photoShapeInner = photoShape === 'round' ? 'rounded-full' : 'rounded-[12px] md:rounded-[14px]';
               return (
             <div className="py-3 sm:py-4 flex flex-row gap-3 sm:gap-4 items-center">
-              <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px]">
+              <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px] transition-transform duration-200 hover:scale-110 cursor-pointer">
                 {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
                 <div className={`absolute inset-0 ${photoShapeOuter} shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none`} />
                 {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
@@ -1358,7 +1358,7 @@ function AuthenticatedApp() {
                 </button>
                 </div>
                 </div>
-                <div className="space-y-0.5 sm:space-y-1 pr-8 sm:pr-12">
+                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] rounded-xl transition-transform duration-200 hover:scale-[1.02] origin-left">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />

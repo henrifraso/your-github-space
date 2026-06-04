@@ -319,7 +319,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
   const cardContent = (
     <>
-      <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl p-3 sm:p-4">{children}</div>
+      <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl p-3 sm:p-4 transition-transform duration-200 hover:scale-[1.02]">{children}</div>
       {showActionButtons && (
       <div className="mt-2 sm:mt-2.5 grid grid-cols-2 lg:grid-cols-4 gap-1.5">
 
