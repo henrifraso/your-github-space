@@ -1066,6 +1066,7 @@ function AuthenticatedApp() {
           <button
             onClick={handleLogout}
             title="Sair"
+            style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}
             className="flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer hover:scale-105 active:scale-90"
           >
             <Power size={22} />
@@ -1076,11 +1077,14 @@ function AuthenticatedApp() {
       {/* P2: máscara de topo — cobre a faixa acima do nav (sticky top-3/4 + margens
           laterais mx-4/5) pra o feed não atravessar visualmente quando scrolla.
           pointer-events-none mantém clique passando pra navbar. */}
-      <div className="fixed top-0 inset-x-0 z-[49] h-5 pointer-events-none bg-[#dcdfe2] dark:bg-[#181818]" />
+      <div
+        className="fixed top-0 inset-x-0 z-[49] h-5 pointer-events-none bg-[#dcdfe2] dark:bg-[#181818]"
+        style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}
+      />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
       <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 hover:scale-[1.02]"
-        style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}>
+        style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full max-w-[935px] lg:mx-0 mx-auto px-4 sm:px-5 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 82 } : undefined}>
           <button onClick={openEmpresaInWorkspace}
