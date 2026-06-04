@@ -91,7 +91,9 @@ function createWindow() {
   if (isDev) {
     win.loadURL('http://localhost:3000');
   } else {
-    win.loadURL('https://os1app.vercel.app');
+    // app.os1.space é o domínio público; os1app.vercel.app retorna 401
+    // (Vercel SSO). NÃO trocar de volta.
+    win.loadURL('https://app.os1.space');
   }
 
   return win;
