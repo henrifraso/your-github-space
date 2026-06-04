@@ -1060,7 +1060,9 @@ function AuthenticatedApp() {
 
       {/* Botão deslogar + Convite + placeholders — desktop only */}
       {!browserOpen && !esferaOpen && !mapOpen && (
-        <div className="fixed top-[30px] right-12 z-[51] hidden lg:flex items-center gap-1">
+        <div
+          className="fixed top-[30px] right-12 z-[51] hidden lg:flex items-center gap-1"
+          style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
           <button
             onClick={handleLogout}
             title="Sair"
