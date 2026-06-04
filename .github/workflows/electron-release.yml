@@ -65,7 +65,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ matrix.artifact_glob }}
-          draft: true
+          # draft: false → release sai publicado como Latest automaticamente.
+          # Se quiser revisar antes, troca pra true (vai pra Drafts).
+          draft: false
+          make_latest: 'true'
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
