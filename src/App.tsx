@@ -835,9 +835,9 @@ function AuthenticatedApp() {
     const chuva = data.previsao_clima.filter(w => (w.chuva_mm ?? 0) > 0).length;
     const semDad = Math.max(0, 7 - data.previsao_clima.length);
     const comPreco = data.fornecedores.filter(f => Number(f.preco_referencia) > 0).length;
-    // Cor por urgência (não escrita) — pct baixo = atenção; pct alto = tranquilo.
-    // vermelho: mais urgente · laranja: urgente · verde: veja quando puder · azul: sem urgência
-    const urg = (pct: number) => pct < 30 ? '#ef4444' : pct < 60 ? '#f59e0b' : pct < 85 ? '#10b981' : '#3b82f6';
+    // Cor unificada dos destaques — branco/claro das fontes da bio em dark mode
+    // (dark:text-neutral-100 = #f5f5f5).
+    const urg = (_pct: number) => '#f5f5f5';
     const p_mkt   = Math.min(100, Math.round((comNota / n) * 100));
     const p_vds   = notaMedia;
     const p_fin   = Math.min(100, Math.round((comFaixa / n) * 100));
@@ -1163,13 +1163,14 @@ function AuthenticatedApp() {
                   <div
                     className={`w-full h-full ${photoShapeMid} p-[3px] md:p-[5px] relative overflow-hidden bg-[#e4e7ea] dark:bg-[#3d3d3d]`}
                   >
-                {/* Sombra interna do miolo — separa a foto do anel.
-                    Em demos: adicionado inset 0 0 0 3px cinza, criando um "ring" interno
-                    que mascara as bordas coloridas do logo (vazamento da img). */}
-                <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} ${!isRoleView ? 'shadow-[inset_0_0_0_3px_#e4e7ea,inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_3px_#3d3d3d,inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)]' : 'shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)]'} pointer-events-none z-[3]`} />
-                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative ${!isRoleView ? 'bg-[#e4e7ea] dark:bg-[#3d3d3d]' : 'bg-white dark:bg-[#1a1a1a]'}`}>
+                {/* Sombra interna do miolo — separa a foto do anel. */}
+                <div className={`absolute inset-[6px] md:inset-[10px] ${photoShapeInner} shadow-[inset_0_2px_5px_rgba(0,0,0,0.22),inset_0_-1px_2px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_2px_6px_rgba(0,0,0,0.6),inset_0_-1px_3px_rgba(0,0,0,0.35)] pointer-events-none z-[3]`} />
+                {/* Demos: padding interno (p-[3px] md:p-[5px]) recua a foto pra dentro do
+                    círculo, deixando uma margem cinza visível em volta sem cobrir/escurecer
+                    a foto — fica como se o anel cinza estendesse 3-5px adicionais. */}
+                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative ${!isRoleView ? 'p-[3px] md:p-[5px] bg-[#e4e7ea] dark:bg-[#3d3d3d]' : 'bg-white dark:bg-[#1a1a1a]'}`}>
                   <div
-                    className="w-full h-full rounded-xl overflow-hidden relative"
+                    className={`w-full h-full ${photoShapeInner} overflow-hidden relative`}
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
                       background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
                     } : undefined}
