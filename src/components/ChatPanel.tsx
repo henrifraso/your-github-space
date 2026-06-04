@@ -917,8 +917,36 @@ interface ChatDesktopProps {
 
 export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 active:scale-90";
+  // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
+  // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
+  // "overflow" pro body é prevenido.
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const handler = (e: WheelEvent) => {
+      // Sobe a árvore procurando algum ancestor com scroll que possa rolar
+      // na direção do deltaY. Se achar, deixa o evento seguir naturalmente.
+      let node: HTMLElement | null = e.target as HTMLElement;
+      while (node && node !== el) {
+        const style = window.getComputedStyle(node);
+        const oy = style.overflowY;
+        if ((oy === 'auto' || oy === 'scroll') && node.scrollHeight > node.clientHeight) {
+          const canScrollDown = node.scrollTop + node.clientHeight < node.scrollHeight - 1;
+          const canScrollUp = node.scrollTop > 0;
+          if ((e.deltaY > 0 && canScrollDown) || (e.deltaY < 0 && canScrollUp)) return;
+        }
+        node = node.parentElement;
+      }
+      // Nenhum scroll interno disponível — bloqueia pra não rolar o body/feed.
+      e.preventDefault();
+    };
+    el.addEventListener('wheel', handler, { passive: false });
+    return () => el.removeEventListener('wheel', handler);
+  }, []);
   return (
     <div
+      ref={wrapperRef}
       style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX + 12}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
