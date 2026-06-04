@@ -51,8 +51,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         # --publish never: a gente sobe os assets manualmente no step abaixo
-        # com softprops/action-gh-release.
-        run: npx electron-builder --publish never -c.directories.output=dist-installer
+        # com softprops/action-gh-release. directories.output está no
+        # package.json (cross-platform — flag inline quebra no PowerShell).
+        run: npx electron-builder --publish never
 
       - name: Upload artifact (debug)
         uses: actions/upload-artifact@v4

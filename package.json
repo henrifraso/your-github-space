@@ -35,6 +35,9 @@
     "appId": "com.omni.os1",
     "productName": "001",
     "icon": "build/icon.png",
+    "directories": {
+      "output": "dist-installer"
+    },
     "files": [
       "dist/**/*",
       "dist-electron/**/*"
