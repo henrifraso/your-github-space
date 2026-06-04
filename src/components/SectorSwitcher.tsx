@@ -235,6 +235,7 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
@@ -377,6 +378,7 @@ export function DepartmentSwitcherModal({ active, onSelect, onClose }: DeptProps
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
       className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
         <div>

@@ -1,0 +1,65 @@
+name: Electron Release
+
+# Builda o app desktop (.dmg pro macOS e .exe pro Windows) e publica como
+# GitHub Release sempre que uma tag `v*` é criada.
+#
+# Uso:
+#   git tag v1.0.0 && git push origin v1.0.0
+#
+# O draft do Release fica em https://github.com/henrifraso/your-github-space/releases
+# Quando estiver pronto, marcar como "Latest" pra os assets ficarem em URLs
+# previsíveis (.../releases/latest/download/<arquivo>).
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact_glob: 'dist-installer/*.dmg'
+          - os: windows-latest
+            artifact_glob: 'dist-installer/*.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Build Vite (dist/)
+        env:
+          ELECTRON: 'true'
+        run: npm run build
+
+      - name: Build Electron installer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # --publish never: a gente sobe os assets manualmente no step abaixo
+        # com softprops/action-gh-release.
+        run: npx electron-builder --publish never -c.directories.output=dist-installer
+
+      - name: Upload artifact (debug)
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.os }}
+          path: ${{ matrix.artifact_glob }}
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.artifact_glob }}
+          draft: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

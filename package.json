@@ -41,7 +41,21 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "devDependencies": {

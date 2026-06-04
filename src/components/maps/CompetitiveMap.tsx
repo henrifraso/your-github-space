@@ -83,7 +83,10 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
   }, [center]);
 
   return (
-    <div className="fixed inset-0 z-[190] bg-[#121212] flex flex-col">
+    <div
+      className="fixed inset-0 z-[190] bg-[#121212] flex flex-col select-none"
+      style={{ WebkitAppRegion: 'no-drag', WebkitUserSelect: 'none' } as React.CSSProperties}
+    >
       {/* Header — X simples no canto (Esc também fecha, via listener) */}
       <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0 border-b border-white/8">
         <div className="flex items-center gap-2">

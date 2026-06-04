@@ -207,6 +207,7 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.26, ease: [0.25, 0.1, 0.25, 1] }}
       className="fixed inset-0 z-[190] bg-[#f0f2f4] dark:bg-[#181818] flex flex-col overflow-hidden"
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       {/* ── Cabeçalho ─────────────────────────────────────────────── */}
       <div className="flex-shrink-0 px-5 sm:px-8 pt-5 pb-4 border-b border-neutral-200 dark:border-[#2e2e2e] flex items-start justify-between gap-4">

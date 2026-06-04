@@ -76,6 +76,7 @@ const TEXTS: Record<TextKey, Record<Difficulty, string>> = {
 import { motion, AnimatePresence } from 'motion/react';
 
 import LoginScreen from './components/LoginScreen';
+import { NoBrowserAccess } from './components/NoBrowserAccess';
 import { getAuthState, setAuthState, clearAuthState, getRole, setRole } from './hooks/useAuth';
 import { apiFetch, getOrgContext } from './api';
 import type { OmniData, Competitor, TimelineEvent } from './types';
@@ -192,6 +193,13 @@ export default function App() {
   });
 
   const [auth, setAuth] = useState(() => getAuthState());
+
+  // Bloqueio do acesso via browser comum. O OS¹ só funciona no app desktop
+  // (Electron). Quem abrir app.os1.space no Chrome/Safari vê só a tela de
+  // download — o login fica disponível apenas dentro do .dmg/.exe.
+  if (!isElectron) {
+    return <NoBrowserAccess />;
+  }
 
   if (!auth.isAuthenticated) {
     return (
@@ -1941,6 +1949,7 @@ function AuthenticatedApp() {
               exit={{ opacity: 0, y: 24 }}
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
               className="fixed inset-0 z-[190] bg-[#f0f2f4] dark:bg-[#323232] flex flex-col overflow-y-auto"
+              style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             >
               <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
                 <div className="flex items-center gap-2">
