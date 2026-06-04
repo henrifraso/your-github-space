@@ -290,10 +290,29 @@ function AuthenticatedApp() {
       .catch(() => {});
   }, []);
   const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; content: any } | null>(null);
-  // Modo escuro travado — o botão Sun/Moon será reaproveitado pra outra função.
-  const [dark] = useState<boolean>(true);
-  useEffect(() => { localStorage.setItem('os1_theme', 'dark'); }, []);
-  const toggleTheme = () => {};
+  // Modo escuro. Press-and-hold na foto de perfil (1,5s) muda pra light.
+  const [dark, setDark] = useState<boolean>(true);
+  useEffect(() => { localStorage.setItem('os1_theme', dark ? 'dark' : 'light'); }, [dark]);
+  const toggleTheme = () => setDark(v => !v);
+  // Estado do hover na foto de perfil — passar cursor preenche lentamente
+  // e ao completar alterna o tema (sem necessidade de clicar).
+  const [photoPressing, setPhotoPressing] = useState(false);
+  const photoPressTimerRef = useRef<number | null>(null);
+  const handlePhotoPressStart = () => {
+    setPhotoPressing(true);
+    photoPressTimerRef.current = window.setTimeout(() => {
+      setDark(d => !d);
+      setPhotoPressing(false);
+      photoPressTimerRef.current = null;
+    }, 3000);
+  };
+  const handlePhotoPressEnd = () => {
+    setPhotoPressing(false);
+    if (photoPressTimerRef.current !== null) {
+      window.clearTimeout(photoPressTimerRef.current);
+      photoPressTimerRef.current = null;
+    }
+  };
   const [difficulty, setDifficulty] = useState<Difficulty>(() => (localStorage.getItem('difficulty') as Difficulty) ?? 'normal');
   const [difficultyOpen, setDifficultyOpen] = useState(false);
   const txt = (key: TextKey) => TEXTS[key][difficulty];
@@ -1154,9 +1173,28 @@ function AuthenticatedApp() {
               const photoShapeInner = photoShape === 'round' ? 'rounded-full' : 'rounded-[12px] md:rounded-[14px]';
               return (
             <div className="py-3 sm:py-4 flex flex-row gap-3 sm:gap-4 items-center">
-              <div className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px] transition-transform duration-200 hover:scale-110 cursor-pointer">
+              <div
+                className="flex-shrink-0 relative w-20 h-20 md:w-[150px] md:h-[150px] transition-transform duration-200 hover:scale-110 cursor-pointer"
+                onMouseEnter={handlePhotoPressStart}
+                onMouseLeave={handlePhotoPressEnd}
+                onTouchStart={handlePhotoPressStart}
+                onTouchEnd={handlePhotoPressEnd}
+              >
                 {/* Sombra externa do disco — separa o anel do fundo (igual destaques) */}
                 <div className={`absolute inset-0 ${photoShapeOuter} shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pointer-events-none`} />
+                {/* Camada de hover — preenche radialmente do centro pra fora
+                    durante 3s; quando completa, alterna o tema. Cor da camada:
+                    branca quando o tema atual é dark (indo pra light) e escura
+                    quando o tema é light (indo pra dark). */}
+                <div
+                  className={`absolute inset-0 ${photoShapeOuter} pointer-events-none z-[20] ${dark ? 'bg-white/55' : 'bg-neutral-900/55'}`}
+                  style={{
+                    transform: photoPressing ? 'scale(1)' : 'scale(0)',
+                    transformOrigin: 'center',
+                    transition: photoPressing ? 'transform 3s ease-out' : 'transform 0.3s ease-out',
+                    opacity: photoPressing ? 1 : 0,
+                  }}
+                />
                 {/* Camada 1: anel cinza base (padding outer cria a espessura visível) */}
                 <div className={`absolute inset-0 ${photoShapeOuter} bg-neutral-200 dark:bg-[#262626] p-[2px] md:p-[4px]`}>
                   {/* Camada 2: anel cinza (mesma cor dos containers da Área de Trabalho). */}
@@ -1358,7 +1396,7 @@ function AuthenticatedApp() {
                 </button>
                 </div>
                 </div>
-                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] rounded-xl transition-transform duration-200 hover:scale-[1.02] origin-left">
+                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.02] origin-left">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
