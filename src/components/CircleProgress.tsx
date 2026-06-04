@@ -47,12 +47,12 @@ export function CircleProgress({ pct, label, color, delay = 0, onClick }: {
         {/* Sombra externa do disco — separa do fundo do container */}
         <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
         {/* Borda fina externa — mesma linha que delimita os containers no feed */}
-        <div className="absolute inset-0 rounded-2xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] pointer-events-none z-[2]" />
+        <div className="absolute inset-0 rounded-2xl border-[0.5px] border-neutral-400 dark:border-[#4a4a4a] pointer-events-none z-[2]" />
         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64" style={{ filter: `drop-shadow(0 0 1.5px ${color}55)` }}>
-          <rect x="6" y="6" width="52" height="52" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="5" strokeLinejoin="round" className="text-neutral-300 dark:text-[#262626]" />
+          <rect x="6" y="6" width="52" height="52" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" className="text-neutral-400 dark:text-[#4a4a4a]" />
           <motion.rect
             x="6" y="6" width="52" height="52" rx="16" ry="16"
-            fill="none" stroke={color} strokeWidth="5"
+            fill="none" stroke={color} strokeWidth="2.5"
             strokeLinejoin="round" strokeLinecap="butt"
             pathLength={100}
             strokeDasharray="100"
