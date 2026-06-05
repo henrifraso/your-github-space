@@ -13,6 +13,11 @@ import {
 } from 'lucide-react';
 
 const isElectron = typeof window !== 'undefined' && !!(window as any).electron?.isElectron;
+// Mobile não pode rodar Electron — então browser mobile entra direto no app web.
+// Só desktop browser cai no NoBrowserAccess.
+const isMobileBrowser = typeof window !== 'undefined' && (
+  window.innerWidth < 1024 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+);
 
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
 type Difficulty = 'muito_facil' | 'facil' | 'normal' | 'dificil' | 'muito_dificil';
@@ -194,10 +199,9 @@ export default function App() {
 
   const [auth, setAuth] = useState(() => getAuthState());
 
-  // Bloqueio do acesso via browser comum. O OS¹ só funciona no app desktop
-  // (Electron). Quem abrir app.os1.space no Chrome/Safari vê só a tela de
-  // download — o login fica disponível apenas dentro do .dmg/.exe.
-  if (!isElectron) {
+  // Bloqueio do acesso via browser DESKTOP. O OS¹ desktop só funciona via Electron
+  // (.dmg/.exe). Mobile browser passa direto — não tem como instalar Electron no celular.
+  if (!isElectron && !isMobileBrowser) {
     return <NoBrowserAccess />;
   }
 
