@@ -63,7 +63,7 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
       gradientStyle: {
         background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
       },
-      bioText: 'Be different',
+      bioText: '',
       showInviteButton: true,
       photoUrl: '/os1-profile.png',
     },

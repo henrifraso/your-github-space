@@ -1376,7 +1376,9 @@ function AuthenticatedApp() {
                         })}
                       </div>
                     )}
-                    <p className="text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium mt-0.5 sm:mt-1">{bio.bioText}</p>
+                    {bio.bioText && (
+                      <p className="text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium mt-0.5 sm:mt-1">{bio.bioText}</p>
+                    )}
                     {bio.bioSubtext && (
                       <p className="text-[11px] sm:text-xs md:text-sm text-neutral-800 dark:text-neutral-200">{bio.bioSubtext}</p>
                     )}
