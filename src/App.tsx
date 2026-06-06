@@ -1226,7 +1226,7 @@ function AuthenticatedApp() {
                 {/* Demos: padding interno (p-[3px] md:p-[5px]) recua a foto pra dentro do
                     círculo, deixando uma margem cinza visível em volta sem cobrir/escurecer
                     a foto — fica como se o anel cinza estendesse 3-5px adicionais. */}
-                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative ${!isRoleView ? 'p-[3px] md:p-[5px] bg-[#e4e7ea] dark:bg-[#3d3d3d]' : 'bg-white dark:bg-[#1a1a1a]'}`}>
+                <div className={`w-full h-full ${photoShapeInner} overflow-hidden relative ${(!isRoleView || roleConfig.bio.photoUrl) ? 'p-[3px] md:p-[5px] bg-[#e4e7ea] dark:bg-[#3d3d3d]' : 'bg-white dark:bg-[#1a1a1a]'}`}>
                   <div
                     className={`w-full h-full ${photoShapeInner} overflow-hidden relative`}
                     style={isRoleView ? bio.gradientStyle : activeSector === 'os1' ? {
