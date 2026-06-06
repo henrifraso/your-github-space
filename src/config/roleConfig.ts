@@ -58,7 +58,7 @@ export interface RoleConfig {
 const ROLE_CONFIGS: Record<string, RoleConfig> = {
   codify: {
     bio: {
-      displayName: 'OS¹',
+      displayName: '001',
       initials: 'OS',
       gradientStyle: {
         background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
