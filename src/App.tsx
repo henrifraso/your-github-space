@@ -816,11 +816,14 @@ function AuthenticatedApp() {
         setScrolled(false);
         setTimeout(() => { scrollCooldownRef.current = false; }, 700);
       };
-      const onScroll = () => { if (anyModalOpenRef.current) return; if (released && window.scrollY === 0) showProfile(); };
-      const onWheel = (e: WheelEvent) => { if (anyModalOpenRef.current) return; if (released && e.deltaY < -5 && window.scrollY === 0) showProfile(); };
+      // Quando há conteúdo ativo na Área de Trabalho, o usuário pode rolar
+      // dentro do container sem que a bio reabra — só salvando/apagando/
+      // finalizando o conteúdo é que volta. Evita perder estado do feed.
+      const onScroll = () => { if (anyModalOpenRef.current || workspaceContextRef.current) return; if (released && window.scrollY === 0) showProfile(); };
+      const onWheel = (e: WheelEvent) => { if (anyModalOpenRef.current || workspaceContextRef.current) return; if (released && e.deltaY < -5 && window.scrollY === 0) showProfile(); };
       const onTouchStart = (e: TouchEvent) => { touchStartY.current = e.touches[0].clientY; };
       const onTouchMove = (e: TouchEvent) => {
-        if (anyModalOpenRef.current || !released) return;
+        if (anyModalOpenRef.current || workspaceContextRef.current || !released) return;
         if (e.touches[0].clientY - touchStartY.current > 30 && window.scrollY === 0) showProfile();
       };
       window.addEventListener('scroll', onScroll, { passive: true });
