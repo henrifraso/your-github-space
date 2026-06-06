@@ -33,7 +33,7 @@
   },
   "build": {
     "appId": "com.omni.os1",
-    "productName": "001",
+    "productName": "OS¹",
     "icon": "build/icon.png",
     "directories": {
       "output": "dist-installer"

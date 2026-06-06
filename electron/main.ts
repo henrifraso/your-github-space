@@ -6,6 +6,10 @@ import { createRequire } from 'module';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Nome que aparece na menu bar do macOS (canto superior esquerdo) e no Dock.
+// Tem que ser chamado o MAIS CEDO possível, antes de qualquer outra coisa.
+app.setName('OS¹');
+
 // ── Desktop Capture / Desktop Control / SCK ──────────────────────────────
 // PAUSADO em 2026-05-28. Motivo: desktopCapturer puro gera espelho/tela preta
 // em 1 monitor com janela maximizada. Retomar futuramente com window-exclusion:
