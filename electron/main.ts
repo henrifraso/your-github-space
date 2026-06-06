@@ -4,7 +4,9 @@ import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const isDev = process.env.NODE_ENV !== 'production';
+// app.isPackaged é true em prod (.dmg/.exe) e false em dev (npm run electron:start).
+// process.env.NODE_ENV não funciona em prod porque electron-builder não seta.
+const isDev = !app.isPackaged;
 
 // Nome que aparece na menu bar do macOS (canto superior esquerdo) e no Dock.
 // Tem que ser chamado o MAIS CEDO possível, antes de qualquer outra coisa.
