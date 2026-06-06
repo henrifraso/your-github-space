@@ -50,6 +50,13 @@ jobs:
       - name: Build Electron installer
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Code signing + notarization (apenas macOS — secrets ausentes
+          # em Windows fazem o afterSign hook pular notarização silencioso).
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         # --publish never: a gente sobe os assets manualmente no step abaixo
         # com softprops/action-gh-release. directories.output está no
         # package.json (cross-platform — flag inline quebra no PowerShell).

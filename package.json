@@ -42,18 +42,34 @@
       "dist/**/*",
       "dist-electron/**/*"
     ],
+    "afterSign": "build/notarize.cjs",
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.png",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
       "target": [
-        { "target": "dmg", "arch": ["x64", "arm64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
       ],
       "artifactName": "OS1-mac-${arch}.${ext}"
     },
     "win": {
       "icon": "build/icon.png",
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "artifactName": "OS1-windows.${ext}"
     },
@@ -64,6 +80,7 @@
     }
   },
   "devDependencies": {
+    "@electron/notarize": "^3.1.1",
     "@electron/rebuild": "^4.0.4",
     "@ibm/plex": "^6.4.1",
     "@types/node": "^22.7.5",
