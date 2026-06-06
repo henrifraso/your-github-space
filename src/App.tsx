@@ -929,8 +929,10 @@ function AuthenticatedApp() {
       return;
     }
     clearAuthState();
-    const isLocal = window.location.hostname === 'localhost';
-    window.location.href = isLocal ? 'http://localhost:5000' : 'https://os1.space';
+    // reload() força o App() a re-inicializar com auth=não-autenticado,
+    // mostrando a LoginScreen com a mesma transição do login inicial.
+    // Sem reload, o setAuth do componente pai não está no escopo daqui.
+    window.location.reload();
   }
 
   // Conteúdo das tabs do role (codify/affiliate) renderizado dentro do modal "+"
