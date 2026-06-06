@@ -80,8 +80,18 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     ],
     showApproveButtons: false,
     showPendingBadge: false,
-    showSummaryBar: true,
+    showSummaryBar: false,
     summaryNumbers: { empresas: 3, afiliados: 2, parceiros: 1 },
+    roleStats: [
+      { value: 3, label: 'empresas' },
+      { value: 2, label: 'afiliados' },
+      { value: 1, label: 'parceiros' },
+    ],
+    bioLines: [
+      { icon: 'store',  text: 'Mercado · Software & IA' },
+      { icon: 'mappin', text: 'Posição · líder do segmento' },
+      { icon: 'zap',    text: 'Evolução · 96% pro próximo nível' },
+    ],
     useDefaultSectors: false,
   },
 
