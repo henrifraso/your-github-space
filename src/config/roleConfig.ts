@@ -58,14 +58,14 @@ export interface RoleConfig {
 const ROLE_CONFIGS: Record<string, RoleConfig> = {
   codify: {
     bio: {
-      displayName: 'Codify',
+      displayName: 'OS¹',
       initials: 'OS',
       gradientStyle: {
         background: 'radial-gradient(ellipse 100% 100% at 45% 40%, #5a5a5a 0%, #2a2a2a 40%, #080808 100%)',
       },
       bioText: 'Be different',
       showInviteButton: true,
-      photoUrl: '/codify-profile.jpg',
+      photoUrl: '/os1-profile.png',
     },
     swipeOptions: [
       { id: 'demos',     label: 'Demos' },
