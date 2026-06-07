@@ -12,6 +12,38 @@ const isDev = !app.isPackaged;
 // Tem que ser chamado o MAIS CEDO possível, antes de qualquer outra coisa.
 app.setName('OS¹');
 
+// ── safeConsole + uncaughtException ───────────────────────────────────────
+// Bug: `console.log` no main process pode lançar `Error: write EIO` quando
+// stdout/stderr fecha (ex: terminal de origem fechado, app empacotado sem
+// console, buffer overflow). Em produção isso vira o modal nativo "A
+// JavaScript error occurred in the main process" — derruba o app.
+//
+// Solução: envolver TODAS as chamadas de console em try/catch silencioso
+// e capturar uncaughtException de write EIO. Logs reais continuam saindo
+// quando stdout está aberto; quando fecha, falham silenciosamente em vez
+// de derrubar o app. Mantém erros não-EIO visíveis pra debug real.
+const safeConsole = {
+  log: (...args: unknown[]) => { try { console.log(...args); } catch { /* swallow EIO */ } },
+  warn: (...args: unknown[]) => { try { console.warn(...args); } catch { /* swallow EIO */ } },
+  error: (...args: unknown[]) => { try { console.error(...args); } catch { /* swallow EIO */ } },
+};
+
+process.on('uncaughtException', (err: NodeJS.ErrnoException) => {
+  // Erro clássico de stdout fechado — ignora silenciosamente
+  if (err && (err.code === 'EIO' || /write EIO/i.test(err.message || ''))) {
+    return;
+  }
+  // Outros erros: tenta logar via safeConsole pra não cair em loop infinito
+  safeConsole.error('[uncaughtException]', err);
+});
+
+process.on('unhandledRejection', (reason: unknown) => {
+  // Mesma lógica: se for EIO de console, ignora
+  const msg = (reason as any)?.message || String(reason);
+  if (/write EIO/i.test(msg)) return;
+  safeConsole.error('[unhandledRejection]', reason);
+});
+
 // ── Desktop Capture / Desktop Control / SCK ──────────────────────────────
 // PAUSADO em 2026-05-28. Motivo: desktopCapturer puro gera espelho/tela preta
 // em 1 monitor com janela maximizada. Retomar futuramente com window-exclusion:
@@ -26,14 +58,14 @@ const ANY_DESKTOP_FEATURE = ENABLE_DESKTOP_CAPTURE || ENABLE_DESKTOP_CONTROL || 
 const ANTI_MIRROR_VERSION = 'v2';
 
 // Banner explícito no startup pra confirmar versão. Aparece SEMPRE.
-console.log('═══════════════════════════════════════════════════════════════');
-console.log(`[main] OS¹ Electron — Anti-Mirror ${ANTI_MIRROR_VERSION.toUpperCase()} ACTIVE`);
-console.log(`[main] ENABLE_DESKTOP_CAPTURE=${ENABLE_DESKTOP_CAPTURE}`);
-console.log(`[main] ENABLE_DESKTOP_CONTROL=${ENABLE_DESKTOP_CONTROL}`);
-console.log(`[main] ENABLE_SCK_CAPTURE=${ENABLE_SCK_CAPTURE} (macOS-only)`);
-console.log(`[main] desktop features any-on: ${ANY_DESKTOP_FEATURE}`);
-console.log(`[main] main.ts compilado: ${new Date().toISOString()}`);
-console.log('═══════════════════════════════════════════════════════════════');
+safeConsole.log('═══════════════════════════════════════════════════════════════');
+safeConsole.log(`[main] OS¹ Electron — Anti-Mirror ${ANTI_MIRROR_VERSION.toUpperCase()} ACTIVE`);
+safeConsole.log(`[main] ENABLE_DESKTOP_CAPTURE=${ENABLE_DESKTOP_CAPTURE}`);
+safeConsole.log(`[main] ENABLE_DESKTOP_CONTROL=${ENABLE_DESKTOP_CONTROL}`);
+safeConsole.log(`[main] ENABLE_SCK_CAPTURE=${ENABLE_SCK_CAPTURE} (macOS-only)`);
+safeConsole.log(`[main] desktop features any-on: ${ANY_DESKTOP_FEATURE}`);
+safeConsole.log(`[main] main.ts compilado: ${new Date().toISOString()}`);
+safeConsole.log('═══════════════════════════════════════════════════════════════');
 
 // ── ScreenCaptureKit nativo (macOS-first) ─────────────────────────────────
 // Carrega o .node compilado em electron/native/sck-capture. Não-bloqueante.
@@ -51,15 +83,15 @@ let sckLoadError: string | null = null;
 if (process.platform === 'darwin' && ENABLE_SCK_CAPTURE) {
   try {
     sck = nativeRequire(path.resolve(process.cwd(), 'electron/native/sck-capture/build/Release/sck_capture.node')) as SckModule;
-    console.log('[sck] native module carregado:', Object.keys(sck));
+    safeConsole.log('[sck] native module carregado:', Object.keys(sck));
   } catch (err: any) {
     sckLoadError = String(err?.message ?? err);
-    console.warn('[sck] falha ao carregar native module:', sckLoadError);
+    safeConsole.warn('[sck] falha ao carregar native module:', sckLoadError);
   }
 } else if (process.platform === 'darwin') {
-  console.log('[sck] desligado (ENABLE_SCK_CAPTURE não está true). Caminho desktopCapturer continua disponível.');
+  safeConsole.log('[sck] desligado (ENABLE_SCK_CAPTURE não está true). Caminho desktopCapturer continua disponível.');
 } else {
-  console.log('[sck] não-macOS, pulando native module.');
+  safeConsole.log('[sck] não-macOS, pulando native module.');
 }
 
 // Estado de Compact Mode (POC anti-self-capture). Salvamos TUDO pra restaurar fielmente.
@@ -113,7 +145,7 @@ ipcMain.removeHandler('save-offline');
 ipcMain.handle('save-offline', async (_e, _key, _data) => ({ ok: true }));
 
 ipcMain.on('navigation-captured', (_e, data) => {
-  console.log('[nav]', data.url);
+  safeConsole.log('[nav]', data.url);
 });
 
 // ─── POC Desktop Capture (Nível 2) ─────────────────────────────────────────────
@@ -245,7 +277,7 @@ async function restoreOS1Window(win: BrowserWindow) {
       win.maximize();
     }
     compactModeActive = false;
-    console.log('[desktop] restored previous window state:', previousWindowState);
+    safeConsole.log('[desktop] restored previous window state:', previousWindowState);
   }
   if (win.isMinimized()) win.restore();
   if (!win.isVisible()) win.show();
@@ -289,7 +321,7 @@ ipcMain.handle('desktop:set-compact-mode', async (event, enable: boolean) => {
       isMaximized: wasMaximized,
       isFullScreen: wasFullScreen,
     };
-    console.log('[desktop] entering compact mode. saved state:', previousWindowState);
+    safeConsole.log('[desktop] entering compact mode. saved state:', previousWindowState);
 
     // ── 1) Sair de fullscreen com await na animação (macOS Spaces transition ~500ms) ──
     if (wasFullScreen) {
@@ -321,7 +353,7 @@ ipcMain.handle('desktop:set-compact-mode', async (event, enable: boolean) => {
     if (process.platform === 'darwin') win.setVisibleOnAllWorkspaces(true);
 
     compactModeActive = true;
-    console.log('[desktop] compact mode ON. window=480x120 bottom-right, alwaysOnTop=floating');
+    safeConsole.log('[desktop] compact mode ON. window=480x120 bottom-right, alwaysOnTop=floating');
   } else if (!enable && compactModeActive) {
     if (previousWindowState) {
       win.setAlwaysOnTop(previousWindowState.alwaysOnTop);
@@ -335,7 +367,7 @@ ipcMain.handle('desktop:set-compact-mode', async (event, enable: boolean) => {
       }
     }
     compactModeActive = false;
-    console.log('[desktop] compact mode OFF, restored');
+    safeConsole.log('[desktop] compact mode OFF, restored');
   }
   return compactModeActive;
 });
@@ -402,7 +434,7 @@ ipcMain.handle('sck:start', (event, opts: { fps?: number; scale?: number; jpegQu
     const targetDisplayId = content.displays.find(d => d.displayID === primaryDisplayId)?.displayID
       ?? content.displays[0]?.displayID
       ?? 0;
-    console.log('[sck] start request', {
+    safeConsole.log('[sck] start request', {
       fps: opts.fps ?? 15,
       scale: opts.scale ?? 0.5,
       targetDisplayId,
@@ -440,7 +472,7 @@ ipcMain.handle('sck:get-frame', () => {
     const buf = sck.getFrame();
     return buf; // Electron serializa Buffer via structured clone para o renderer
   } catch (err: any) {
-    console.warn('[sck] getFrame err:', err);
+    safeConsole.warn('[sck] getFrame err:', err);
     return null;
   }
 });
@@ -512,12 +544,12 @@ app.whenReady().then(() => {
         if (wins.length === 0) return;
         restoreOS1Window(wins[0]);
       });
-      console.log(`[desktop] hotkey de emergência registrada: ${accelerator}`);
+      safeConsole.log(`[desktop] hotkey de emergência registrada: ${accelerator}`);
     } catch (err) {
-      console.warn('[desktop] falha ao registrar hotkey:', err);
+      safeConsole.warn('[desktop] falha ao registrar hotkey:', err);
     }
     // Banner consolidado: confirma que TODOS os handlers de desktop estão no ar.
-    console.log('[desktop] handlers registrados: is-enabled, list-sources, get-primary-display, open-system-prefs, hide-window, show-window, set-compact-mode, is-compact-mode, get-window-state');
+    safeConsole.log('[desktop] handlers registrados: is-enabled, list-sources, get-primary-display, open-system-prefs, hide-window, show-window, set-compact-mode, is-compact-mode, get-window-state');
   }
 });
 

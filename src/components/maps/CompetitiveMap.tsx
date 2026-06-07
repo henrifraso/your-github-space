@@ -33,9 +33,15 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
+  // FORCE_LEAFLET (piloto): mudar pra false só quando o projeto Google Cloud
+  // tiver billing habilitado. Enquanto a chave estiver sem billing, o Google
+  // mostra overlay "Esta página não carregou o Google Maps corretamente"
+  // por cima do mapa — UX inaceitável pro cliente. Leaflet (CartoDB Dark
+  // Matter) cobre 100% da funcionalidade do piloto sem custo nem chave.
+  const FORCE_LEAFLET = true;
   // Detecta falha do Google Maps (Safari ITP, AdBlock, etc.) e cai pra Leaflet.
   const { loadError: gmapsError } = useGoogleMaps();
-  const useFallback = gmapsError !== null;
+  const useFallback = FORCE_LEAFLET || gmapsError !== null;
 
   // P1: ESC fecha o mapa. Se o menu de Ações estiver aberto, fecha o menu primeiro.
   React.useEffect(() => {

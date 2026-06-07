@@ -28,6 +28,20 @@ function notify() {
   listeners.forEach(fn => { try { fn(currentState); } catch { /* ignore */ } });
 }
 
+// Hook global do Google Maps API que dispara quando a chave tem problema
+// (billing inativo, chave inválida, restrição de referrer/origin). Tem que
+// estar registrado ANTES do script carregar — por isso setamos no escopo
+// de módulo, não dentro da promise.
+if (typeof window !== 'undefined') {
+  (window as any).gm_authFailure = () => {
+    currentState = {
+      isLoaded: false,
+      loadError: new Error('Google Maps: chave restrita ao domínio de produção ou billing inativo — usando Leaflet.'),
+    };
+    notify();
+  };
+}
+
 function ensureGoogleMapsLoaded(): Promise<void> {
   if (currentState.isLoaded) return Promise.resolve();
   if (loaderPromise) return loaderPromise;
@@ -43,6 +57,7 @@ function ensureGoogleMapsLoaded(): Promise<void> {
       return;
     }
     if (!GOOGLE_MAPS_API_KEY) { reject(new Error('VITE_GOOGLE_MAPS_KEY não configurada')); return; }
+    // gm_authFailure já foi registrado no escopo de módulo (linhas ~30-37)
     (window as any)[CALLBACK_NAME] = () => { resolve(); };
     const s = document.createElement('script');
     s.id = SCRIPT_ID;
@@ -125,6 +140,84 @@ function LoadingMaps() {
 
 export function GoogleMapWrapper({ center, zoom, onMapLoad, children }: Props) {
   const { isLoaded, loadError } = useGoogleMaps();
+
+  // Esconde o overlay "Esta página não carregou o Google Maps corretamente".
+  //
+  // Causa real (confirmada por pesquisa): BillingNotEnabledMapError —
+  // a chave de API é válida, mas o projeto no Google Cloud não tem
+  // billing habilitado. O Google injeta um overlay branco/transparente
+  // como ÚLTIMO filho do `.gm-style` com:
+  //   - position: absolute
+  //   - dimensões 100% × 100%
+  //   - SEM classes estáveis (.gm-err-* não pega esse caso)
+  //   - z-index alto
+  //
+  // Como gm_authFailure não dispara (a auth tecnicamente passou),
+  // detectamos via seletor estrutural depois do mapa renderizar.
+  //
+  // SOLUÇÃO DE RAIZ: habilitar billing em console.cloud.google.com →
+  // projeto da chave → Billing. Free tier dá $200/mês de crédito.
+  useEffect(() => {
+    if (loadError || !isLoaded) return;
+
+    const ERR_TEXTS = [
+      'Esta página não carregou o Google Maps corretamente',
+      'Você é o proprietário',
+      'For development purposes only',
+      "This page didn't load Google Maps correctly",
+      'Do you own this website',
+    ];
+
+    const hideStructuralOverlay = () => {
+      // Camada A: classes .gm-err-* (erros fatais — improvável aqui mas custa nada)
+      document.querySelectorAll<HTMLElement>('[class^="gm-err"], [class*=" gm-err"]')
+        .forEach(el => { el.style.display = 'none'; });
+
+      // Camada B: ÚLTIMOS filhos do .gm-style com position:absolute e tamanho ~100%
+      // (padrão do overlay billing/quota). O mapa real é o PRIMEIRO filho do .gm-style.
+      document.querySelectorAll<HTMLElement>('.gm-style').forEach(gmStyle => {
+        const children = Array.from(gmStyle.children) as HTMLElement[];
+        // Pula o primeiro (mapa real) — varre o resto procurando overlay
+        children.slice(1).forEach(child => {
+          const cs = window.getComputedStyle(child);
+          const isAbsolute = cs.position === 'absolute';
+          const rect = child.getBoundingClientRect();
+          const parentRect = gmStyle.getBoundingClientRect();
+          const isFullsize = rect.width >= parentRect.width * 0.8 && rect.height >= parentRect.height * 0.8;
+          // Tem texto identificável?
+          const t = child.textContent || '';
+          const hasErrText = ERR_TEXTS.some(s => t.includes(s));
+          // Z-index alto? (overlay típico)
+          const z = parseInt(cs.zIndex, 10);
+          const hasHighZ = !isNaN(z) && z > 0;
+
+          // Se tem texto de erro OU (é absolute + fullsize + tem z-index alto), esconde
+          if (hasErrText || (isAbsolute && isFullsize && hasHighZ)) {
+            child.style.display = 'none';
+          }
+        });
+      });
+    };
+
+    // Roda imediatamente + observa mutações dentro dos containers do mapa
+    hideStructuralOverlay();
+    const observer = new MutationObserver(hideStructuralOverlay);
+    // Observa o body inteiro porque o .gm-style aparece dinamicamente
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style'],
+    });
+    // Roda de novo após 1s e 3s pra pegar overlay que vem assíncrono
+    const t1 = window.setTimeout(hideStructuralOverlay, 1000);
+    const t2 = window.setTimeout(hideStructuralOverlay, 3000);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [isLoaded, loadError]);
 
   if (loadError) {
     // eslint-disable-next-line no-console
