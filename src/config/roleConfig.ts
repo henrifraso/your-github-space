@@ -24,6 +24,28 @@ export interface RoleFeedCard {
   tags: string[];
   isPending?: boolean;
   franchiseName?: string;
+  // Etapa 10 — rastreabilidade pra cards gerados por ações (navegador/mapa)
+  /** Origem do card quando vier de ação externa (navegador, mapa, etc.). */
+  origem?: 'navegador' | 'mapa' | 'diagnostico' | 'role';
+  /** ID da evidência/sinal associado (rastreabilidade). */
+  evidenceId?: string;
+  /** URL de origem (cards do navegador). */
+  sourceUrl?: string;
+  /** Título da página de origem (cards do navegador). */
+  sourceTitle?: string;
+  /** Timestamp de criação do card. */
+  createdAt?: string;
+  // Etapa 11 — rastreabilidade pra cards do mapa
+  /** ID do sinal territorial associado (cards do mapa). */
+  mapSignalId?: string;
+  /** Raio analisado em metros (cards do mapa). */
+  radius?: number;
+  /** Centro da análise (cards do mapa). */
+  center?: { lat: number; lng: number };
+  /** Quantidade de concorrentes considerados (cards do mapa). */
+  competitorsCount?: number;
+  /** Label legível da origem territorial (ex: "Raio 1,0 km · 8 concorrentes"). */
+  sourceLabel?: string;
 }
 
 export interface RoleSummaryNumbers {

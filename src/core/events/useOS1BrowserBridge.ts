@@ -22,6 +22,7 @@ import {
   browserPayloadToFeedCard,
   type BrowserGeneratedPayload,
 } from '../../features/feed/feed-generated-cards';
+import { analyzePageContext, saveEvidence } from '../../features/browser/actions/browser-actions.builders';
 
 interface UseOS1BrowserBridgeArgs {
   activeSector: string;
@@ -57,17 +58,68 @@ export function useOS1BrowserBridge({
         _synthetic: true as const,
       };
       if (d.type === 'send-to-workspace') {
+        const a = analyzePageContext({ url: fechaUrl, title: d.context.title, capturedText: d.context.capturedText });
+
+        // Evidência vinculada (Etapa 8): registra que o conteúdo foi
+        // levado pra Área de Trabalho. Faz dedupe automático se já
+        // existir mesma URL+action sem snippet.
+        saveEvidence(
+          { url: fechaUrl, title: d.context.title, capturedText: d.context.capturedText, capturedAt: d.context.capturedAt || new Date().toISOString(), origin: 'navegador' },
+          { sector, action: 'send-to-workspace', usedInWorkspace: true, evidenceLabel: 'Análise enviada para Área de Trabalho' }
+        );
+
+        // Sinal identificado: primeira observação factual
+        const sinal = a.signals[0] || (d.context.capturedText ? 'Conteúdo capturado da página atual.' : 'Página revisada sem texto capturado.');
+
+        // Etapa 14: título contextual por tipo — mais específico que
+        // o genérico "Análise da página".
+        const tituloMap: Record<string, string> = {
+          'regulatório': 'Análise regulatória da página',
+          'preço':       'Sinal de preço identificado',
+          'concorrente': 'Sinal competitivo identificado',
+          'fornecedor':  'Fornecedor para análise',
+          'notícia':     'Análise da notícia',
+          'rede-social': 'Sinal reputacional capturado',
+          'pesquisa':    'Achado de pesquisa para aprofundar',
+          'genérico':    'Análise da página',
+        };
+
+        // Por que importa: contextualizado por tipo + setor
+        const porQueMap: Record<string, string> = {
+          'regulatório': `Afeta conformidade do setor ${sector}. Avaliar prazos e adequação antes da próxima decisão.`,
+          'preço':       `Pode impactar margem ou posicionamento comercial em ${sector}. Compare antes de reagir.`,
+          'concorrente': `Sinaliza movimento competitivo relevante para ${sector}. Dimensione resposta proporcional ao risco.`,
+          'fornecedor':  `Pode reduzir custo ou prazo na cadeia de ${sector}. Validar capacidade antes de pilotar.`,
+          'notícia':     `Pode repercutir em clientes ou mercado de ${sector}. Avaliar necessidade de comunicação.`,
+          'rede-social': `Possível sinal de reputação ou tendência relevante a ${sector}. Capturar e decidir resposta.`,
+          'pesquisa':    `Achado em curso — aprofundar com fontes complementares antes de consolidar.`,
+          'genérico':    `Avaliar se afeta operação, comunicação ou estratégia de ${sector}.`,
+        };
+        const porQue = porQueMap[a.pageType];
+
+        // Próximos passos: contextualizados
+        const passosMap: Record<string, string> = {
+          'regulatório': 'Identificar a norma e prazo de vigência · Mapear processos afetados · Definir plano de adequação com responsável',
+          'preço':       'Comparar com oferta atual · Decidir resposta comercial · Medir impacto em 7 dias',
+          'concorrente': 'Resumir o movimento em uma frase · Avaliar alcance e janela de tempo · Definir resposta competitiva',
+          'fornecedor':  'Validar capacidade e termos · Cotar substituição parcial · Decidir teste piloto',
+          'notícia':     'Extrair fato principal · Avaliar repercussão para o setor · Decidir comunicação interna ou externa',
+          'rede-social': 'Capturar sinal e contexto · Avaliar tom e alcance · Decidir resposta ou monitoramento',
+          'pesquisa':    'Listar 3 fontes complementares · Validar achado central · Consolidar conclusão',
+          'genérico':    'Identificar fato principal · Cruzar com dados internos · Decidir próxima ação',
+        };
+
         const card: IntelligenceCard = {
           ...synthBase,
-          titulo: d.context.title || 'Página do navegador',
-          resumo: (d.context.capturedText || 'Conteúdo capturado do navegador interno.').slice(0, 280),
-          por_que_importa: `Origem: ${fechaUrl}`,
+          titulo: tituloMap[a.pageType],
+          resumo: `${sinal}${a.hostname ? ` · Origem: ${a.hostname}` : ''}.`,
+          por_que_importa: porQue,
           onde_afeta: sector,
-          o_que_fazer: 'Decidir próxima ação (missão, card no feed, descarte).',
+          o_que_fazer: passosMap[a.pageType],
           dominio: sector,
-          area: sector,
-          urgencia: 'media',
-          tipo_card: 'informacao',
+          area: a.pageType === 'genérico' ? sector : a.pageType,
+          urgencia: a.urgencyHint,
+          tipo_card: a.pageType === 'regulatório' ? 'alerta' : 'informacao',
         };
         onWorkspaceCard(card, 'utilizar');
         closeBrowser();
@@ -75,13 +127,20 @@ export function useOS1BrowserBridge({
       }
       if (d.type === 'create-mission') {
         const m = d.payload;
+        // Por que importa: contexto + responsável + prazo. Evita "Evidência: <url>" cru.
+        const porQue = [
+          m?.objetivo ? m.objetivo : null,
+          m?.responsavelSugerido ? `Responsável sugerido: ${m.responsavelSugerido}` : null,
+          m?.prazoSugerido ? `Prazo: ${m.prazoSugerido}` : null,
+          d.context.title ? `Evidência: ${d.context.title}` : `Origem: ${fechaUrl}`,
+        ].filter(Boolean).join(' · ');
         const card: IntelligenceCard = {
           ...synthBase,
-          titulo: m?.titulo ?? 'Missão sugerida',
-          resumo: m?.objetivo ?? '',
-          por_que_importa: `Evidência: ${fechaUrl}`,
+          titulo: m?.titulo ?? 'Missão criada a partir da página',
+          resumo: m?.objetivo ?? 'Missão operacional gerada da página atual.',
+          por_que_importa: porQue,
           onde_afeta: sector,
-          o_que_fazer: (m?.etapas ?? []).join(' · '),
+          o_que_fazer: (m?.etapas ?? []).join(' · ') + (m?.criterioConclusao ? ` · Critério de conclusão: ${m.criterioConclusao}` : ''),
           dominio: sector,
           area: 'missao',
           urgencia: 'media',
@@ -93,17 +152,22 @@ export function useOS1BrowserBridge({
       }
       if (d.type === 'analyze-session') {
         const r = d.payload;
-        const sinais = (r?.sinaisDetectados ?? []).join(' · ');
+        // Estrutura premium: padrões percebidos + riscos + o que merece ação.
+        const padroes = (r?.sinaisDetectados ?? []).slice(0, 3).join(' · ');
+        const riscosTxt = (r?.riscos ?? []).length > 0 ? ` · Riscos: ${(r.riscos ?? []).join(' · ')}` : '';
+        const merecemAcaoTxt = (r?.oportunidades ?? []).length > 0
+          ? `Merecem ação: ${(r.oportunidades ?? []).join(' · ')}`
+          : '';
         const card: IntelligenceCard = {
           ...synthBase,
-          titulo: 'Análise da sessão de navegação',
+          titulo: 'Relatório da sessão de navegação',
           resumo: r?.resumo ?? 'Resumo da sessão atual.',
-          por_que_importa: sinais,
+          por_que_importa: `${padroes}${riscosTxt}${merecemAcaoTxt ? ` · ${merecemAcaoTxt}` : ''}`,
           onde_afeta: sector,
           o_que_fazer: (r?.proximosPassos ?? []).join(' · '),
           dominio: sector,
-          area: 'analise',
-          urgencia: 'baixa',
+          area: 'relatorio-sessao',
+          urgencia: (r?.riscos ?? []).length > 0 ? 'media' : 'baixa',
           tipo_card: 'informacao',
         };
         onWorkspaceCard(card, 'utilizar');
@@ -115,18 +179,53 @@ export function useOS1BrowserBridge({
         onBrowserCard(newCard);
         return;
       }
-      // 'save-evidence', 'monitor-page', 'capture-snippet', 'create-dossier':
-      // já persistem em localStorage no próprio BrowserView; aqui são silenciosos.
+      // 'save-evidence', 'monitor-page', 'capture-snippet': já persistem em
+      // localStorage no próprio BrowserView; aqui são silenciosos.
 
-      // P4: comparação de abas → workspace
-      if (d.type === 'compare-tabs') {
-        const cmp = d.payload;
+      // 'create-dossier' deixou de ser silencioso: agora abre a Área de
+      // Trabalho com a síntese mínima do dossiê (tema central, pontos
+      // críticos, pendências, próximos passos). O payload é a
+      // DossierSynthesis montada no BrowserView.
+      if (d.type === 'create-dossier') {
+        const syn = d.payload;
+        if (!syn?.dossier) return; // fallback: sem síntese, não abre workspace
+        // Por que importa: pontos críticos + pendências (não só lista).
+        const pontos = (syn.pontosCriticos ?? []).slice(0, 3).join(' · ');
+        const pendenciasTxt = (syn.pendencias ?? []).length > 0
+          ? ` · Pendências: ${(syn.pendencias ?? []).slice(0, 2).join(' · ')}`
+          : '';
         const card: IntelligenceCard = {
           ...synthBase,
           id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: 'Comparação de abas abertas',
-          resumo: cmp?.resumo ?? '',
-          por_que_importa: (cmp?.diferencas ?? []).slice(0, 4).join(' · '),
+          titulo: `Síntese de dossiê: ${syn.dossier.nome}`,
+          resumo: `${syn.temaCentral ?? ''}${syn.dossier.pages?.length ? ` · ${syn.dossier.pages.length} página(s) incluída(s).` : ''}`,
+          por_que_importa: `${pontos}${pendenciasTxt}`,
+          onde_afeta: sector,
+          o_que_fazer: (syn.proximosPassos ?? []).join(' · '),
+          dominio: sector,
+          area: 'dossie',
+          urgencia: 'baixa',
+          tipo_card: 'informacao',
+        };
+        onWorkspaceCard(card, 'utilizar');
+        closeBrowser();
+        return;
+      }
+
+      // Comparar páginas recentes (renomeado de "Comparar abas abertas" —
+      // não comparamos abas reais; comparamos as últimas N visitas).
+      if (d.type === 'compare-tabs') {
+        const cmp = d.payload;
+        // Por que importa: lista as diferenças + riscos. Inclui melhor opção destacada.
+        const diferencas = (cmp?.diferencas ?? []).slice(0, 3).join(' · ');
+        const riscosTxt = (cmp?.riscos ?? []).length > 0 ? ` · Atenção: ${(cmp?.riscos ?? []).slice(0, 2).join(' · ')}` : '';
+        const melhor = cmp?.melhorOpcao ? ` · Merece ação primeiro: ${cmp.melhorOpcao}` : '';
+        const card: IntelligenceCard = {
+          ...synthBase,
+          id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+          titulo: 'Análise de páginas recentes',
+          resumo: cmp?.resumo ?? 'Análise das páginas recentes da sessão.',
+          por_que_importa: `${diferencas}${riscosTxt}${melhor}`,
           onde_afeta: sector,
           o_que_fazer: cmp?.recomendacao ?? '',
           dominio: sector,
@@ -138,19 +237,22 @@ export function useOS1BrowserBridge({
         closeBrowser();
         return;
       }
-      // P4: agente do setor → workspace
+      // Leitura contextual preliminar por setor (renomeado de "Perguntar
+      // ao agente do setor" — não chamamos IA; é leitura heurística
+      // anotada com o ponto de vista do setor).
       if (d.type === 'ask-sector-agent') {
         const a = d.payload;
+        const aviso = '⚠ Leitura preliminar (heurística) — não é resposta de IA. Confirme antes de transformar em decisão.';
         const card: IntelligenceCard = {
           ...synthBase,
           id: `synth-browser-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: a?.agente ?? 'Agente do setor',
+          titulo: `Leitura preliminar — ${sector}`,
           resumo: a?.analise ?? '',
-          por_que_importa: (a?.observacoes ?? []).join(' · '),
+          por_que_importa: `${aviso} · ${(a?.observacoes ?? []).join(' · ')}`,
           onde_afeta: sector,
           o_que_fazer: (a?.proximosPassos ?? []).join(' · '),
           dominio: sector,
-          area: 'agente',
+          area: 'leitura-setor',
           urgencia: 'baixa',
           tipo_card: 'informacao',
         };

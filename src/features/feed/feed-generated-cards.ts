@@ -20,16 +20,33 @@ export interface BrowserGeneratedPayload {
   titulo?: string;
   resumo?: string;
   urgencia?: 'baixa' | 'media' | 'alta';
+  // Etapa 10 — rastreabilidade
+  evidenceId?: string;
+  evidenciaUrl?: string;
+  pageType?: string;
+  sourceTitle?: string;
+  capturedAt?: string;
+  deduped?: boolean;
 }
 
 export function browserPayloadToFeedCard(fc: BrowserGeneratedPayload | undefined | null, sector: string): RoleFeedCard {
+  // Tipo do card varia por urgência (alta → alerta)
+  const tipo: 'informacao' | 'alerta' = fc?.urgencia === 'alta' ? 'alerta' : 'informacao';
+  // Tags expandidas: navegador + evidência + setor + tipo da página
+  const tags = ['navegador', 'evidência', sector];
+  if (fc?.pageType) tags.push(fc.pageType);
   return {
     id: fc?.id ?? `bfc-${Date.now()}`,
     titulo: fc?.titulo ?? 'Card do navegador',
     resumo: fc?.resumo ?? '',
-    tipo: 'informacao',
+    tipo,
     urgencia: fc?.urgencia ?? 'media',
-    tags: ['navegador', sector],
+    tags,
+    origem: 'navegador',
+    evidenceId: fc?.evidenceId,
+    sourceUrl: fc?.evidenciaUrl,
+    sourceTitle: fc?.sourceTitle,
+    createdAt: fc?.capturedAt,
   };
 }
 
@@ -42,17 +59,51 @@ export interface MapGeneratedCard {
   resumo: string;
   urgencia: 'alta' | 'media' | 'baixa';
   dominio: string;
+  /** Nível de risco territorial — usado pra decidir tipo do card (alerta vs informacao). */
+  risco?: 'alto' | 'medio' | 'baixo' | string;
+  /** Etapa 11: rastreabilidade do sinal territorial. */
+  mapSignalId?: string;
+  raioMetros?: number;
+  localizacao?: { lat: number; lng: number };
+  competitorsCount?: number;
+  sourceLabel?: string;
+  capturedAt?: string;
+  /** Domínio competitivo/risco/oportunidade pra tags. */
+  oportunidade?: string;
 }
 
 export function mapPayloadToFeedCards(cards: MapGeneratedCard[], sector: string): RoleFeedCard[] {
-  return cards.map(c => ({
-    id: c.id,
-    titulo: c.titulo,
-    resumo: c.resumo,
-    tipo: 'informacao',
-    urgencia: c.urgencia,
-    tags: ['mapa', sector, c.dominio].filter(Boolean) as string[],
-  }));
+  return cards.map(c => {
+    // Risco alto + urgência alta = alerta. Resto vira informacao.
+    const tipo = (c.risco === 'alto' || c.urgencia === 'alta') ? 'alerta' : 'informacao';
+
+    // Tags Etapa 11: mapa + território + raio + setor + dominio + risco/oportunidade
+    const tags: string[] = ['mapa', 'território', sector];
+    if (c.raioMetros) {
+      const km = c.raioMetros / 1000;
+      tags.push(km < 1 ? `raio:${Math.round(c.raioMetros)}m` : `raio:${km.toFixed(1)}km`);
+    }
+    if (c.dominio && c.dominio !== sector) tags.push(c.dominio);
+    if (c.risco === 'alto' || c.risco === 'medio') tags.push('risco');
+    if (c.oportunidade === 'alta' || c.oportunidade === 'média') tags.push('oportunidade');
+    if (/parceir/i.test(c.titulo) || /fornecedor/i.test(c.titulo)) tags.push('parceiros');
+
+    return {
+      id: c.id,
+      titulo: c.titulo,
+      resumo: c.resumo,
+      tipo,
+      urgencia: c.urgencia,
+      tags: tags.filter(Boolean) as string[],
+      origem: 'mapa' as const,
+      mapSignalId: c.mapSignalId,
+      radius: c.raioMetros,
+      center: c.localizacao,
+      competitorsCount: c.competitorsCount,
+      sourceLabel: c.sourceLabel,
+      createdAt: c.capturedAt,
+    };
+  });
 }
 
 // ── Diagnóstico ontológico → feed ─────────────────────────────────

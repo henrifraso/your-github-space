@@ -33,6 +33,15 @@ export interface MapFeedCard {
   acaoRecomendada: string;
   origem: 'mapa';
   capturedAt: string;
+  // Etapa 11
+  /** ID do sinal territorial associado (rastreabilidade). */
+  mapSignalId?: string;
+  /** Quantidade de concorrentes considerados na análise do raio. */
+  competitorsCount?: number;
+  /** Label legível (ex: "Raio 1,0 km · 8 concorrentes"). */
+  sourceLabel?: string;
+  /** True se foi deduplicado (mesma action+sector+raio+centro). */
+  deduped?: boolean;
 }
 
 export interface MapMission {
@@ -63,6 +72,12 @@ export interface MapCompetitionAnalysis {
 export interface MapOpportunity {
   id: string;
   oportunidades: string[];
+  /**
+   * Versão enriquecida da lista de oportunidades. Opcional pra manter
+   * retro-compatibilidade com payloads antigos. Quando presente, o bridge
+   * usa estes campos pra montar resumo + por que importa + ação.
+   */
+  oportunidadesDetalhadas?: { titulo: string; justificativa: string; prioridade: 'alta' | 'media' | 'baixa' }[];
   acaoRecomendada: string;
   resumo: string;
   capturedAt: string;
@@ -117,7 +132,15 @@ export interface MapSectorOpportunity {
 
 export interface MapNearbyPartner {
   id: string;
-  candidatos: { nome: string; tipo: 'fornecedor' | 'parceiro' | 'prestador'; distancia: string; observacao: string }[];
+  candidatos: {
+    nome: string;
+    /** Categorização do candidato: parceiro/fornecedor/prestador/complementar/concorrente-a-monitorar. */
+    tipo: 'fornecedor' | 'parceiro' | 'prestador' | 'complementar' | 'concorrente-monitorar';
+    distancia: string;
+    observacao: string;
+    /** Sugestão de tipo de parceria (bundling, cross-promo, white-label, etc.). Opcional. */
+    parceriaSugerida?: string;
+  }[];
   recomendacao: string;
   resumo: string;
   capturedAt: string;
@@ -135,7 +158,79 @@ export interface MapTerritorySimulation {
   metricaSucesso: string;
   proximaAcao: string;
   resumo: string;
+  /**
+   * Como os cenários foram estimados. Lista de fatores considerados
+   * (densidade competitiva, reputação, etc.). Necessária pra evitar
+   * "número mágico" — o cliente vê de onde saiu a estimativa.
+   */
+  fundamento?: string[];
+  /** Aviso explícito de que isto é estimativa, não previsão. */
+  aviso?: string;
   capturedAt: string;
+}
+
+// ─── Sinal territorial unificado (Etapa 9) ──────────────────────────────
+// Estrutura cross-action que registra o contexto territorial de cada
+// ação do mapa. Permite saber depois: que raio foi analisado, quais
+// concorrentes foram considerados, que tipo de sinal foi gerado, se foi
+// pra workspace/feed/missão, etc. Todos os campos opcionais são tolerados
+// pra retro-compatibilidade — `MapTerritorialSignal` pode crescer sem
+// quebrar dados antigos no localStorage.
+export interface MapTerritorialSignal {
+  id: string;
+  source: 'map';
+  /** Ação do mapa que gerou o sinal. */
+  action: MapActionType | 'codify-territory-watchlist';
+  /** Setor/perfil ativo no momento. */
+  sector: string;
+  /** Role do usuário (codify, franchise, etc.). */
+  role?: string;
+  /** Raio analisado, em metros. */
+  radius: number;
+  /** Centro da análise (lat/lng). */
+  center: { lat: number; lng: number };
+  /** Label opcional da região (cidade, bairro, descrição). */
+  regionLabel?: string;
+  /** Quantidade de concorrentes considerados. */
+  competitorsCount: number;
+  /** Nomes dos concorrentes considerados (até 10 pra não inflar storage). */
+  competitorsUsed: string[];
+  /** Nota média dos concorrentes no raio. */
+  averageRating: number;
+  /** Concorrentes com nota ≥ 4.3. */
+  strongCompetitors: number;
+  /** Concorrentes com nota < 4.0. */
+  weakCompetitors: number;
+  /** Concorrentes diretos no raio. */
+  directCompetitors: number;
+  /** Concorrentes indiretos no raio. */
+  indirectCompetitors: number;
+  /** Tipo de sinal — derivado da action ou heurística. */
+  signalType:
+    | 'concorrencia'
+    | 'oportunidade'
+    | 'risco'
+    | 'comparacao'
+    | 'missao'
+    | 'parceiros'
+    | 'simulacao'
+    | 'feed'
+    | 'watchlist'
+    | 'sector-opportunity';
+  /** Resumo curto (1-2 frases) gerado da análise. */
+  summary: string;
+  /** Nível de risco territorial. */
+  riskLevel?: 'alto' | 'medio' | 'baixo';
+  /** Nível de oportunidade territorial. */
+  opportunityLevel?: 'alta' | 'media' | 'baixa';
+  /** Marcado quando o sinal foi levado pra Área de Trabalho. */
+  usedInWorkspace?: boolean;
+  /** Marcado quando o sinal gerou cards no feed. */
+  usedInFeed?: boolean;
+  /** ID da missão derivada, se houver. */
+  missionId?: string;
+  /** Timestamp ISO. */
+  timestamp: string;
 }
 
 export interface MapActionEventDetail {

@@ -15,6 +15,31 @@ export interface BrowserEvidence extends BrowserActionContext {
   id: string;
   sector?: string;
   businessName?: string;
+
+  // Estrutura mínima da Etapa 8 (todos opcionais pra retro-compatibilidade
+  // com evidências antigas no localStorage).
+  /** Sempre 'browser' para evidências do navegador. */
+  source?: 'browser';
+  /** Ação que originou a evidência (save-evidence, capture-snippet, etc.). */
+  action?: BrowserActionType | 'codify-watchlist';
+  /** Trecho selecionado pelo usuário, se houver. Diferente de capturedText. */
+  snippet?: string;
+  /** Tipo da página classificada (regulatório, preço, concorrente, etc.). */
+  pageType?: string;
+  /** Role do usuário no momento da captura (codify, franchise, etc.). */
+  role?: string;
+  /** Label curta exibível na lista de evidências. */
+  evidenceLabel?: string;
+  /** Resumo curto (1-2 frases) gerado da página. */
+  summary?: string;
+  /** Nível de risco derivado do tipo da página ('alto'|'medio'|'baixo'). */
+  riskLevel?: 'alto' | 'medio' | 'baixo';
+  /** Marcada quando a evidência foi usada para abrir/popular workspace. */
+  usedInWorkspace?: boolean;
+  /** Marcada quando a evidência gerou card no feed. */
+  usedInFeed?: boolean;
+  /** ID do dossiê que referencia esta evidência, se houver. */
+  dossierId?: string;
 }
 
 export interface BrowserMission extends BrowserActionContext {
@@ -46,6 +71,15 @@ export interface BrowserFeedCard {
   evidenciaUrl: string;
   origem: 'navegador';
   capturedAt: string;
+  // Etapa 10
+  /** ID da evidência associada (rastreabilidade) */
+  evidenceId?: string;
+  /** Tipo da página (regulatório/preço/concorrente/...) */
+  pageType?: string;
+  /** Título da página de origem */
+  sourceTitle?: string;
+  /** Indica que foi deduplicado (mesma URL+tipo já existia) */
+  deduped?: boolean;
 }
 
 export interface BrowserSessionReport {
@@ -112,6 +146,18 @@ export interface BrowserSectorAgentAnswer {
   capturedAt: string;
 }
 
+// Síntese mínima do dossiê: payload enviado quando `create-dossier`
+// abre a Área de Trabalho com tema central, pontos críticos, pendências
+// e próximos passos. Não é uma entidade persistida (o dossiê embedded
+// já está salvo); é só estrutura de exibição.
+export interface BrowserDossierSynthesis {
+  dossier: BrowserDossier;
+  temaCentral: string;
+  pontosCriticos: string[];
+  pendencias: string[];
+  proximosPassos: string[];
+}
+
 export interface BrowserActionEventDetail {
   type: BrowserActionType;
   context: BrowserActionContext;
@@ -123,5 +169,6 @@ export interface BrowserActionEventDetail {
     | BrowserTabComparison
     | BrowserWatcher
     | BrowserDossier
-    | BrowserSectorAgentAnswer;
+    | BrowserSectorAgentAnswer
+    | BrowserDossierSynthesis;
 }

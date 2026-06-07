@@ -16,4 +16,6 @@ export const MAP_LS_KEYS = {
   sectorOpportunities: 'os1_map_sector_opportunities',
   nearbyPartners: 'os1_map_nearby_partners',
   simulations: 'os1_map_simulations',
+  // Etapa 9: sinal territorial unificado (cross-action)
+  signals: 'os1_map_signals',
 } as const;

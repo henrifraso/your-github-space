@@ -26,10 +26,25 @@ export const SENSITIVE_NOTICE =
   'Área sensível: use esta saída como apoio e valide com o responsável antes de tomar decisão final.';
 
 // ── Helpers de inferência de contexto ────────────────────────────────
+// Os cards que vêm direto do bridge (workspace) começam com `synth-map-`
+// ou `synth-browser-`. Os que passam pelo feed (`browserPayloadToFeedCard`
+// → `roleFeedCardToIntelligenceCard`) ganham prefixo `synthetic-` antes
+// do ID original (`synthetic-bfc-`, `synthetic-mfc-`). Reconhecemos os
+// dois caminhos pra os atalhos contextuais funcionarem em ambos.
 export function inferSourceFromCardId(cardId?: string): ToolSource | undefined {
   if (!cardId) return;
-  if (cardId.startsWith('synth-map-') || cardId.startsWith('mfc-') || cardId.startsWith('mms-')) return 'map';
-  if (cardId.startsWith('synth-browser-') || cardId.startsWith('bfc-') || cardId.startsWith('bw-')) return 'browser';
+  // Cards do Mapa (direto ou via feed)
+  if (cardId.startsWith('synth-map-') ||
+      cardId.startsWith('mfc-') ||
+      cardId.startsWith('mms-') ||
+      cardId.startsWith('synthetic-mfc-') ||
+      cardId.startsWith('synthetic-mms-')) return 'map';
+  // Cards do Navegador (direto ou via feed)
+  if (cardId.startsWith('synth-browser-') ||
+      cardId.startsWith('bfc-') ||
+      cardId.startsWith('bw-') ||
+      cardId.startsWith('synthetic-bfc-') ||
+      cardId.startsWith('synthetic-bw-')) return 'browser';
   if (cardId.startsWith('synth-')) return 'workspace';
   if (cardId.startsWith('ontodiag-')) return 'diagnosis';
   return 'feed';

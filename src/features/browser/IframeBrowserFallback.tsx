@@ -33,6 +33,8 @@ import {
   buildSectorAgentAnswer,
   type BrowserActionContext,
 } from '../../lib/browser-actions';
+import { buildDossierSynthesis } from './actions/browser-actions.builders';
+import { getRole } from '../../hooks/useAuth';
 import { libcurl as _libcurl } from 'libcurl.js';
 import {
   normalizeUrl,
@@ -80,46 +82,57 @@ export function IframeBrowser({ initialUrl, lightMode = false, syncing = false, 
     if (type === 'save-evidence') {
       const ev = saveEvidence(ctx, {});
       dispatchBrowserAction({ type, context: ctx, payload: ev });
-      flashFeedback('Evidência salva'); return;
+      flashFeedback('Evidência salva — usável nas análises desta sessão'); return;
     }
     if (type === 'create-mission') {
       dispatchBrowserAction({ type, context: ctx, payload: buildMission(ctx, {}) });
-      flashFeedback('Missão proposta enviada'); return;
+      flashFeedback('Missão criada a partir da página'); return;
     }
     if (type === 'generate-feed-card') {
-      dispatchBrowserAction({ type, context: ctx, payload: buildFeedCard(ctx, {}) });
-      flashFeedback('Card adicionado ao feed'); return;
+      const fc = buildFeedCard(ctx, {});
+      dispatchBrowserAction({ type, context: ctx, payload: fc });
+      flashFeedback(fc.deduped
+        ? 'Este sinal já está no Feed (atualizado para o topo)'
+        : 'Card criado no Feed a partir desta página'
+      ); return;
     }
     if (type === 'analyze-session') {
       dispatchBrowserAction({ type, context: ctx, payload: buildSessionReport({}) });
-      flashFeedback('Sessão analisada'); return;
+      flashFeedback('Relatório da sessão pronto na Área de Trabalho'); return;
     }
     if (type === 'compare-tabs') {
       dispatchBrowserAction({ type, context: ctx, payload: buildTabComparison() });
-      flashFeedback('Comparação de abas enviada'); return;
+      flashFeedback('Análise de páginas recentes pronta na Área de Trabalho'); return;
     }
     if (type === 'monitor-page') {
       addWatcher(ctx, 'mudança');
       dispatchBrowserAction({ type, context: ctx });
-      flashFeedback('Monitoramento ativado'); return;
+      flashFeedback('Página registrada na watchlist Codify — sem detecção automática ativa'); return;
     }
     if (type === 'capture-snippet') {
-      captureSnippet(ctx, {});
-      dispatchBrowserAction({ type, context: ctx });
-      flashFeedback('Trecho da página salvo'); return;
+      const ev = captureSnippet(ctx, {});
+      if (!ev) {
+        // Em fallback web não há getSelection cross-origin; só salva se
+        // capturedText estiver presente. Se ambos vazios, peça seleção.
+        flashFeedback('Selecione um trecho da página antes de capturar');
+        return;
+      }
+      dispatchBrowserAction({ type, context: ctx, payload: ev });
+      flashFeedback('Trecho da página capturado e salvo como evidência desta sessão'); return;
     }
     if (type === 'create-dossier') {
       const d = quickAddToSectorDossier(ctx);
-      dispatchBrowserAction({ type, context: ctx });
-      flashFeedback(`Página adicionada ao "${d.nome}"`); return;
+      const syn = buildDossierSynthesis(d, ctx);
+      dispatchBrowserAction({ type, context: ctx, payload: syn });
+      flashFeedback(`Dossiê "${d.nome}" atualizado — síntese pronta na Área de Trabalho`); return;
     }
     if (type === 'ask-sector-agent') {
       dispatchBrowserAction({ type, context: ctx, payload: buildSectorAgentAnswer(ctx) });
-      flashFeedback('Pergunta enviada ao agente do setor'); return;
+      flashFeedback('Leitura preliminar pronta na Área de Trabalho'); return;
     }
     // default: send-to-workspace
     dispatchBrowserAction({ type, context: ctx });
-    flashFeedback('Enviado para Área de Trabalho');
+    flashFeedback('Análise da página pronta na Área de Trabalho');
   }
 
   useEffect(() => {
@@ -311,18 +324,23 @@ export function IframeBrowser({ initialUrl, lightMode = false, syncing = false, 
                 borderRadius: 14, boxShadow: '0 24px 60px rgba(0,0,0,0.6)', padding: 6, color: '#d0d0d0',
               }}>
                 <div style={{ padding: '8px 12px 6px', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>OS¹ · Ações</div>
-                {[
-                  { id: 'send-to-workspace', label: 'Enviar para Área de Trabalho', Icon: Send },
-                  { id: 'create-mission',    label: 'Transformar em missão',         Icon: Target },
-                  { id: 'save-evidence',     label: 'Salvar como evidência',         Icon: FileText },
-                  { id: 'generate-feed-card', label: 'Gerar card no feed',           Icon: LayoutGrid },
-                  { id: 'analyze-session',   label: 'Analisar sessão inteira',       Icon: BarChart3 },
-                  { id: 'compare-tabs',      label: 'Comparar abas abertas',         Icon: Layers },
-                  { id: 'monitor-page',      label: 'Monitorar página',              Icon: Bell },
-                  { id: 'capture-snippet',   label: 'Capturar trecho',               Icon: Scissors },
-                  { id: 'create-dossier',    label: 'Criar dossiê',                  Icon: FolderOpen },
-                  { id: 'ask-sector-agent',  label: 'Perguntar ao agente do setor',  Icon: Bot },
-                ].map(({ id, label, Icon }) => (
+                {(() => {
+                  const role = getRole();
+                  const isAdmin = role === 'codify';
+                  const allActions: { id: BrowserActionId; label: string; Icon: typeof Send; adminOnly?: boolean }[] = [
+                    { id: 'send-to-workspace', label: 'Enviar para Área de Trabalho', Icon: Send },
+                    { id: 'create-mission',    label: 'Transformar em missão',        Icon: Target },
+                    { id: 'save-evidence',     label: 'Salvar como evidência',        Icon: FileText },
+                    { id: 'generate-feed-card', label: 'Gerar card no feed',          Icon: LayoutGrid },
+                    { id: 'analyze-session',   label: 'Analisar sessão inteira',      Icon: BarChart3 },
+                    { id: 'compare-tabs',      label: 'Comparar páginas recentes',    Icon: Layers },
+                    { id: 'monitor-page',      label: 'Acompanhar página (Codify)',   Icon: Bell, adminOnly: true },
+                    { id: 'capture-snippet',   label: 'Capturar trecho',              Icon: Scissors },
+                    { id: 'create-dossier',    label: 'Criar dossiê',                 Icon: FolderOpen },
+                    { id: 'ask-sector-agent',  label: 'Leitura preliminar do setor (Codify)', Icon: Bot, adminOnly: true },
+                  ];
+                  return allActions.filter(a => !a.adminOnly || isAdmin);
+                })().map(({ id, label, Icon }) => (
                   <button
                     key={id}
                     onClick={() => runAction(id as any)}

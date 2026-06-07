@@ -52,8 +52,33 @@ function pickAreaShortcuts(ctx: WorkspaceToolContext): WorkspaceShortcut[] {
 }
 
 function pickSourceShortcuts(ctx: WorkspaceToolContext): WorkspaceShortcut[] {
-  if (ctx.source === 'map') return SHORTCUTS_MAPA;
-  if (ctx.source === 'browser' || ctx.source === 'upload') return SHORTCUTS_NAVEGADOR;
+  if (ctx.source === 'map') {
+    // Etapa 13: prioriza atalhos cujo appliesTo bate com a area do card
+    // do mapa (concorrencia-territorial / oportunidade / risco-territorial /
+    // parceiros-territoriais / simulacao / comparacao-territorial /
+    // missao-territorial / mapa-feed). Atalho específico ANTES dos genéricos.
+    const area = AREA_NORMALIZE(ctx.areaMacro);
+    if (area) {
+      const specific = SHORTCUTS_MAPA.filter(s =>
+        Array.isArray(s.appliesTo) && s.appliesTo.some(k => area.includes(AREA_NORMALIZE(k)))
+      );
+      if (specific.length > 0) return [...specific, ...SHORTCUTS_MAPA];
+    }
+    return SHORTCUTS_MAPA;
+  }
+  if (ctx.source === 'browser' || ctx.source === 'upload') {
+    // Etapa 12: prioriza atalhos cujo appliesTo bate com a area do card
+    // (regulatório, preço, concorrente, dossie, missao, relatorio-sessao...).
+    // Atalho específico aparece ANTES dos genéricos (sc-doc-pontos, etc.).
+    const area = AREA_NORMALIZE(ctx.areaMacro);
+    if (area) {
+      const specific = SHORTCUTS_NAVEGADOR.filter(s =>
+        Array.isArray(s.appliesTo) && s.appliesTo.some(k => area.includes(AREA_NORMALIZE(k)))
+      );
+      if (specific.length > 0) return [...specific, ...SHORTCUTS_NAVEGADOR];
+    }
+    return SHORTCUTS_NAVEGADOR;
+  }
   return [];
 }
 

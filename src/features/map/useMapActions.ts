@@ -63,54 +63,59 @@ export function useMapActions({ buildCtx, allWithDistance }: UseMapActionsArgs):
     if (type === 'feed-from-radius') {
       const cards = buildMapFeedCards(ctx);
       dispatchMapAction({ type, context: ctx, payload: cards });
-      flashToast(`${cards.length} card(s) gerados no feed`);
+      // Etapa 11: toast distingue novo vs deduplicado
+      const isDedup = cards.length > 0 && cards.every(c => c.deduped);
+      flashToast(isDedup
+        ? `Este sinal territorial já está no Feed (${cards.length} card(s) atualizado(s))`
+        : `${cards.length} card(s) criado(s) no Feed a partir deste território`
+      );
       return;
     }
     if (type === 'analyze-competition') {
       dispatchMapAction({ type, context: ctx, payload: buildCompetitionAnalysis(ctx) });
-      flashToast('Análise enviada para Área de Trabalho');
+      flashToast('Análise competitiva pronta na Área de Trabalho');
       return;
     }
     if (type === 'find-opportunities') {
       dispatchMapAction({ type, context: ctx, payload: buildOpportunities(ctx) });
-      flashToast('Oportunidades enviadas para Área de Trabalho');
+      flashToast('Oportunidades territoriais prontas na Área de Trabalho');
       return;
     }
     if (type === 'compare-regions') {
       dispatchMapAction({ type, context: ctx, payload: buildComparison(ctx, allWithDistance) });
-      flashToast('Comparação enviada para Área de Trabalho');
+      flashToast('Comparação entre raios pronta na Área de Trabalho');
       return;
     }
     if (type === 'territory-to-mission') {
       dispatchMapAction({ type, context: ctx, payload: buildMapMission(ctx) });
-      flashToast('Missão sugerida enviada');
+      flashToast('Missão territorial pronta na Área de Trabalho');
       return;
     }
     // ── P5: novas 5 ──
     if (type === 'monitor-territory') {
       addTerritoryWatcher(ctx);
       dispatchMapAction({ type, context: ctx });
-      flashToast('Monitoramento do território ativado');
+      flashToast('Território registrado na watchlist Codify — sem detecção automática ativa');
       return;
     }
     if (type === 'risk-map') {
       dispatchMapAction({ type, context: ctx, payload: buildRiskAnalysis(ctx) });
-      flashToast('Mapa de risco enviado');
+      flashToast('Mapa de risco territorial pronto na Área de Trabalho');
       return;
     }
     if (type === 'sector-opportunities') {
       dispatchMapAction({ type, context: ctx, payload: buildSectorOpportunities(ctx) });
-      flashToast('Oportunidades por setor enviadas');
+      flashToast('Oportunidades por setor prontas na Área de Trabalho');
       return;
     }
     if (type === 'nearby-partners') {
       dispatchMapAction({ type, context: ctx, payload: buildNearbyPartners(ctx) });
-      flashToast('Parceiros próximos enviados');
+      flashToast('Candidatos a parceria prontos na Área de Trabalho');
       return;
     }
     if (type === 'simulate-territory-action') {
       dispatchMapAction({ type, context: ctx, payload: buildTerritorySimulation(ctx) });
-      flashToast('Simulação de território enviada');
+      flashToast('Simulação territorial pronta na Área de Trabalho — estimativa, não previsão');
       return;
     }
   }, [buildCtx, allWithDistance, flashToast]);
