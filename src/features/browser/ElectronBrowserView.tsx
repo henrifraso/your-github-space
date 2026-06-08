@@ -310,7 +310,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
       {/* ── Barra de abas — slim ───────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'flex-end', padding: '40px 12px 0',
         background: isDark ? '#2f2f2f' : '#f7f8f9',
-        borderBottom: isDark ? '1px solid #4a4a4a' : '1px solid #d4d7da',
+        borderBottom: isDark ? '1px solid #4a4a4a' : '0.5px solid #ebedef',
         boxShadow: isDark
           ? '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
           : '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12)',
@@ -360,7 +360,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
         <button onClick={() => openTab()}
           style={{ width: 28, height: 28, marginBottom: 2, marginLeft: 4, borderRadius: 8, flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#555', cursor: 'pointer', transition: 'all 0.15s' }}>
+            color: isDark ? '#d0d0d0' : '#111', cursor: 'pointer', transition: 'all 0.15s' }}>
           <Plus size={13} />
         </button>
       </div>
