@@ -1,11 +1,15 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { MapPin, X } from 'lucide-react';
+import { MapPin, X,
+  LayoutGrid, BarChart3, Search, GitCompareArrows, Target, Bell,
+  AlertTriangle, Briefcase, Handshake, FlaskConical,
+} from 'lucide-react';
 import { CircleF } from '@react-google-maps/api';
 import { AnimatePresence } from 'motion/react';
 import type { Competitor } from '../../types';
 import { GoogleMapWrapper, useGoogleMaps } from './GoogleMapWrapper';
 import { LeafletFallbackMap } from './LeafletFallbackMap';
 import { useDarkMode } from '../../hooks/useDarkMode';
+import { getRole } from '../../hooks/useAuth';
 import { ClientMarker } from './ClientMarker';
 import { CompetitorMarker } from './CompetitorMarker';
 import { CompetitorCard } from './CompetitorCard';
@@ -16,7 +20,6 @@ import type { MapContextSnapshot } from '../../lib/map-actions';
 import { RADIUS_ZOOM } from '../../features/map/map-ui-utils';
 import { useMapAnalysis } from '../../features/map/useMapAnalysis';
 import { useMapActions, type MapActionId } from '../../features/map/useMapActions';
-import { MapActionsMenu } from '../../features/map/MapActionsMenu';
 import { MapActionToast, MapAnalysisPanel } from '../../features/map/MapActionResult';
 
 interface Props {
@@ -96,18 +99,66 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
       style={{ WebkitAppRegion: 'no-drag', WebkitUserSelect: 'none' } as React.CSSProperties}
     >
       {/* Header — X simples no canto (Esc também fecha, via listener) */}
-      <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0 border-b border-white/8">
-        <div className="flex items-center gap-2">
-          <MapPin size={16} className="text-[#3b82f6]" />
-          <p className="text-xs font-bold uppercase tracking-widest text-[#3b82f6]">Mapa do Mercado</p>
-        </div>
+      <div
+        className="flex items-center justify-end px-5 pt-5 pb-3 flex-shrink-0"
+        style={{
+          background: isDark ? '#2f2f2f' : '#f7f8f9',
+          borderBottom: isDark ? '1px solid #4a4a4a' : '0.5px solid #ebedef',
+          boxShadow: isDark
+            ? '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
+            : '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12)',
+        }}
+      >
         <button
           onClick={onClose}
           title="Fechar mapa"
-          className="p-2 rounded-xl text-white/30 hover:text-white hover:bg-white/5 transition-all cursor-pointer"
+          className={`p-2 rounded-xl transition-all cursor-pointer ${
+            isDark ? 'text-white/30 hover:text-white hover:bg-white/5' : 'text-black/30 hover:text-black hover:bg-black/5'
+          }`}
         >
           <X size={20} />
         </button>
+      </div>
+
+      {/* Barra de ações inline (OS¹ · Mapa) — mesmo padrão do navegador */}
+      <div style={{
+        display: 'flex', gap: 8, padding: '8px 16px 16px',
+        background: isDark ? '#2f2f2f' : '#f7f8f9',
+        boxShadow: isDark
+          ? '0 12px 20px -16px rgba(0,0,0,0.8), 0 4px 8px -6px rgba(0,0,0,0.5)'
+          : '0 12px 20px -16px rgba(0,0,0,0.35), 0 4px 8px -6px rgba(0,0,0,0.18)',
+        flexShrink: 0,
+      }}>
+        {(() => {
+          const isAdmin = getRole() === 'codify';
+          const allActions: { id: MapActionId; label: string; Icon: typeof LayoutGrid; adminOnly?: boolean }[] = [
+            { id: 'feed-from-radius',          label: 'Feed do raio',     Icon: LayoutGrid },
+            { id: 'analyze-competition',       label: 'Concorrência',     Icon: BarChart3 },
+            { id: 'find-opportunities',        label: 'Oportunidades',    Icon: Search },
+            { id: 'compare-regions',           label: 'Comparar regiões', Icon: GitCompareArrows },
+            { id: 'territory-to-mission',      label: 'Missão',           Icon: Target },
+            { id: 'monitor-territory',         label: 'Acompanhar (Codify)', Icon: Bell, adminOnly: true },
+            { id: 'risk-map',                  label: 'Risco',            Icon: AlertTriangle },
+            { id: 'sector-opportunities',      label: 'Oport. por setor', Icon: Briefcase },
+            { id: 'nearby-partners',           label: 'Parceiros',        Icon: Handshake },
+            { id: 'simulate-territory-action', label: 'Simular',          Icon: FlaskConical },
+          ];
+          return allActions.filter(a => !a.adminOnly || isAdmin);
+        })().map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            onClick={() => handleMenuAction(id)}
+            title={label}
+            className={`flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-medium cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97] ${
+              isDark
+                ? 'bg-[#2f2f2f] border-[0.5px] border-[#3d3d3d] text-neutral-200 shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#353535]'
+                : 'bg-[#f7f8f9] border-[0.5px] border-neutral-200 text-neutral-700 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12),inset_0_1px_2px_rgba(255,255,255,0.6)] hover:bg-[#e4e7ea]'
+            }`}
+          >
+            <Icon size={13} strokeWidth={1.8} className={`flex-shrink-0 ${isDark ? 'text-neutral-400' : 'text-neutral-500'}`} />
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Slider de raio */}
@@ -147,13 +198,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
           </GoogleMapWrapper>
         )}
 
-        {/* Badge de fallback quando Leaflet está ativo */}
-        {useFallback && (
-          <div className="absolute top-3 left-3 z-[1000] inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[rgba(20,20,22,0.85)] border border-white/10 text-[10px] text-white/70">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            OpenStreetMap (fallback)
-          </div>
-        )}
+        {/* Badge de fallback escondido — Leaflet continua ativo, só não exibe o badge */}
 
         <MapLegend />
 
@@ -164,7 +209,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
         </AnimatePresence>
       </div>
 
-      {/* ── Botões inferiores: Analisar (centro) + Ações OS¹ (direita do Analisar)
+      {/* ── Botão inferior central: Analisar (ações OS¹ agora ficam na barra de cima)
           z-[1100] pra ficar acima dos panes do Leaflet (até ~1000) e dos controles
           do Google Maps. ── */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-[1100]">
@@ -174,12 +219,6 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
         >
           {analysisOpen ? 'Fechar análise' : 'Analisar este raio'}
         </button>
-        <MapActionsMenu
-          open={actionsOpen}
-          onToggle={() => setActionsOpen(o => !o)}
-          onClose={() => setActionsOpen(false)}
-          onAction={handleMenuAction}
-        />
       </div>
 
       {/* Toast de feedback das ações OS¹ do mapa */}
