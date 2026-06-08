@@ -19,9 +19,11 @@ interface Props {
   radius: number;            // metros; Infinity = sem círculo
   clientPosition: { lat: number; lng: number };
   markers: MarkerInput[];
+  /** Respeita o tema do app: dark=CartoDB Dark Matter, light=CartoDB Positron. */
+  isDark?: boolean;
 }
 
-export function LeafletFallbackMap({ center, zoom, radius, clientPosition, markers }: Props) {
+export function LeafletFallbackMap({ center, zoom, radius, clientPosition, markers, isDark = true }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
@@ -36,7 +38,10 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
       zoomControl: true,
       attributionControl: true,
     });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    const tileUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    L.tileLayer(tileUrl, {
       attribution: '© OpenStreetMap · CARTO',
       maxZoom: 19,
       subdomains: 'abcd',

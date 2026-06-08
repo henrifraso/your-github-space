@@ -5,6 +5,7 @@ import { AnimatePresence } from 'motion/react';
 import type { Competitor } from '../../types';
 import { GoogleMapWrapper, useGoogleMaps } from './GoogleMapWrapper';
 import { LeafletFallbackMap } from './LeafletFallbackMap';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import { ClientMarker } from './ClientMarker';
 import { CompetitorMarker } from './CompetitorMarker';
 import { CompetitorCard } from './CompetitorCard';
@@ -33,6 +34,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const isDark = useDarkMode();
   // FORCE_LEAFLET (piloto): mudar pra false só quando o projeto Google Cloud
   // tiver billing habilitado. Enquanto a chave estiver sem billing, o Google
   // mostra overlay "Esta página não carregou o Google Maps corretamente"
@@ -90,7 +92,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
 
   return (
     <div
-      className="fixed inset-0 z-[190] bg-[#121212] flex flex-col select-none"
+      className={`fixed inset-0 z-[190] ${isDark ? 'bg-[#121212]' : 'bg-white'} flex flex-col select-none`}
       style={{ WebkitAppRegion: 'no-drag', WebkitUserSelect: 'none' } as React.CSSProperties}
     >
       {/* Header — X simples no canto (Esc também fecha, via listener) */}
@@ -121,6 +123,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
             radius={radius}
             clientPosition={center}
             markers={filtered.map(({ c, pos }) => ({ position: pos, competitor: c, onClick: setSelected }))}
+            isDark={isDark}
           />
         ) : (
           <GoogleMapWrapper center={center} zoom={DEFAULT_ZOOM} onMapLoad={m => {

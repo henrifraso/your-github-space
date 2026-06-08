@@ -32,6 +32,7 @@ import {
 } from '../../lib/browser-actions';
 import { buildDossierSynthesis } from './actions/browser-actions.builders';
 import { getRole } from '../../hooks/useAuth';
+import { useDarkMode } from '../../hooks/useDarkMode';
 import { DesktopView } from '../../components/DesktopView';
 import { DESKTOP_URL, normalizeUrl } from './browser-url-utils';
 import { makeTab } from './useBrowserSession';
@@ -41,6 +42,7 @@ import type { Tab, WebviewElement } from './useBrowserSession';
 export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
   initialUrl: string; syncing?: boolean; onSyncClick?: () => void;
 }) {
+  const isDark = useDarkMode();
   const [tabs, setTabs] = useState<Tab[]>(() => [makeTab(normalizeUrl(initialUrl))]);
   const [activeId, setActiveId] = useState(() => tabs[0].id);
   const [inputVal, setInputVal] = useState(initialUrl);
@@ -293,15 +295,25 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
 
   const wv = webviewRefs.current.get(activeId);
 
-  const btnBase = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: '#747474' };
-  const btnActive = { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.13)', color: '#d0d0d0' };
+  // Estética de container do sistema (mesma usada na Área de Trabalho e Feed):
+  // background com elevação visual via shadow externa forte + inset highlight.
+  const btnBase = isDark
+    ? { background: '#2f2f2f', border: '0.5px solid #3d3d3d', color: '#a0a0a0', boxShadow: '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.04)' }
+    : { background: '#f7f8f9', border: '0.5px solid #e5e7eb', color: '#666',    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.6)' };
+  const btnActive = isDark
+    ? { background: '#353535', border: '0.5px solid #4a4a4a', color: '#d0d0d0', boxShadow: '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.04)' }
+    : { background: '#e4e7ea', border: '0.5px solid #d4d7da', color: '#333',    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.6)' };
 
   return (
     <div className="flex flex-col w-full h-full select-none">
 
       {/* ── Barra de abas — slim ───────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', padding: '8px 12px 0',
-        background: '#0d0d0d', borderBottom: '1px solid rgba(255,255,255,0.05)',
+      <div style={{ display: 'flex', alignItems: 'flex-end', padding: '40px 12px 0',
+        background: isDark ? '#2f2f2f' : '#f7f8f9',
+        borderBottom: isDark ? '1px solid #4a4a4a' : '1px solid #d4d7da',
+        boxShadow: isDark
+          ? '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
+          : '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12)',
         overflowX: 'auto', scrollbarWidth: 'none' as const, flexShrink: 0 }}>
         {tabs.map(tab => (
           <motion.button key={tab.id} layout
@@ -311,10 +323,10 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
             className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-t-lg flex-shrink-0 group cursor-pointer transition-colors"
             style={{
               maxWidth: 200, minWidth: 100,
-              background: tab.id === activeId ? '#111' : 'transparent',
+              background: tab.id === activeId ? (isDark ? '#ffffff' : '#111') : 'transparent',
               border: '1px solid transparent',
               borderBottom: 'none',
-              ...(tab.id === activeId ? { borderColor: 'rgba(255,255,255,0.07)', marginBottom: -1 } : {}),
+              ...(tab.id === activeId ? { borderColor: isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)', marginBottom: -1 } : {}),
             }}>
             {tab.loading
               ? <div style={{ width: 12, height: 12, borderRadius: '50%', flexShrink: 0,
@@ -327,7 +339,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
                 : <Globe size={11} style={{ color: '#555', flexShrink: 0 }} />
             }
             <span className="text-xs truncate flex-1 text-left"
-              style={{ color: tab.id === activeId ? '#d0d0d0' : '#555' }}>
+              style={{ color: tab.id === activeId ? (isDark ? '#111' : '#d0d0d0') : '#555' }}>
               {tab.title || 'Nova aba'}
             </span>
             {tabs.length > 1 && (
@@ -349,8 +361,8 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
 
       {/* ── Barra de endereço — mesma aparência do IframeBrowser ─── */}
       <div style={{
-        padding: '20px 16px 14px', background: '#111',
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        padding: '10px 16px 12px',
+        background: isDark ? '#2f2f2f' : '#f7f8f9',
         display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
       }}>
         {/* Botão Desktop — só se a feature flag estiver ligada */}
@@ -367,110 +379,28 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
         {/* URL input */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10,
           paddingLeft: 16, paddingRight: 16, height: 52, borderRadius: 16,
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+          ...btnBase }}>
           {isDesktopTab
-            ? <Monitor size={17} style={{ color: '#464646', flexShrink: 0 }} />
+            ? <Monitor size={17} style={{ color: isDark ? '#464646' : '#888', flexShrink: 0 }} />
             : activeTab?.loading
               ? <div style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
-                  border: '1.5px solid rgba(255,255,255,0.12)',
-                  borderTopColor: 'rgba(255,255,255,0.55)',
+                  border: isDark ? '1.5px solid rgba(255,255,255,0.12)' : '1.5px solid rgba(0,0,0,0.12)',
+                  borderTopColor: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)',
                   animation: 'spin 0.7s linear infinite' }} />
               : activeTab?.favicon
                 ? <img src={activeTab.favicon} style={{ width: 17, height: 17, flexShrink: 0 }} alt=""
                     onError={e => (e.currentTarget.style.display = 'none')} />
-                : <Globe size={17} style={{ color: '#464646', flexShrink: 0 }} />
+                : <Globe size={17} style={{ color: isDark ? '#464646' : '#888', flexShrink: 0 }} />
           }
           <input ref={inputRef} value={inputVal}
             onChange={e => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown} onFocus={e => e.target.select()}
             style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: '#d0d0d0', fontSize: 15, minWidth: 0 }}
+              color: isDark ? '#d0d0d0' : '#333', fontSize: 15, minWidth: 0 }}
             placeholder={isDesktopTab ? 'Desktop ativo — digite uma URL pra abrir um site' : 'Endereço ou busca...'} />
         </div>
 
-        {/* Fase 5 — Botão Ações universais do navegador (5 funções OS¹) */}
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <button
-            onClick={() => setActionsOpen(o => !o)}
-            title="OS¹ — ações sobre a página atual"
-            style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', transition: 'all 0.15s',
-              ...(actionsOpen ? btnActive : btnBase) }}>
-            <Sparkles size={15} strokeWidth={1.8} />
-          </button>
-          {actionsOpen && (
-            <>
-              {/* clique fora fecha o menu */}
-              <div onClick={() => setActionsOpen(false)}
-                style={{ position: 'fixed', inset: 0, zIndex: 49, background: 'transparent' }} />
-              <div style={{
-                position: 'absolute', right: 0, top: 'calc(100% + 8px)', zIndex: 50,
-                width: 280, background: '#0f0f10',
-                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14,
-                boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
-                padding: 6, color: '#d0d0d0',
-              }}>
-                <div style={{ padding: '8px 12px 6px', fontSize: 10, letterSpacing: '0.12em',
-                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)' }}>OS¹ · Ações</div>
-                {(() => {
-                  const role = getRole();
-                  const isAdmin = role === 'codify';
-                  const allActions: { id: BrowserActionId; label: string; Icon: typeof Send; adminOnly?: boolean }[] = [
-                    { id: 'send-to-workspace', label: 'Enviar para Área de Trabalho', Icon: Send },
-                    { id: 'create-mission',    label: 'Transformar em missão',        Icon: Target },
-                    { id: 'save-evidence',     label: 'Salvar como evidência',        Icon: FileText },
-                    { id: 'generate-feed-card', label: 'Gerar card no feed',          Icon: LayoutGrid },
-                    { id: 'analyze-session',   label: 'Analisar sessão inteira',      Icon: BarChart3 },
-                    { id: 'compare-tabs',      label: 'Comparar páginas recentes',    Icon: Layers },
-                    // monitor-page: oculto pra cliente — não há mecanismo real
-                    // de detecção; mantido só pra Codify acompanhar lista.
-                    { id: 'monitor-page',      label: 'Acompanhar página (Codify)',   Icon: Bell, adminOnly: true },
-                    { id: 'capture-snippet',   label: 'Capturar trecho',              Icon: Scissors },
-                    { id: 'create-dossier',    label: 'Criar dossiê',                 Icon: FolderOpen },
-                    // ask-sector-agent: oculto pra cliente — é leitura
-                    // preliminar heurística, não IA. Visível só pra Codify.
-                    { id: 'ask-sector-agent',  label: 'Leitura preliminar do setor (Codify)', Icon: Bot, adminOnly: true },
-                  ];
-                  return allActions.filter(a => !a.adminOnly || isAdmin);
-                })().map(({ id, label, Icon }) => (
-                  <button
-                    key={id}
-                    onClick={() => runAction(id as any)}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-                      background: 'transparent', border: 'none', color: '#d0d0d0',
-                      fontSize: 13, textAlign: 'left', transition: 'background 0.12s ease',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <Icon size={14} strokeWidth={1.8} style={{ color: 'rgba(255,255,255,0.55)', flexShrink: 0 }} />
-                    <span style={{ flex: 1 }}>{label}</span>
-                  </button>
-                ))}
-                <div style={{ padding: '10px 12px 8px', fontSize: 10, color: 'rgba(255,255,255,0.32)',
-                  borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: 4, lineHeight: 1.4 }}>
-                  Você controla o que o OS¹ salva. As ações são manuais e nada é capturado sem você clicar.
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Abrir no navegador externo do SO (Safari/Chrome padrão) */}
-        <button
-          onClick={() => {
-            const u = activeTab?.url && activeTab.url !== DESKTOP_URL ? activeTab.url : (inputVal && normalizeUrl(inputVal)) || '';
-            if (u && /^https?:\/\//i.test(u)) window.electron?.openExternal?.(u);
-          }}
-          title="Abrir esta página no navegador externo do sistema"
-          style={{ width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', transition: 'all 0.15s', ...btnBase }}>
-          <ExternalLink size={15} strokeWidth={1.8} />
-        </button>
+        {/* Botão Ações removido — ações agora aparecem inline na barra abaixo da URL */}
 
         {/* Ir */}
         <button onClick={() => { navigate(inputVal); inputRef.current?.blur(); }}
@@ -497,8 +427,48 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
         </button>
       </div>
 
+      {/* ── Barra de ações inline (OS¹ · Ações) ────────────────────── */}
+      <div style={{
+        display: 'flex', gap: 8, padding: '8px 16px 16px',
+        background: isDark ? '#2f2f2f' : '#f7f8f9',
+        borderBottom: isDark ? '0.5px solid #3d3d3d' : '0.5px solid #e5e7eb',
+        // Shadow só pra baixo (spread negativo = blur elimina halo superior)
+        boxShadow: isDark
+          ? '0 12px 20px -16px rgba(0,0,0,0.8), 0 4px 8px -6px rgba(0,0,0,0.5)'
+          : '0 12px 20px -16px rgba(0,0,0,0.35), 0 4px 8px -6px rgba(0,0,0,0.18)',
+        flexShrink: 0,
+      }}>
+        {(() => {
+          const role = getRole();
+          const isAdmin = role === 'codify';
+          const allActions: { id: BrowserActionId; label: string; Icon: typeof Send; adminOnly?: boolean }[] = [
+            { id: 'send-to-workspace',  label: 'Enviar',              Icon: Send },
+            { id: 'create-mission',     label: 'Missão',              Icon: Target },
+            { id: 'save-evidence',      label: 'Evidência',           Icon: FileText },
+            { id: 'generate-feed-card', label: 'Card',                Icon: LayoutGrid },
+            { id: 'analyze-session',    label: 'Sessão',              Icon: BarChart3 },
+            { id: 'compare-tabs',       label: 'Comparar',            Icon: Layers },
+            { id: 'monitor-page',       label: 'Acompanhar (Codify)', Icon: Bell, adminOnly: true },
+            { id: 'capture-snippet',    label: 'Trecho',              Icon: Scissors },
+            { id: 'create-dossier',     label: 'Dossiê',              Icon: FolderOpen },
+            { id: 'ask-sector-agent',   label: 'Leitura (Codify)',    Icon: Bot, adminOnly: true },
+          ];
+          return allActions.filter(a => !a.adminOnly || isAdmin);
+        })().map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            onClick={() => runAction(id as any)}
+            title={label}
+            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-medium cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97] bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]"
+          >
+            <Icon size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{label}</span>
+          </button>
+        ))}
+      </div>
+
       {/* ── Webviews — uma por aba, mostrar/ocultar via CSS ────────── */}
-      <div className="flex-1 relative min-h-0 bg-[#0a0a0a]">
+      <div className={`flex-1 relative min-h-0 ${isDark ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
         {tabs.map(tab => {
           const isDesktop = tab.url === DESKTOP_URL;
           // Desktop só monta se a flag estiver ligada. Pausado em 2026-05-28.
