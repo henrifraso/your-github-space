@@ -326,7 +326,13 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
               background: tab.id === activeId ? (isDark ? '#ffffff' : '#111') : 'transparent',
               border: '1px solid transparent',
               borderBottom: 'none',
-              ...(tab.id === activeId ? { borderColor: isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)', marginBottom: -1 } : {}),
+              ...(tab.id === activeId ? {
+                borderColor: isDark ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.07)',
+                marginBottom: -1,
+                boxShadow: isDark
+                  ? '0 8px 20px -4px rgba(0,0,0,0.5), 0 2px 6px -2px rgba(0,0,0,0.3)'
+                  : '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12)',
+              } : {}),
             }}>
             {tab.loading
               ? <div style={{ width: 12, height: 12, borderRadius: '50%', flexShrink: 0,
