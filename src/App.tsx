@@ -159,6 +159,7 @@ import {
   type DiagnosisGeneratedCard,
 } from './features/feed/feed-generated-cards';
 import { mergeFeedSources } from './features/feed/feed-sources';
+import { useCodifyFeed } from './features/feed/use-codify-feed';
 import { useOS1BrowserBridge } from './core/events/useOS1BrowserBridge';
 import { useOS1MapBridge } from './core/events/useOS1MapBridge';
 import { useOS1OntologyBridge } from './core/events/useOS1OntologyBridge';
@@ -401,6 +402,11 @@ function AuthenticatedApp() {
   const ESFERA_URL = '/esfera-ontologica.html';
   const [sectorOpen, setSectorOpen] = useState(false);
   const [activeSector, setActiveSector] = useState<SectorId>('os1');
+  // Fase 4.2 — cards reais via /api/feed/codify (Bearer JWT).
+  // Só ativa em contexto real (activeSector === 'os1' = perfil real do user);
+  // em sectors demo/fake (bobs-mc, boticario-natura, etc.) fica desligado
+  // pra não misturar dados reais da org do user com demos do piloto.
+  const apiFeedCards = useCodifyFeed({ enabled: activeSector === 'os1' });
   const [activeDepartment, setActiveDepartment] = useState<DepartmentId>('geral');
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
@@ -1501,9 +1507,9 @@ function AuthenticatedApp() {
         // Cards do franchisor por aba (cards do navegador e do mapa entram em todas as abas).
         if (role === 'franchisor') {
           const relevantCards = filterFranchisorCardsByTab(roleConfig.feedCards, activeRoleTab);
-          cards = mergeFeedSources({ map: mapFeedCards, browser: browserFeedCards, role: relevantCards, dismissed: dismissedCards });
+          cards = mergeFeedSources({ api: apiFeedCards, map: mapFeedCards, browser: browserFeedCards, role: relevantCards, dismissed: dismissedCards });
         } else {
-          cards = mergeFeedSources({ map: mapFeedCards, browser: browserFeedCards, role: roleConfig.feedCards, dismissed: dismissedCards });
+          cards = mergeFeedSources({ api: apiFeedCards, map: mapFeedCards, browser: browserFeedCards, role: roleConfig.feedCards, dismissed: dismissedCards });
         }
 
         const urgenciaColor = (u: string) => u === 'alta' ? '#ef4444' : u === 'media' ? '#f59e0b' : '#6b7280';
