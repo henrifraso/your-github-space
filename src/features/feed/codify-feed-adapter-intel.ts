@@ -41,6 +41,7 @@ export function codifyCardToIntelligenceCard(card: CodifyApiCard): IntelligenceC
     confianca_score,
     impacto,
     risco_erro,
+    tags: card.tags,
     // Cards reais NÃO são sintéticos — vêm do backend Codify
   };
 }

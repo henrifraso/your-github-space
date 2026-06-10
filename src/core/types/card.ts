@@ -31,6 +31,7 @@ export interface IntelligenceCard {
   }>;
   share_token?: string;
   publicado_em?: string;
+  tags?: string[];
   // Sintético = card mockado que não existe no backend.
   _synthetic?: boolean;
 }
