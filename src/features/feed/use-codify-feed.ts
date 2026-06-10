@@ -18,6 +18,13 @@ import { fetchCodifyCards } from './codify-feed-client';
 export interface UseCodifyFeedOptions {
   /** Quando false, hook não dispara fetch. Útil em demos OS¹ que não têm org real. */
   enabled?: boolean;
+  /**
+   * Escopo explícito. Quando passado, sobrescreve o orgId/buId do localStorage
+   * (Fase 4.3.c — sector atual mapeia pra org real via codify-sector-scope).
+   * Sem esses params, hook cai no comportamento da Fase 4.2 (lê de useAuth).
+   */
+  organizationId?: string;
+  unitId?: string;
 }
 
 /**
@@ -33,6 +40,11 @@ export function useCodifyFeed(options: UseCodifyFeedOptions = {}): RoleFeedCard[
   // pra detectar mudanças sem precisar de event system.
   const { token, orgId, buId } = getAuthState();
 
+  // Escopo explícito vindo de options (sector→org) tem precedência sobre
+  // o orgId/buId do localStorage. Se não vier, mantém fallback Fase 4.2.
+  const effectiveOrg = options.organizationId ?? orgId ?? undefined;
+  const effectiveUnit = options.unitId ?? buId ?? undefined;
+
   useEffect(() => {
     if (!enabled || !token) {
       setCards([]);
@@ -41,14 +53,14 @@ export function useCodifyFeed(options: UseCodifyFeedOptions = {}): RoleFeedCard[
     let cancelled = false;
     (async () => {
       const items = await fetchCodifyCards({
-        organizationId: orgId ?? undefined,
-        unitId: buId ?? undefined,
+        organizationId: effectiveOrg,
+        unitId: effectiveUnit,
       });
       if (cancelled) return;
       setCards(items ? codifyCardsToRoleFeedCards(items) : []);
     })();
     return () => { cancelled = true; };
-  }, [enabled, token, orgId, buId]);
+  }, [enabled, token, effectiveOrg, effectiveUnit]);
 
   return cards;
 }

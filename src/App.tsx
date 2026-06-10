@@ -160,6 +160,7 @@ import {
 } from './features/feed/feed-generated-cards';
 import { mergeFeedSources } from './features/feed/feed-sources';
 import { useCodifyFeed } from './features/feed/use-codify-feed';
+import { getCodifyScopeForSector } from './features/feed/codify-sector-scope';
 import { useOS1BrowserBridge } from './core/events/useOS1BrowserBridge';
 import { useOS1MapBridge } from './core/events/useOS1MapBridge';
 import { useOS1OntologyBridge } from './core/events/useOS1OntologyBridge';
@@ -402,11 +403,15 @@ function AuthenticatedApp() {
   const ESFERA_URL = '/esfera-ontologica.html';
   const [sectorOpen, setSectorOpen] = useState(false);
   const [activeSector, setActiveSector] = useState<SectorId>('os1');
-  // Fase 4.2 — cards reais via /api/feed/codify (Bearer JWT).
-  // Só ativa em contexto real (activeSector === 'os1' = perfil real do user);
-  // em sectors demo/fake (bobs-mc, boticario-natura, etc.) fica desligado
-  // pra não misturar dados reais da org do user com demos do piloto.
-  const apiFeedCards = useCodifyFeed({ enabled: activeSector === 'os1' });
+  // Fase 4.3.c — escopo Codify derivado do sector ativo.
+  //   - mcdonalds/nike/nubank → orgs reais criadas na Sub-fase 4.3.b
+  //   - os1 e demais sectors  → null (sem fetch real, demos seguem)
+  const codifyScope = getCodifyScopeForSector(activeSector);
+  const apiFeedCards = useCodifyFeed({
+    enabled: codifyScope !== null,
+    organizationId: codifyScope?.organizationId,
+    unitId: codifyScope?.unitId,
+  });
   const [activeDepartment, setActiveDepartment] = useState<DepartmentId>('geral');
   const [photoEditorOpen, setPhotoEditorOpen] = useState(false);
   const [photoHover, setPhotoHover] = useState(false);
