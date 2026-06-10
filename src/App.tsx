@@ -160,6 +160,7 @@ import {
 } from './features/feed/feed-generated-cards';
 import { mergeFeedSources } from './features/feed/feed-sources';
 import { useCodifyFeed } from './features/feed/use-codify-feed';
+import { useCodifyFeedIntelligence } from './features/feed/use-codify-feed-intelligence';
 import { getCodifyScopeForSector } from './features/feed/codify-sector-scope';
 import { useOS1BrowserBridge } from './core/events/useOS1BrowserBridge';
 import { useOS1MapBridge } from './core/events/useOS1MapBridge';
@@ -408,6 +409,14 @@ function AuthenticatedApp() {
   //   - os1 e demais sectors  → null (sem fetch real, demos seguem)
   const codifyScope = getCodifyScopeForSector(activeSector);
   const apiFeedCards = useCodifyFeed({
+    enabled: codifyScope !== null,
+    organizationId: codifyScope?.organizationId,
+    unitId: codifyScope?.unitId,
+  });
+  // Fase 6.2 fix — cards reais da API no Feed dos sectors (não-OS1).
+  // Mesmo escopo, mas adapta direto pra IntelligenceCard preservando
+  // whyItMatters/whatToDo/domain (Opção B do diagnóstico).
+  const apiIntelligenceCards = useCodifyFeedIntelligence({
     enabled: codifyScope !== null,
     organizationId: codifyScope?.organizationId,
     unitId: codifyScope?.unitId,
@@ -1644,8 +1653,16 @@ function AuthenticatedApp() {
 
         {/* Cards do feed da empresa:
             - activeSector === 'os1' → cards reais do backend (orchCards)
-            - outras demos → cards mockados específicos da empresa (DEMO_FEED_CARDS) */}
-        {(activeSector === 'os1' ? orchCards : (DEMO_FEED_CARDS[activeSector] ?? [])).map(card => (
+            - outras demos → cards mockados específicos da empresa (DEMO_FEED_CARDS)
+            - Fase 6.2 — cards reais da Codify API (Oscar/Pacheco/McDonald's
+              quando sector != os1) entram NO TOPO antes do fallback demo.
+              Dedupe por id pra evitar duplicação caso um demo coincida. */}
+        {(() => {
+          const base = activeSector === 'os1' ? orchCards : (DEMO_FEED_CARDS[activeSector] ?? []);
+          const realIds = new Set(apiIntelligenceCards.map(c => c.id));
+          const merged = [...apiIntelligenceCards, ...base.filter(c => !realIds.has(c.id))];
+          return merged;
+        })().map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard
               onWorkspaceIntent={(intent) => openWorkspaceFromCard(card, intent)}
