@@ -32,6 +32,9 @@ export interface IntelligenceCard {
   share_token?: string;
   publicado_em?: string;
   tags?: string[];
+  // Marca cards cujo conteúdo é hipótese a validar (sem dado medido).
+  // Calculado no adapter de feed a partir de tags e texto do card.
+  isHypothesis?: boolean;
   // Sintético = card mockado que não existe no backend.
   _synthetic?: boolean;
 }
