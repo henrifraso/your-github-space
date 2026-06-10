@@ -35,6 +35,11 @@ export interface IntelligenceCard {
   // Marca cards cujo conteúdo é hipótese a validar (sem dado medido).
   // Calculado no adapter de feed a partir de tags e texto do card.
   isHypothesis?: boolean;
+  // Rastreador do pacote de ingestão que originou o card (publisher
+  // do tools/codify_ingestion). Usado pelo hook de Contexto Editorial
+  // para vincular itens estruturalmente. Vazio/None para cards demo
+  // e cards F1 pré-fix F2.
+  createdBy?: string | null;
   // Sintético = card mockado que não existe no backend.
   _synthetic?: boolean;
 }

@@ -86,6 +86,7 @@ export function codifyCardToIntelligenceCard(card: CodifyApiCard): IntelligenceC
     risco_erro,
     tags: card.tags,
     isHypothesis: isHypothesisCard(card),
+    createdBy: card.createdBy,
     // Cards reais NÃO são sintéticos — vêm do backend Codify
   };
 }

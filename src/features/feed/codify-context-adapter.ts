@@ -44,6 +44,9 @@ export interface CardForContext {
   _synthetic?: boolean;
   /** Id pra dedupe / re-fetch. */
   id?: string;
+  /** Rastreador do pacote de ingestão (publisher F2+). Usado para
+   *  vínculo estrutural prioritário com itens de contexto. */
+  createdBy?: string | null;
 }
 
 /**
@@ -89,6 +92,34 @@ export function splitSignalsAndMapSignals(items: CodifySignal[]): {
     signals: items.filter(s => !isTerritorial(s)),
     mapSignals: items.filter(s => isTerritorial(s)),
   };
+}
+
+/**
+ * Escolhe itens de contexto para um card. Política em duas camadas:
+ *
+ *   1. Estrutural (preferida): se card.createdBy existir e ≥1 item tiver
+ *      o mesmo createdBy, retorna SOMENTE esses itens. Garante zero
+ *      overmatching para pacotes publicados pelo publisher pós-F2.
+ *
+ *   2. Editorial (fallback): se card.createdBy estiver vazio, ou se
+ *      nenhum item bater por createdBy, cai para filterByCardTema
+ *      (comportamento atual — match por tags-tema).
+ *
+ * O fallback preserva comportamento atual para:
+ *   - card F1 Markdown (createdBy=None por bug pré-F2)
+ *   - cards Etapa 6 (card.createdBy='etapa-6.2' mas itens têm
+ *     'etapa-6.3'/'6.4'/'6.5' — sem match estrutural)
+ *   - cards demo (interceptados antes pelo hook)
+ */
+export function pickContextItems<T extends { createdBy?: string | null; tags: string[] }>(
+  items: T[],
+  card: CardForContext,
+): T[] {
+  if (card.createdBy) {
+    const matches = items.filter(i => i.createdBy === card.createdBy);
+    if (matches.length > 0) return matches;
+  }
+  return filterByCardTema(items, card);
 }
 
 /**

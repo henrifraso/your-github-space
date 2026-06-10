@@ -17,7 +17,7 @@ import {
   type CodifySignal,
 } from './codify-context-client';
 import {
-  filterByCardTema,
+  pickContextItems,
   splitSignalsAndMapSignals,
   belongsToScope,
   type CardForContext,
@@ -92,14 +92,15 @@ export function useCodifyCardContext(options: UseCodifyCardContextOptions): Codi
       const evScoped  = evidencesAll.filter(e => belongsToScope(e, scopeCheck));
       const sigScoped = signalsAll.filter(s => belongsToScope(s, scopeCheck));
 
-      // Filtro editorial por tema. Aplicado a evidências, signals gerais e
-      // map-signals territoriais. Antes (Bloco F4) map-signals passavam direto
-      // como "transversais à empresa"; quando passou a haver >1 map-signal por
-      // org (Bloco F1) ficou overmatching — todo card via todos os territoriais.
-      const evFiltered = filterByCardTema(evScoped, card);
+      // Seleção de contexto em 2 camadas (F7):
+      //   1. Estrutural por createdBy quando ambos tiverem (pacotes
+      //      publicados pelo publisher pós-F2). Zero overmatching.
+      //   2. Fallback editorial por tema/tags (comportamento Etapa 6,
+      //      F1 pré-fix, cards demo).
+      const evFiltered = pickContextItems(evScoped, card);
       const { signals, mapSignals } = splitSignalsAndMapSignals(sigScoped);
-      const signalsFiltered = filterByCardTema(signals, card);
-      const mapSignalsFiltered = filterByCardTema(mapSignals, card);
+      const signalsFiltered = pickContextItems(signals, card);
+      const mapSignalsFiltered = pickContextItems(mapSignals, card);
 
       setCtx({
         evidences:  evFiltered,
