@@ -19,6 +19,12 @@ import type { CodifyEvidence, CodifySignal } from './codify-context-client';
 // tags transversais de signal/map-signal.
 const GENERIC_TAGS: ReadonlySet<string> = new Set([
   'etapa-6',
+  // Tags técnicas da rodada de ingestão Etapa 7 — não são temas
+  // editoriais e não devem participar do matching por tema (F7b).
+  // Sem isso, todos os cards publicados pelo publisher F2+ vazam
+  // entre si via fallback (ex.: Densidade puxa evidências do NPS).
+  'etapa-7',
+  'etapa-7-simulacao',
   'codify-editorial',
   // Empresas (sectorIds mapeados):
   'oscar',
