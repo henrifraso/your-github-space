@@ -1899,6 +1899,7 @@ function AuthenticatedApp() {
         activeSector={activeSector}
         userRole={role}
         workspaceContext={workspaceContext}
+        codifyScope={codifyScope}
         dark={dark}
         onToggleTheme={toggleTheme}
         onShowHistory={() => setChatHistoryOpen(o => !o)}
@@ -1926,6 +1927,7 @@ function AuthenticatedApp() {
         open={chatOpen}
         onClose={() => setChatOpen(false)}
         workspaceContext={workspaceContext}
+        codifyScope={codifyScope}
         activeSector={activeSector}
         userRole={role}
         onHome={() => setEsferaOpen(v => !v)}

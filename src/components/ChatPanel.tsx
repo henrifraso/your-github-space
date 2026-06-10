@@ -26,6 +26,8 @@ import type {
   ToolSource,
 } from '../lib/workspace-tools';
 import { isSensitiveDomain, inferSourceFromCardId } from '../lib/workspace-tools';
+import { useCodifyCardContext, type CodifyScope } from '../features/feed/use-codify-card-context';
+import { WorkspaceContextBlock } from '../features/workspace/blocks/WorkspaceContextBlock';
 
 // Tipos públicos do Workspace foram movidos para core/types/workspace.ts.
 // Reexportamos para manter compatibilidade com imports existentes.
@@ -115,7 +117,7 @@ interface Message {
   block?: WorkspaceBlock;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, onWorkspaceCleared, chatHistoryOpen, archivedSessions, onSelectHistorySession }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; onWorkspaceCleared?: () => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, onWorkspaceCleared, chatHistoryOpen, archivedSessions, onSelectHistorySession, codifyScope }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; onWorkspaceCleared?: () => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void; codifyScope?: CodifyScope | null }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -128,6 +130,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
   // Toggle dos 3 modos no toolbar (Área de Trabalho expande/recolhe).
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const lastCardIdRef = useRef<string | null>(null);
+
+  // Sub-fase 6.6.d — Contexto editorial do card aberto (evidências, signals,
+  // map-signals da org do sector ativo). Hook tem short-circuit interno pra
+  // card sintético / sem scope / sem id — retorna EMPTY sem fetch.
+  const codifyContextCard = activeCard ?? { id: '' };
+  const codifyContext = useCodifyCardContext({
+    card: codifyContextCard,
+    scope: codifyScope ?? null,
+  });
+
   const firstBlockRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -456,21 +468,26 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
             const c = msg.card;
             const urgColor = c.urgencia === 'alta' ? '#ef4444' : c.urgencia === 'media' ? '#f59e0b' : '#6b7280';
             return (
-              <motion.div
-                key={msg.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="flex justify-start"
-              >
-                <div className="max-w-[92%] w-full p-3.5 rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgColor }}>{c.dominio || c.area || 'Card'}</p>
-                  <p className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{c.titulo}</p>
-                  {c.resumo && (
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{c.resumo}</p>
-                  )}
-                </div>
-              </motion.div>
+              <React.Fragment key={msg.id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeOut' }}
+                  className="flex justify-start"
+                >
+                  <div className="max-w-[92%] w-full p-3.5 rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgColor }}>{c.dominio || c.area || 'Card'}</p>
+                    <p className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{c.titulo}</p>
+                    {c.resumo && (
+                      <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{c.resumo}</p>
+                    )}
+                  </div>
+                </motion.div>
+                {/* Sub-fase 6.6.d — Contexto editorial logo abaixo do card aberto.
+                    Componente retorna null em McDonald's / OS¹ / sectors sem scope /
+                    cards sintéticos / sem tema. Silencioso em erro. */}
+                <WorkspaceContextBlock {...codifyContext} />
+              </React.Fragment>
             );
           }
           if (msg.role === 'block' && msg.block) {
@@ -913,9 +930,10 @@ interface ChatDesktopProps {
   onSelectHistorySession?: (id: string) => void;
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
   onWorkspaceCleared?: () => void;
+  codifyScope?: CodifyScope | null;
 }
 
-export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
@@ -982,7 +1000,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
       </div>
       </div>
       <div className="flex-1 min-h-0">
-        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} onWorkspaceCleared={onWorkspaceCleared} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} onWorkspaceCleared={onWorkspaceCleared} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} codifyScope={codifyScope} />
       </div>
     </div>
   );
@@ -1028,7 +1046,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 export function ChatMobile({
   open, onClose, workspaceContext, activeSector, userRole,
   onHome, homeTitle, onSector, onBrowser, unreadCount,
-  dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive,
+  dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, codifyScope,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1049,6 +1067,7 @@ export function ChatMobile({
   archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>;
   onSelectHistorySession?: (id: string) => void;
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
+  codifyScope?: CodifyScope | null;
 }) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   return (
@@ -1099,7 +1118,7 @@ export function ChatMobile({
           </div>
           </div>
           <div className="flex-1 min-h-0">
-            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} />
+            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} codifyScope={codifyScope} />
           </div>
         </motion.div>
       )}
