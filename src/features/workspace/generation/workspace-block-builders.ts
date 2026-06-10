@@ -66,32 +66,53 @@ export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldad
   const urg = card.urgencia || 'media';
   const acao = card.o_que_fazer || 'definir próximo passo';
   const janela = urg === 'alta' ? '48 a 72 horas' : urg === 'media' ? '2 semanas' : '30 dias';
+  // F6b: cards de hipótese ganham variante editorial conservadora —
+  // sem percentual inventado, sem prazo arbitrário, sem previsão forte.
+  const isHyp = card.isHypothesis === true;
 
   const o_que_aconteceu = card.resumo
-    ? `${card.resumo} O sinal aparece em ${dom} e foi identificado a partir do cruzamento de indicadores operacionais e de mercado. Não é ruído isolado — vale tratar como ponto de atenção real.`
-    : `Detectamos um sinal relevante em ${dom}: "${card.titulo}". Trata-se de uma variação que merece atenção nos próximos dias, com base no cruzamento de indicadores internos e externos.`;
+    ? (isHyp
+        ? `${card.resumo} Trate como hipótese a validar com indicadores próprios — ainda não é leitura medida.`
+        : `${card.resumo} O sinal aparece em ${dom} e foi identificado a partir do cruzamento de indicadores operacionais e de mercado. Não é ruído isolado — vale tratar como ponto de atenção real.`)
+    : (isHyp
+        ? `Hipótese em ${dom}: "${card.titulo}". Tema com dado interno ainda pendente — vale acompanhar antes de qualquer conclusão.`
+        : `Detectamos um sinal relevante em ${dom}: "${card.titulo}". Trata-se de uma variação que merece atenção nos próximos dias, com base no cruzamento de indicadores internos e externos.`);
 
   const por_que_importa = card.por_que_importa
-    ? `${card.por_que_importa} Em prática, isso afeta a forma como o cliente percebe a unidade e como a operação reage a mudanças. Ignorar abre espaço pra concorrentes consolidarem posição na região.`
-    : `Esse tipo de sinal afeta diretamente a percepção do cliente local, a operação cotidiana e a competitividade da unidade. Empresas que leem cedo ganham 2-4 semanas de vantagem; quem reage tarde paga mais pra recuperar.`;
+    ? (isHyp
+        ? `${card.por_que_importa} Por ser hipótese, o foco é validar o tema com indicador simples antes de comprometer recursos.`
+        : `${card.por_que_importa} Em prática, isso afeta a forma como o cliente percebe a unidade e como a operação reage a mudanças. Ignorar abre espaço pra concorrentes consolidarem posição na região.`)
+    : (isHyp
+        ? `Tema relevante para ${dom}, mas ainda depende de validação com dado interno antes de virar ação ampla.`
+        : `Esse tipo de sinal afeta diretamente a percepção do cliente local, a operação cotidiana e a competitividade da unidade. Empresas que leem cedo ganham 2-4 semanas de vantagem; quem reage tarde paga mais pra recuperar.`);
 
   const onde_afeta = card.onde_afeta
     ? `${card.onde_afeta} Efeito direto em ${dom} e secundário em atendimento, conversão e reputação pública. Indicadores correlatos costumam mover juntos nas próximas semanas.`
     : `Principalmente em ${dom}, com efeito secundário em atendimento ao cliente, conversão de novos visitantes e reputação pública (Google, redes sociais, delivery). Esses indicadores costumam mover-se juntos quando há sinal nessa área.`;
 
-  const risco = urg === 'alta'
-    ? `Alto — exige reação rápida. Concorrentes podem capturar demanda em ${janela}, e cada semana sem ação multiplica o esforço de recuperação depois. Impacto provável: queda de 8 a 15% no indicador-chave em 60 dias se nada for feito.`
-    : urg === 'media'
-      ? `Moderado — vale monitorar evolução nos próximos dias. Risco maior é normalizar a piora gradualmente e perder a janela de reação barata. Impacto provável: queda de 3 a 7% em 60 dias se persistir.`
-      : `Baixo — manter sob acompanhamento periódico. Risco principal é deixar o sinal sair do radar e descobrir tarde quando virar problema visível. Custo de monitorar é mínimo, vale manter no painel semanal.`;
+  const risco = isHyp
+    ? `Sem dado medido, não estimar impacto numérico. O risco editorial aqui é tratar a hipótese como fato — vale manter como monitoramento até a primeira leitura interna confirmar ou descartar.`
+    : (urg === 'alta'
+        ? `Alto — exige reação rápida. Concorrentes podem capturar demanda em ${janela}, e cada semana sem ação multiplica o esforço de recuperação depois. Impacto provável: queda de 8 a 15% no indicador-chave em 60 dias se nada for feito.`
+        : urg === 'media'
+          ? `Moderado — vale monitorar evolução nos próximos dias. Risco maior é normalizar a piora gradualmente e perder a janela de reação barata. Impacto provável: queda de 3 a 7% em 60 dias se persistir.`
+          : `Baixo — manter sob acompanhamento periódico. Risco principal é deixar o sinal sair do radar e descobrir tarde quando virar problema visível. Custo de monitorar é mínimo, vale manter no painel semanal.`);
 
-  const oportunidade = `Reagir antes dos concorrentes pode reposicionar a unidade como referência em ${dom} na região. A janela típica dura ${janela}: depois disso, pares copiam ou o sinal vira commodity. Investimento pequeno hoje rende efeito composto em 60-90 dias se sustentado.`;
+  const oportunidade = isHyp
+    ? `Se a hipótese se confirmar com dado interno, abre espaço para uma decisão melhor calibrada em ${dom}. Por ora, ganho está em definir baseline antes de executar plano amplo.`
+    : `Reagir antes dos concorrentes pode reposicionar a unidade como referência em ${dom} na região. A janela típica dura ${janela}: depois disso, pares copiam ou o sinal vira commodity. Investimento pequeno hoje rende efeito composto em 60-90 dias se sustentado.`;
 
   const acao_recomendada = card.o_que_fazer
-    ? `${card.o_que_fazer} Executar com responsável definido, indicador semanal e meta numérica clara. Sem essas três coisas, vira "intenção" e não ação. Começar pela validação mais barata antes de comprometer recursos.`
-    : `Revisar o contexto rapidamente, definir 1 responsável claro, escolher 1 indicador semanal de ${dom} com meta numérica, e executar piloto em ${janela}. Antes de plano grande, validar com 2 indicadores cruzados.`;
+    ? (isHyp
+        ? `${card.o_que_fazer} Comece pela validação mais simples possível — 1 indicador, 1 responsável, sem comprometer recursos antes da leitura inicial.`
+        : `${card.o_que_fazer} Executar com responsável definido, indicador semanal e meta numérica clara. Sem essas três coisas, vira "intenção" e não ação. Começar pela validação mais barata antes de comprometer recursos.`)
+    : (isHyp
+        ? `Definir 1 indicador simples para validar a hipótese em ${dom}, com 1 responsável e prazo curto de leitura. Plano amplo só depois da confirmação.`
+        : `Revisar o contexto rapidamente, definir 1 responsável claro, escolher 1 indicador semanal de ${dom} com meta numérica, e executar piloto em ${janela}. Antes de plano grande, validar com 2 indicadores cruzados.`);
 
-  const proximo_passo = `1) Use os atalhos abaixo (Entender melhor / Criar checklist / Gerar mensagem / Ver exemplos / Simular impacto) pra aprofundar. 2) Decidir nos próximos 3 dias se vira ação ou monitoramento. 3) Se virar ação, definir responsável e KPI antes do fim da semana. 4) Revisar em ${urg === 'alta' ? '14' : '30'} dias.`;
+  const proximo_passo = isHyp
+    ? `1) Use os atalhos abaixo para aprofundar o tema. 2) Definir 1 indicador interno para checar a hipótese. 3) Atribuir responsável pela leitura. 4) Revisar quando a primeira medição estiver disponível.`
+    : `1) Use os atalhos abaixo (Entender melhor / Criar checklist / Gerar mensagem / Ver exemplos / Simular impacto) pra aprofundar. 2) Decidir nos próximos 3 dias se vira ação ou monitoramento. 3) Se virar ação, definir responsável e KPI antes do fim da semana. 4) Revisar em ${urg === 'alta' ? '14' : '30'} dias.`;
   return {
     id:         `blk-init-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     cardId:     card.id,
@@ -290,40 +311,72 @@ export function buildModeBlock(card: IntelligenceCard, mode: MainKey, difficulty
   const urg = card.urgencia || 'media';
   const acao = card.o_que_fazer || 'definir próximo passo';
   const janela = urg === 'alta' ? '48 a 72 horas' : urg === 'media' ? '2 semanas' : '30 dias';
+  // F6b: cards de hipótese ganham variante editorial conservadora.
+  const isHyp = card.isHypothesis === true;
   let result: Record<string, unknown>;
   if (mode === 'pesquisar') {
     result = {
-      leitura_inicial:     `O sinal "${titulo}" indica movimento concreto em ${dom}, com urgência ${urg}. Não é ruído isolado — combinado com indicadores correlatos, sugere mudança em curso que pede atenção nas próximas ${janela}.`,
+      leitura_inicial:     isHyp
+        ? `O tema "${titulo}" é hipótese a validar em ${dom}. Não tratar como leitura medida — ainda depende de dado interno antes de qualquer conclusão.`
+        : `O sinal "${titulo}" indica movimento concreto em ${dom}, com urgência ${urg}. Não é ruído isolado — combinado com indicadores correlatos, sugere mudança em curso que pede atenção nas próximas ${janela}.`,
       resumo_sinal:        `${resumo} O dado por trás disso normalmente vem da combinação de comportamento de cliente, movimento de concorrentes e variação interna de operação em ${dom}.`,
       por_que_importa:     card.por_que_importa
-        ? `${card.por_que_importa} Ignorar significa abrir espaço pra concorrentes locais consolidarem posição enquanto o problema cresce.`
-        : `Esse sinal toca diretamente ${dom} e pode antecipar mudanças mais amplas. Se a unidade tratar antes dos pares, ganha 2-4 semanas de vantagem competitiva. Se não tratar, perde terreno em janela curta.`,
+        ? (isHyp
+            ? `${card.por_que_importa} Por ser hipótese, o foco é validar com indicador simples antes de comprometer recursos.`
+            : `${card.por_que_importa} Ignorar significa abrir espaço pra concorrentes locais consolidarem posição enquanto o problema cresce.`)
+        : (isHyp
+            ? `Tema relevante para ${dom}, mas depende de validação com dado interno antes de virar ação ampla.`
+            : `Esse sinal toca diretamente ${dom} e pode antecipar mudanças mais amplas. Se a unidade tratar antes dos pares, ganha 2-4 semanas de vantagem competitiva. Se não tratar, perde terreno em janela curta.`),
       pode_estar_por_tras: `Variações em ${dom} costumam refletir três vetores: (1) mudança no comportamento do cliente local, (2) movimento de concorrente próximo, (3) ajuste interno de operação ou equipe. Identificar qual vetor predomina é o primeiro filtro pra decisão.`,
-      risco_ignorar:       urg === 'alta'
-        ? `Alto — concorrentes podem capturar terreno em ${janela}. Custo de inação tende a crescer exponencialmente: cada semana sem reação multiplica o esforço de recuperação depois.`
-        : urg === 'media'
-          ? `Moderado — erosão gradual de indicador-chave em 60 dias se sem ação. Risco maior é normalizar a piora e perder a janela de reação barata.`
-          : `Baixo — manter sob acompanhamento periódico. Risco principal é deixar o sinal sair do radar e descobrir tarde quando virar problema visível.`,
-      oportunidade_agir:   `Reagir antes dos pares posiciona ${dom} como referência local. Janela típica de oportunidade dura ${janela}: depois disso, concorrentes copiam ou o sinal vira commodity. Investimento pequeno hoje rende efeito composto em 60-90 dias.`,
+      risco_ignorar:       isHyp
+        ? `Sem dado medido, qualquer previsão numérica é palpite. O risco editorial aqui é tratar a hipótese como fato — trate como monitoramento até haver evidência suficiente.`
+        : (urg === 'alta'
+            ? `Alto — concorrentes podem capturar terreno em ${janela}. Custo de inação tende a crescer exponencialmente: cada semana sem reação multiplica o esforço de recuperação depois.`
+            : urg === 'media'
+              ? `Moderado — erosão gradual de indicador-chave em 60 dias se sem ação. Risco maior é normalizar a piora e perder a janela de reação barata.`
+              : `Baixo — manter sob acompanhamento periódico. Risco principal é deixar o sinal sair do radar e descobrir tarde quando virar problema visível.`),
+      oportunidade_agir:   isHyp
+        ? `Se a hipótese se confirmar com dado interno, abre espaço para uma decisão melhor calibrada em ${dom}. Por ora, ganho está em definir baseline antes de executar plano amplo.`
+        : `Reagir antes dos pares posiciona ${dom} como referência local. Janela típica de oportunidade dura ${janela}: depois disso, concorrentes copiam ou o sinal vira commodity. Investimento pequeno hoje rende efeito composto em 60-90 dias.`,
       observar_agora:      `Indicador direto de ${dom} (medição semanal), variação de avaliação pública (Google/iFood), comportamento de concorrentes próximos (mídia local + posts orgânicos), feedback qualitativo da equipe de linha de frente. Cruzar pelo menos 2 desses nos próximos ${urg === 'alta' ? '7' : '30'} dias.`,
-      impacto_negocio:     `Em vendas: efeito direto em ticket médio e frequência se sem ação. Em reputação: cada 0,1★ no Google representa ~7% em conversão de novos clientes. Em operação: pressão crescente sobre rotina e clima de equipe. Em margem: ${urg === 'alta' ? '2-4 pontos percentuais' : '1-2 pontos'} de pressão se persistir.`,
+      impacto_negocio:     isHyp
+        ? `Sem dado interno medido, não estimar impacto numérico. Vale acompanhar o tema com indicador próprio antes de discutir efeito em vendas, margem ou reputação.`
+        : `Em vendas: efeito direto em ticket médio e frequência se sem ação. Em reputação: cada 0,1★ no Google representa ~7% em conversão de novos clientes. Em operação: pressão crescente sobre rotina e clima de equipe. Em margem: ${urg === 'alta' ? '2-4 pontos percentuais' : '1-2 pontos'} de pressão se persistir.`,
       hipotese:            `Hipótese principal: ${resumo} reflete movimento real do mercado em ${dom}, com janela curta de reação. Hipótese alternativa: pode ser flutuação sazonal ou ruído de medição — vale confirmar com 1-2 indicadores adicionais antes de decisão grande.`,
-      proximo_passo:       `1) Validar hipótese cruzando com 2 indicadores adicionais em 7 dias. 2) Se confirmada, executar ${acao}. 3) Definir KPI semanal de ${dom} com meta numérica. 4) Marcar revisão em ${urg === 'alta' ? '14' : '30'} dias com gestor responsável.`,
+      proximo_passo:       isHyp
+        ? `1) Definir 1 indicador interno simples para checar a hipótese. 2) Atribuir 1 responsável pela leitura. 3) Revisar quando a primeira medição estiver disponível. 4) Só depois discutir plano amplo.`
+        : `1) Validar hipótese cruzando com 2 indicadores adicionais em 7 dias. 2) Se confirmada, executar ${acao}. 3) Definir KPI semanal de ${dom} com meta numérica. 4) Marcar revisão em ${urg === 'alta' ? '14' : '30'} dias com gestor responsável.`,
     };
   } else if (mode === 'executar') {
     result = {
-      objetivo:        `Transformar o sinal "${titulo}" em ação operacional concreta em ${dom}, com indicador mensurável, responsável definido e prazo curto. Saída esperada: indicador de ${dom} retornar ao nível-base ou superar em até 30 dias.`,
-      diagnostico:     `Situação atual: ${resumo} Sintoma principal em ${dom}. Causas prováveis: (a) movimento competitivo, (b) gap operacional interno, (c) mudança no comportamento do cliente. Antes de agir, confirmar qual causa predomina — dispara decisão diferente em cada caso.`,
-      primeiro_passo:  `${acao} — começar pela validação mais barata (uma conversa com a equipe de linha de frente + checagem de 1 indicador objetivo). Custa 30 min, evita executar plano errado.`,
-      plano_inicial:   `Fase 1 (esta semana): diagnóstico + definição de responsável + indicador-chave. Fase 2 (próximas 2 semanas): execução piloto da ação prioritária. Fase 3 (semana 4): medição, ajuste e decisão de escalar ou recuar.`,
+      objetivo:        isHyp
+        ? `Validar a hipótese "${titulo}" em ${dom} com 1 indicador interno simples antes de executar plano amplo. Saída esperada: leitura clara de "confirmada" ou "descartada".`
+        : `Transformar o sinal "${titulo}" em ação operacional concreta em ${dom}, com indicador mensurável, responsável definido e prazo curto. Saída esperada: indicador de ${dom} retornar ao nível-base ou superar em até 30 dias.`,
+      diagnostico:     isHyp
+        ? `Hipótese: ${resumo} Por ora é tema sem dado interno medido — não é diagnóstico, é leitura editorial. Antes de qualquer plano, vale definir baseline com 1 indicador simples.`
+        : `Situação atual: ${resumo} Sintoma principal em ${dom}. Causas prováveis: (a) movimento competitivo, (b) gap operacional interno, (c) mudança no comportamento do cliente. Antes de agir, confirmar qual causa predomina — dispara decisão diferente em cada caso.`,
+      primeiro_passo:  isHyp
+        ? `${acao} — comece pela leitura mais simples possível: 1 conversa com a equipe + 1 indicador interno acessível. Sem compromisso de recurso até a primeira leitura.`
+        : `${acao} — começar pela validação mais barata (uma conversa com a equipe de linha de frente + checagem de 1 indicador objetivo). Custa 30 min, evita executar plano errado.`,
+      plano_inicial:   isHyp
+        ? `Etapa 1: validar hipótese com 1 indicador interno simples. Etapa 2: só depois da leitura, decidir entre monitoramento contínuo ou plano operacional. Etapa 3: revisar editorial em ciclo regular conforme dado for chegando.`
+        : `Fase 1 (esta semana): diagnóstico + definição de responsável + indicador-chave. Fase 2 (próximas 2 semanas): execução piloto da ação prioritária. Fase 3 (semana 4): medição, ajuste e decisão de escalar ou recuar.`,
       quem_executa:    `Gestor responsável por ${dom}, com sponsor de liderança pra desbloquear recursos rapidamente. Equipe de execução: 2-3 pessoas focadas, não diluído entre vários. Quem acompanha: liderança da unidade em ritual semanal de 30 min.`,
-      prazo:           urg === 'alta'
-        ? `Primeiro passo hoje. Execução piloto até o fim da semana. Medição em 14 dias. Decisão de escalar/recuar em 30 dias.`
-        : `Diagnóstico em 3 dias. Piloto em 2 semanas. Medição em 30 dias. Próximo ciclo em 60 dias.`,
+      prazo:           isHyp
+        ? `Prazo da validação depende da disponibilidade do dado interno. Definir agora apenas: quem lê, qual indicador, e em que ciclo (semanal/quinzenal). Plano operacional só após a primeira leitura.`
+        : (urg === 'alta'
+            ? `Primeiro passo hoje. Execução piloto até o fim da semana. Medição em 14 dias. Decisão de escalar/recuar em 30 dias.`
+            : `Diagnóstico em 3 dias. Piloto em 2 semanas. Medição em 30 dias. Próximo ciclo em 60 dias.`),
       risco_antes:     `Verificar: (1) há iniciativa semelhante já em curso? (2) orçamento e equipe disponíveis? (3) ação tem risco regulatório ou de imagem? (4) o ganho esperado supera o esforço? Se algum item bloquear, ajustar plano antes de começar.`,
-      criterio_sucesso:`KPI 1: indicador direto de ${dom} retornar ao baseline ou superar em 30 dias. KPI 2: NPS/nota pública estável ou em alta. KPI 3: ticket médio sem queda. Meta inicial: ${urg === 'alta' ? '+5% em 30d' : '+3% em 60d'} no indicador-chave.`,
-      plano_b:         `Se piloto não der resultado em 14 dias: revisar diagnóstico (causa estava errada). Se concorrente reagir antes: acelerar timing e ajustar mensagem. Se equipe não conseguir executar: redefinir escopo menor ou trazer apoio externo. Em todos os casos, evitar dobrar aposta sem dados novos.`,
-      proximo_passo:   `Hoje: marcar conversa de 30 min com gestor de ${dom}. Esta semana: definir responsável formal + indicador-chave + meta. Próximas 2 semanas: piloto. Daqui a 30 dias: revisão de resultado.`,
+      criterio_sucesso:isHyp
+        ? `Critério editorial: hipótese fica "confirmada" se o indicador interno mostrar padrão consistente em pelo menos 2 leituras, e "descartada" se a leitura não bater. Sem meta numérica inventada — meta é ter dado para decidir.`
+        : `KPI 1: indicador direto de ${dom} retornar ao baseline ou superar em 30 dias. KPI 2: NPS/nota pública estável ou em alta. KPI 3: ticket médio sem queda. Meta inicial: ${urg === 'alta' ? '+5% em 30d' : '+3% em 60d'} no indicador-chave.`,
+      plano_b:         isHyp
+        ? `Se a leitura não confirmar a hipótese: arquivar como editorial revisitável, sem ação operacional. Se confirmar: aí sim desenhar plano com responsável, KPI e prazo. Evitar dobrar aposta sem dado interno.`
+        : `Se piloto não der resultado em 14 dias: revisar diagnóstico (causa estava errada). Se concorrente reagir antes: acelerar timing e ajustar mensagem. Se equipe não conseguir executar: redefinir escopo menor ou trazer apoio externo. Em todos os casos, evitar dobrar aposta sem dados novos.`,
+      proximo_passo:   isHyp
+        ? `Hoje: definir quem lê o indicador interno e em que ciclo. Esta semana: primeira leitura registrada. Depois disso: decidir entre monitoramento contínuo ou plano operacional. Sem plano amplo antes da primeira medição.`
+        : `Hoje: marcar conversa de 30 min com gestor de ${dom}. Esta semana: definir responsável formal + indicador-chave + meta. Próximas 2 semanas: piloto. Daqui a 30 dias: revisão de resultado.`,
     };
   } else {
     result = {

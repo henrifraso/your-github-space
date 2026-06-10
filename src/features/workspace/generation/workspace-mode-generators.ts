@@ -25,6 +25,8 @@ export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, diff
   const urg     = card.urgencia || 'media';
   const acao    = card.o_que_fazer || 'definir próximo passo';
   const _dif    = DIFICULDADE_LABELS[difficulty];
+  // F6b: cards de hipótese ganham variante conservadora nas sub-ações.
+  const isHyp   = card.isHypothesis === true;
 
   switch (sub.key) {
     // ── ENTENDER ────────────────────────────────────────────────────────────
@@ -40,28 +42,47 @@ export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, diff
       };
     case 'explicar':
       return {
-        pontos_chave: [
-          `Explicação simples: ${resumo}`,
-          `Contexto: o sinal aparece em ${dom} e reflete combinação de comportamento do cliente, movimento de concorrentes e variação interna de operação.`,
-          `Exemplo aplicado: unidade comparável tratou caso similar com ${acao} e recuperou indicador em 45 dias.`,
-          `Por que importa: ignorar abre espaço pra concorrentes consolidarem posição na região; cada semana sem ação multiplica o esforço de recuperação depois.`,
-          `Próximo passo: validar com 1-2 indicadores adicionais antes de comprometer recursos — investe 30 min, evita executar plano errado.`,
-        ],
+        pontos_chave: isHyp
+          ? [
+              `Explicação simples: ${resumo}`,
+              `Contexto: o tema toca ${dom}, mas ainda depende de validação com dado interno antes de virar leitura medida.`,
+              `Como tratar: como hipótese a validar — sem prescrição forte antes da primeira leitura.`,
+              `Por que importa: vale acompanhar para não deixar tema relevante sair do radar; ao mesmo tempo, evitar agir como se já houvesse dado.`,
+              `Próximo passo: definir 1 indicador interno simples e responsável pela leitura. Plano amplo só após confirmação.`,
+            ]
+          : [
+              `Explicação simples: ${resumo}`,
+              `Contexto: o sinal aparece em ${dom} e reflete combinação de comportamento do cliente, movimento de concorrentes e variação interna de operação.`,
+              `Exemplo aplicado: unidade comparável tratou caso similar com ${acao} e recuperou indicador em 45 dias.`,
+              `Por que importa: ignorar abre espaço pra concorrentes consolidarem posição na região; cada semana sem ação multiplica o esforço de recuperação depois.`,
+              `Próximo passo: validar com 1-2 indicadores adicionais antes de comprometer recursos — investe 30 min, evita executar plano errado.`,
+            ],
         contexto_setorial: `Leitura prática de "${titulo}" — explicada em camadas, do simples ao aplicável.`,
         perguntas_a_investigar: [`Quem é responsável formal por ${dom}?`, `Quais dados confirmam que a mudança é real e não ruído?`, `Existe ação semelhante já em curso na unidade?`],
       };
     case 'aprofundar':
       return {
-        paragrafos: [
-          `Análise profunda de "${titulo}" — contexto, causas, consequências e hipóteses.`,
-          `Contexto: ${dom} é área onde o cliente decide rápido e a operação responde com pouco delay; sinais aqui costumam refletir mudança real do mercado em até 2 semanas.`,
-          `Causas possíveis: (1) movimento competitivo direto, (2) gap operacional interno, (3) mudança no comportamento do cliente local, (4) sazonalidade ou evento externo.`,
-          `Consequências encadeadas: queda em ${dom} → pressão sobre indicador correlato → variação em ticket médio/frequência → impacto em margem em 60-90 dias.`,
-          `Sinais relacionados: avaliações públicas, comportamento de concorrentes próximos, feedback qualitativo da equipe de linha de frente, variação de fluxo orgânico.`,
-          `Hipótese principal: ${resumo} reflete movimento real do mercado com janela curta de reação (${urg === 'alta' ? '48-72h' : urg === 'media' ? '2 semanas' : '30 dias'}).`,
-          `Hipótese alternativa: pode ser flutuação sazonal ou ruído de medição — vale confirmar com 2 indicadores adicionais antes de decisão grande.`,
-          `Recomendação: validar hipótese principal em 7 dias; se confirmada, executar ${acao} como piloto; revisar em ${urg === 'alta' ? '14' : '30'} dias.`,
-        ],
+        paragrafos: isHyp
+          ? [
+              `Análise editorial de "${titulo}" — tema com dado interno ainda pendente.`,
+              `Contexto: ${dom} é área relevante para a operação, mas a leitura proposta aqui é hipótese, não medição.`,
+              `Causas possíveis (caso a hipótese se confirme): movimento competitivo, gap operacional interno, mudança no comportamento do cliente local, sazonalidade ou evento externo. Vale lembrar que ordem de prioridade depende de dado interno.`,
+              `Cuidados editoriais: sem dado medido, não estimar percentuais de impacto nem prazos rígidos de reação. O risco é tratar a hipótese como fato e desencadear plano amplo desnecessário.`,
+              `Sinais relacionados que podem ajudar a validar: avaliações públicas, comportamento de concorrentes próximos, feedback qualitativo da equipe, variação de fluxo orgânico.`,
+              `Hipótese principal: ${resumo}`,
+              `Hipótese alternativa: pode ser flutuação sazonal ou ruído de medição — vale confirmar com 1-2 indicadores adicionais antes de decisão grande.`,
+              `Recomendação: definir 1 indicador interno simples para checar a hipótese, com 1 responsável pela leitura. Sem plano operacional antes da primeira medição.`,
+            ]
+          : [
+              `Análise profunda de "${titulo}" — contexto, causas, consequências e hipóteses.`,
+              `Contexto: ${dom} é área onde o cliente decide rápido e a operação responde com pouco delay; sinais aqui costumam refletir mudança real do mercado em até 2 semanas.`,
+              `Causas possíveis: (1) movimento competitivo direto, (2) gap operacional interno, (3) mudança no comportamento do cliente local, (4) sazonalidade ou evento externo.`,
+              `Consequências encadeadas: queda em ${dom} → pressão sobre indicador correlato → variação em ticket médio/frequência → impacto em margem em 60-90 dias.`,
+              `Sinais relacionados: avaliações públicas, comportamento de concorrentes próximos, feedback qualitativo da equipe de linha de frente, variação de fluxo orgânico.`,
+              `Hipótese principal: ${resumo} reflete movimento real do mercado com janela curta de reação (${urg === 'alta' ? '48-72h' : urg === 'media' ? '2 semanas' : '30 dias'}).`,
+              `Hipótese alternativa: pode ser flutuação sazonal ou ruído de medição — vale confirmar com 2 indicadores adicionais antes de decisão grande.`,
+              `Recomendação: validar hipótese principal em 7 dias; se confirmada, executar ${acao} como piloto; revisar em ${urg === 'alta' ? '14' : '30'} dias.`,
+            ],
       };
     case 'evidencias':
       return {
@@ -88,24 +109,40 @@ export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, diff
       };
     case 'risco':
       return {
-        pontos_chave: [
-          `Risco principal: ${urg === 'alta' ? 'perda rápida de demanda pra concorrentes diretos em até 30 dias' : urg === 'media' ? 'erosão gradual de reputação e ticket médio em 60 dias' : 'desgaste lento de indicadores sem reação aparente'}.`,
-          `Riscos secundários: clima de equipe, aumento de custos operacionais, leitura negativa pra investidor/franqueado.`,
-          `Impacto provável: queda de ${urg === 'alta' ? '8 a 15%' : urg === 'media' ? '3 a 7%' : '1 a 3%'} no indicador-chave em 60 dias se sem ação.`,
-          `Sinais de agravamento: queda em avaliações públicas, aumento de cancelamentos, perda de buscas orgânicas, virada negativa em NPS.`,
-          `Ação preventiva: ${acao} · revisar em ${urg === 'alta' ? '14' : '30'} dias com responsável e KPI definido.`,
-        ],
+        pontos_chave: isHyp
+          ? [
+              `Risco editorial principal: tratar a hipótese como fato e desencadear plano amplo antes de ter dado interno.`,
+              `Sem dado medido, não estimar impacto numérico. Qualquer percentual aqui é palpite.`,
+              `Risco secundário: ignorar tema relevante e deixar sair do radar até virar problema visível.`,
+              `Sinais que ajudariam a validar: leitura interna do indicador citado no card, conversa estruturada com a equipe, comparação com período anterior.`,
+              `Ação preventiva: tratar como monitoramento até haver evidência suficiente — definir baseline antes de executar plano amplo.`,
+            ]
+          : [
+              `Risco principal: ${urg === 'alta' ? 'perda rápida de demanda pra concorrentes diretos em até 30 dias' : urg === 'media' ? 'erosão gradual de reputação e ticket médio em 60 dias' : 'desgaste lento de indicadores sem reação aparente'}.`,
+              `Riscos secundários: clima de equipe, aumento de custos operacionais, leitura negativa pra investidor/franqueado.`,
+              `Impacto provável: queda de ${urg === 'alta' ? '8 a 15%' : urg === 'media' ? '3 a 7%' : '1 a 3%'} no indicador-chave em 60 dias se sem ação.`,
+              `Sinais de agravamento: queda em avaliações públicas, aumento de cancelamentos, perda de buscas orgânicas, virada negativa em NPS.`,
+              `Ação preventiva: ${acao} · revisar em ${urg === 'alta' ? '14' : '30'} dias com responsável e KPI definido.`,
+            ],
         contexto_setorial: `Mapa de risco do sinal — ${dom}.`,
       };
     case 'oportunidade':
       return {
-        pontos_chave: [
-          `Oportunidade principal: posicionar ${dom} como diferencial competitivo na região antes dos pares reagirem.`,
-          `Por que existe: gap entre expectativa do cliente local e oferta atual do mercado em ${dom}.`,
-          `Como capturar: combinar ${acao} com comunicação clara em canais próprios (mídia local, base de WhatsApp, parcerias).`,
-          `Esforço necessário: 2–4 semanas de execução com 1 responsável focado, orçamento moderado e ritual semanal de check-in.`,
-          `Retorno esperado: ganho de 5–12% no indicador-chave em 60 dias, com efeito composto em 90 dias se sustentado.`,
-        ],
+        pontos_chave: isHyp
+          ? [
+              `Oportunidade principal: se a hipótese se confirmar com dado interno, decisão fica melhor calibrada em ${dom}.`,
+              `Por que existe: tema relevante que ainda não foi medido pela própria empresa — espaço para tirar leitura própria antes do mercado.`,
+              `Como começar: 1 indicador interno simples, 1 responsável pela leitura, ciclo curto de revisão.`,
+              `Esforço necessário: baixo na fase de validação — basta atribuir leitura recorrente do indicador escolhido.`,
+              `Retorno editorial: clareza sobre o que é hipótese e o que é dado medido. Plano operacional só depois.`,
+            ]
+          : [
+              `Oportunidade principal: posicionar ${dom} como diferencial competitivo na região antes dos pares reagirem.`,
+              `Por que existe: gap entre expectativa do cliente local e oferta atual do mercado em ${dom}.`,
+              `Como capturar: combinar ${acao} com comunicação clara em canais próprios (mídia local, base de WhatsApp, parcerias).`,
+              `Esforço necessário: 2–4 semanas de execução com 1 responsável focado, orçamento moderado e ritual semanal de check-in.`,
+              `Retorno esperado: ganho de 5–12% no indicador-chave em 60 dias, com efeito composto em 90 dias se sustentado.`,
+            ],
         contexto_setorial: `Mapa de oportunidade — ${dom}.`,
       };
     case 'confianca':
