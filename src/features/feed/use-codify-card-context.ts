@@ -92,16 +92,19 @@ export function useCodifyCardContext(options: UseCodifyCardContextOptions): Codi
       const evScoped  = evidencesAll.filter(e => belongsToScope(e, scopeCheck));
       const sigScoped = signalsAll.filter(s => belongsToScope(s, scopeCheck));
 
-      // Filtro editorial por tema (apenas evidências e signals gerais).
-      // Map-signals territoriais são transversais à empresa — não filtra.
+      // Filtro editorial por tema. Aplicado a evidências, signals gerais e
+      // map-signals territoriais. Antes (Bloco F4) map-signals passavam direto
+      // como "transversais à empresa"; quando passou a haver >1 map-signal por
+      // org (Bloco F1) ficou overmatching — todo card via todos os territoriais.
       const evFiltered = filterByCardTema(evScoped, card);
       const { signals, mapSignals } = splitSignalsAndMapSignals(sigScoped);
       const signalsFiltered = filterByCardTema(signals, card);
+      const mapSignalsFiltered = filterByCardTema(mapSignals, card);
 
       setCtx({
         evidences:  evFiltered,
         signals:    signalsFiltered,
-        mapSignals: mapSignals,  // todos da org, sem filtro de tema
+        mapSignals: mapSignalsFiltered,
         loading:    false,
         error:      failed,
       });
