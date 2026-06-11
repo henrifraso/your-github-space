@@ -35,9 +35,23 @@ interface Props {
    *  Distribuir — antes do fallback `localStorage.os1_org_id` (que podia
    *  ser McDonald's se o user logou com membership McDo primeiro). */
   cardOrganizationId?: string;
+  /** Sector visual atual do app (vindo de `activeSector` em App.tsx).
+   *  Quando o user matriz "visita" um perfil de loja pelo SectorSwitcher,
+   *  o backend continua respondendo 200 nos endpoints governance (ele
+   *  É matriz na org), mas a UX correta é mostrar a *visão da loja*:
+   *  cards distribuídos sem botões de governança. Esta prop permite o
+   *  componente suprimir as ações quando o contexto visual é de loja
+   *  mesmo que o user real tenha permissão de matriz. */
+  viewSector?: string;
   /** Chamado após qualquer ação concluída com sucesso. */
   onChange?: () => void;
 }
+
+/** Sectors do SectorSwitcher que representam contexto de loja (não matriz).
+ *  Quando `viewSector` é um destes, o componente vira invisível mesmo se o
+ *  user real for matriz na org. Estender quando novas lojas piloto forem
+ *  adicionadas (ex.: 'pacheco-piloto-01'). */
+const STORE_SECTORS: ReadonlySet<string> = new Set(['oscar-piloto-01']);
 
 type Busy = 'idle' | 'approving' | 'rejecting' | 'distributing';
 
@@ -65,13 +79,20 @@ const BTN_DISTRIBUTE =
   'hover:bg-sky-100 dark:hover:bg-sky-900/30';
 
 
-export function CardGovernanceActions({ cardId, cardOrganizationId, onChange }: Props) {
+export function CardGovernanceActions({ cardId, cardOrganizationId, viewSector, onChange }: Props) {
   const gov = useCardGovernance(cardId);
   const [busy, setBusy] = useState<Busy>('idle');
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [distOpen, setDistOpen] = useState(false);
 
   if (gov.accessLevel !== 'matrix') {
+    return null;
+  }
+  // GA4 contexto: matriz "visitando" uma loja pelo SectorSwitcher deve
+  // enxergar a UX da loja (só feed, sem governança). Sem este gate, o
+  // user @codify visitando Oscar Loja Piloto 01 veria Aprovar/Rejeitar/
+  // Distribuir em cards já distribuídos — incorreto pro modelo P10.
+  if (viewSector && STORE_SECTORS.has(viewSector)) {
     return null;
   }
 
