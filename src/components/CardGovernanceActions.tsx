@@ -33,6 +33,15 @@ import { CardStatusBadge } from './CardStatusBadge';
 // área de trabalho da filial quando a loja escolhe uma ação/ferramenta
 // no card aprovado. Backend GM1-A fica sem caller até a UX da loja
 // (GM1-D) ser replanejada.
+//
+// GM1-X separação visual C1/C2: o conteúdo do card (resumo/análise/
+// trilhas Entender/Aprender/Executar/ferramentas/atalhos) é universal
+// — funciona para matriz, filial e Codify. Este componente é a
+// camada C2 (governança), por isso ele se apresenta como um bloco
+// destacado com título "Decisão da matriz" e uma frase curta de
+// orientação. A intenção é deixar visualmente claro pra matriz que
+// primeiro ela trabalha o conteúdo (C1, acima) e só então decide
+// (C2, este bloco). Gates atuais inalterados.
 
 interface Props {
   cardId: string;
@@ -149,42 +158,55 @@ export function CardGovernanceActions({
     }
   }
 
+  // GM1-X: bloco "Decisão da matriz" envolve o status + 3 botões com
+  // separador visual (border-top) e um header curto. Sem header, este
+  // bloco ficava indistinguível das ações universais de conteúdo (C1).
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <CardStatusBadge
-        status={gov.derivedStatus}
-        distributionCount={gov.distributionCount}
-        loading={gov.loading || busy !== 'idle'}
-      />
-      <button
-        type="button"
-        className={BTN_APPROVE}
-        onClick={runApprove}
-        disabled={busy !== 'idle'}
-      >
-        {busy === 'approving' ? 'Aprovando…' : 'Aprovar'}
-      </button>
-      <button
-        type="button"
-        className={BTN_REJECT}
-        onClick={runReject}
-        disabled={busy !== 'idle'}
-      >
-        {busy === 'rejecting' ? 'Rejeitando…' : 'Rejeitar'}
-      </button>
-      <button
-        type="button"
-        className={BTN_DISTRIBUTE}
-        onClick={() => { setErrMsg(null); setDistOpen(true); }}
-        disabled={busy !== 'idle'}
-      >
-        Distribuir
-      </button>
-      {errMsg && (
-        <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
-          {errMsg}
+    <div className="mt-3 pt-3 border-t border-neutral-200 dark:border-[#3d3d3d]">
+      <div className="flex items-center justify-between gap-2 mb-1.5">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
+          Decisão da matriz
         </span>
-      )}
+        <CardStatusBadge
+          status={gov.derivedStatus}
+          distributionCount={gov.distributionCount}
+          loading={gov.loading || busy !== 'idle'}
+        />
+      </div>
+      <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed mb-2.5">
+        Use o conteúdo acima para analisar. Depois decida se ele deve ser aprovado, rejeitado ou distribuído.
+      </p>
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          className={BTN_APPROVE}
+          onClick={runApprove}
+          disabled={busy !== 'idle'}
+        >
+          {busy === 'approving' ? 'Aprovando…' : 'Aprovar'}
+        </button>
+        <button
+          type="button"
+          className={BTN_REJECT}
+          onClick={runReject}
+          disabled={busy !== 'idle'}
+        >
+          {busy === 'rejecting' ? 'Rejeitando…' : 'Rejeitar'}
+        </button>
+        <button
+          type="button"
+          className={BTN_DISTRIBUTE}
+          onClick={() => { setErrMsg(null); setDistOpen(true); }}
+          disabled={busy !== 'idle'}
+        >
+          Distribuir
+        </button>
+        {errMsg && (
+          <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
+            {errMsg}
+          </span>
+        )}
+      </div>
       {distOpen && (
         <DistributeModal
           cardId={cardId}
