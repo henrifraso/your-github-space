@@ -970,10 +970,24 @@ function AuthenticatedApp() {
   })();
 
   function handleLogout() {
-    // GA4 fix: logout direto, sem o early-return antigo que pulava pra OS1
-    // primeiro (forçava 2 cliques). Para a loja Oscar (auto-pick para
-    // 'oscar-piloto-01') isso fazia o primeiro clique cair em OS1 e parecer
-    // "outro perfil demo", exigindo segundo clique pra sair de fato.
+    // GA4 logout v2: regra de dois níveis baseada no role REAL do user
+    // autenticado (não em activeSector). Isto cobre os 3 cenários:
+    //
+    //   A) @codify (role='codify') visitando um perfil secundário
+    //      (Oscar/McDonald's/Pacheco/oscar-piloto-01): "Sair" só volta para
+    //      o perfil principal OS¹ — token permanece, sem logout.
+    //   B) @codify já no perfil principal OS¹: "Sair" desloga totalmente.
+    //   C) Qualquer outro user real (oscar-piloto-01, @franquia, etc.):
+    //      "Sair" desloga totalmente, sem cair em demo fantasma.
+    //
+    // O bug anterior usava `activeSector !== 'os1'` sozinho, o que travava
+    // o logout de users não-master cujo auto-pick deixava o sector em
+    // 'oscar-piloto-01'. Agora o gate é `role === 'codify'` (lido do backend
+    // via getRole()), distinguindo o master das contas de demo/loja real.
+    if (role === 'codify' && activeSector !== 'os1') {
+      setActiveSector('os1');
+      return;
+    }
     clearAuthState();
     // reload() força o App() a re-inicializar com auth=não-autenticado,
     // mostrando a LoginScreen com a mesma transição do login inicial.
