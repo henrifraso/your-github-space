@@ -970,10 +970,10 @@ function AuthenticatedApp() {
   })();
 
   function handleLogout() {
-    if (activeSector !== 'os1') {
-      setActiveSector('os1');
-      return;
-    }
+    // GA4 fix: logout direto, sem o early-return antigo que pulava pra OS1
+    // primeiro (forçava 2 cliques). Para a loja Oscar (auto-pick para
+    // 'oscar-piloto-01') isso fazia o primeiro clique cair em OS1 e parecer
+    // "outro perfil demo", exigindo segundo clique pra sair de fato.
     clearAuthState();
     // reload() força o App() a re-inicializar com auth=não-autenticado,
     // mostrando a LoginScreen com a mesma transição do login inicial.
