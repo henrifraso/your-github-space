@@ -105,16 +105,36 @@ export function CardGovernanceActions({
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [distOpen, setDistOpen] = useState(false);
 
-  if (gov.accessLevel !== 'matrix') {
-    return null;
-  }
   // GA4 contexto: matriz "visitando" uma loja pelo SectorSwitcher deve
   // enxergar a UX da loja (só feed, sem governança). Sem este gate, o
   // user @codify visitando Oscar Loja Piloto 01 veria Aprovar/Rejeitar/
   // Distribuir em cards já distribuídos — incorreto pro modelo P10.
+  // Hotfix-1: este gate fica ANTES de qualquer renderização (inclusive
+  // do skeleton) — loja jamais vê C2, mesmo placeholder.
   if (viewSector && STORE_SECTORS.has(viewSector)) {
     return null;
   }
+
+  // Esconde quando temos certeza de que o usuário não deve ver C2:
+  //   - non_matrix / unauthenticated: backend respondeu 403/401 (resolved).
+  //   - unsupported: card sintético / sem id real (resolved).
+  //   - unknown && !loading: erro de rede final — não polui UI.
+  if (
+    gov.accessLevel === 'non_matrix' ||
+    gov.accessLevel === 'unauthenticated' ||
+    gov.accessLevel === 'unsupported' ||
+    (gov.accessLevel === 'unknown' && !gov.loading)
+  ) {
+    return null;
+  }
+
+  // Hotfix-1: daqui pra baixo, ou já confirmamos 'matrix' OU ainda
+  // estamos carregando ('unknown' && loading). Antes do hotfix, esse
+  // intervalo retornava null, o que fazia o bloco "Decisão da matriz"
+  // aparecer/sumir e dava sensação de refresh visual no pós-GM1-X
+  // (bloco maior tornou o flash mais perceptível). Agora reservamos
+  // um skeleton com a mesma altura do bloco final.
+  const showSkeleton = gov.accessLevel !== 'matrix';
 
   async function runApprove() {
     setErrMsg(null);
@@ -161,53 +181,74 @@ export function CardGovernanceActions({
   // GM1-X: bloco "Decisão da matriz" envolve o status + 3 botões com
   // separador visual (border-top) e um header curto. Sem header, este
   // bloco ficava indistinguível das ações universais de conteúdo (C1).
+  // Hotfix-1: quando `showSkeleton`, header e parágrafo continuam
+  // visíveis (reservam a altura) enquanto status-badge e botões
+  // viram pills pulse — evita o flash visual entre loading e resolved.
   return (
-    <div className="mt-3 pt-3 border-t border-neutral-200 dark:border-[#3d3d3d]">
+    <div
+      className="mt-3 pt-3 border-t border-neutral-200 dark:border-[#3d3d3d]"
+      aria-busy={showSkeleton || undefined}
+    >
       <div className="flex items-center justify-between gap-2 mb-1.5">
         <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
           Decisão da matriz
         </span>
-        <CardStatusBadge
-          status={gov.derivedStatus}
-          distributionCount={gov.distributionCount}
-          loading={gov.loading || busy !== 'idle'}
-        />
+        {showSkeleton ? (
+          <span
+            aria-hidden="true"
+            className="inline-block h-[18px] w-16 rounded-full bg-neutral-200/70 dark:bg-[#3a3a3a] animate-pulse"
+          />
+        ) : (
+          <CardStatusBadge
+            status={gov.derivedStatus}
+            distributionCount={gov.distributionCount}
+            loading={gov.loading || busy !== 'idle'}
+          />
+        )}
       </div>
       <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed mb-2.5">
         Use o conteúdo acima para analisar. Depois decida se ele deve ser aprovado, rejeitado ou distribuído.
       </p>
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          type="button"
-          className={BTN_APPROVE}
-          onClick={runApprove}
-          disabled={busy !== 'idle'}
-        >
-          {busy === 'approving' ? 'Aprovando…' : 'Aprovar'}
-        </button>
-        <button
-          type="button"
-          className={BTN_REJECT}
-          onClick={runReject}
-          disabled={busy !== 'idle'}
-        >
-          {busy === 'rejecting' ? 'Rejeitando…' : 'Rejeitar'}
-        </button>
-        <button
-          type="button"
-          className={BTN_DISTRIBUTE}
-          onClick={() => { setErrMsg(null); setDistOpen(true); }}
-          disabled={busy !== 'idle'}
-        >
-          Distribuir
-        </button>
-        {errMsg && (
-          <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
-            {errMsg}
-          </span>
-        )}
-      </div>
-      {distOpen && (
+      {showSkeleton ? (
+        <div className="flex items-center gap-2 flex-wrap" aria-hidden="true">
+          <span className="inline-block h-[26px] w-[82px] rounded-full bg-neutral-200/70 dark:bg-[#3a3a3a] animate-pulse" />
+          <span className="inline-block h-[26px] w-[82px] rounded-full bg-neutral-200/70 dark:bg-[#3a3a3a] animate-pulse" />
+          <span className="inline-block h-[26px] w-[96px] rounded-full bg-neutral-200/70 dark:bg-[#3a3a3a] animate-pulse" />
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            className={BTN_APPROVE}
+            onClick={runApprove}
+            disabled={busy !== 'idle'}
+          >
+            {busy === 'approving' ? 'Aprovando…' : 'Aprovar'}
+          </button>
+          <button
+            type="button"
+            className={BTN_REJECT}
+            onClick={runReject}
+            disabled={busy !== 'idle'}
+          >
+            {busy === 'rejecting' ? 'Rejeitando…' : 'Rejeitar'}
+          </button>
+          <button
+            type="button"
+            className={BTN_DISTRIBUTE}
+            onClick={() => { setErrMsg(null); setDistOpen(true); }}
+            disabled={busy !== 'idle'}
+          >
+            Distribuir
+          </button>
+          {errMsg && (
+            <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
+              {errMsg}
+            </span>
+          )}
+        </div>
+      )}
+      {distOpen && !showSkeleton && (
         <DistributeModal
           cardId={cardId}
           organizationId={cardOrganizationId ?? gov.organizationId}
