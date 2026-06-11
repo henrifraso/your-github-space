@@ -27,6 +27,7 @@ import {
   useCardGovernance,
 } from '../features/governance/use-card-governance';
 import { CardStatusBadge } from './CardStatusBadge';
+import { CreateMissionModal } from './CreateMissionModal';
 
 interface Props {
   cardId: string;
@@ -35,6 +36,10 @@ interface Props {
    *  Distribuir — antes do fallback `localStorage.os1_org_id` (que podia
    *  ser McDonald's se o user logou com membership McDo primeiro). */
   cardOrganizationId?: string;
+  /** Título do card. Pré-popula o campo "Título" do modal Criar missão. */
+  cardTitle?: string;
+  /** Resumo/descrição do card. Pré-popula o campo "Descrição" do modal. */
+  cardDescription?: string;
   /** Sector visual atual do app (vindo de `activeSector` em App.tsx).
    *  Quando o user matriz "visita" um perfil de loja pelo SectorSwitcher,
    *  o backend continua respondendo 200 nos endpoints governance (ele
@@ -78,12 +83,26 @@ const BTN_DISTRIBUTE =
   'border-sky-200 dark:border-sky-800/50 ' +
   'hover:bg-sky-100 dark:hover:bg-sky-900/30';
 
+const BTN_MISSION =
+  BTN_BASE +
+  ' bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 ' +
+  'border-violet-200 dark:border-violet-800/50 ' +
+  'hover:bg-violet-100 dark:hover:bg-violet-900/30';
 
-export function CardGovernanceActions({ cardId, cardOrganizationId, viewSector, onChange }: Props) {
+
+export function CardGovernanceActions({
+  cardId,
+  cardOrganizationId,
+  cardTitle,
+  cardDescription,
+  viewSector,
+  onChange,
+}: Props) {
   const gov = useCardGovernance(cardId);
   const [busy, setBusy] = useState<Busy>('idle');
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [distOpen, setDistOpen] = useState(false);
+  const [missOpen, setMissOpen] = useState(false);
 
   if (gov.accessLevel !== 'matrix') {
     return null;
@@ -169,6 +188,14 @@ export function CardGovernanceActions({ cardId, cardOrganizationId, viewSector, 
       >
         Distribuir
       </button>
+      <button
+        type="button"
+        className={BTN_MISSION}
+        onClick={() => { setErrMsg(null); setMissOpen(true); }}
+        disabled={busy !== 'idle'}
+      >
+        Criar missão
+      </button>
       {errMsg && (
         <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
           {errMsg}
@@ -180,6 +207,16 @@ export function CardGovernanceActions({ cardId, cardOrganizationId, viewSector, 
           organizationId={cardOrganizationId ?? gov.organizationId}
           onClose={() => setDistOpen(false)}
           onDone={() => { setDistOpen(false); gov.reload(); onChange?.(); }}
+        />
+      )}
+      {missOpen && (
+        <CreateMissionModal
+          cardId={cardId}
+          cardOrganizationId={cardOrganizationId ?? gov.organizationId}
+          defaultTitle={cardTitle}
+          defaultDescription={cardDescription}
+          onClose={() => setMissOpen(false)}
+          onDone={() => { onChange?.(); }}
         />
       )}
     </div>

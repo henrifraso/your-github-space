@@ -487,13 +487,15 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                         GA4 fix: passa organizationId do card pra o modal Distribuir
                         listar unidades da org certa (não cair no fallback McDo).
                         GA4 contexto: passa activeSector pra esconder botões quando
-                        a matriz @codify estiver "visitando" um perfil de loja
-                        (caso contrário backend ainda diz que ela é matriz e
-                        retorna 200, mas a UX correta é a visão da loja). */}
+                        a matriz @codify estiver "visitando" um perfil de loja.
+                        GM1-C: passa título/resumo do card pra pré-popular o modal
+                        "Criar missão". */}
                     <div className="mt-2">
                       <CardGovernanceActions
                         cardId={c.id}
                         cardOrganizationId={c.organizationId}
+                        cardTitle={c.titulo}
+                        cardDescription={c.o_que_fazer ?? c.por_que_importa ?? c.resumo}
                         viewSector={activeSector}
                       />
                     </div>
