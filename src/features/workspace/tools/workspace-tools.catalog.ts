@@ -60,8 +60,10 @@ export const TOOLS_GERAIS: WorkspaceTool[] = [
     }),
   },
   {
-    id: 'gen-missao', label: 'Transformar em missão', group: 'execucao', appliesTo: ['*'],
-    description: 'Missão com objetivo, etapas, prazo e critério de conclusão.',
+    // GM1 limpeza: era "Transformar em missão"; o template é local, não
+    // chama o backend de missões. Renomeado para descrever a entrega real.
+    id: 'gen-missao', label: 'Rascunho de execução estruturado', group: 'execucao', appliesTo: ['*'],
+    description: 'Rascunho com objetivo, etapas, prazo e critério de conclusão.',
     template: (ctx) => ({
       title: 'Missão sugerida',
       context: `Missão estruturada com base em ${ctxPhrase(ctx)}.`,
@@ -192,7 +194,7 @@ export const TOOLS_GERAIS: WorkspaceTool[] = [
         'Evidência a registrar: documentar a comparação com data.',
       ],
       expectedResult: 'Quadro comparativo simples — empresa vs. tema.',
-      nextStep: 'Marcar quais divergências viram missão ou risco a acompanhar.',
+      nextStep: 'Marcar quais divergências viram ação ou risco a acompanhar.',
       sensitiveNotice: mkSensitive(ctx),
     }),
   },

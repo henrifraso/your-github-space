@@ -126,7 +126,13 @@ export const SUB_BTNS: Record<MainKey, SubAction[]> = {
     { key: 'roteiro',         label: 'Criar roteiro',        Icon: AlignLeft,    endpoint: 'executar', extra: { tipo: 'plano' } },
     { key: 'simular',         label: 'Simular resultado',    Icon: FlaskConical, endpoint: 'simular',  extra: { cenario: 'realista' } },
     { key: 'validar',         label: 'Validar antes',        Icon: Eye,          endpoint: 'simular',  extra: { cenario: 'realista' } },
-    { key: 'missao',          label: 'Marcar como missão',   Icon: StarIcon,     endpoint: null },
+    // GM1 limpeza: rótulo antigo "Marcar como missão" prometia persistência
+    // que esta sub-ação não entrega (endpoint: null, só template local).
+    // Renomeado pra "Rascunho de execução" — descreve o que o bloco gera
+    // de fato. Backend GM1-A continua disponível em /api/governance/missions;
+    // quando a missão real for ligada à workspace, isso vira outro botão
+    // explícito (não esta sub-ação).
+    { key: 'missao',          label: 'Rascunho de execução', Icon: StarIcon,     endpoint: null },
   ],
   aprender: [
     { key: 'conceito',        label: 'Ensinar conceito',     Icon: Brain,        endpoint: 'aprender' },

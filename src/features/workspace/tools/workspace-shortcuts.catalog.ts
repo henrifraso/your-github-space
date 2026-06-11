@@ -70,8 +70,11 @@ export const SHORTCUTS_CONCORRENCIA: WorkspaceShortcut[] = [
   {
     id: 'sc-conc-missao',
     kind: 'atalho',
-    tagline: 'Transforme este sinal em uma missão prática para o time comercial: mapear preços do concorrente, revisar mix de oferta e propor 2 movimentos com prazo curto. O OS¹ organiza etapas, responsável e métrica, evitando que vire só observação na reunião.',
-    cta: 'Criar missão',
+    // GM1 limpeza: rótulo antigo "Criar missão" prometia persistência no
+    // backend de missões. O template é só local. Renomeado para descrever
+    // o que entrega de fato.
+    tagline: 'Organize este sinal em uma ação prática para o time comercial: mapear preços do concorrente, revisar mix de oferta e propor 2 movimentos com prazo curto. O OS¹ separa etapas, responsável e métrica, evitando que vire só observação na reunião.',
+    cta: 'Preparar ação competitiva',
     appliesTo: ['concorrencia', 'mercado'],
     template: (ctx) => ({
       title: 'Missão de resposta competitiva',
@@ -563,8 +566,9 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
   {
     id: 'sc-map-missao',
     kind: 'atalho',
-    tagline: 'Transforme a leitura do raio em missão para a unidade mais afetada. O OS¹ monta mapeamento de concorrentes, revisão de reputação local, campanha por proximidade e métrica de 7 dias — para o gestor local saber o que fazer e o que medir.',
-    cta: 'Criar missão',
+    // GM1 limpeza: era "Criar missão"; só gera template local. Renomeado.
+    tagline: 'Organize a leitura do raio em um plano para a unidade mais afetada. O OS¹ monta mapeamento de concorrentes, revisão de reputação local, campanha por proximidade e métrica de 7 dias — para o gestor local saber o que fazer e o que medir.',
+    cta: 'Preparar plano territorial',
     source: ['map'],
     template: (ctx) => ({
       title: 'Missão territorial',
@@ -656,8 +660,9 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
   {
     id: 'sc-map-oportunidade-missao',
     kind: 'atalho',
-    tagline: 'Transforme a principal oportunidade do raio em uma missão prática para a unidade. Defina responsável, prazo e critério de sucesso para testar a ação sem virar apenas observação territorial.',
-    cta: 'Criar missão',
+    // GM1 limpeza: era "Criar missão"; só gera template local. Renomeado.
+    tagline: 'Organize a principal oportunidade do raio em uma ação prática para a unidade. Defina responsável, prazo e critério de sucesso para testar sem virar apenas observação territorial.',
+    cta: 'Organizar próximos passos',
     appliesTo: ['oportunidade', 'oportunidade-setorial'],
     source: ['map'],
     template: (ctx) => ({
@@ -789,8 +794,9 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
   {
     id: 'sc-map-missao-publicar',
     kind: 'ferramenta',
-    tagline: 'Antes de publicar esta missão territorial pra equipe da unidade, valide responsável, prazo e métrica de sucesso. O OS¹ monta o resumo, conecta a evidência territorial e prepara o aviso pra canal interno — sem precisar refazer texto.',
-    cta: 'Publicar missão',
+    // GM1 limpeza: era "Publicar missão"; não há publicação real. Renomeado.
+    tagline: 'Antes de levar este plano territorial pra equipe da unidade, valide responsável, prazo e métrica de sucesso. O OS¹ monta o resumo, conecta a evidência territorial e prepara o aviso pra canal interno — sem precisar refazer texto.',
+    cta: 'Preparar plano para a unidade',
     appliesTo: ['missao-territorial'],
     source: ['map'],
     template: (ctx) => ({
@@ -981,8 +987,9 @@ export const SHORTCUTS_NAVEGADOR: WorkspaceShortcut[] = [
   {
     id: 'sc-doc-relatorio-sessao',
     kind: 'atalho',
-    tagline: 'Transforme os principais achados desta sessão em uma lista de execução. O OS¹ separa prioridade, evidência e próximo responsável — para a navegação virar plano de ação, não pasta de favoritos.',
-    cta: 'Criar missão',
+    // GM1 limpeza: era "Criar missão"; só gera template local. Renomeado.
+    tagline: 'Organize os principais achados desta sessão em uma lista de execução. O OS¹ separa prioridade, evidência e próximo responsável — para a navegação virar plano de ação, não pasta de favoritos.',
+    cta: 'Criar plano',
     appliesTo: ['relatorio-sessao'],
     source: ['browser'],
     template: (ctx) => ({
@@ -1025,8 +1032,9 @@ export const SHORTCUTS_NAVEGADOR: WorkspaceShortcut[] = [
   {
     id: 'sc-doc-missao-publicar',
     kind: 'ferramenta',
-    tagline: 'Antes de publicar esta missão para a equipe, valide responsável, prazo e métrica de sucesso. O OS¹ monta o resumo, conecta a evidência e prepara o aviso para o canal interno — sem precisar refazer texto.',
-    cta: 'Publicar missão',
+    // GM1 limpeza: era "Publicar missão"; não há publicação real. Renomeado.
+    tagline: 'Antes de levar este plano para a equipe, valide responsável, prazo e métrica de sucesso. O OS¹ monta o resumo, conecta a evidência e prepara o aviso para o canal interno — sem precisar refazer texto.',
+    cta: 'Preparar plano para a unidade',
     appliesTo: ['missao'],
     source: ['browser'],
     template: (ctx) => ({

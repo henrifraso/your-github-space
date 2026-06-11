@@ -184,7 +184,7 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
 
   // ── EXECUTAR — atalhos por sub ────────────────────────────────────────────
   if (s === 'checklist') return [
-    mk('Transformar em missão',         'executar',  'missao',    '1'),
+    mk('Rascunho de execução',          'executar',  'missao',    '1'),
     mk('Definir responsável',           'executar',  'delegar',   '2'),
     mk('Adicionar prazo',               'executar',  'tarefa',    '3'),
     mk('Gerar mensagem p/ equipe',      'executar',  'mensagem',  '4'),
@@ -215,7 +215,7 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
     mk('Adicionar prazo',               'executar',  'tarefa',    '1'),
     mk('Definir responsável',           'executar',  'delegar',   '2'),
     mk('Criar checklist',               'executar',  'checklist', '3'),
-    mk('Marcar como missão',            'executar',  'missao',    '4'),
+    mk('Rascunho de execução',          'executar',  'missao',    '4'),
     mk('Compartilhar tarefa',           'executar',  'mensagem',  '5'),
   ];
   if (s === 'simular' || s === 'validar') return [
@@ -236,7 +236,7 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
     mk('Criar checklist',               'executar',  'checklist', '1'),
     mk('Definir responsáveis',          'executar',  'delegar',   '2'),
     mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
-    mk('Marcar como missão',            'executar',  'missao',    '4'),
+    mk('Rascunho de execução',          'executar',  'missao',    '4'),
     mk('Simular resultado',             'executar',  'simular',   '5'),
   ];
 
