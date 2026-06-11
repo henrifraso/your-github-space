@@ -237,7 +237,12 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     lastCardIdRef.current = card.id;
     setActiveCard(card);
 
-    // 1) Card pequeno na conversa
+    // 1) Card pequeno na conversa.
+    //    GM1-C UX fix: o card carrega os botões de governança (Aprovar/
+    //    Rejeitar/Distribuir/Criar missão). Ficar como primeiro item
+    //    da área de trabalho jogava as ações pra fora do fluxo natural.
+    //    Inserimos como ÚLTIMO item — após análise/diagnóstico, share
+    //    e modo — para que a decisão venha ao fim do raciocínio.
     const cardMsg: Message = { id: `card-${seq}-${card.id}`, role: 'card', text: card.titulo, card };
 
     // 2) Bloco principal:
@@ -248,7 +253,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       : buildInitialBlock(card, dificuldade);
     const initialMsg: Message = { id: mainBlock.id, role: 'block', text: mainBlock.subLabel, block: mainBlock };
 
-    const newMessages: Message[] = [cardMsg, initialMsg];
+    const newMessages: Message[] = [initialMsg];
 
     // 3) Bloco de compartilhamento (apenas para intent='compartilhar')
     if (intent === 'compartilhar') {
@@ -267,6 +272,9 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       // Intent compartilhar (ou desconhecido) — mantém workspace fechado.
       setWorkspaceOpen(false);
     }
+    // 5) Card com botões de governança vira o ÚLTIMO item da área —
+    //    decisão/ação ao fim do raciocínio.
+    newMessages.push(cardMsg);
     setMessages(prev => [...prev, ...newMessages]);
 
     // 4) Atalhos: começa com fallback local por domínio; tenta backend e mescla
