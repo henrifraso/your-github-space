@@ -403,7 +403,14 @@ function AuthenticatedApp() {
   const [esferaOpen, setEsferaOpen] = useState(false);
   const ESFERA_URL = '/esfera-ontologica.html';
   const [sectorOpen, setSectorOpen] = useState(false);
-  const [activeSector, setActiveSector] = useState<SectorId>('os1');
+  // GA3-test-loja: se o user logou como loja Oscar Piloto 01 (bu salvo no
+  // login), arranca já no sector dedicado pra não exibir "Perfil Unidade Demo"
+  // do fallback role=franchise. Para qualquer outro user mantém OS¹.
+  const _initialSector: SectorId =
+    (typeof window !== 'undefined' && localStorage.getItem('os1_bu_id') === 'bu-oscar-piloto-01')
+      ? 'oscar-piloto-01'
+      : 'os1';
+  const [activeSector, setActiveSector] = useState<SectorId>(_initialSector);
   // Fase 4.3.c — escopo Codify derivado do sector ativo.
   //   - mcdonalds/nike/nubank → orgs reais criadas na Sub-fase 4.3.b
   //   - os1 e demais sectors  → null (sem fetch real, demos seguem)

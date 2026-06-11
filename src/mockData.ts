@@ -1007,6 +1007,16 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
   mcdonalds: MCDONALDS_DATA,
   nike:      NIKE_DATA,
   nubank:    NUBANK_DATA,
+  // GA3-test-loja: loja Oscar não-matriz. Reutiliza dados de NIKE_DATA (Oscar
+  // Calçados) ajustando só nome_fantasia/segmento pra refletir a unidade.
+  'oscar-piloto-01': {
+    ...NIKE_DATA,
+    negocio: {
+      ...NIKE_DATA.negocio,
+      nome_fantasia: 'Oscar Loja Piloto 01',
+      segmento: 'Varejo de Calçados · Loja conectada',
+    },
+  },
   ifood:     IFOOD_DATA,
   ambev:     AMBEV_DATA,
   magalu:    MAGALU_DATA,

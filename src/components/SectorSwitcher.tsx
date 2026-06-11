@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
 import type { DepartmentId } from '../types';
 
-export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
+export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
 
 export type ProfileConfig = {
   id: SectorId;
@@ -50,6 +50,15 @@ export const SECTORS: ProfileConfig[] = [
     desc: '134 anos no RJ — Grupo DPSP, 1.600+ lojas no Brasil',
     color: '#e11d48',
     logo: 'DP',
+    active: false,
+  },
+  {
+    id: 'oscar-piloto-01',
+    label: 'Oscar Loja Piloto 01',
+    niche: 'Varejo de Calçados · Loja',
+    desc: 'Oscar Calçados · Unidade piloto conectada (visão não-matriz)',
+    color: '#f97316',
+    logo: 'OL',
     active: false,
   },
   {
@@ -305,7 +314,7 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
         )}
         {!showSubview && !hideDemoProfiles && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SECTORS.filter(p => ['os1', 'mcdonalds', 'nike', 'nubank'].includes(p.id)).map((profile, i) => {
+          {SECTORS.filter(p => ['os1', 'mcdonalds', 'nike', 'nubank', 'oscar-piloto-01'].includes(p.id)).map((profile, i) => {
             const isActive = active === profile.id;
             return (
               <motion.div
