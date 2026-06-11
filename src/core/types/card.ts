@@ -40,6 +40,11 @@ export interface IntelligenceCard {
   // para vincular itens estruturalmente. Vazio/None para cards demo
   // e cards F1 pré-fix F2.
   createdBy?: string | null;
+  // Organização real do card (vinda do backend). Usado por
+  // CardGovernanceActions/DistributeModal pra listar as unidades certas
+  // (sem cair em fallback McDonald's via `os1_org_id` antigo). Cards
+  // sintéticos podem deixar undefined.
+  organizationId?: string;
   // Sintético = card mockado que não existe no backend.
   _synthetic?: boolean;
 }

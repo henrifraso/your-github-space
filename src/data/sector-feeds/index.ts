@@ -21,6 +21,9 @@ export const PROFILE_SECTOR_FEEDS: Record<string, CompanySectorFeeds> = {
   mcdonalds: MCDONALDS_SECTOR_FEEDS,
   nike:      NIKE_SECTOR_FEEDS,
   nubank:    NUBANK_SECTOR_FEEDS,
+  // GA4 visual fix: loja Oscar herda os feeds setoriais Oscar (NIKE_SECTOR_FEEDS).
+  // Antes caía no fallback McDonald's quando o user clicava em uma área.
+  'oscar-piloto-01': NIKE_SECTOR_FEEDS,
   ifood:     IFOOD_SECTOR_FEEDS,
   ambev:     AMBEV_SECTOR_FEEDS,
   magalu:    MAGALU_SECTOR_FEEDS,

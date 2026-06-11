@@ -411,6 +411,22 @@ function AuthenticatedApp() {
       ? 'oscar-piloto-01'
       : 'os1';
   const [activeSector, setActiveSector] = useState<SectorId>(_initialSector);
+  // GA4 fix: redundância defensiva — se `_initialSector` foi avaliado antes
+  // do `localStorage.os1_bu_id` estar disponível (timing raro entre login e
+  // mount do AuthenticatedApp), corrige uma única vez no primeiro effect.
+  // Sem isso o feed geral da loja Oscar pode ficar vazio porque o sector
+  // ficaria em 'os1' e o fetch Codify nunca dispararia.
+  const _ga4SectorSynced = useRef(false);
+  useEffect(() => {
+    if (_ga4SectorSynced.current) return;
+    if (typeof window === 'undefined') return;
+    const buId = localStorage.getItem('os1_bu_id');
+    if (buId === 'bu-oscar-piloto-01' && activeSector !== 'oscar-piloto-01') {
+      setActiveSector('oscar-piloto-01');
+    }
+    _ga4SectorSynced.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Fase 4.3.c — escopo Codify derivado do sector ativo.
   //   - mcdonalds/nike/nubank → orgs reais criadas na Sub-fase 4.3.b
   //   - os1 e demais sectors  → null (sem fetch real, demos seguem)

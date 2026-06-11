@@ -30,6 +30,11 @@ import { CardStatusBadge } from './CardStatusBadge';
 
 interface Props {
   cardId: string;
+  /** Organization id do card (vinda do backend via IntelligenceCard).
+   *  Quando informada, é a fonte primária pra carregar unidades no modal
+   *  Distribuir — antes do fallback `localStorage.os1_org_id` (que podia
+   *  ser McDonald's se o user logou com membership McDo primeiro). */
+  cardOrganizationId?: string;
   /** Chamado após qualquer ação concluída com sucesso. */
   onChange?: () => void;
 }
@@ -60,7 +65,7 @@ const BTN_DISTRIBUTE =
   'hover:bg-sky-100 dark:hover:bg-sky-900/30';
 
 
-export function CardGovernanceActions({ cardId, onChange }: Props) {
+export function CardGovernanceActions({ cardId, cardOrganizationId, onChange }: Props) {
   const gov = useCardGovernance(cardId);
   const [busy, setBusy] = useState<Busy>('idle');
   const [errMsg, setErrMsg] = useState<string | null>(null);
@@ -151,7 +156,7 @@ export function CardGovernanceActions({ cardId, onChange }: Props) {
       {distOpen && (
         <DistributeModal
           cardId={cardId}
-          organizationId={gov.organizationId}
+          organizationId={cardOrganizationId ?? gov.organizationId}
           onClose={() => setDistOpen(false)}
           onDone={() => { setDistOpen(false); gov.reload(); onChange?.(); }}
         />

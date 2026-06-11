@@ -483,9 +483,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{c.resumo}</p>
                     )}
                     {/* GA3: governança matrix-only. Componente retorna null
-                        pra non-matrix / synthetic / 401 / 403 — não polui card. */}
+                        pra non-matrix / synthetic / 401 / 403 — não polui card.
+                        GA4 fix: passa organizationId do card pra o modal Distribuir
+                        listar unidades da org certa (não cair no fallback McDo). */}
                     <div className="mt-2">
-                      <CardGovernanceActions cardId={c.id} />
+                      <CardGovernanceActions
+                        cardId={c.id}
+                        cardOrganizationId={c.organizationId}
+                      />
                     </div>
                   </div>
                 </motion.div>
