@@ -18,6 +18,7 @@ import {
 } from '../features/workspace/blocks/WorkspaceBlockContent';
 import { WorkspaceBlockHeader } from '../features/workspace/blocks/WorkspaceBlockHeader';
 import { BlockCtrl } from '../features/workspace/blocks/WorkspaceBlockActions';
+import { CardGovernanceActions } from './CardGovernanceActions';
 import type {
   WorkspaceTool,
   WorkspaceToolContext,
@@ -481,6 +482,11 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     {c.resumo && (
                       <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{c.resumo}</p>
                     )}
+                    {/* GA3: governança matrix-only. Componente retorna null
+                        pra non-matrix / synthetic / 401 / 403 — não polui card. */}
+                    <div className="mt-2">
+                      <CardGovernanceActions cardId={c.id} />
+                    </div>
                   </div>
                 </motion.div>
                 {/* Sub-fase 6.6.d — Contexto editorial logo abaixo do card aberto.
