@@ -500,6 +500,11 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
 
       </div>
       )}
+      {!showActionButtons && locked && (
+        <p className="mt-2 text-[9px] text-neutral-400 text-center tracking-wide uppercase">
+          Contexto informativo
+        </p>
+      )}
 
       {/* ── Picker de Perguntas ── */}
       <AnimatePresence>
