@@ -208,14 +208,14 @@ export function buildMission(ctx: BrowserActionContext, meta: { sector?: string 
 
   // Objetivo por tipo
   const objetivoMap: Record<PageContextAnalysis['pageType'], string> = {
-    'regulatório': `Entender o que muda na operação e ajustar conformidade do domínio ${sector}.`,
-    'preço':       `Avaliar se preço/condição da página exige ajuste comercial no domínio ${sector}.`,
-    'concorrente': `Mapear o movimento e definir resposta competitiva no domínio ${sector}.`,
+    'regulatório': `Entender o que muda na operação e ajustar conformidade no contexto analisado.`,
+    'preço':       `Avaliar se preço/condição da página exige ajuste comercial no contexto analisado.`,
+    'concorrente': `Mapear o movimento e definir resposta competitiva no contexto analisado.`,
     'fornecedor':  `Validar viabilidade do fornecedor e potencial de redução de custo/prazo.`,
-    'notícia':     `Avaliar impacto da notícia no domínio ${sector} e decidir comunicação.`,
+    'notícia':     `Avaliar impacto da notícia no contexto analisado e decidir comunicação.`,
     'rede-social': `Capturar sinal social e decidir se vira posicionamento ou resposta.`,
     'pesquisa':    `Aprofundar pesquisa em fontes adjacentes e consolidar achado.`,
-    'genérico':    `Avaliar relevância da página para o domínio ${sector} e propor ação concreta.`,
+    'genérico':    `Avaliar relevância da página no contexto analisado e propor ação concreta.`,
   };
 
   // Etapas por tipo (4-6, contextuais)
@@ -756,8 +756,8 @@ export function buildDossierSynthesis(dossier: BrowserDossier, ctx: BrowserActio
   const tipoMaisFrequente = Array.from(tiposEncontrados.entries())
     .sort((x, y) => y[1] - x[1])[0]?.[0] || ctxAnalysis.pageType;
   const temaCentral = tipoMaisFrequente === 'genérico'
-    ? `Acompanhamento contínuo no domínio ${sector || 'geral'}`
-    : `Acompanhamento de ${tipoMaisFrequente} no domínio ${sector || 'geral'}`;
+    ? `Acompanhamento contínuo no contexto analisado`
+    : `Acompanhamento de ${tipoMaisFrequente} no contexto analisado`;
 
   // Pontos críticos = sinais detectados nas últimas 3 páginas + atuais
   const pontosCriticos: string[] = [];

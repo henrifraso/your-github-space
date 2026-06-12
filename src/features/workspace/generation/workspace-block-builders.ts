@@ -100,8 +100,12 @@ export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldad
         ? `Tema relevante para ${dom}, mas ainda depende de validação com dado interno antes de virar ação ampla.`
         : `Esse tipo de sinal afeta diretamente a percepção do cliente local, a operação cotidiana e a competitividade da unidade. Empresas que leem cedo ganham 2-4 semanas de vantagem; quem reage tarde paga mais pra recuperar.`);
 
-  const onde_afeta = card.onde_afeta
-    ? `${card.onde_afeta} Efeito direto em ${dom} e secundário em atendimento, conversão e reputação pública. Indicadores correlatos costumam mover juntos nas próximas semanas.`
+  // card.onde_afeta pode vir do bridge como entity slug ('nike', etc.) —
+  // mesmo filtro de ENTITY_AND_TECH_IDS para não vazar em prosa narrativa.
+  const ondeAfetaSafe = (card.onde_afeta && !ENTITY_AND_TECH_IDS.has(card.onde_afeta.toLowerCase().trim()))
+    ? card.onde_afeta : null;
+  const onde_afeta = ondeAfetaSafe
+    ? `${ondeAfetaSafe} Efeito direto em ${dom} e secundário em atendimento, conversão e reputação pública. Indicadores correlatos costumam mover juntos nas próximas semanas.`
     : `Principalmente em ${dom}, com efeito secundário em atendimento ao cliente, conversão de novos visitantes e reputação pública (Google, redes sociais, delivery). Esses indicadores costumam mover-se juntos quando há sinal nessa área.`;
 
   const risco = isHyp
