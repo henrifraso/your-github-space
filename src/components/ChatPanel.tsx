@@ -543,6 +543,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     pinned={b.pinned}
                     createdAt={b.createdAt}
                     headerColor={headerColor}
+                    source={toolCtx?.source}
                   />
                   <div className="px-3.5 py-3 text-[12px] text-neutral-700 dark:text-neutral-300">
                     {isInitial ? (
