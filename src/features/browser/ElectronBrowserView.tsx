@@ -47,6 +47,12 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
   const [activeId, setActiveId] = useState(() => tabs[0].id);
   const [inputVal, setInputVal] = useState(initialUrl);
   const webviewRefs = useRef<Map<string, WebviewElement>>(new Map());
+  // Hotfix zx-loop: rastreia o último `origin + pathname` visto por aba
+  // pra filtrar `did-navigate-in-page` triviais (mesmo path, só query
+  // mudou). Caso típico: Google cache-buster `?zx=<timestamp>` que muda
+  // várias vezes/seg via history.pushState. Sem isso, a barra de
+  // endereço pisca e o IPC `captureNavigation` é chamado em loop.
+  const lastNavPathRef = useRef<Map<string, string>>(new Map());
   const inputRef = useRef<HTMLInputElement>(null);
   const [desktopEnabled, setDesktopEnabled] = useState(false);
   // Detecta página de bloqueio do Google (captcha / unusual traffic).
@@ -219,7 +225,28 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
     };
     const onNavigate = (e: any) => {
       const url = e.url || '';
+      // Hotfix zx-loop: detecta re-entradas triviais (mesma `origin +
+      // pathname` da última navegação) e pula `setState`/`captureNavigation`.
+      // Caso típico: Google dispara `history.pushState` com cache-buster
+      // `?zx=<timestamp>` várias vezes/seg durante instant search; antes
+      // disso o app re-renderizava a barra e tabs em loop. Navegações
+      // reais (mudança de path ou de origin) continuam passando intactas.
+      let trivialReentry = false;
       if (url && !url.startsWith('about:')) {
+        try {
+          const u = new URL(url);
+          const pathKey = u.origin + u.pathname;
+          const prevPath = lastNavPathRef.current.get(id);
+          if (prevPath === pathKey) {
+            trivialReentry = true;
+          } else {
+            lastNavPathRef.current.set(id, pathKey);
+          }
+        } catch {
+          // URL malformada — não filtra; segue handler original.
+        }
+      }
+      if (!trivialReentry && url && !url.startsWith('about:')) {
         update({ url });
         setTabs(prev => prev.map(t => t.id === id && id === activeId ? { ...t, url } : t));
         if (id === activeId) {
@@ -229,7 +256,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
         }
       }
       refreshNav();
-      if (url && window.electron) {
+      if (!trivialReentry && url && window.electron) {
         window.electron.captureNavigation({ url, title: '', ts: Date.now() });
       }
     };
