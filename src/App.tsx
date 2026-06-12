@@ -1119,6 +1119,9 @@ function AuthenticatedApp() {
     return null;
   }
 
+  // demo: esconder contexto ambiental não acionável no feed principal
+  const showCodifyContextCards = false;
+
   return (
     <div className={dark ? 'dark' : ''}>
 
@@ -1717,7 +1720,7 @@ function AuthenticatedApp() {
 
         {/* Cards 1–10 fixos (Av. Paulista / ANVISA / fast food) — só na empresa OS1.
             Demais demos usam apenas DEMO_FEED_CARDS específicos do setor. */}
-        {activeSector === 'os1' && (<>
+        {activeSector === 'os1' && showCodifyContextCards && (<>
         {[
           { label: txt('lbl_conc'), containerType: 'concorrencia', color: '#ef4444', titulo: timeline.filter(e=>e.tipo==='concorrente')[0]?.titulo ?? `${[...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nome ?? 'Concorrente'} lidera com ★ ${Number([...data.concorrentes].sort((a,b)=>Number(b.nota_google)-Number(a.nota_google))[0]?.nota_google||0).toFixed(1)}`, detalhe: timeline.filter(e=>e.tipo==='concorrente')[0]?.detalhe ?? `${data.concorrentes.length} concorrentes mapeados. Monitore os movimentos da região.`, onClick: () => { const e = timeline.filter(e=>e.tipo==='concorrente')[0]; if(e) setSelectedTimelineEvent(e); } },
           { label: txt('lbl_merc'), containerType: 'mercado', color: '#3b82f6', titulo: timeline.filter(e=>e.tipo==='mercado')[0]?.titulo ?? 'Delivery cresce 31% no fast food em 2025', detalhe: timeline.filter(e=>e.tipo==='mercado')[0]?.detalhe ?? 'iFood e Rappi concentram 78% dos pedidos de fast food em SP. Quem não está no delivery perde fatia crescente.', onClick: () => { const e = timeline.filter(e=>e.tipo==='mercado')[0]; if(e) setSelectedTimelineEvent(e); } },
