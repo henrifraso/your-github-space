@@ -181,10 +181,13 @@ export function saveEvidence(ctx: BrowserActionContext, meta: SaveEvidenceMeta =
   return ev;
 }
 
-// ─── Função 2: Transformar em missão ─────────────────────────────────────
-// Missão contextual: título, etapas, responsável e prazo variam conforme
-// tipo de página (regulatório/preço/concorrente/etc.) detectado em
+// ─── Função 2: Preparar plano da página ─────────────────────────────────
+// Plano/rascunho contextual: título, etapas, responsável e prazo variam
+// conforme tipo de página (regulatório/preço/concorrente/etc.) detectado em
 // `analyzePageContext`. Evita as 4 etapas fixas de antes.
+// C1-B: linguagem alinhada ao canônico do C1 ('plano'/'rascunho'). O nome
+// `buildMission` e o tipo `BrowserMission` são mantidos como contrato interno
+// (action id 'create-mission' é union type fixo em core/types/browser.ts).
 export function buildMission(ctx: BrowserActionContext, meta: { sector?: string }): BrowserMission {
   const sector = meta.sector || 'geral';
   const a = analyzePageContext(ctx);
@@ -271,7 +274,7 @@ export function buildMission(ctx: BrowserActionContext, meta: { sector?: string 
       'Identificar fato/sinal principal da página',
       'Cruzar com dados internos relevantes',
       'Avaliar impacto no setor e prioridade',
-      'Decidir próxima ação (missão, card, descarte)',
+      'Decidir próxima ação (plano, card, descarte)',
       'Registrar conclusão para uso futuro',
     ],
   };
@@ -308,13 +311,13 @@ export function buildMission(ctx: BrowserActionContext, meta: { sector?: string 
     'genérico':    'Card publicado no feed ou descarte com justificativa.',
   };
 
-  // Auto-cria/vincula evidência: missão sempre referencia uma evidência salva.
-  // Marca usedInWorkspace=true porque missão vai pra Área de Trabalho.
+  // Auto-cria/vincula evidência: plano sempre referencia uma evidência salva.
+  // Marca usedInWorkspace=true porque o plano vai pra Área de Trabalho.
   saveEvidence(ctx, {
     sector,
     action: 'create-mission',
     usedInWorkspace: true,
-    evidenceLabel: `Missão: ${titulo}`,
+    evidenceLabel: `Plano: ${titulo}`,
   });
 
   const m: BrowserMission = {
@@ -503,7 +506,7 @@ export function buildSessionReport(meta: { sector?: string }): BrowserSessionRep
   const sinais: string[] = [];
   if (visits.length > 0) sinais.push(`${visits.length} página(s) revisada(s) em ${domains.length} domínio(s)`);
   if (evidences.length > 0) sinais.push(`${evidences.length} evidência(s) salva(s)`);
-  if (missions.length > 0) sinais.push(`${missions.length} missão(ões) já criada(s) na sessão`);
+  if (missions.length > 0) sinais.push(`${missions.length} plano(s) já preparado(s) na sessão`);
 
   // Riscos: bloqueios + páginas regulatórias urgentes
   const riscos: string[] = [];
@@ -537,7 +540,7 @@ export function buildSessionReport(meta: { sector?: string }): BrowserSessionRep
     resumo = 'Sessão sem navegação registrada. Comece visitando páginas e use as ações do navegador para gerar inteligência.';
   } else {
     const tipoTxt = tipoDominante && tipoDominante[1] >= 2 ? ` Foco em ${tipoDominante[0]}.` : '';
-    resumo = `${visits.length} página(s) em ${domains.length} domínio(s).${tipoTxt} ${evidences.length} evidência(s) e ${missions.length} missão(ões) gerada(s) nesta sessão.`;
+    resumo = `${visits.length} página(s) em ${domains.length} domínio(s).${tipoTxt} ${evidences.length} evidência(s) e ${missions.length} plano(s) gerado(s) nesta sessão.`;
   }
 
   const r: BrowserSessionReport = {
@@ -608,7 +611,7 @@ export function buildTabComparison(): BrowserTabComparison {
     : 'sem páginas suficientes';
 
   const recomendacao = visits.length >= 2
-    ? `Prioridade: ${melhor?.a.pageType || 'revisar'}. Separar evidência da página acima e transformar em missão se exigir ação.`
+    ? `Prioridade: ${melhor?.a.pageType || 'revisar'}. Separar evidência da página acima e preparar plano de ação se exigir.`
     : 'Navegue por mais 1-2 páginas e refaça para enriquecer a comparação.';
 
   const c: BrowserTabComparison = {
@@ -769,7 +772,7 @@ export function buildDossierSynthesis(dossier: BrowserDossier, ctx: BrowserActio
   if (dossier.pages.length < 3) pendencias.push('Volume baixo — adicione mais páginas para fortalecer a síntese.');
   if (!dossier.notes) pendencias.push('Sem anotações livres no dossiê — registre conclusões à medida que avança.');
   if (tipoMaisFrequente === 'genérico') pendencias.push('Tipo central ainda indefinido — capture páginas mais específicas.');
-  if (pendencias.length === 0) pendencias.push('Dossiê com volume suficiente. Pronto para virar evidência ou missão.');
+  if (pendencias.length === 0) pendencias.push('Dossiê com volume suficiente. Pronto para virar evidência ou plano de ação.');
 
   // Próximos passos contextuais
   const proximosPassos: string[] = [];
@@ -777,7 +780,7 @@ export function buildDossierSynthesis(dossier: BrowserDossier, ctx: BrowserActio
   if (tipoMaisFrequente === 'regulatório') proximosPassos.push('Mapear obrigações e prazos identificados.');
   else if (tipoMaisFrequente === 'preço') proximosPassos.push('Comparar com oferta atual e decidir resposta.');
   else if (tipoMaisFrequente === 'concorrente') proximosPassos.push('Consolidar movimentos competitivos em diagnóstico.');
-  proximosPassos.push('Transformar em missão se houver ação concreta a tomar.');
+  proximosPassos.push('Preparar plano de ação se houver ação concreta a tomar.');
 
   return { dossier, temaCentral, pontosCriticos, pendencias, proximosPassos };
 }
@@ -803,10 +806,10 @@ export function buildSectorAgentAnswer(ctx: BrowserActionContext, sector?: strin
   const proximos = [
     'Salvar como evidência se for relevante',
     'Adicionar ao dossiê do setor',
-    a.pageType === 'regulatório' ? 'Transformar em missão de conformidade'
-      : a.pageType === 'preço' ? 'Transformar em missão comercial'
-      : a.pageType === 'concorrente' ? 'Transformar em missão competitiva'
-      : 'Transformar em missão se precisar de ação',
+    a.pageType === 'regulatório' ? 'Preparar plano de conformidade'
+      : a.pageType === 'preço' ? 'Preparar plano comercial'
+      : a.pageType === 'concorrente' ? 'Preparar plano competitivo'
+      : 'Preparar plano de ação se precisar agir',
   ];
   const out: BrowserSectorAgentAnswer = {
     id: `ba-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,

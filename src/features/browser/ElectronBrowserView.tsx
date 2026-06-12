@@ -102,7 +102,8 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
     if (type === 'create-mission') {
       const m = buildMission(ctx, {});
       dispatchBrowserAction({ type, context: ctx, payload: m });
-      flashFeedback('Missão criada a partir da página');
+      // C1-B: feedback alinhado ao canônico do C1 ('plano'/'rascunho').
+      flashFeedback('Plano da página criado');
       return;
     }
     if (type === 'generate-feed-card') {
@@ -476,7 +477,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
           const isAdmin = role === 'codify';
           const allActions: { id: BrowserActionId; label: string; Icon: typeof Send; adminOnly?: boolean }[] = [
             { id: 'send-to-workspace',  label: 'Enviar',              Icon: Send },
-            { id: 'create-mission',     label: 'Missão',              Icon: Target },
+            { id: 'create-mission',     label: 'Preparar plano da página', Icon: Target },
             { id: 'save-evidence',      label: 'Evidência',           Icon: FileText },
             { id: 'generate-feed-card', label: 'Card',                Icon: LayoutGrid },
             { id: 'analyze-session',    label: 'Sessão',              Icon: BarChart3 },

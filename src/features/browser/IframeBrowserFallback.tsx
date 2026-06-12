@@ -86,7 +86,10 @@ export function IframeBrowser({ initialUrl, lightMode = false, syncing = false, 
     }
     if (type === 'create-mission') {
       dispatchBrowserAction({ type, context: ctx, payload: buildMission(ctx, {}) });
-      flashFeedback('Missão criada a partir da página'); return;
+      // C1-B: feedback alinhado ao canônico do C1 ('plano'/'rascunho'). Id da
+      // ação ('create-mission') é union type fixo em core/types/browser.ts e
+      // permanece como contrato interno — só texto user-facing foi limpo.
+      flashFeedback('Plano da página criado'); return;
     }
     if (type === 'generate-feed-card') {
       const fc = buildFeedCard(ctx, {});
@@ -329,7 +332,7 @@ export function IframeBrowser({ initialUrl, lightMode = false, syncing = false, 
                   const isAdmin = role === 'codify';
                   const allActions: { id: BrowserActionId; label: string; Icon: typeof Send; adminOnly?: boolean }[] = [
                     { id: 'send-to-workspace', label: 'Enviar para Área de Trabalho', Icon: Send },
-                    { id: 'create-mission',    label: 'Transformar em missão',        Icon: Target },
+                    { id: 'create-mission',    label: 'Preparar plano da página',     Icon: Target },
                     { id: 'save-evidence',     label: 'Salvar como evidência',        Icon: FileText },
                     { id: 'generate-feed-card', label: 'Gerar card no feed',          Icon: LayoutGrid },
                     { id: 'analyze-session',   label: 'Analisar sessão inteira',      Icon: BarChart3 },
