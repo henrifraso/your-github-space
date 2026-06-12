@@ -16,8 +16,10 @@
 // O caller controla o `onRun` — clique gera novo bloco abaixo no ChatPanel.
 
 import { ArrowRight } from 'lucide-react';
+import { Toast, useToast } from '../../../components/Toast';
 import type {
   ShortcutKind,
+  ShortcutTier,
   WorkspaceShortcut,
   WorkspaceToolContext,
   ToolOutput,
@@ -48,6 +50,22 @@ const KIND_PILL: Record<ShortcutKind, string> = {
   conexao:    'bg-amber-50     text-amber-700    dark:bg-amber-900/25 dark:text-amber-300',
 };
 
+// Badge de tier — aparece só para beta / api_parceira / em_breve.
+// 'incluso' não renderiza badge (é o padrão silencioso).
+const TIER_LABEL: Partial<Record<ShortcutTier, string>> = {
+  incluso:      'Incluso',
+  beta:         'Beta',
+  api_parceira: 'API parceira',
+  em_breve:     'Em breve',
+};
+
+const TIER_PILL: Partial<Record<ShortcutTier, string>> = {
+  incluso:      'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-400',
+  beta:         'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  api_parceira: 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  em_breve:     'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400',
+};
+
 // Cor do CTA (texto + seta) por tipo — segue a cor da pílula.
 const KIND_CTA: Record<ShortcutKind, string> = {
   dado:       '',
@@ -59,40 +77,45 @@ const KIND_CTA: Record<ShortcutKind, string> = {
 
 export function WorkspaceShortcutsBlock({ ctx, onRun }: WorkspaceShortcutsBlockProps) {
   const shortcuts = getShortcutsForContext(ctx);
+  const { toast, show: showToast, hide: hideToast } = useToast();
   if (shortcuts.length === 0) return null;
 
   const handleClick = (sc: WorkspaceShortcut) => {
     if (sc.kind === 'dado' || !sc.template) return;
     const output = runShortcut(sc, ctx);
     onRun(sc, output);
+    showToast(output.title, 'blue');
   };
 
   return (
-    <div
-      className="
-        w-full
-        rounded-xl
-        border-[0.5px] border-neutral-200 dark:border-[#3d3d3d]
-        bg-[#fbfcfd] dark:bg-[#2a2a2a]
-        shadow-[0_2px_6px_-2px_rgba(0,0,0,0.08)]
-        dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)]
-        px-3.5 py-3
-      "
-    >
-      <div className="flex flex-col gap-3">
-        {shortcuts.map((sc) => {
-          const clickable = sc.kind !== 'dado' && !!sc.template;
-          return (
-            <ShortcutRow
-              key={sc.id}
-              shortcut={sc}
-              clickable={clickable}
-              onClick={() => handleClick(sc)}
-            />
-          );
-        })}
+    <>
+      <div
+        className="
+          w-full
+          rounded-xl
+          border-[0.5px] border-neutral-200 dark:border-[#3d3d3d]
+          bg-[#fbfcfd] dark:bg-[#2a2a2a]
+          shadow-[0_2px_6px_-2px_rgba(0,0,0,0.08)]
+          dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)]
+          px-3.5 py-3
+        "
+      >
+        <div className="flex flex-col gap-3">
+          {shortcuts.map((sc) => {
+            const clickable = sc.kind !== 'dado' && !!sc.template;
+            return (
+              <ShortcutRow
+                key={sc.id}
+                shortcut={sc}
+                clickable={clickable}
+                onClick={() => handleClick(sc)}
+              />
+            );
+          })}
+        </div>
       </div>
-    </div>
+      <Toast message={toast.message} color={toast.color} visible={toast.visible} onHide={hideToast} />
+    </>
   );
 }
 
@@ -107,6 +130,9 @@ function ShortcutRow({ shortcut, clickable, onClick }: ShortcutRowProps) {
   const ctaColor = KIND_CTA[shortcut.kind];
   const label = KIND_LABEL[shortcut.kind];
 
+  const tierLabel = shortcut.tier ? TIER_LABEL[shortcut.tier] : undefined;
+  const tierPill  = shortcut.tier ? TIER_PILL[shortcut.tier]  : undefined;
+
   // Linha não-clicável (dado): renderiza como bloco estático.
   if (!clickable) {
     return (
@@ -114,6 +140,11 @@ function ShortcutRow({ shortcut, clickable, onClick }: ShortcutRowProps) {
         <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${pill}`}>
           {label}
         </span>
+        {tierLabel && tierPill && (
+          <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${tierPill}`}>
+            {tierLabel}
+          </span>
+        )}
         <span className="flex-1 text-neutral-600 dark:text-neutral-300">{shortcut.tagline}</span>
       </div>
     );
@@ -137,6 +168,11 @@ function ShortcutRow({ shortcut, clickable, onClick }: ShortcutRowProps) {
       <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${pill}`}>
         {label}
       </span>
+      {tierLabel && tierPill && (
+        <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${tierPill}`}>
+          {tierLabel}
+        </span>
+      )}
       <span className="flex-1 text-neutral-600 dark:text-neutral-300">
         {shortcut.tagline}{' '}
         {shortcut.cta && (

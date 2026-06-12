@@ -176,6 +176,7 @@ export const SHORTCUTS_FINANCEIRO: WorkspaceShortcut[] = [
   {
     id: 'sc-fin-conexao',
     kind: 'conexao',
+    tier: 'api_parceira',
     tagline: 'Antes de buscar crédito caro ou apertar operação, mapeie alternativas. Veja opções de renegociação com fornecedores, cobrança ativa, antecipação de recebíveis e linhas parceiras com custo conhecido — para destravar caixa pelo caminho de menor pressão.',
     cta: 'Ver opções',
     appliesTo: ['financeiro', 'credito', 'crédito'],
@@ -389,6 +390,7 @@ export const SHORTCUTS_MARKETING: WorkspaceShortcut[] = [
   {
     id: 'sc-mkt-campanha',
     kind: 'ferramenta',
+    tier: 'beta',
     tagline: 'Transforme este sinal em uma campanha local testável. O OS¹ gera briefing com objetivo, público, mensagem central, canal e métrica de sucesso — para você rodar um teste curto e barato antes de comprometer orçamento em campanha grande.',
     cta: 'Abrir campanha',
     appliesTo: ['marketing', 'campanhas', 'vendas', 'comercial'],
@@ -477,6 +479,7 @@ export const SHORTCUTS_OPERACAO: WorkspaceShortcut[] = [
   {
     id: 'sc-op-checklist',
     kind: 'atalho',
+    tier: 'incluso',
     tagline: 'Não deixe o gargalo virar relatório de reunião. O checklist organiza causa provável, responsável, prazo e critério de correção, e entra na rotina de execução do time — para que a observação vire ação medida em dias, não em semanas.',
     cta: 'Gerar checklist',
     appliesTo: ['operacao', 'operação', 'processos', 'qualidade'],
@@ -498,6 +501,7 @@ export const SHORTCUTS_OPERACAO: WorkspaceShortcut[] = [
   {
     id: 'sc-op-simulador',
     kind: 'ferramenta',
+    tier: 'beta',
     tagline: 'Antes de mudar processo ou trocar fornecedor, simule o impacto operacional em prazo, custo e capacidade. Compare cenário conservador, provável e agressivo para identificar onde a mudança gera ganho real e onde gera só agitação.',
     cta: 'Abrir simulador',
     appliesTo: ['operacao', 'operação', 'logistica', 'logística'],
@@ -750,6 +754,7 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
   {
     id: 'sc-map-comparacao-regional',
     kind: 'referencia',
+    tier: 'em_breve',
     tagline: 'Compare o raio atual com uma área menor ou maior antes de decidir onde agir. O OS¹ mostra se a oportunidade está concentrada, espalhada ou saturada demais para justificar esforço de ativação.',
     cta: 'Ver comparação',
     appliesTo: ['comparacao-territorial'],
@@ -1217,6 +1222,7 @@ export const SHORTCUTS_GERAIS: WorkspaceShortcut[] = [
   {
     id: 'sc-gen-plano',
     kind: 'atalho',
+    tier: 'incluso',
     tagline: 'Transforme esta análise em plano executável de verdade. Etapas práticas, responsável claro, prazo realista, indicador de acompanhamento e ponto de revisão — para o que foi discutido aqui virar ação medida, não só intenção registrada.',
     cta: 'Criar plano',
     appliesTo: ['*'],

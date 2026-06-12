@@ -75,6 +75,7 @@ export interface WorkspaceTool {
   source?: ToolSource[];   // fontes que disparam (opcional)
   modes?: ToolMode[];      // modos onde aparece (opcional)
   profile?: string[];      // perfis específicos (codify/franchisor/franchise/affiliate/partner)
+  tier?: ShortcutTier;
   template: (ctx: WorkspaceToolContext) => ToolOutput;
 }
 
@@ -89,6 +90,7 @@ export interface WorkspaceTool {
 //   - atalho:      executa caminho rápido de trabalho (criar plano, missão, ...).
 //   - conexao:     mostra fornecedores/parceiros/contatos/opções externas.
 export type ShortcutKind = 'dado' | 'referencia' | 'ferramenta' | 'atalho' | 'conexao';
+export type ShortcutTier = 'incluso' | 'beta' | 'api_parceira' | 'em_breve';
 
 export interface WorkspaceShortcut {
   id: string;
@@ -103,6 +105,8 @@ export interface WorkspaceShortcut {
   source?: ToolSource[];
   modes?: ToolMode[];
   profile?: string[];
+  /** Status comercial/produto do atalho (opcional). Sem badge se ausente ou 'incluso'. */
+  tier?: ShortcutTier;
   /**
    * Gerador do bloco que aparece abaixo quando o usuário clica.
    * Atalhos do tipo 'dado' não têm template (não são clicáveis).
