@@ -78,7 +78,7 @@ const KIND_CTA: Record<ShortcutKind, string> = {
 export function WorkspaceShortcutsBlock({ ctx, onRun }: WorkspaceShortcutsBlockProps) {
   const shortcuts = getShortcutsForContext(ctx);
   const { toast, show: showToast, hide: hideToast } = useToast();
-  const showTierBadge = ctx.role === 'codify';
+  const showTierBadge = ctx.role === 'codify' && ctx.activeSector === 'os1';
   if (shortcuts.length === 0) return null;
 
   const handleClick = (sc: WorkspaceShortcut) => {
