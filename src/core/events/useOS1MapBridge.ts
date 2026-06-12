@@ -166,18 +166,21 @@ export function useOS1MapBridge({
           (m?.etapas ?? []).join(' · '),
           m?.criterioConclusao ? `Critério de conclusão: ${m.criterioConclusao}` : '',
         ].filter(Boolean).join(' · ');
+        // C1-A: novos cards gerados localmente usam 'rascunho' como tipo
+        // canônico (em vez do legado 'missao'). Cards persistidos antes da
+        // renomeação continuam sendo lidos pelo type union que aceita ambos.
         const card: IntelligenceCard = {
           ...synthBase,
           id: `synth-map-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-          titulo: m?.titulo ?? 'Missão territorial',
-          resumo: m?.objetivo ?? 'Missão operacional gerada do território selecionado.',
+          titulo: m?.titulo ?? 'Plano territorial',
+          resumo: m?.objetivo ?? 'Plano operacional gerado do território selecionado.',
           por_que_importa: porQue,
           onde_afeta: sector,
           o_que_fazer: oQueFazer,
           dominio: sector,
-          area: 'missao-territorial',
+          area: 'plano-territorial',
           urgencia: 'media',
-          tipo_card: 'missao',
+          tipo_card: 'rascunho',
         };
         onWorkspaceCard(card, 'utilizar');
         closeMap();

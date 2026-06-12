@@ -79,9 +79,11 @@ export const MODE_FIELDS: Record<MainKey, { label: string; key: string }[]> = {
 };
 
 // Ordem dos atalhos dentro de cada bloco de modo — top 5 + outros 5 em "Mais ações"
+// C1-A: a key 'missao' do top-5 de executar foi renomeada pra 'rascunho'
+// pra refletir o que a sub-ação faz de fato (template local, sem POST).
 export const MODE_TOP5: Record<MainKey, string[]> = {
   pesquisar: ['resumir', 'risco', 'evidencias', 'comparar', 'negocio'],
-  executar:  ['checklist', 'plano', 'mensagem', 'simular', 'missao'],
+  executar:  ['checklist', 'plano', 'mensagem', 'simular', 'rascunho'],
   aprender:  ['exemplo', 'conceito', 'erro', 'medir', 'memoria'],
 };
 
@@ -126,13 +128,11 @@ export const SUB_BTNS: Record<MainKey, SubAction[]> = {
     { key: 'roteiro',         label: 'Criar roteiro',        Icon: AlignLeft,    endpoint: 'executar', extra: { tipo: 'plano' } },
     { key: 'simular',         label: 'Simular resultado',    Icon: FlaskConical, endpoint: 'simular',  extra: { cenario: 'realista' } },
     { key: 'validar',         label: 'Validar antes',        Icon: Eye,          endpoint: 'simular',  extra: { cenario: 'realista' } },
-    // GM1 limpeza: rótulo antigo "Marcar como missão" prometia persistência
-    // que esta sub-ação não entrega (endpoint: null, só template local).
-    // Renomeado pra "Rascunho de execução" — descreve o que o bloco gera
-    // de fato. Backend GM1-A continua disponível em /api/governance/missions;
-    // quando a missão real for ligada à workspace, isso vira outro botão
-    // explícito (não esta sub-ação).
-    { key: 'missao',          label: 'Rascunho de execução', Icon: StarIcon,     endpoint: null },
+    // C1-A: key renomeada de 'missao' pra 'rascunho' pra alinhar com o que
+    // a sub-ação faz (template local, sem POST). Backend GM1-A continua
+    // disponível em /api/governance/missions; quando a missão real for
+    // ligada à workspace, vira outro botão explícito (não esta sub-ação).
+    { key: 'rascunho',        label: 'Rascunho de execução', Icon: StarIcon,     endpoint: null },
   ],
   aprender: [
     { key: 'conceito',        label: 'Ensinar conceito',     Icon: Brain,        endpoint: 'aprender' },

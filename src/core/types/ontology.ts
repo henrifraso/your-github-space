@@ -97,7 +97,9 @@ export interface DiagnosisCardSuggestion {
   origem: 'diagnostico_ontologico';
   dominio: string;
   areaMacro: string;
-  tipo: 'lacuna' | 'risco' | 'oportunidade' | 'fraco' | 'acao' | 'analise' | 'missao';
+  /** C1-A: `'rascunho'` é o nome canônico para cards gerados localmente.
+   *  `'missao'` mantido por 1 release pra não quebrar diagnósticos persistidos. */
+  tipo: 'lacuna' | 'risco' | 'oportunidade' | 'fraco' | 'acao' | 'analise' | 'rascunho' | 'missao';
   urgencia: 'alta' | 'media' | 'baixa';
   risco: string;
   oportunidade: string;

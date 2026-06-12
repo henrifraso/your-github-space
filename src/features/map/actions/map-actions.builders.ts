@@ -528,9 +528,12 @@ export function buildMapMission(ctx: MapContextSnapshot): MapMission {
   safeWrite(MAP_LS_KEYS.missions, all.slice(0, 200));
 
   // Etapa 9: sinal territorial vinculado à missão (missionId preenchido).
+  // C1-A: signalType canônico atual é 'rascunho'; o type union em map.ts
+  // mantém 'missao' como leitura legada por 1 release. Cards/sinais novos
+  // saem como 'rascunho'.
   saveTerritorialSignal(ctx, {
     action: 'territory-to-mission',
-    signalType: 'missao',
+    signalType: 'rascunho',
     summary: `Missão "${titulo}" criada a partir do território.`,
     usedInWorkspace: true,
     missionId: m.id,

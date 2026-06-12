@@ -184,7 +184,8 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
 
   // ── EXECUTAR — atalhos por sub ────────────────────────────────────────────
   if (s === 'checklist') return [
-    mk('Rascunho de execução',          'executar',  'missao',    '1'),
+    // C1-A: subKey alinhada à key canônica nova ('rascunho') de SUB_BTNS.executar.
+    mk('Rascunho de execução',          'executar',  'rascunho',  '1'),
     mk('Definir responsável',           'executar',  'delegar',   '2'),
     mk('Adicionar prazo',               'executar',  'tarefa',    '3'),
     mk('Gerar mensagem p/ equipe',      'executar',  'mensagem',  '4'),
@@ -215,17 +216,21 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
     mk('Adicionar prazo',               'executar',  'tarefa',    '1'),
     mk('Definir responsável',           'executar',  'delegar',   '2'),
     mk('Criar checklist',               'executar',  'checklist', '3'),
-    mk('Rascunho de execução',          'executar',  'missao',    '4'),
+    // C1-A: subKey alinhada à key canônica nova ('rascunho').
+    mk('Rascunho de execução',          'executar',  'rascunho',  '4'),
     mk('Compartilhar tarefa',           'executar',  'mensagem',  '5'),
   ];
   if (s === 'simular' || s === 'validar') return [
     mk('Plano para melhor cenário',     'executar',  'plano',     '1'),
     mk('Riscos do pior cenário',        'pesquisar', 'risco',     '2'),
     mk('Comparar cenários',             'pesquisar', 'comparar',  '3'),
-    mk('Transformar em decisão',        'executar',  'missao',    '4'),
+    // C1-A: subKey alinhada à key canônica nova ('rascunho').
+    mk('Transformar em decisão',        'executar',  'rascunho',  '4'),
     mk('Checklist de validação',        'executar',  'checklist', '5'),
   ];
-  if (s === 'missao') return [
+  // C1-A: 'rascunho' é a key canônica; 'missao' mantido por 1 release
+  // pra compat com blocos restaurados de sessão antiga.
+  if (s === 'rascunho' || s === 'missao') return [
     mk('Criar checklist',               'executar',  'checklist', '1'),
     mk('Definir responsável',           'executar',  'delegar',   '2'),
     mk('Criar cronograma',              'executar',  'roteiro',   '3'),
@@ -236,7 +241,8 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
     mk('Criar checklist',               'executar',  'checklist', '1'),
     mk('Definir responsáveis',          'executar',  'delegar',   '2'),
     mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
-    mk('Rascunho de execução',          'executar',  'missao',    '4'),
+    // C1-A: subKey alinhada à key canônica nova ('rascunho').
+    mk('Rascunho de execução',          'executar',  'rascunho',  '4'),
     mk('Simular resultado',             'executar',  'simular',   '5'),
   ];
 

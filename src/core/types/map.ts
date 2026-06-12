@@ -205,12 +205,17 @@ export interface MapTerritorialSignal {
   directCompetitors: number;
   /** Concorrentes indiretos no raio. */
   indirectCompetitors: number;
-  /** Tipo de sinal — derivado da action ou heurística. */
+  /** Tipo de sinal — derivado da action ou heurística.
+   *  C1-A: `'rascunho'` é o nome canônico atual para cards gerados localmente.
+   *  `'missao'` permanece aceito por 1 release pra não quebrar leitura de
+   *  cards antigos persistidos antes da renomeação. Remover em release futuro
+   *  quando confirmado que nenhum card persistido usa mais o legado. */
   signalType:
     | 'concorrencia'
     | 'oportunidade'
     | 'risco'
     | 'comparacao'
+    | 'rascunho'
     | 'missao'
     | 'parceiros'
     | 'simulacao'

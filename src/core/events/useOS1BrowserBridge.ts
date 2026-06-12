@@ -134,17 +134,20 @@ export function useOS1BrowserBridge({
           m?.prazoSugerido ? `Prazo: ${m.prazoSugerido}` : null,
           d.context.title ? `Evidência: ${d.context.title}` : `Origem: ${fechaUrl}`,
         ].filter(Boolean).join(' · ');
+        // C1-A: novos cards gerados localmente usam 'rascunho' como tipo
+        // canônico (em vez do legado 'missao'). Cards persistidos antes da
+        // renomeação continuam sendo lidos pelo type union que aceita ambos.
         const card: IntelligenceCard = {
           ...synthBase,
-          titulo: m?.titulo ?? 'Missão criada a partir da página',
-          resumo: m?.objetivo ?? 'Missão operacional gerada da página atual.',
+          titulo: m?.titulo ?? 'Plano da página',
+          resumo: m?.objetivo ?? 'Plano operacional gerado da página atual.',
           por_que_importa: porQue,
           onde_afeta: sector,
           o_que_fazer: (m?.etapas ?? []).join(' · ') + (m?.criterioConclusao ? ` · Critério de conclusão: ${m.criterioConclusao}` : ''),
           dominio: sector,
-          area: 'missao',
+          area: 'plano',
           urgencia: 'media',
-          tipo_card: 'missao',
+          tipo_card: 'rascunho',
         };
         onWorkspaceCard(card, 'utilizar');
         closeBrowser();

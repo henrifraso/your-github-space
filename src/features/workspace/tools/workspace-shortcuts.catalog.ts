@@ -68,17 +68,17 @@ export const SHORTCUTS_CONCORRENCIA: WorkspaceShortcut[] = [
     }),
   },
   {
-    id: 'sc-conc-missao',
+    id: 'sc-conc-plano',
     kind: 'atalho',
-    // GM1 limpeza: rótulo antigo "Criar missão" prometia persistência no
-    // backend de missões. O template é só local. Renomeado para descrever
-    // o que entrega de fato.
+    // C1-A: id renomeado de 'sc-conc-missao' pra 'sc-conc-plano' pra
+    // alinhar com o rótulo visual "Preparar ação competitiva" — template
+    // local, sem POST. Label visual preservado.
     tagline: 'Organize este sinal em uma ação prática para o time comercial: mapear preços do concorrente, revisar mix de oferta e propor 2 movimentos com prazo curto. O OS¹ separa etapas, responsável e métrica, evitando que vire só observação na reunião.',
     cta: 'Preparar ação competitiva',
     appliesTo: ['concorrencia', 'mercado'],
     template: (ctx) => ({
-      title: 'Missão de resposta competitiva',
-      context: `Missão para tratar ${ctxPhrase(ctx)} em ciclo curto.`,
+      title: 'Plano de resposta competitiva',
+      context: `Plano para tratar ${ctxPhrase(ctx)} em ciclo curto.`,
       items: [
         'Objetivo: reagir ao movimento competitivo sem comprometer margem.',
         'Etapa 1 — Mapear 3 concorrentes mais próximos e seus preços/ofertas atuais.',
@@ -87,7 +87,7 @@ export const SHORTCUTS_CONCORRENCIA: WorkspaceShortcut[] = [
         `Prazo: ${urgencyWindow(ctx.urgency)} pra primeira leitura.`,
         'Métrica: ticket médio, volume, conversão local em 30 dias.',
       ],
-      expectedResult: 'Missão atribuível pra time comercial.',
+      expectedResult: 'Plano atribuível pra time comercial.',
       nextStep: 'Atribuir responsável e iniciar pela etapa 1.',
     }),
   },
@@ -564,14 +564,14 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
     template: (ctx) => simuladorImpactoOutput(ctx, 'engajamento regional'),
   },
   {
-    id: 'sc-map-missao',
+    id: 'sc-map-plano',
     kind: 'atalho',
-    // GM1 limpeza: era "Criar missão"; só gera template local. Renomeado.
+    // C1-A: id renomeado de 'sc-map-missao'. Template local, sem POST.
     tagline: 'Organize a leitura do raio em um plano para a unidade mais afetada. O OS¹ monta mapeamento de concorrentes, revisão de reputação local, campanha por proximidade e métrica de 7 dias — para o gestor local saber o que fazer e o que medir.',
     cta: 'Preparar plano territorial',
     source: ['map'],
     template: (ctx) => ({
-      title: 'Missão territorial',
+      title: 'Plano territorial',
       context: `Plano territorial para tratar ${ctxPhrase(ctx)}.`,
       items: [
         'Mapear os 3 concorrentes mais fortes do raio.',
@@ -580,7 +580,7 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
         'Definir oferta ou mensagem específica da região.',
         'Medir resposta em 7 dias e ajustar.',
       ],
-      expectedResult: 'Missão territorial pronta para atribuir.',
+      expectedResult: 'Plano territorial pronto para atribuir.',
       nextStep: 'Atribuir responsável local e iniciar.',
     }),
   },
@@ -658,15 +658,15 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
     }),
   },
   {
-    id: 'sc-map-oportunidade-missao',
+    id: 'sc-map-oportunidade-rascunho',
     kind: 'atalho',
-    // GM1 limpeza: era "Criar missão"; só gera template local. Renomeado.
+    // C1-A: id renomeado de 'sc-map-oportunidade-missao'. Template local, sem POST.
     tagline: 'Organize a principal oportunidade do raio em uma ação prática para a unidade. Defina responsável, prazo e critério de sucesso para testar sem virar apenas observação territorial.',
     cta: 'Organizar próximos passos',
     appliesTo: ['oportunidade', 'oportunidade-setorial'],
     source: ['map'],
     template: (ctx) => ({
-      title: 'Missão territorial',
+      title: 'Plano territorial',
       context: `Plano de execução a partir da oportunidade em ${ctxPhrase(ctx)}.`,
       items: [
         'Objetivo: (descrever o que se quer alcançar no raio).',
@@ -676,7 +676,7 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
         'Etapas operacionais (3-5 passos).',
         'Métrica de sucesso medida em 7-14 dias.',
       ],
-      expectedResult: 'Missão territorial pronta para atribuir.',
+      expectedResult: 'Plano territorial pronto para atribuir.',
       nextStep: 'Atribuir responsável local e iniciar execução.',
     }),
   },
@@ -792,25 +792,28 @@ export const SHORTCUTS_MAPA: WorkspaceShortcut[] = [
     }),
   },
   {
-    id: 'sc-map-missao-publicar',
+    id: 'sc-map-plano-unidade',
     kind: 'ferramenta',
-    // GM1 limpeza: era "Publicar missão"; não há publicação real. Renomeado.
+    // C1-A: id renomeado de 'sc-map-missao-publicar'. Sem publicação real
+    // — template local que prepara texto para canal interno.
     tagline: 'Antes de levar este plano territorial pra equipe da unidade, valide responsável, prazo e métrica de sucesso. O OS¹ monta o resumo, conecta a evidência territorial e prepara o aviso pra canal interno — sem precisar refazer texto.',
     cta: 'Preparar plano para a unidade',
-    appliesTo: ['missao-territorial'],
+    // C1-A: aceita o nome canônico novo ('plano-territorial') e mantém
+    // 'missao-territorial' por 1 release pra compat com cards persistidos.
+    appliesTo: ['plano-territorial', 'missao-territorial'],
     source: ['map'],
     template: (ctx) => ({
-      title: 'Publicação da missão territorial',
-      context: `Preparação para divulgar a missão territorial sobre ${ctxPhrase(ctx)}.`,
+      title: 'Publicação do plano territorial',
+      context: `Preparação para divulgar o plano territorial sobre ${ctxPhrase(ctx)}.`,
       items: [
-        'Resumo curto da missão territorial (1-2 frases).',
+        'Resumo curto do plano territorial (1-2 frases).',
         'Raio e centro analisados.',
         'Evidência territorial associada.',
         'Responsável atribuído (unidade ou time local).',
         'Prazo confirmado e métrica de sucesso.',
         'Canal de comunicação sugerido.',
       ],
-      expectedResult: 'Texto pronto para publicar e missão ativa.',
+      expectedResult: 'Texto pronto para publicar e plano ativo.',
       nextStep: 'Confirmar destinatários e publicar.',
     }),
   },
@@ -993,7 +996,7 @@ export const SHORTCUTS_NAVEGADOR: WorkspaceShortcut[] = [
     appliesTo: ['relatorio-sessao'],
     source: ['browser'],
     template: (ctx) => ({
-      title: 'Missão criada da sessão',
+      title: 'Plano criado da sessão',
       context: `Plano de execução a partir dos achados em ${ctxPhrase(ctx)}.`,
       items: [
         'Achado principal: (1 frase).',
@@ -1003,8 +1006,8 @@ export const SHORTCUTS_NAVEGADOR: WorkspaceShortcut[] = [
         'Prazo recomendado pela urgência.',
         'Critério de conclusão.',
       ],
-      expectedResult: 'Missão executável pronta pra atribuir.',
-      nextStep: 'Atribuir responsável e prazo, registrar como missão ativa.',
+      expectedResult: 'Plano executável pronto pra atribuir.',
+      nextStep: 'Atribuir responsável e prazo, registrar como plano ativo.',
     }),
   },
   {
@@ -1020,7 +1023,7 @@ export const SHORTCUTS_NAVEGADOR: WorkspaceShortcut[] = [
       items: [
         'Tema central do dossiê em 1 frase.',
         'Páginas mais relevantes (top 3).',
-        'Quais viram missão / ação imediata.',
+        'Quais viram plano / ação imediata.',
         'Quais ficam em acompanhamento (sem ação ainda).',
         'Quais podem ser descartadas com justificativa.',
         'Próxima revisão do dossiê (data sugerida).',
@@ -1030,25 +1033,28 @@ export const SHORTCUTS_NAVEGADOR: WorkspaceShortcut[] = [
     }),
   },
   {
-    id: 'sc-doc-missao-publicar',
+    id: 'sc-doc-plano-unidade',
     kind: 'ferramenta',
-    // GM1 limpeza: era "Publicar missão"; não há publicação real. Renomeado.
+    // C1-A: id renomeado de 'sc-doc-missao-publicar'. Sem publicação real —
+    // template local que prepara texto para canal interno. `appliesTo`
+    // ganhou 'rascunho' como nome canônico; 'missao' mantido por 1 release
+    // pra compat com cards persistidos antes da renomeação.
     tagline: 'Antes de levar este plano para a equipe, valide responsável, prazo e métrica de sucesso. O OS¹ monta o resumo, conecta a evidência e prepara o aviso para o canal interno — sem precisar refazer texto.',
     cta: 'Preparar plano para a unidade',
-    appliesTo: ['missao'],
+    appliesTo: ['rascunho', 'missao'],
     source: ['browser'],
     template: (ctx) => ({
-      title: 'Publicação da missão',
-      context: `Preparação para divulgar a missão sobre ${ctxPhrase(ctx)}.`,
+      title: 'Publicação do plano',
+      context: `Preparação para divulgar o plano sobre ${ctxPhrase(ctx)}.`,
       items: [
-        'Resumo curto da missão (1-2 frases).',
+        'Resumo curto do plano (1-2 frases).',
         'Evidência principal (link).',
         'Responsável atribuído.',
         'Prazo confirmado.',
         'Métrica de sucesso (como medir).',
         'Canal de comunicação sugerido.',
       ],
-      expectedResult: 'Texto pronto para publicar e missão ativa.',
+      expectedResult: 'Texto pronto para publicar e plano ativo.',
       nextStep: 'Confirmar destinatários e publicar.',
     }),
   },

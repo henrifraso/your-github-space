@@ -60,13 +60,13 @@ export const TOOLS_GERAIS: WorkspaceTool[] = [
     }),
   },
   {
-    // GM1 limpeza: era "Transformar em missão"; o template é local, não
-    // chama o backend de missões. Renomeado para descrever a entrega real.
-    id: 'gen-missao', label: 'Rascunho de execução estruturado', group: 'execucao', appliesTo: ['*'],
+    // C1-A: id renomeado de 'gen-missao' pra 'gen-rascunho-execucao';
+    // template alinhado pra "Rascunho de execução" — local, sem POST.
+    id: 'gen-rascunho-execucao', label: 'Rascunho de execução estruturado', group: 'execucao', appliesTo: ['*'],
     description: 'Rascunho com objetivo, etapas, prazo e critério de conclusão.',
     template: (ctx) => ({
-      title: 'Missão sugerida',
-      context: `Missão estruturada com base em ${ctxPhrase(ctx)}.`,
+      title: 'Rascunho de execução sugerido',
+      context: `Rascunho estruturado com base em ${ctxPhrase(ctx)}.`,
       items: [
         `Objetivo: tratar ${ctx.cardTitle || 'o tema'} de forma prática e mensurável.`,
         `Prazo recomendado: ${urgencyWindow(ctx.urgency)}.`,
@@ -76,7 +76,7 @@ export const TOOLS_GERAIS: WorkspaceTool[] = [
         'Métrica de sucesso: indicador específico do tema definido em até 2 dias.',
         'Critério de conclusão: ação executada + métrica registrada.',
       ],
-      expectedResult: 'Missão pronta pra entrar em rotina de acompanhamento.',
+      expectedResult: 'Rascunho pronto pra entrar em rotina de acompanhamento.',
       nextStep: 'Atribuir responsável formal e iniciar pela etapa 1.',
       sensitiveNotice: mkSensitive(ctx),
     }),

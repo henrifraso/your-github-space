@@ -303,18 +303,22 @@ export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, diff
           `Decisão: AVANÇAR (se 5+ critérios verdes) · AJUSTAR (se 1-2 critérios amarelos) · ESPERAR (se algum critério vermelho ou falta de dado).`,
         ],
       };
+    // C1-A: 'rascunho' é o nome canônico atual; 'missao' mantido como
+    // fall-through por 1 release pra não quebrar leitura de blocos gerados
+    // com a key antiga (cards persistidos / blocos restaurados de sessão).
+    case 'rascunho':
     case 'missao':
       return {
         paragrafos: [
-          `Missão operacional gerada a partir de "${titulo}".`,
-          `Título da missão: "${titulo}" — tratar como projeto curto com começo, meio e fim claros.`,
+          `Rascunho operacional gerado a partir de "${titulo}".`,
+          `Título do rascunho: "${titulo}" — tratar como projeto curto com começo, meio e fim claros.`,
           `Objetivo: ${acao}. Resultado esperado: indicador de ${dom} retornar ao baseline ou superar em 30 dias.`,
           `Etapas: (1) Diagnóstico em 3 dias; (2) Piloto em 14 dias; (3) Medição em 21 dias; (4) Decisão de escala em 30 dias.`,
           `Responsável: gestor de ${dom} com sponsor de liderança. Prazo total: ${urg === 'alta' ? '21 dias' : '60 dias'}.`,
           `Recompensa simbólica: reconhecimento público quando indicador retornar ao baseline + captura como case na base interna.`,
           `Evidência de conclusão: relatório de 1 página com baseline, ação executada, resultado medido e aprendizado capturado.`,
-          `Status inicial: ABERTA — aguardando confirmação de responsável e definição de KPI.`,
-          `Como aparece no painel: missão "${dom}" com prazo ${urg === 'alta' ? '21d' : '60d'} e ícone de urgência ${urg}.`,
+          `Status inicial: ABERTO — aguardando confirmação de responsável e definição de KPI.`,
+          `Como aparece no painel: rascunho de "${dom}" com prazo ${urg === 'alta' ? '21d' : '60d'} e ícone de urgência ${urg}.`,
         ],
       };
 
@@ -386,7 +390,7 @@ export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, diff
           `2) EXEMPLO. "${titulo}" é um sinal típico em ${dom}: parece pequeno, mas em 60-90 dias pode virar problema visível se ignorado. Histórico mostra que unidades que tratam cedo recuperam em 14 dias; quem ignora paga 3-5x mais depois.`,
           `3) APLICAÇÃO. No caso atual: (a) cruze o sinal com 2 indicadores adicionais; (b) defina 1 responsável formal; (c) execute ${acao} como piloto; (d) meça em 14 dias; (e) ajuste ou escale com base no resultado.`,
           `4) ERRO COMUM. Os 3 erros mais frequentes: agir sem validar, delegar sem responsável claro, pular o ritual semanal. Cada um sozinho transforma boa intenção em projeto largado.`,
-          `5) EXERCÍCIO PRÁTICO. Nas próximas 24h: (1) abra o card "${titulo}" novamente, (2) escreva em 1 linha qual é a hipótese principal, (3) defina quem seria o responsável se virasse missão, (4) liste 2 indicadores que cruzaria pra validar. Esse exercício custa 10 min e prepara decisão rápida quando voltar ao tema.`,
+          `5) EXERCÍCIO PRÁTICO. Nas próximas 24h: (1) abra o card "${titulo}" novamente, (2) escreva em 1 linha qual é a hipótese principal, (3) defina quem seria o responsável se virasse plano de ação, (4) liste 2 indicadores que cruzaria pra validar. Esse exercício custa 10 min e prepara decisão rápida quando voltar ao tema.`,
         ],
       };
     case 'perguntas':
