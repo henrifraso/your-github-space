@@ -70,10 +70,17 @@ function pickSourceShortcuts(ctx: WorkspaceToolContext): WorkspaceShortcut[] {
     // Etapa 12: prioriza atalhos cujo appliesTo bate com a area do card
     // (regulatório, preço, concorrente, dossie, missao, relatorio-sessao...).
     // Atalho específico aparece ANTES dos genéricos (sc-doc-pontos, etc.).
+    // C1-B compat: cards de "Preparar plano da página" têm area='análise externa'
+    // mas tipo_card='rascunho'. O match inclui ctx.tipo para que appliesTo:
+    // ['rascunho','missao'] continue selecionando sc-doc-plano-unidade.
     const area = AREA_NORMALIZE(ctx.areaMacro);
-    if (area) {
+    const tipo = AREA_NORMALIZE(ctx.tipo);
+    if (area || tipo) {
       const specific = SHORTCUTS_NAVEGADOR.filter(s =>
-        Array.isArray(s.appliesTo) && s.appliesTo.some(k => area.includes(AREA_NORMALIZE(k)))
+        Array.isArray(s.appliesTo) && s.appliesTo.some(k => {
+          const norm = AREA_NORMALIZE(k);
+          return (area && area.includes(norm)) || (tipo && tipo.includes(norm));
+        })
       );
       if (specific.length > 0) return [...specific, ...SHORTCUTS_NAVEGADOR];
     }
