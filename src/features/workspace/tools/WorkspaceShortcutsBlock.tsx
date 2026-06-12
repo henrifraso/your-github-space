@@ -78,6 +78,7 @@ const KIND_CTA: Record<ShortcutKind, string> = {
 export function WorkspaceShortcutsBlock({ ctx, onRun }: WorkspaceShortcutsBlockProps) {
   const shortcuts = getShortcutsForContext(ctx);
   const { toast, show: showToast, hide: hideToast } = useToast();
+  const showTierBadge = ctx.role === 'codify';
   if (shortcuts.length === 0) return null;
 
   const handleClick = (sc: WorkspaceShortcut) => {
@@ -108,6 +109,7 @@ export function WorkspaceShortcutsBlock({ ctx, onRun }: WorkspaceShortcutsBlockP
                 key={sc.id}
                 shortcut={sc}
                 clickable={clickable}
+                showTierBadge={showTierBadge}
                 onClick={() => handleClick(sc)}
               />
             );
@@ -122,10 +124,11 @@ export function WorkspaceShortcutsBlock({ ctx, onRun }: WorkspaceShortcutsBlockP
 interface ShortcutRowProps {
   shortcut: WorkspaceShortcut;
   clickable: boolean;
+  showTierBadge: boolean;
   onClick: () => void;
 }
 
-function ShortcutRow({ shortcut, clickable, onClick }: ShortcutRowProps) {
+function ShortcutRow({ shortcut, clickable, showTierBadge, onClick }: ShortcutRowProps) {
   const pill = KIND_PILL[shortcut.kind];
   const ctaColor = KIND_CTA[shortcut.kind];
   const label = KIND_LABEL[shortcut.kind];
@@ -140,7 +143,7 @@ function ShortcutRow({ shortcut, clickable, onClick }: ShortcutRowProps) {
         <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${pill}`}>
           {label}
         </span>
-        {tierLabel && tierPill && (
+        {showTierBadge && tierLabel && tierPill && (
           <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${tierPill}`}>
             {tierLabel}
           </span>
