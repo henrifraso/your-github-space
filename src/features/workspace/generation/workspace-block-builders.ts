@@ -22,6 +22,20 @@ import type {
 import { MODE_TITLES } from './workspace-generation';
 import { buildFallbackForSub } from './workspace-mode-generators';
 
+// Visual entity IDs (brand slugs like 'nike') and technical area slugs
+// ('relatorio-sessao', etc.) must not appear in narrative prose as if they
+// were operational domains. narDom() replaces them with a neutral label.
+const ENTITY_AND_TECH_IDS = new Set([
+  'nike', 'mcdonalds', 'nubank', 'os1',
+  'relatorio-sessao', 'dossie', 'comparacao', 'leitura-setor',
+]);
+function narDom(card: IntelligenceCard): string {
+  const raw = (card.area || card.dominio || '').toLowerCase().trim();
+  if (!raw) return 'área de operação';
+  if (ENTITY_AND_TECH_IDS.has(raw)) return 'análise externa';
+  return raw;
+}
+
 export function shortcutsForCard(card: IntelligenceCard): LocalShortcut[] {
   const d = ((card.dominio || '') + ' ' + (card.area || '')).toLowerCase();
   if (/reput|nota|avalia|review/.test(d)) return [
@@ -62,7 +76,7 @@ export function shortcutsForCard(card: IntelligenceCard): LocalShortcut[] {
   ];
 }
 export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
-  const dom = (card.area || card.dominio || 'área de operação').toLowerCase();
+  const dom = narDom(card);
   const urg = card.urgencia || 'media';
   const acao = card.o_que_fazer || 'definir próximo passo';
   const janela = urg === 'alta' ? '48 a 72 horas' : urg === 'media' ? '2 semanas' : '30 dias';
@@ -311,7 +325,7 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
 
 // Conteúdo do bloco de modo (Entender / Executar / Aprender) — fallback local.
 export function buildModeBlock(card: IntelligenceCard, mode: MainKey, difficulty: Dificuldade): WorkspaceBlock {
-  const dom = (card.area || card.dominio || 'área de operação').toLowerCase();
+  const dom = narDom(card);
   const titulo = card.titulo;
   const resumo = card.resumo || titulo;
   const urg = card.urgencia || 'media';

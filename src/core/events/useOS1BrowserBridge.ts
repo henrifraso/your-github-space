@@ -116,8 +116,8 @@ export function useOS1BrowserBridge({
           por_que_importa: porQue,
           onde_afeta: sector,
           o_que_fazer: passosMap[a.pageType],
-          dominio: sector,
-          area: a.pageType === 'genérico' ? sector : a.pageType,
+          dominio: 'análise externa',
+          area: a.pageType === 'genérico' ? 'análise externa' : a.pageType,
           urgencia: a.urgencyHint,
           tipo_card: a.pageType === 'regulatório' ? 'alerta' : 'informacao',
         };
@@ -137,12 +137,11 @@ export function useOS1BrowserBridge({
         // C1-A: novos cards gerados localmente usam 'rascunho' como tipo
         // canônico (em vez do legado 'missao'). Cards persistidos antes da
         // renomeação continuam sendo lidos pelo type union que aceita ambos.
-        // C1-B fix: 'area' representa o DOMÍNIO/área do conteúdo (geral,
-        // comercial, operação, etc.) — NÃO o formato da ação. Antes ficava
-        // como 'plano' e era propagado por `workspace-mode-generators:24`
-        // (`dom = card.area || card.dominio`) virando frases tipo "indicador
-        // de plano" / "gestor de plano". Agora espelha `dominio: sector`
-        // (= 'geral' por default) pra manter invariante area == dominio.
+        // C1-B: 'area' e 'dominio' representam o DOMÍNIO/área do conteúdo
+        // (análise externa, comercial, etc.) — não o formato da ação nem o
+        // ID visual do sector. 'análise externa' é o domínio neutro seguro
+        // para cards gerados pelo browser, evitando que slugs de entidade
+        // ('nike', 'mcdonalds') virem frases tipo "indicador de nike".
         const card: IntelligenceCard = {
           ...synthBase,
           titulo: m?.titulo ?? 'Plano da página',
@@ -150,8 +149,8 @@ export function useOS1BrowserBridge({
           por_que_importa: porQue,
           onde_afeta: sector,
           o_que_fazer: (m?.etapas ?? []).join(' · ') + (m?.criterioConclusao ? ` · Critério de conclusão: ${m.criterioConclusao}` : ''),
-          dominio: sector,
-          area: sector,
+          dominio: 'análise externa',
+          area: 'análise externa',
           urgencia: 'media',
           tipo_card: 'rascunho',
         };
@@ -174,7 +173,7 @@ export function useOS1BrowserBridge({
           por_que_importa: `${padroes}${riscosTxt}${merecemAcaoTxt ? ` · ${merecemAcaoTxt}` : ''}`,
           onde_afeta: sector,
           o_que_fazer: (r?.proximosPassos ?? []).join(' · '),
-          dominio: sector,
+          dominio: 'análise externa',
           area: 'relatorio-sessao',
           urgencia: (r?.riscos ?? []).length > 0 ? 'media' : 'baixa',
           tipo_card: 'informacao',
@@ -211,7 +210,7 @@ export function useOS1BrowserBridge({
           por_que_importa: `${pontos}${pendenciasTxt}`,
           onde_afeta: sector,
           o_que_fazer: (syn.proximosPassos ?? []).join(' · '),
-          dominio: sector,
+          dominio: 'análise externa',
           area: 'dossie',
           urgencia: 'baixa',
           tipo_card: 'informacao',
@@ -237,7 +236,7 @@ export function useOS1BrowserBridge({
           por_que_importa: `${diferencas}${riscosTxt}${melhor}`,
           onde_afeta: sector,
           o_que_fazer: cmp?.recomendacao ?? '',
-          dominio: sector,
+          dominio: 'análise externa',
           area: 'comparacao',
           urgencia: 'baixa',
           tipo_card: 'informacao',
@@ -260,7 +259,7 @@ export function useOS1BrowserBridge({
           por_que_importa: `${aviso} · ${(a?.observacoes ?? []).join(' · ')}`,
           onde_afeta: sector,
           o_que_fazer: (a?.proximosPassos ?? []).join(' · '),
-          dominio: sector,
+          dominio: 'análise externa',
           area: 'leitura-setor',
           urgencia: 'baixa',
           tipo_card: 'informacao',
