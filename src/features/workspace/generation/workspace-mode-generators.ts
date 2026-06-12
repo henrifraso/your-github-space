@@ -21,7 +21,13 @@ import { DIFICULDADE_LABELS } from './workspace-generation';
 export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, difficulty: Dificuldade): Record<string, unknown> {
   const titulo  = card.titulo;
   const resumo  = card.resumo || titulo;
-  const dom     = card.area || card.dominio || 'operação';
+  // C1-B fix: prioriza `dominio` sobre `area` porque `area` em cards vindos
+  // de bridges (browser/mapa) é usada como tag funcional/formato ('plano',
+  // 'plano-territorial') e NÃO como domínio do negócio. `dominio` sempre
+  // espelha `sector` ('geral' default ou um setor real). Cards Codify reais
+  // têm `dominio` semântico ('comercial', 'operacional', etc.), então a
+  // inversão não regride a qualidade dos textos gerados.
+  const dom     = card.dominio || card.area || 'operação';
   const urg     = card.urgencia || 'media';
   const acao    = card.o_que_fazer || 'definir próximo passo';
   const _dif    = DIFICULDADE_LABELS[difficulty];
@@ -312,13 +318,17 @@ export function buildFallbackForSub(card: IntelligenceCard, sub: SubAction, diff
         paragrafos: [
           `Rascunho operacional gerado a partir de "${titulo}".`,
           `Título do rascunho: "${titulo}" — tratar como projeto curto com começo, meio e fim claros.`,
-          `Objetivo: ${acao}. Resultado esperado: indicador de ${dom} retornar ao baseline ou superar em 30 dias.`,
+          // C1-B fix: frases domain-agnostic ("tema" em vez de ${dom}) pra
+          // evitar resultados torpes quando o dom resolve em valor genérico
+          // ('geral') vindo de cards do browser/mapa. Para cards Codify
+          // reais com domínio semântico, "tema" segue natural.
+          `Objetivo: ${acao}. Resultado esperado: indicador do tema retornar ao baseline ou superar em 30 dias.`,
           `Etapas: (1) Diagnóstico em 3 dias; (2) Piloto em 14 dias; (3) Medição em 21 dias; (4) Decisão de escala em 30 dias.`,
-          `Responsável: gestor de ${dom} com sponsor de liderança. Prazo total: ${urg === 'alta' ? '21 dias' : '60 dias'}.`,
+          `Responsável: gestor responsável pelo tema com sponsor de liderança. Prazo total: ${urg === 'alta' ? '21 dias' : '60 dias'}.`,
           `Recompensa simbólica: reconhecimento público quando indicador retornar ao baseline + captura como case na base interna.`,
           `Evidência de conclusão: relatório de 1 página com baseline, ação executada, resultado medido e aprendizado capturado.`,
           `Status inicial: ABERTO — aguardando confirmação de responsável e definição de KPI.`,
-          `Como aparece no painel: rascunho de "${dom}" com prazo ${urg === 'alta' ? '21d' : '60d'} e ícone de urgência ${urg}.`,
+          `Como aparece no painel: rascunho do tema com prazo ${urg === 'alta' ? '21d' : '60d'} e ícone de urgência ${urg}.`,
         ],
       };
 

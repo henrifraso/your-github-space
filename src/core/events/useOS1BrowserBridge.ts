@@ -137,6 +137,12 @@ export function useOS1BrowserBridge({
         // C1-A: novos cards gerados localmente usam 'rascunho' como tipo
         // canônico (em vez do legado 'missao'). Cards persistidos antes da
         // renomeação continuam sendo lidos pelo type union que aceita ambos.
+        // C1-B fix: 'area' representa o DOMÍNIO/área do conteúdo (geral,
+        // comercial, operação, etc.) — NÃO o formato da ação. Antes ficava
+        // como 'plano' e era propagado por `workspace-mode-generators:24`
+        // (`dom = card.area || card.dominio`) virando frases tipo "indicador
+        // de plano" / "gestor de plano". Agora espelha `dominio: sector`
+        // (= 'geral' por default) pra manter invariante area == dominio.
         const card: IntelligenceCard = {
           ...synthBase,
           titulo: m?.titulo ?? 'Plano da página',
@@ -145,7 +151,7 @@ export function useOS1BrowserBridge({
           onde_afeta: sector,
           o_que_fazer: (m?.etapas ?? []).join(' · ') + (m?.criterioConclusao ? ` · Critério de conclusão: ${m.criterioConclusao}` : ''),
           dominio: sector,
-          area: 'plano',
+          area: sector,
           urgencia: 'media',
           tipo_card: 'rascunho',
         };
