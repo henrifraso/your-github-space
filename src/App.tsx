@@ -1698,7 +1698,7 @@ function AuthenticatedApp() {
               quando sector != os1) entram NO TOPO antes do fallback demo.
               Dedupe por id pra evitar duplicação caso um demo coincida. */}
         {(() => {
-          const base = activeSector === 'os1' ? orchCards : (DEMO_FEED_CARDS[activeSector] ?? []);
+          const base = activeSector === 'os1' ? [] : (DEMO_FEED_CARDS[activeSector] ?? []);
           const realIds = new Set(apiIntelligenceCards.map(c => c.id));
           const merged = [...apiIntelligenceCards, ...base.filter(c => !realIds.has(c.id))];
           return merged;
