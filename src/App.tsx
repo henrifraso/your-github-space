@@ -620,11 +620,10 @@ function AuthenticatedApp() {
   // e usa o mesmo canal de openWorkspaceFromCard (setWorkspaceContext).
   const openDiagnosisInWorkspace = async () => {
     try {
-      const diag = await runFullDiagnosis({
-        role,
-        activeSector,
-        businessName: data?.negocio?.nome_fantasia,
-      });
+      const diag = await runFullDiagnosis(
+        { role, activeSector, businessName: data?.negocio?.nome_fantasia },
+        apiIntelligenceCards ?? [],
+      );
 
       // Resumo de áreas fortes/lacunas vem dos arrays já estruturados pelo motor.
       const strongDomains = diag.strongestDomains || [];

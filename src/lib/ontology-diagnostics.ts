@@ -17,6 +17,7 @@ export type {
 
 import { safeGetString, safeGetJSON, safeSetJSON } from '../core/storage/local-storage';
 import { dispatchOS1Event, OS1_EVENTS } from '../core/events/os1-events';
+import type { IntelligenceCard } from '../core/types/card';
 
 // ── Constantes ──
 export const ONTOLOGY_DIAGNOSIS_LS = {
@@ -212,8 +213,12 @@ function normalizar(s: string): string {
 // Mantemos alias com mesma assinatura pra não tocar nos call sites.
 const safeReadLS = <T,>(key: string, fb: T): T => safeGetJSON<T>(key, fb);
 
-// 4. Extrai sinais reais da empresa a partir dos dados locais
-export function extractCompanySignals(profile: CompanyProfileInput): CompanyDomainSignal[] {
+// 4. Extrai sinais reais da empresa a partir dos dados locais e dos cards do feed (W3.2-B).
+// feedCards: cards reais do feed (IntelligenceCard[]). Não sintéticos, não truncam o texto acima de 300 chars.
+export function extractCompanySignals(
+  profile: CompanyProfileInput,
+  feedCards: IntelligenceCard[] = [],
+): CompanyDomainSignal[] {
   const out: CompanyDomainSignal[] = [];
 
   // ── A) Sinais do perfil declarado ──
@@ -223,7 +228,27 @@ export function extractCompanySignals(profile: CompanyProfileInput): CompanyDoma
   if (profile.businessName) out.push({ source: 'profile', text: `empresa ${profile.businessName}`, confidence: 0.4 });
   out.push({ source: 'profile', text: `papel ${profile.role}`, confidence: 0.3 });
 
-  // ── B) Navegador (todas as 9 chaves) ──
+  // ── B) Feed/API — cards reais enviados pela API (W3.2-B) ──
+  // Exclui sintéticos (_synthetic=true) e limita texto a 300 chars por card.
+  for (const card of feedCards) {
+    if (card._synthetic) continue;
+    const text = [
+      card.titulo,
+      card.resumo,
+      card.dominio,
+      card.area,
+      (card.tags || []).join(' '),
+    ].filter(Boolean).join(' ').slice(0, 300).trim();
+    if (!text) continue;
+    out.push({
+      source: 'feed',
+      text,
+      confidence: 0.75,
+      createdAt: undefined,
+    });
+  }
+
+  // ── C) Navegador (todas as 9 chaves) ──
   const browserSources: Array<[string, string]> = [
     ['os1_browser_evidences', 'evidência salva'],
     ['os1_browser_missions', 'missão proposta'],
@@ -495,10 +520,13 @@ function _maturityScore(diags: DomainDiagnosis[]): number {
   return Math.round((total / Math.max(1, weight)) * 100);
 }
 
-export async function runFullDiagnosis(opts: BuildProfileInput = {}): Promise<CompanyOntologyDiagnosis> {
+export async function runFullDiagnosis(
+  opts: BuildProfileInput = {},
+  feedCards: IntelligenceCard[] = [],
+): Promise<CompanyOntologyDiagnosis> {
   const terms = await loadOntologyTerms();
   const profile = buildCompanyProfile(opts);
-  const signals = extractCompanySignals(profile);
+  const signals = extractCompanySignals(profile, feedCards);
   const diags = diagnoseCompanyAgainstOntology(profile, terms, signals);
   const rk = rankDiagnosis(diags);
   const cards = generateDiagnosisCards(rk, diags);
