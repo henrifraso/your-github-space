@@ -29,6 +29,7 @@ import type {
 import { isSensitiveDomain, inferSourceFromCardId } from '../lib/workspace-tools';
 import { useCodifyCardContext, type CodifyScope } from '../features/feed/use-codify-card-context';
 import { WorkspaceContextBlock } from '../features/workspace/blocks/WorkspaceContextBlock';
+import { saveWorkspaceBlock, loadLastWorkspaceBlock } from '../features/workspace/persistence/workspace-blocks-api';
 
 // Tipos públicos do Workspace foram movidos para core/types/workspace.ts.
 // Reexportamos para manter compatibilidade com imports existentes.
@@ -116,6 +117,7 @@ interface Message {
   text: string;
   card?: IntelligenceCard;
   block?: WorkspaceBlock;
+  _fromPersistence?: boolean;
 }
 
 function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, onWorkspaceCleared, chatHistoryOpen, archivedSessions, onSelectHistorySession, codifyScope }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; onWorkspaceCleared?: () => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void; codifyScope?: CodifyScope | null }) {
@@ -296,6 +298,22 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
         .catch(() => { /* mantém locais */ });
     }
 
+    // W2.2 — carrega último bloco salvo para este card (fail-soft)
+    if (!card._synthetic && !card.id.startsWith('synth-')) {
+      const cardIdAtLoad = card.id;
+      loadLastWorkspaceBlock(card.id).then(loaded => {
+        if (!loaded) return;
+        if (lastCardIdRef.current !== cardIdAtLoad) return;
+        setMessages(prev => [...prev, {
+          id: `persisted-${loaded.id}`,
+          role: 'block' as const,
+          text: loaded.subLabel || 'Resultado anterior',
+          block: loaded,
+          _fromPersistence: true,
+        }]);
+      }).catch(() => { /* fail-soft */ });
+    }
+
   }, [workspaceContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Dispara uma sub-ação: chama endpoint ou usa fallback local, gera bloco.
@@ -333,6 +351,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       createdAt:  new Date().toISOString(),
     };
     setMessages(prev => [...prev, { id: blockId, role: 'block', text: sub.label, block }]);
+    if (!useFallback && !('erro' in result)) saveWorkspaceBlock(block, activeCard.titulo);
     setActionLoading(null);
   }
 
@@ -535,6 +554,11 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                 transition={{ duration: 0.22, ease: 'easeOut' }}
                 className="flex flex-col items-start gap-2.5"
               >
+                {msg._fromPersistence && (
+                  <p className="text-[10px] text-neutral-400 dark:text-neutral-500 px-1 flex items-center gap-1">
+                    <History size={10} /> Último resultado salvo
+                  </p>
+                )}
                 <div className="max-w-[94%] w-full rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
                   <WorkspaceBlockHeader
                     kind={b.kind}
