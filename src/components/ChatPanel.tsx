@@ -50,7 +50,7 @@ import {
   shortcutsForCard, buildInitialBlock, buildDiagnosticBlock, buildShareBlock,
   buildBlockShortcuts, buildModeBlock,
 } from '../features/workspace/generation/workspace-block-builders';
-import { buildFallbackForSub } from '../features/workspace/generation/workspace-mode-generators';
+import { executeAction } from '../features/workspace/execute/action-executor';
 
 type Phase = 'init' | 'expanded' | 'selected';
 
@@ -316,42 +316,15 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
 
   }, [workspaceContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Dispara uma sub-ação: chama endpoint ou usa fallback local, gera bloco.
+  // Dispara uma sub-ação via executor central (W3.1-A).
   async function handleSubAction(mode: MainKey, sub: SubAction) {
     if (!activeCard) return;
     setActionLoading(sub.key);
-    const blockId = `blk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    let result: Record<string, unknown>;
-    const useFallback = !sub.endpoint || activeCard._synthetic;
-    if (useFallback) {
-      await new Promise(r => setTimeout(r, 300));
-      result = buildFallbackForSub(activeCard, sub, dificuldade);
-    } else {
-      try {
-        result = await apiFetch<Record<string, unknown>>(`/api/workspace/${sub.endpoint}`, {
-          method: 'POST',
-          body: JSON.stringify({ card_id: activeCard.id, ...(sub.extra || {}) }),
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Falha ao conectar';
-        result = { erro: msg };
-      }
-    }
-    const block: WorkspaceBlock = {
-      id:         blockId,
-      cardId:     activeCard.id,
-      mode,
-      subKey:     sub.key,
-      subLabel:   sub.label,
-      endpoint:   sub.endpoint,
-      extra:      sub.extra,
-      result,
-      difficulty: dificuldade,
-      pinned:     false,
-      createdAt:  new Date().toISOString(),
-    };
-    setMessages(prev => [...prev, { id: blockId, role: 'block', text: sub.label, block }]);
-    if (!useFallback && !('erro' in result)) saveWorkspaceBlock(block, activeCard.titulo);
+    const res = await executeAction({ source: 'workspace', card: activeCard, mode, sub, dificuldade });
+    if (!res) { setActionLoading(null); return; }
+    const { block, usedFallback } = res;
+    setMessages(prev => [...prev, { id: block.id, role: 'block', text: sub.label, block }]);
+    if (!usedFallback && !('erro' in block.result)) saveWorkspaceBlock(block, activeCard.titulo);
     setActionLoading(null);
   }
 
