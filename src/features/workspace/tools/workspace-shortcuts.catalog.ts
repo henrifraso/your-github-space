@@ -390,7 +390,7 @@ export const SHORTCUTS_MARKETING: WorkspaceShortcut[] = [
   {
     id: 'sc-mkt-campanha',
     kind: 'ferramenta',
-    tier: 'beta',
+    tier: 'api_parceira',
     tagline: 'Transforme este sinal em uma campanha local testável. O OS¹ gera briefing com objetivo, público, mensagem central, canal e métrica de sucesso — para você rodar um teste curto e barato antes de comprometer orçamento em campanha grande.',
     cta: 'Abrir campanha',
     appliesTo: ['marketing', 'campanhas', 'vendas', 'comercial'],
