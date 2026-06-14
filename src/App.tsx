@@ -1204,13 +1204,13 @@ function AuthenticatedApp() {
                 <Home size={24} className="hidden lg:block" />
               </button>
             )}
-            <button className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90">
+            <button
+              onClick={() => showToast('Notificações em breve', 'blue')}
+              className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+            >
               <Bell size={18} className="sm:hidden" />
               <Bell size={20} className="hidden sm:block lg:hidden" />
               <Bell size={24} className="hidden lg:block" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-              )}
             </button>
           </div>
         </div>

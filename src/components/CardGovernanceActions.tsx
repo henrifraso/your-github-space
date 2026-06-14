@@ -104,6 +104,8 @@ export function CardGovernanceActions({
   const [busy, setBusy] = useState<Busy>('idle');
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [distOpen, setDistOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ action: 'approve' | 'reject' } | null>(null);
+  const [dialogComment, setDialogComment] = useState('');
 
   // GA4 contexto: matriz "visitando" uma loja pelo SectorSwitcher deve
   // enxergar a UX da loja (só feed, sem governança). Sem este gate, o
@@ -136,15 +138,26 @@ export function CardGovernanceActions({
   // um skeleton com a mesma altura do bloco final.
   const showSkeleton = gov.accessLevel !== 'matrix';
 
-  async function runApprove() {
+  function runApprove() {
     setErrMsg(null);
-    const comment = window.prompt(
-      'Comentário (opcional) para registro de aprovação:',
-      '',
-    );
-    if (comment === null) return;
-    setBusy('approving');
-    const res = await approveCard(cardId, comment || undefined);
+    setDialogComment('');
+    setConfirmDialog({ action: 'approve' });
+  }
+
+  function runReject() {
+    setErrMsg(null);
+    setDialogComment('');
+    setConfirmDialog({ action: 'reject' });
+  }
+
+  async function confirmAction() {
+    if (!confirmDialog) return;
+    const { action } = confirmDialog;
+    setConfirmDialog(null);
+    setBusy(action === 'approve' ? 'approving' : 'rejecting');
+    const res = action === 'approve'
+      ? await approveCard(cardId, dialogComment || undefined)
+      : await rejectCard(cardId, dialogComment || undefined);
     setBusy('idle');
     if (res.status === 'ok') {
       gov.reload();
@@ -153,26 +166,6 @@ export function CardGovernanceActions({
       setErrMsg(res.message);
     } else if (res.status === 'forbidden') {
       setErrMsg('Sem permissão de matriz.');
-    } else {
-      setErrMsg(`Falha: ${res.status}`);
-    }
-  }
-
-  async function runReject() {
-    setErrMsg(null);
-    const comment = window.prompt(
-      'Comentário (opcional) para registro de rejeição:',
-      '',
-    );
-    if (comment === null) return;
-    setBusy('rejecting');
-    const res = await rejectCard(cardId, comment || undefined);
-    setBusy('idle');
-    if (res.status === 'ok') {
-      gov.reload();
-      onChange?.();
-    } else if (res.status === 'error') {
-      setErrMsg(res.message);
     } else {
       setErrMsg(`Falha: ${res.status}`);
     }
@@ -246,6 +239,36 @@ export function CardGovernanceActions({
               {errMsg}
             </span>
           )}
+        </div>
+      )}
+      {confirmDialog && (
+        <div className="mt-2.5 p-3 rounded-xl bg-neutral-50 dark:bg-[#252525] border border-neutral-200 dark:border-[#3a3a3a]">
+          <p className="text-[11px] font-medium text-neutral-600 dark:text-neutral-300 mb-1.5">
+            {confirmDialog.action === 'approve' ? 'Comentário de aprovação (opcional):' : 'Motivo da rejeição (opcional):'}
+          </p>
+          <textarea
+            value={dialogComment}
+            onChange={e => setDialogComment(e.target.value)}
+            placeholder="..."
+            rows={2}
+            className="w-full text-[12px] px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-[#3a3a3a] bg-white dark:bg-[#1e1e1e] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-600 resize-none outline-none focus:border-neutral-400 dark:focus:border-neutral-600 transition-colors"
+          />
+          <div className="flex justify-end gap-2 mt-2">
+            <button
+              type="button"
+              onClick={() => setConfirmDialog(null)}
+              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-[#2e2e2e] cursor-pointer transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={confirmAction}
+              className={confirmDialog.action === 'approve' ? BTN_APPROVE : BTN_REJECT}
+            >
+              Confirmar
+            </button>
+          </div>
         </div>
       )}
       {distOpen && !showSkeleton && (
