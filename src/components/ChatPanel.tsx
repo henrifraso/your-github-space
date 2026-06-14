@@ -392,6 +392,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       kind: 'tool',
     };
     setMessages(prev => [...prev, { id: blockId, role: 'block', text: tool.label, block }]);
+    // W3.1-B-A: persistir blocos de atalho/ferramenta se card é real e sem erro.
+    const SYNTHETIC_PREFIXES = ['synth-', 'browser-', 'map-', 'ontology-'];
+    if (
+      activeCard &&
+      !activeCard._synthetic &&
+      !SYNTHETIC_PREFIXES.some(p => block.cardId.startsWith(p)) &&
+      !('erro' in block.result)
+    ) {
+      saveWorkspaceBlock(block, activeCard.titulo);
+    }
   }
 
   // "Exemplos" no bloco: chama Aprender · exemplo pro mesmo card.
