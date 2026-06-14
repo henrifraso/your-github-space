@@ -171,7 +171,7 @@ function ShortcutRow({ shortcut, clickable, showTierBadge, onClick }: ShortcutRo
       <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${pill}`}>
         {label}
       </span>
-      {tierLabel && tierPill && (
+      {showTierBadge && tierLabel && tierPill && (
         <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${tierPill}`}>
           {tierLabel}
         </span>
