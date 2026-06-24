@@ -224,9 +224,9 @@ function EvidenciaItem({ ev }: { ev: Evidencia }) {
 
 // ── Painel principal ──────────────────────────────────────────────────────────
 
-interface ScoreOS1PanelProps { onClose?: () => void; activeSector?: string; role?: string; }
+interface ScoreOS1PanelProps { onClose?: () => void; activeSector?: string; role?: string; standalone?: boolean; }
 
-export function ScoreOS1Panel({ onClose, activeSector, role: _role }: ScoreOS1PanelProps) {
+export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone = true }: ScoreOS1PanelProps) {
   const mock = getMock(activeSector);
   const [evidenciasReais, setEvidenciasReais] = useState<Evidencia[] | null>(null);
 
@@ -258,18 +258,20 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role }: ScoreOS1Pa
   return (
     <div className="flex flex-col h-full bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
 
-      {/* Barra superior — pt-10 (40px) libera os traffic lights do macOS hiddenInset */}
-      <div className="flex items-center gap-2 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] flex-shrink-0">
-        <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">OS¹</span>
-        <span className="text-neutral-300 dark:text-neutral-600">/</span>
-        <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">Score da Empresa</span>
-        <span className="text-[10px] text-neutral-400 dark:text-neutral-600 bg-neutral-100 dark:bg-[#2a2a2a] px-2 py-0.5 rounded-full ml-auto">{evidenciasReais ? 'evidências reais' : 'mockado'}</span>
-        {onClose && (
-          <button onClick={onClose} className="ml-1 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
-            <X size={13} />
-          </button>
-        )}
-      </div>
+      {/* Barra própria — só quando standalone (fora do BrowserView) */}
+      {standalone && (
+        <div className="flex items-center gap-2 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] flex-shrink-0">
+          <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">OS¹</span>
+          <span className="text-neutral-300 dark:text-neutral-600">/</span>
+          <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">Score da Empresa</span>
+          <span className="text-[10px] text-neutral-400 dark:text-neutral-600 bg-neutral-100 dark:bg-[#2a2a2a] px-2 py-0.5 rounded-full ml-auto">{evidenciasReais ? 'evidências reais' : 'mockado'}</span>
+          {onClose && (
+            <button onClick={onClose} className="ml-1 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:hidden">
 
