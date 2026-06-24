@@ -1926,6 +1926,8 @@ function AuthenticatedApp() {
         open={browserOpen}
         onClose={() => setBrowserOpen(false)}
         onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
+        activeSector={activeSector}
+        role={role}
       />
 
       {/* Chat */}

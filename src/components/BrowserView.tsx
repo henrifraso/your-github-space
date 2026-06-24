@@ -19,6 +19,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { isElectron } from '../features/browser/browser-url-utils';
 import { ElectronBrowser } from '../features/browser/ElectronBrowserView';
 import { IframeBrowser } from '../features/browser/IframeBrowserFallback';
+import { ScoreOS1Panel } from '../features/score/ScoreOS1Panel';
+
+// URLs internas do OS¹ — renderizam React, não webview/iframe
+const OS1_INTERNAL_URLS = ['os1://score', 'os1://contexto'];
 
 // ── Modal principal — exportado ───────────────────────────────────────────────
 interface BrowserViewProps {
@@ -27,9 +31,11 @@ interface BrowserViewProps {
   initialUrl?: string;
   lightMode?: boolean;
   onSync?: () => void;
+  activeSector?: string;
+  role?: string;
 }
 
-export function BrowserView({ open, onClose, initialUrl = 'https://www.google.com', lightMode = false, onSync }: BrowserViewProps) {
+export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMode = false, onSync, activeSector, role }: BrowserViewProps) {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { if (!open) setSyncing(false); }, [open]);
@@ -42,6 +48,7 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
   }, [open, onClose]);
 
   const lm = lightMode;
+  const isInternal = OS1_INTERNAL_URLS.includes(initialUrl);
 
   return (
     <AnimatePresence>
@@ -54,22 +61,24 @@ export function BrowserView({ open, onClose, initialUrl = 'https://www.google.co
           className="fixed inset-0 z-[300] flex flex-col"
           style={{ background: lm ? '#F5F1EA' : '#0a0a0a' }}
         >
-          {/* Conteúdo: webview (Electron) ou iframe (browser) */}
+          {/* Conteúdo: página interna OS¹, webview (Electron) ou iframe (browser) */}
           <div className="flex-1 min-h-0">
-            {isElectron
-              ? <ElectronBrowser initialUrl={initialUrl} syncing={syncing} onSyncClick={() => {
-                  if (syncing) { onSync ? onSync() : onClose(); }
-                  else setSyncing(true);
-                }} />
-              : <IframeBrowser
-                  initialUrl={initialUrl}
-                  lightMode={lm}
-                  syncing={syncing}
-                  onSyncClick={() => {
+            {isInternal
+              ? <ScoreOS1Panel onClose={onClose} activeSector={activeSector} role={role} />
+              : isElectron
+                ? <ElectronBrowser initialUrl={initialUrl} syncing={syncing} onSyncClick={() => {
                     if (syncing) { onSync ? onSync() : onClose(); }
                     else setSyncing(true);
-                  }}
-                />
+                  }} />
+                : <IframeBrowser
+                    initialUrl={initialUrl}
+                    lightMode={lm}
+                    syncing={syncing}
+                    onSyncClick={() => {
+                      if (syncing) { onSync ? onSync() : onClose(); }
+                      else setSyncing(true);
+                    }}
+                  />
             }
           </div>
         </motion.div>
