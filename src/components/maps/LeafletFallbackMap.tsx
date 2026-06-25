@@ -95,19 +95,24 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
     });
     L.marker([clientPosition.lat, clientPosition.lng], { icon: clientIcon, zIndexOffset: 1000 }).addTo(group);
 
-    // Markers dos concorrentes
+    // Markers dos concorrentes — bolinha + etiqueta clicável numa div unificada
     markers.forEach(({ position, competitor, onClick }) => {
-      const nota = Number(competitor.nota_google);
-      const color = nota >= 4.3 ? '#22c55e' : nota >= 4.0 ? '#f59e0b' : '#ef4444';
+      const risk = competitor.risco_competitivo;
+      const color = risk === 'alto' ? '#ef4444' : risk === 'medio' ? '#f59e0b' : '#22c55e';
+      const nome = competitor.nome;
       const icon = L.divIcon({
-        className: 'os1-leaflet-competitor',
-        html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #1a1a1a;box-shadow:0 1px 4px rgba(0,0,0,0.6);cursor:pointer"></div>`,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
+        className: '',
+        html: `<div style="display:flex;align-items:center;gap:5px;cursor:pointer;pointer-events:all">` +
+          `<div style="width:12px;height:12px;flex-shrink:0;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.18);box-shadow:0 0 0 2px rgba(0,0,0,0.45),0 1px 5px rgba(0,0,0,0.7)"></div>` +
+          `<span style="color:#f0f0f0;font-size:10px;font-weight:600;white-space:nowrap;line-height:1.4;` +
+            `background:rgba(8,8,10,0.82);padding:2px 6px;border-radius:4px;` +
+            `border:0.5px solid rgba(255,255,255,0.1);text-shadow:0 1px 2px rgba(0,0,0,0.8)">` +
+            `${nome}</span>` +
+          `</div>`,
+        iconAnchor: [7, 8],
       });
       const m = L.marker([position.lat, position.lng], { icon }).addTo(group);
       m.on('click', () => onClick(competitor));
-      m.bindTooltip(competitor.nome, { direction: 'top', offset: [0, -8], className: 'os1-leaflet-tooltip' });
     });
 
     // Círculo do raio

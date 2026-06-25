@@ -24,6 +24,15 @@ export const OSCAR_COORDS: google.maps.LatLngLiteral[] = [
   { lat: -30.0346, lng: -51.2200 }, // [13] Renner — Porto Alegre (~900km S)
   { lat: -30.0400, lng: -51.2100 }, // [14] Paquetá Sports — Porto Alegre (~900km S)
   { lat: -23.5680, lng: -46.6490 }, // [15] Shoestock — online/SP (~87km SW)
+  // ── Novos locais SJC (raio 5km) ──────────────────────────────────────────
+  { lat: -23.2217, lng: -45.8977 }, // [16] Studio Z — Center Vale (~400m NE)
+  { lat: -23.2222, lng: -45.8983 }, // [17] Sonho dos Pés — Center Vale (~360m NE)
+  { lat: -23.2285, lng: -45.8855 }, // [18] Di Gaspi — Jd. Satélite (~1.8km E)
+  { lat: -23.2375, lng: -45.9235 }, // [19] World Tennis — Vale Sul (~1.6km S)
+  { lat: -23.2155, lng: -45.8840 }, // [20] Riachuelo Calçados — Colinas Shopping (~2.5km NE)
+  // ── Regionais (raio 50km) ────────────────────────────────────────────────
+  { lat: -23.3084, lng: -45.9657 }, // [21] Centauro Jacareí — NovaShopping (~20km E)
+  { lat: -23.0330, lng: -45.5480 }, // [22] Americanas Calçados — Taubaté Shopping (~35km NE)
 ];
 
 // ── Coordenadas fixas dos concorrentes ──────────────────────────────
