@@ -54,9 +54,9 @@ export const SECTORS: ProfileConfig[] = [
   },
   {
     id: 'oscar-piloto-01',
-    label: 'Oscar Loja Piloto 01',
+    label: 'Oscar Loja 1',
     niche: 'Varejo de Calçados · Loja',
-    desc: 'Oscar Calçados · Unidade piloto conectada (visão não-matriz)',
+    desc: 'Unidade Oscar com leitura focada em presença local, concorrência no entorno, reputação da loja e operação comercial.',
     color: '#f97316',
     logo: 'OL',
     active: false,

@@ -1087,8 +1087,8 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
     ...NIKE_DATA,
     negocio: {
       ...NIKE_DATA.negocio,
-      nome_fantasia: 'Oscar Loja Piloto 01',
-      segmento: 'Varejo de Calçados · Loja conectada',
+      nome_fantasia: 'Oscar Loja 1',
+      segmento: 'Varejo de Calçados · Loja',
     },
   },
   ifood:     IFOOD_DATA,

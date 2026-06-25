@@ -82,7 +82,8 @@ const NOME_POR_SECTOR: Record<string, string> = {
 const OSCAR_SECTORS = new Set(['oscar-piloto-01', 'nike']);
 
 function getMock(activeSector?: string): ScoreMock {
-  if (activeSector && OSCAR_SECTORS.has(activeSector)) return OSCAR_MOCK;
+  if (activeSector === 'nike') return OSCAR_MOCK;
+  if (activeSector === 'oscar-piloto-01') return { ...OSCAR_MOCK, companyName: 'Oscar Loja 1' };
   const nome = activeSector ? (NOME_POR_SECTOR[activeSector] ?? 'Empresa selecionada') : 'Empresa selecionada';
   return { ...NEUTRO_BASE, companyName: nome };
 }
