@@ -57,8 +57,8 @@ function buildInsight(comps: Competitor[], radiusMeters: number): string {
 }
 
 const CARD = [
-  'bg-white dark:bg-[#242424]',
-  'border border-neutral-200 dark:border-[#303030]',
+  'bg-[#f7f8f9] dark:bg-[#2f2f2f]',
+  'border-[0.5px] border-neutral-200 dark:border-[#3d3d3d]',
   'rounded-2xl',
   'shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]',
 ].join(' ');
@@ -89,7 +89,7 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
       className="h-full flex flex-col overflow-hidden"
     >
       {/* Header */}
-      <div className="px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-[#2e2e2e] flex-shrink-0">
+      <div className="px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-[#414141] flex-shrink-0">
         <p className={`${LABEL} mb-1.5`}>Inteligência competitiva</p>
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -213,7 +213,7 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
 
         {/* Oportunidade para Oscar */}
         {topOp && (
-          <div className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
+          <div className="bg-emerald-50 dark:bg-emerald-900/30 border-[0.5px] border-emerald-200 dark:border-emerald-800 rounded-2xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
             <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400/70 mb-1.5">
               Oportunidade para Oscar
             </p>
