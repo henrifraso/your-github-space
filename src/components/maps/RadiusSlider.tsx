@@ -23,8 +23,8 @@ export function RadiusSlider({ value, onChange, competitorCount }: Props) {
   const currentStep = STEPS[idx] ?? STEPS[4];
 
   return (
-    <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/8 bg-[#181818]">
-      <span className="text-white/40 text-[11px] flex-shrink-0 w-16">Raio</span>
+    <div className="flex items-center gap-3 px-5 py-2.5 border-b border-neutral-200 dark:border-[#2e2e2e] bg-[#f0f2f4] dark:bg-[#242424]">
+      <span className="text-neutral-400 dark:text-neutral-500 text-[11px] font-medium flex-shrink-0 w-10">Raio</span>
       <input
         type="range"
         min={0}
@@ -34,8 +34,14 @@ export function RadiusSlider({ value, onChange, competitorCount }: Props) {
         className="flex-1 h-1 appearance-none rounded-full cursor-pointer"
         style={{ accentColor: '#3b82f6' }}
       />
-      <span className="text-white/80 text-xs font-medium w-16 text-right flex-shrink-0">{currentStep.label}</span>
-      <span className={`text-xs flex-shrink-0 w-28 text-right ${competitorCount === 0 ? 'text-[#ef4444]' : 'text-white/40'}`}>
+      <span className="text-neutral-700 dark:text-neutral-200 text-xs font-semibold w-16 text-right flex-shrink-0">
+        {currentStep.label}
+      </span>
+      <span className={`text-xs flex-shrink-0 w-28 text-right ${
+        competitorCount === 0
+          ? 'text-red-500 dark:text-red-400'
+          : 'text-neutral-400 dark:text-neutral-500'
+      }`}>
         {value === Infinity ? 'todos' : `${competitorCount} concorrente${competitorCount !== 1 ? 's' : ''}`}
       </span>
     </div>

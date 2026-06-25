@@ -56,12 +56,18 @@ function buildInsight(comps: Competitor[], radiusMeters: number): string {
   return `${n} concorrentes no mapa, incluindo redes nacionais e e-commerces. A maioria não compite diretamente com a loja física Oscar em SJC.`;
 }
 
-const CARD = 'bg-[#1e1e20] border-[0.5px] border-white/10 rounded-xl shadow-[0_4px_10px_-1px_rgba(0,0,0,0.45),0_1px_2px_rgba(0,0,0,0.3)]';
+const CARD = [
+  'bg-white dark:bg-[#242424]',
+  'border border-neutral-200 dark:border-[#2e2e2e]',
+  'rounded-xl',
+  'shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]',
+].join(' ');
+
+const LABEL = 'text-[9px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500';
 
 export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
   const alto  = comps.filter(c => c.risco_competitivo === 'alto');
   const medio = comps.filter(c => c.risco_competitivo === 'medio');
-  const baixo = comps.filter(c => !c.risco_competitivo || c.risco_competitivo === 'baixo');
 
   const ticket    = useMemo(() => calcTicketRange(comps), [comps]);
   const strengths = useMemo(() => topTags(comps.map(c => c.faz_bem), 5), [comps]);
@@ -69,10 +75,10 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
   const topOp     = alto[0]?.oportunidade ?? medio[0]?.oportunidade;
 
   const dominantRisk = alto.length > 0 ? 'alto' : medio.length > 0 ? 'médio' : 'baixo';
-  const dominantColor =
-    dominantRisk === 'alto'  ? { bg: 'bg-red-500/15',     text: 'text-red-400' } :
-    dominantRisk === 'médio' ? { bg: 'bg-amber-500/15',   text: 'text-amber-400' } :
-                               { bg: 'bg-emerald-500/15', text: 'text-emerald-400' };
+  const riskBadge =
+    dominantRisk === 'alto'  ? 'bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400' :
+    dominantRisk === 'médio' ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400' :
+                               'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400';
 
   return (
     <motion.div
@@ -83,21 +89,19 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
       className="h-full flex flex-col overflow-hidden"
     >
       {/* Header */}
-      <div className="px-4 pt-5 pb-4 border-b border-white/8 flex-shrink-0">
-        <p className="text-white/30 text-[10px] font-semibold uppercase tracking-wider mb-2">
-          Inteligência competitiva
-        </p>
+      <div className="px-5 pt-5 pb-4 border-b border-neutral-200 dark:border-[#2e2e2e] flex-shrink-0">
+        <p className={`${LABEL} mb-1.5`}>Inteligência competitiva</p>
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h3 className="text-white font-semibold text-sm leading-tight">
+            <h3 className="text-neutral-800 dark:text-neutral-100 font-semibold text-sm leading-tight">
               Raio de {formatRadius(radiusMeters)}
             </h3>
-            <p className="text-white/35 text-[11px] mt-0.5">
+            <p className="text-neutral-500 dark:text-neutral-400 text-[11px] mt-0.5">
               {comps.length} {comps.length === 1 ? 'concorrente' : 'concorrentes'} visíveis
             </p>
           </div>
           {comps.length > 0 && (
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${dominantColor.bg} ${dominantColor.text}`}>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${riskBadge}`}>
               {dominantRisk} risco
             </span>
           )}
@@ -110,66 +114,79 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
         {/* Empty state */}
         {comps.length === 0 && (
           <div className="py-10 text-center">
-            <p className="text-white/25 text-xs">Nenhum concorrente neste raio.</p>
-            <p className="text-white/15 text-[10px] mt-1">Tente aumentar o raio.</p>
+            <p className="text-neutral-400 dark:text-neutral-500 text-xs">Nenhum concorrente neste raio.</p>
+            <p className="text-neutral-300 dark:text-neutral-600 text-[10px] mt-1">Tente aumentar o raio.</p>
           </div>
         )}
 
-        {/* Métricas em grid 2×2 */}
+        {/* Grid 2×2 de métricas */}
         {comps.length > 0 && (
           <div className="grid grid-cols-2 gap-2">
             {/* Total */}
-            <div className={`${CARD} px-3 py-2.5 flex flex-col gap-1`}>
-              <p className="text-white/30 text-[9px] font-semibold uppercase tracking-wide">Total</p>
-              <p className="text-white text-2xl font-bold tabular-nums leading-none">{comps.length}</p>
+            <div className={`${CARD} px-3 py-2.5`}>
+              <p className={`${LABEL} mb-1.5`}>Total</p>
+              <p className="text-neutral-800 dark:text-neutral-100 text-2xl font-bold tabular-nums leading-none">
+                {comps.length}
+              </p>
             </div>
             {/* Ticket */}
-            <div className={`${CARD} px-3 py-2.5 flex flex-col gap-1`}>
-              <p className="text-white/30 text-[9px] font-semibold uppercase tracking-wide">Ticket estimado</p>
-              <p className="text-white/85 text-[11px] font-semibold leading-tight mt-0.5">
+            <div className={`${CARD} px-3 py-2.5`}>
+              <p className={`${LABEL} mb-1.5`}>Ticket estimado</p>
+              <p className="text-neutral-700 dark:text-neutral-200 text-[11px] font-semibold leading-tight">
                 {ticket ?? '—'}
               </p>
             </div>
             {/* Alto risco */}
-            <div className={`${CARD} px-3 py-2.5 flex flex-col gap-1`}>
-              <p className="text-white/30 text-[9px] font-semibold uppercase tracking-wide">Alto risco</p>
+            <div className={`${CARD} px-3 py-2.5`}>
+              <p className={`${LABEL} mb-1.5`}>Alto risco</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-red-400 text-2xl font-bold tabular-nums leading-none">{alto.length}</span>
-                {alto.length > 0 && <span className="text-white/25 text-[10px] mb-0.5">concorrentes</span>}
+                <span className="text-red-600 dark:text-red-400 text-2xl font-bold tabular-nums leading-none">
+                  {alto.length}
+                </span>
+                {alto.length > 0 && (
+                  <span className="text-neutral-400 dark:text-neutral-500 text-[10px] mb-0.5">concorrentes</span>
+                )}
               </div>
             </div>
-            {/* Risco médio */}
-            <div className={`${CARD} px-3 py-2.5 flex flex-col gap-1`}>
-              <p className="text-white/30 text-[9px] font-semibold uppercase tracking-wide">Risco médio</p>
+            {/* Médio risco */}
+            <div className={`${CARD} px-3 py-2.5`}>
+              <p className={`${LABEL} mb-1.5`}>Risco médio</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-amber-400 text-2xl font-bold tabular-nums leading-none">{medio.length}</span>
-                {medio.length > 0 && <span className="text-white/25 text-[10px] mb-0.5">concorrentes</span>}
+                <span className="text-amber-600 dark:text-amber-400 text-2xl font-bold tabular-nums leading-none">
+                  {medio.length}
+                </span>
+                {medio.length > 0 && (
+                  <span className="text-neutral-400 dark:text-neutral-500 text-[10px] mb-0.5">concorrentes</span>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        {/* Insight */}
+        {/* Análise do raio */}
         {comps.length > 0 && (
           <div className={`${CARD} p-3.5`}>
-            <p className="text-white/28 text-[9px] font-semibold uppercase tracking-wide mb-2">Análise do raio</p>
-            <p className="text-white/62 text-xs leading-relaxed">{insight}</p>
+            <p className={`${LABEL} mb-2`}>Análise do raio</p>
+            <p className="text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed">{insight}</p>
           </div>
         )}
 
         {/* Principais ameaças */}
         {alto.length > 0 && (
           <div className={`${CARD} p-3.5`}>
-            <p className="text-white/28 text-[9px] font-semibold uppercase tracking-wide mb-2.5">
-              Principais ameaças
-            </p>
-            <div className="space-y-0">
+            <p className={`${LABEL} mb-2.5`}>Principais ameaças</p>
+            <div>
               {alto.slice(0, 4).map(c => (
-                <div key={c.nome} className="flex items-center gap-2 py-2 border-b border-white/5 last:border-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400/60 flex-shrink-0" />
-                  <span className="text-white/72 text-xs min-w-0 truncate">{c.nome}</span>
+                <div
+                  key={c.nome}
+                  className="flex items-center gap-2 py-2 border-b border-neutral-100 dark:border-[#2e2e2e] last:border-0"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                  <span className="text-neutral-700 dark:text-neutral-300 text-xs min-w-0 truncate">{c.nome}</span>
                   {c.ticket_medio && (
-                    <span className="text-white/22 text-[10px] flex-shrink-0 ml-auto">{c.ticket_medio}</span>
+                    <span className="text-neutral-400 dark:text-neutral-500 text-[10px] flex-shrink-0 ml-auto">
+                      {c.ticket_medio}
+                    </span>
                   )}
                 </div>
               ))}
@@ -180,14 +197,12 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
         {/* Padrão competitivo */}
         {strengths.length > 0 && (
           <div className={`${CARD} p-3.5`}>
-            <p className="text-white/28 text-[9px] font-semibold uppercase tracking-wide mb-2.5">
-              Padrão competitivo
-            </p>
+            <p className={`${LABEL} mb-2.5`}>Padrão competitivo</p>
             <div className="flex flex-wrap gap-1.5">
               {strengths.map(s => (
                 <span
                   key={s}
-                  className="text-[10px] font-medium px-2 py-0.5 bg-white/[0.06] text-white/50 rounded-full border-[0.5px] border-white/10"
+                  className="text-[10px] font-medium px-2 py-0.5 bg-neutral-100 dark:bg-[#353535] text-neutral-600 dark:text-neutral-300 rounded-full border border-neutral-200 dark:border-[#484848]"
                 >
                   {s}
                 </span>
@@ -196,19 +211,19 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
           </div>
         )}
 
-        {/* Oportunidade */}
+        {/* Oportunidade para Oscar */}
         {topOp && (
-          <div className="bg-emerald-950/60 border-[0.5px] border-emerald-500/20 rounded-xl p-3.5 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.45)]">
-            <p className="text-emerald-400/60 text-[9px] font-semibold uppercase tracking-wide mb-1.5">
+          <div className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
+            <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400/70 mb-1.5">
               Oportunidade para Oscar
             </p>
-            <p className="text-white/72 text-xs leading-relaxed">{topOp}</p>
+            <p className="text-neutral-700 dark:text-neutral-300 text-xs leading-relaxed">{topOp}</p>
           </div>
         )}
 
-        {/* Dica */}
+        {/* Dica de interação */}
         {comps.length > 0 && (
-          <p className="text-white/16 text-[10px] text-center pt-1 pb-2">
+          <p className="text-neutral-300 dark:text-neutral-600 text-[10px] text-center pt-1 pb-2">
             Clique em um concorrente para ver inteligência detalhada
           </p>
         )}

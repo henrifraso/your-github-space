@@ -71,26 +71,23 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
 
   return (
     <div
-      className={`fixed inset-0 z-[190] ${isDark ? 'bg-[#121212]' : 'bg-white'} flex flex-col select-none`}
+      className="fixed inset-0 z-[190] bg-[#f0f2f4] dark:bg-[#181818] flex flex-col select-none"
       style={{ WebkitAppRegion: 'no-drag', WebkitUserSelect: 'none' } as React.CSSProperties}
     >
-      {/* Header — X simples no canto (Esc também fecha, via listener) */}
-      <div
-        className="flex items-center justify-end px-5 pt-5 pb-3 flex-shrink-0"
-        style={{
-          background: isDark ? '#2f2f2f' : '#f7f8f9',
-          borderBottom: isDark ? '1px solid #4a4a4a' : '0.5px solid #ebedef',
-          boxShadow: isDark
-            ? '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)'
-            : '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12)',
-        }}
-      >
+      {/* Header */}
+      <div className="flex-shrink-0 px-5 pt-4 pb-3.5 border-b border-neutral-200 dark:border-[#2e2e2e] flex items-center justify-between gap-4 bg-[#f0f2f4] dark:bg-[#242424] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)]">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+            Mapa competitivo
+          </p>
+          {businessName && (
+            <h2 className="text-neutral-800 dark:text-neutral-100 font-semibold text-sm mt-0.5">{businessName}</h2>
+          )}
+        </div>
         <button
           onClick={onClose}
           title="Fechar mapa"
-          className={`p-2 rounded-xl transition-all cursor-pointer ${
-            isDark ? 'text-white/30 hover:text-white hover:bg-white/5' : 'text-black/30 hover:text-black hover:bg-black/5'
-          }`}
+          className="flex-shrink-0 p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all cursor-pointer"
         >
           <X size={20} />
         </button>
@@ -136,7 +133,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
         </div>
 
         {/* Painel lateral — sempre visível; conteúdo alterna entre resumo e detalhe */}
-        <div className="w-[400px] flex-shrink-0 h-full bg-[#161618] border-l border-white/10 overflow-hidden">
+        <div className="w-[400px] flex-shrink-0 h-full bg-[#f0f2f4] dark:bg-[#181818] border-l border-neutral-200 dark:border-[#2e2e2e] overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             {selected ? (
               <CompetitorSidePanel
