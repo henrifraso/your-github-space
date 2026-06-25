@@ -453,8 +453,9 @@ function AuthenticatedApp() {
   // Oscar = logo PNG do CDN S3 da Deco (header oficial do oscarcalcados.com.br).
   // Pacheco = JPG da fachada da loja do Largo do Machado/RJ (Wikimedia Commons).
   const DEFAULT_PHOTOS: Record<string, string> = {
-    nike:   '/profile-photos/oscar-calcados.png',
-    nubank: '/profile-photos/drogarias-pacheco.png',
+    nike:              '/profile-photos/oscar-calcados.png',
+    'oscar-piloto-01': '/profile-photos/oscar-calcados.png',
+    nubank:            '/profile-photos/drogarias-pacheco.png',
   };
 
   function loadPhotoForProfile(profileId: string): PhotoSettings {
