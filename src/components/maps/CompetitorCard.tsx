@@ -103,6 +103,49 @@ export function CompetitorCard({ competitor: c, onClose, onDeepAnalysis }: Props
           </div>
         )}
 
+        {/* Ticket médio estimado */}
+        {c.ticket_medio && (
+          <div className="flex items-center gap-2">
+            <p className="text-white/40 text-[10px] uppercase tracking-wide">Ticket médio</p>
+            <p className="text-white/80 text-xs font-medium">{c.ticket_medio}</p>
+          </div>
+        )}
+
+        {/* Risco competitivo */}
+        {c.risco_competitivo && (
+          <div className="flex items-center gap-2">
+            <p className="text-white/40 text-[10px] uppercase tracking-wide">Risco</p>
+            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+              c.risco_competitivo === 'alto'  ? 'bg-red-500/20 text-red-400' :
+              c.risco_competitivo === 'medio' ? 'bg-amber-500/20 text-amber-400' :
+                                                'bg-emerald-500/20 text-emerald-400'
+            }`}>
+              {c.risco_competitivo.charAt(0).toUpperCase() + c.risco_competitivo.slice(1)}
+            </span>
+          </div>
+        )}
+
+        {/* Oportunidade para Oscar */}
+        {c.oportunidade && (
+          <div>
+            <p className="text-white/40 text-[10px] uppercase tracking-wide mb-1">Oportunidade</p>
+            <p className="text-white/80 text-xs leading-relaxed">{c.oportunidade}</p>
+          </div>
+        )}
+
+        {/* Evidência / fonte */}
+        {c.evidencia && (
+          <div className="border-t border-white/6 pt-2 flex items-start gap-1.5">
+            <span className="text-white/25 text-[10px] flex-shrink-0 mt-px">Fonte:</span>
+            <span className="text-white/35 text-[10px] leading-relaxed">{c.evidencia}</span>
+          </div>
+        )}
+
+        {/* Última atualização */}
+        {c.ultima_atualizacao && (
+          <p className="text-white/20 text-[10px] text-right">{c.ultima_atualizacao}</p>
+        )}
+
         {/* Botão análise profunda */}
         {onDeepAnalysis && (
           <button

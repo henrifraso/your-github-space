@@ -12,6 +12,11 @@ export interface Competitor {
   proposta_principal?: string;
   diferencial?: string;
   notas_digitais?: { plataforma: string; nota: number }[];
+  ticket_medio?: string;
+  risco_competitivo?: 'alto' | 'medio' | 'baixo';
+  oportunidade?: string;
+  evidencia?: string;
+  ultima_atualizacao?: string;
 }
 
 export interface TimelineEvent {

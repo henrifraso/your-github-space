@@ -1031,6 +1031,34 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
   natura:    NATURA_DATA,
 };
 
+// ── Inteligência competitiva Oscar ───────────────────────────────────────────
+// Campos analíticos adicionados pós-definição para não poluir as longas linhas
+// de dados base. Oscar Piloto herda via referência ao mesmo array NIKE_DATA.
+;(function enrichOscarConcorrentes() {
+  const intel: Record<string, { ticket_medio: string; risco_competitivo: 'alto' | 'medio' | 'baixo'; oportunidade: string; evidencia: string; ultima_atualizacao: string }> = {
+    'Centauro SJC':             { ticket_medio: 'R$ 280 – R$ 520', risco_competitivo: 'alto',  oportunidade: 'Reforçar mix família (casual + esportivo + infantil) sem dependência de licença — Oscar captura quem quer variedade num único PDV', evidencia: 'FashionNetwork 2026 · SBF RI 1T26', ultima_atualizacao: 'jun/2026' },
+    'Arezzo SJC':               { ticket_medio: 'R$ 350 – R$ 680', risco_competitivo: 'medio', oportunidade: 'Público Arezzo que busca custo-benefício é capturável — Oscar com proposta fashion + conforto no mesmo mix', evidencia: 'Azzas 2154 IR 1T26', ultima_atualizacao: 'jun/2026' },
+    'Constance Calçados':       { ticket_medio: 'R$ 140 – R$ 260', risco_competitivo: 'medio', oportunidade: 'Reforma da loja Satélite em mai/26 cria janela de captura — cliente em transição buscando conforto feminino com mais variedade', evidencia: 'Google Maps SJC · FashionNetwork 2025', ultima_atualizacao: 'jun/2026' },
+    'Usaflex SJC':              { ticket_medio: 'R$ 160 – R$ 290', risco_competitivo: 'baixo', oportunidade: 'Nicho 35+ com linha de conforto ampliada — ativar comunicação segmentada sem precisar de loja especializada', evidencia: 'Usaflex RI 2025', ultima_atualizacao: 'jun/2026' },
+    'Sapatella SJC':            { ticket_medio: 'R$ 120 – R$ 230', risco_competitivo: 'baixo', oportunidade: 'Diferencial de qualidade e durabilidade vs. ciclos curtos de tendência — Oscar posiciona moda com mais permanência', evidencia: 'Google Maps SJC', ultima_atualizacao: 'mai/2026' },
+    'Netshoes (online)':        { ticket_medio: 'R$ 150 – R$ 320', risco_competitivo: 'medio', oportunidade: 'Experiência de loja física como diferencial — provador real, atendimento especializado, troca imediata sem esperar frete', evidencia: 'Magalu RI 2025 · Reclame Aqui', ultima_atualizacao: 'jun/2026' },
+    'Magalu Calçados (online)': { ticket_medio: 'R$ 80 – R$ 280',  risco_competitivo: 'medio', oportunidade: 'Oscar como ponto de retirada local para compras Magalu — mesmo-dia na loja, credencializando a rede como hub de conveniência', evidencia: 'Magalu RI 1T26', ultima_atualizacao: 'jun/2026' },
+    'Esposende SC':             { ticket_medio: 'R$ 90 – R$ 180',  risco_competitivo: 'medio', oportunidade: 'Posicionamento premium vs. popular — Oscar diferencia por qualidade e serviço para o mesmo público C/B em SC', evidencia: 'Google Maps Joinville', ultima_atualizacao: 'mai/2026' },
+    'Lojas Pompeia (Sul)':      { ticket_medio: 'R$ 120 – R$ 220', risco_competitivo: 'baixo', oportunidade: 'Especialização em calçado vs. mix moda+calçado — diferencial claro onde Oscar opera no Sul', evidencia: 'Google Maps Porto Alegre', ultima_atualizacao: 'mai/2026' },
+    'Centauro Taubaté':         { ticket_medio: 'R$ 280 – R$ 520', risco_competitivo: 'alto',  oportunidade: 'Capturar clientela do Vale fora de shopping — lojas de bairro Oscar alcançam segmentos que a Centauro em mall não atinge', evidencia: 'SBF RI 2025 · Google Maps Taubaté', ultima_atualizacao: 'jun/2026' },
+    'Calçados Bibi':            { ticket_medio: 'R$ 80 – R$ 160',  risco_competitivo: 'baixo', oportunidade: 'Linha infantil Oscar como âncora de visita familiar — cliente Bibi buscando adulto pode ser convertido pelo mix completo', evidencia: 'Bibi RI 2025', ultima_atualizacao: 'mai/2026' },
+    'Aramis Calçados':          { ticket_medio: 'R$ 380 – R$ 780', risco_competitivo: 'baixo', oportunidade: 'Entrante sem histórico local — reforçar posicionamento masculino premium Diadora antes que Aramis abra pontos em SJC', evidencia: 'FashionNetwork mai/2026', ultima_atualizacao: 'jun/2026' },
+    'Zattini (online)':         { ticket_medio: 'R$ 150 – R$ 350', risco_competitivo: 'baixo', oportunidade: 'Público digital feminino que prefere loja para botas — bridge entre digital e físico via WhatsApp commerce Oscar', evidencia: 'Magalu RI 1T26', ultima_atualizacao: 'mai/2026' },
+    'Renner Calçados (multi)':  { ticket_medio: 'R$ 80 – R$ 180',  risco_competitivo: 'baixo', oportunidade: 'Cliente frustrado com sortimento raso da Renner pode ser capturado com variedade e atendimento especializado Oscar', evidencia: 'Renner RI 2025', ultima_atualizacao: 'mai/2026' },
+    'Paquetá Sports (RS)':      { ticket_medio: 'R$ 120 – R$ 240', risco_competitivo: 'baixo', oportunidade: 'Sinergia operacional interna — alinhar estratégia do Grupo para cross-sell sem canibalização de bandeiras', evidencia: 'Grupo Oscar IR 2025', ultima_atualizacao: 'jun/2026' },
+    'Shoestock (online)':       { ticket_medio: 'R$ 200 – R$ 480', risco_competitivo: 'baixo', oportunidade: 'Premium digital feminino que prefere experiência presencial — showrooming reverso com consultoria especializada na loja Oscar', evidencia: 'Magalu RI 2025', ultima_atualizacao: 'mai/2026' },
+  };
+  for (const c of NIKE_DATA.concorrentes) {
+    const extra = intel[c.nome];
+    if (extra) Object.assign(c, extra);
+  }
+}());
+
 export function buildStories(data: OmniData): StoryGroup[] {
   return [
     {

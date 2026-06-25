@@ -45,10 +45,11 @@ export function useMapAnalysis(
   competitors: Competitor[],
   center: google.maps.LatLngLiteral,
   radius: number,
+  coords: google.maps.LatLngLiteral[] = COORDS,
 ): UseMapAnalysisReturn {
   const withCoords = useMemo(() =>
-    competitors.slice(0, COORDS.length).map((c, i) => ({ c, pos: COORDS[i] })),
-    [competitors]
+    competitors.slice(0, coords.length).map((c, i) => ({ c, pos: coords[i] })),
+    [competitors, coords]
   );
 
   const filtered = useMemo(() =>

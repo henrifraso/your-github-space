@@ -3,6 +3,29 @@
 // Conteúdo movido de src/components/maps/CompetitiveMap.tsx (Fase 14).
 // Sem JSX, sem hooks — só dados e funções de geometria.
 
+// ── Coordenadas Oscar (SJC) ─────────────────────────────────────────
+// Índices mapeados para os 16 concorrentes de NIKE_DATA.concorrentes.
+// Centradas em São José dos Campos (matriz Oscar) — lat -23.2237, lng -45.9009.
+// Locais (0-5) visíveis em raios normais; nacionais (6+) só em "Sem limite".
+export const OSCAR_COORDS: google.maps.LatLngLiteral[] = [
+  { lat: -23.2219, lng: -45.8979 }, // [0]  Centauro SJC — Center Vale Shopping (~300m NE)
+  { lat: -23.2225, lng: -45.8985 }, // [1]  Arezzo SJC — Center Vale Shopping (~270m NE)
+  { lat: -23.2290, lng: -45.8860 }, // [2]  Constance — Jd. Satélite (~1.6km E)
+  { lat: -23.2380, lng: -45.9240 }, // [3]  Usaflex — Vale Sul Shopping (~1.7km S)
+  { lat: -23.2215, lng: -45.8972 }, // [4]  Sapatella — Center Vale Shopping (~350m NE)
+  { lat: -22.8600, lng: -46.3180 }, // [5]  Netshoes — CD Extrema/MG (~65km NW)
+  { lat: -20.5386, lng: -47.4008 }, // [6]  Magalu — CD Franca/SP (~310km NW)
+  { lat: -26.3037, lng: -48.8456 }, // [7]  Esposende — Joinville SC (~490km S)
+  { lat: -30.0346, lng: -51.2177 }, // [8]  Lojas Pompeia — Porto Alegre (~900km S)
+  { lat: -23.0320, lng: -45.5460 }, // [9]  Centauro Taubaté — Via Vale Garden (~36km NE)
+  { lat: -29.6290, lng: -50.8280 }, // [10] Calçados Bibi — Parobé RS (~840km S)
+  { lat: -23.5932, lng: -46.6213 }, // [11] Aramis — Vila Olímpia SP (~90km SW)
+  { lat: -23.5719, lng: -46.6589 }, // [12] Zattini — online/SP (~88km SW)
+  { lat: -30.0346, lng: -51.2200 }, // [13] Renner — Porto Alegre (~900km S)
+  { lat: -30.0400, lng: -51.2100 }, // [14] Paquetá Sports — Porto Alegre (~900km S)
+  { lat: -23.5680, lng: -46.6490 }, // [15] Shoestock — online/SP (~87km SW)
+];
+
 // ── Coordenadas fixas dos concorrentes ──────────────────────────────
 // Cada índice corresponde à posição na lista `competitors` recebida
 // pelo componente. Mantém EXATAMENTE as 28 coordenadas originais
