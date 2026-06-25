@@ -371,3 +371,61 @@ export const DEMO_FEED_CARDS: Record<string, IntelligenceCard[]> = {
 
 // Oscar Piloto herda cards Oscar Calçados para Feed Geral (mesmo padrão de PROFILE_SECTOR_FEEDS).
 DEMO_FEED_CARDS['oscar-piloto-01'] = DEMO_FEED_CARDS['nike'];
+
+// Cerveja Império — Feed Geral (visão matriz / marca)
+DEMO_FEED_CARDS['cerveja-imperio'] = [
+  mk('ci-1',
+     'Cervejas regionais crescem 18% ao ano — consumidor busca identidade e origem',
+     'Presença de marca e identidade de origem crescem como critério de escolha, criando janela para posicionamento premium da Império.',
+     'mercado', 'media', 'oportunidade',
+     'Reforçar comunicação de origem serrana (Petrópolis) nos materiais de PDV e campanhas regionais.'),
+  mk('ci-2',
+     'Alta temporada de verão: volume de cerveja pode crescer até 2.5× — distribuidoras devem antecipar pedidos',
+     'O período outubro–março concentra o maior volume de vendas. Rupturas nessa janela beneficiam marcas concorrentes.',
+     'logistica', 'alta', 'alerta',
+     'Antecipar pedidos de abastecimento para distribuidoras piloto e garantir estoque mínimo nos PDVs estratégicos antes de outubro.'),
+  mk('ci-3',
+     'Ambev amplia ação de trade marketing em bares do interior do RJ com equipamentos em comodato',
+     'Freezers e materiais de PDV em comodato criam dependência do ponto de venda com a marca fornecedora.',
+     'concorrencia', 'alta', 'risco',
+     'Mapear PDVs na rota que receberam equipamento Ambev e definir contrapartida comercial ou material de reforço de marca.'),
+  mk('ci-4',
+     'Festivais gastronômicos crescem 35% no calendário RJ/ES/MG — oportunidade de exposição de marca',
+     'Participar como marca patrocinadora em eventos de perfil compatível amplia recall sem custo de mídia de massa.',
+     'marketing', 'media', 'oportunidade',
+     'Mapear calendário de festivais no 2º semestre e selecionar 2–3 eventos prioritários para presença da Cerveja Império.'),
+  mk('ci-5',
+     'Atacarejo responde por 22% das vendas de cerveja no Brasil — canal cresce como ponto de abastecimento de pequenos PDVs',
+     'Assaí e Mateus são usados por bares e mercadinhos para complementar pedidos entre as visitas da distribuidora.',
+     'distribuicao', 'baixa', 'informacao',
+     'Avaliar presença da Império em atacarejos regionais como canal complementar para ampliar alcance sem nova rota.'),
+];
+
+// Distribuidora Império — Feed Geral (visão operacional / campo)
+DEMO_FEED_CARDS['cerveja-imperio-distribuidora-01'] = [
+  mk('di-1',
+     'Giro de produto na semana: identificar PDVs com menor saída para reequilibrar pedidos',
+     'Pontos com estoque parado elevam risco de vencimento e reduzem margem líquida da distribuidora.',
+     'operacao', 'media', 'alerta',
+     'Registrar saída por PDV na visita semanal e ajustar volume do próximo pedido nos pontos com menor giro.'),
+  mk('di-2',
+     'Entregas concentradas em dois dias da semana criam gargalo de frota — avaliar redistribuição de rota',
+     'Concentração de carga em terça e quinta pode causar atrasos nas demais rotas e impactar confiabilidade percebida pelo PDV.',
+     'logistica', 'media', 'risco',
+     'Redistribuir rotas ao longo da semana ou acionar parceiro de transporte para cobrir picos de entrega.'),
+  mk('di-3',
+     'Distribuidora concorrente ofereceu freezer em comodato a bares da rota — risco de perda de espaço de PDV',
+     'Equipamento em comodato cria vínculo comercial que favorece a marca fornecedora na decisão de compra do ponto.',
+     'concorrencia', 'alta', 'risco',
+     'Identificar PDVs ameaçados e intensificar visita + condição comercial diferenciada para manter relacionamento.'),
+  mk('di-4',
+     'Festival de gastronomia em Petrópolis no fim de julho — oportunidade de cadastrar novos PDVs temporários',
+     'Eventos na região criam demanda pontual e expõem a marca a público que ainda não é cliente recorrente.',
+     'mercado', 'media', 'oportunidade',
+     'Cadastrar fornecedores de food trucks e bares temporários do festival e oferecer condição especial de primeiro pedido.'),
+  mk('di-5',
+     'Demanda na Região dos Lagos cresce no pré-verão — janela de expansão de rota antes do pico',
+     'Búzios, Arraial do Cabo e Cabo Frio registram aumento de consumo já em junho, dois meses antes do pico de verão.',
+     'distribuicao', 'baixa', 'oportunidade',
+     'Avaliar expansão de rota para a Região dos Lagos antes de setembro para garantir presença na alta temporada.'),
+];
