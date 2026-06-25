@@ -389,7 +389,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
             <div className="flex-1 flex flex-col gap-2.5 bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-3 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
               {mock.evolucao.map(pt => (
                 <div key={pt.semana} className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 w-5 flex-shrink-0">{pt.semana}</span>
+                  <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 w-14 flex-shrink-0">{pt.semana}</span>
                   <div className="flex-1 h-[5px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-neutral-800 dark:bg-neutral-100 transition-all duration-700"
                       style={{ width: `${pt.score}%`, opacity: 0.3 + (pt.score / 100) * 0.6 }} />
