@@ -27,7 +27,7 @@ const OSCAR_MOCK: ScoreMock = {
     { id: 'presenca', label: 'Presença Local', score: 69, icon: MapPin, descricao: 'Visibilidade média na região. Abaixo da média do raio competitivo.' },
     { id: 'execucao', label: 'Ações', score: 58, icon: Zap, descricao: 'Poucos cards transformados em plano na Área de Trabalho.' },
   ],
-  evolucao: [{ semana: 'S1', score: 61 }, { semana: 'S2', score: 66 }, { semana: 'S3', score: 70 }, { semana: 'S4', score: 72 }],
+  evolucao: [{ semana: 'Início', score: 61 }, { semana: 'Semana 2', score: 66 }, { semana: 'Semana 3', score: 70 }, { semana: 'Agora', score: 72 }],
   evidencias: [
     { id: 1, tipo: 'Concorrência', fonte: 'Google Maps', confianca: 0.70, impacto: -3, titulo: 'Concorrente no raio competitivo', descricao: 'Arezzo e Mr. Cat com avaliações acima de 4.4★ a menos de 2 km.' },
     { id: 2, tipo: 'Mercado', fonte: 'Valor Econômico', confianca: 0.82, impacto: 5, titulo: 'Crescimento do varejo de calçados em SP', descricao: 'Setor cresceu 8% no primeiro semestre. Demanda por marcas nacionais em alta.' },
@@ -58,7 +58,7 @@ const NEUTRO_BASE: Omit<ScoreMock, 'companyName'> = {
     { id: 'presenca', label: 'Presença Local', score: 65, icon: MapPin, descricao: 'Visibilidade local em análise.' },
     { id: 'execucao', label: 'Ações', score: 54, icon: Zap, descricao: 'Histórico de ações ainda em construção.' },
   ],
-  evolucao: [{ semana: 'S1', score: 60 }, { semana: 'S2', score: 63 }, { semana: 'S3', score: 66 }, { semana: 'S4', score: 68 }],
+  evolucao: [{ semana: 'Início', score: 60 }, { semana: 'Semana 2', score: 63 }, { semana: 'Semana 3', score: 66 }, { semana: 'Agora', score: 68 }],
   evidencias: [
     { id: 1, tipo: 'Mercado', fonte: 'Sinal externo', confianca: 0.60, impacto: 2, titulo: 'Sinal externo em monitoramento', descricao: 'Fonte pública identificada e em validação.' },
     { id: 2, tipo: 'Reputação', fonte: 'Sinal externo', confianca: 0.55, impacto: 0, titulo: 'Fonte pública em validação', descricao: 'Dados ainda sendo processados pelo sistema.' },
