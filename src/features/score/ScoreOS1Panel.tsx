@@ -223,11 +223,15 @@ function EvidenciaItem({ ev }: { ev: Evidencia }) {
   );
 }
 
+// ── Tipos públicos ────────────────────────────────────────────────────────────
+
+export interface ScoreInsight { titulo: string; resumo?: string; dominio?: string; urgencia?: string; }
+
 // ── Painel principal ──────────────────────────────────────────────────────────
 
-interface ScoreOS1PanelProps { onClose?: () => void; activeSector?: string; role?: string; standalone?: boolean; }
+interface ScoreOS1PanelProps { onClose?: () => void; activeSector?: string; role?: string; standalone?: boolean; insights?: ScoreInsight[]; }
 
-export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone = true }: ScoreOS1PanelProps) {
+export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone = true, insights }: ScoreOS1PanelProps) {
   const mock = getMock(activeSector);
   const [evidenciasReais, setEvidenciasReais] = useState<Evidencia[] | null>(null);
 
@@ -456,18 +460,35 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         </div>
 
         {/* Cards relacionados */}
-        <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={ClipboardList} titulo="Insights relacionados" badge={mock.cardsRelacionados.length} />
-          <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-1.5 space-y-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
-            {mock.cardsRelacionados.map((c, i) => (
-              <div key={i} className="flex items-center gap-3 px-3 py-2.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500 flex-shrink-0" />
-                <span className="text-[12px] text-neutral-700 dark:text-neutral-300 flex-1 leading-snug">{c}</span>
-                <ArrowRight size={11} className="text-neutral-400 flex-shrink-0" />
+        {(() => {
+          const realInsights = insights && insights.length > 0 ? insights.slice(0, 5) : null;
+          const badge = realInsights ? realInsights.length : mock.cardsRelacionados.length;
+          return (
+            <div className={`${cardCls} p-4`}>
+              <SecaoHeader icon={ClipboardList} titulo="Insights relacionados" badge={badge} />
+              <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-1.5 space-y-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
+                {realInsights
+                  ? realInsights.map((ins, i) => (
+                      <div key={i} className="flex items-start gap-3 px-3 py-2.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500 flex-shrink-0 mt-1" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] text-neutral-700 dark:text-neutral-300 leading-snug">{ins.titulo}</p>
+                          {ins.dominio && <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5 uppercase tracking-wide">{ins.dominio}</p>}
+                        </div>
+                        <ArrowRight size={11} className="text-neutral-400 flex-shrink-0 mt-1" />
+                      </div>
+                    ))
+                  : mock.cardsRelacionados.map((c, i) => (
+                      <div key={i} className="flex items-center gap-3 px-3 py-2.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500 flex-shrink-0" />
+                        <span className="text-[12px] text-neutral-700 dark:text-neutral-300 flex-1 leading-snug">{c}</span>
+                        <ArrowRight size={11} className="text-neutral-400 flex-shrink-0" />
+                      </div>
+                    ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          );
+        })()}
 
         {/* Explicação */}
         <div className={`${cardCls} p-4`}>

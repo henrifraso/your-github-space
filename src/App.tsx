@@ -92,6 +92,7 @@ import { CircleProgress, PieChart } from './components/CircleProgress';
 import { StoryViewer } from './components/StoryViewer';
 import { ConcorrenteModal } from './components/ConcorrenteModal';
 import { BrowserView } from './components/BrowserView';
+import type { ScoreInsight } from './features/score/ScoreOS1Panel';
 import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
 import { OS1_EVENTS } from './core/events/os1-events';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
@@ -1922,13 +1923,31 @@ function AuthenticatedApp() {
       </AnimatePresence>
 
       {/* Browser / Sincronizar */}
-      <BrowserView
-        open={browserOpen}
-        onClose={() => setBrowserOpen(false)}
-        onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
-        activeSector={activeSector}
-        role={role}
-      />
+      {(() => {
+        // Insights para o Score: apenas sectores com codifyScope explícito e seguro.
+        // os1 (Codify puro) não usa orchCards — esses cards têm contexto de cliente
+        // local e não devem aparecer no Score institucional. Fallback via undefined
+        // → ScoreOS1Panel usa mock.cardsRelacionados (NEUTRO_BASE).
+        let scoreInsights: ScoreInsight[] | undefined;
+        if (codifyScope !== null) {
+          const seen = new Set<string>();
+          scoreInsights = apiIntelligenceCards
+            .filter(c => { if (seen.has(c.titulo)) return false; seen.add(c.titulo); return true; })
+            .slice(0, 5)
+            .map(c => ({ titulo: c.titulo, resumo: c.resumo, dominio: c.dominio, urgencia: c.urgencia }));
+          if (scoreInsights.length === 0) scoreInsights = undefined;
+        }
+        return (
+          <BrowserView
+            open={browserOpen}
+            onClose={() => setBrowserOpen(false)}
+            onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
+            activeSector={activeSector}
+            role={role}
+            insights={scoreInsights}
+          />
+        );
+      })()}
 
       {/* Chat */}
       <ChatDesktop

@@ -20,7 +20,7 @@ import { X } from 'lucide-react';
 import { isElectron } from '../features/browser/browser-url-utils';
 import { ElectronBrowser } from '../features/browser/ElectronBrowserView';
 import { IframeBrowser } from '../features/browser/IframeBrowserFallback';
-import { ScoreOS1Panel } from '../features/score/ScoreOS1Panel';
+import { ScoreOS1Panel, type ScoreInsight } from '../features/score/ScoreOS1Panel';
 
 // URLs internas do OS¹ — renderizam React, não webview/iframe
 const OS1_INTERNAL_URLS = ['os1://score', 'os1://contexto'];
@@ -74,9 +74,10 @@ interface BrowserViewProps {
   onSync?: () => void;
   activeSector?: string;
   role?: string;
+  insights?: ScoreInsight[];
 }
 
-export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMode = false, onSync, activeSector, role }: BrowserViewProps) {
+export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMode = false, onSync, activeSector, role, insights }: BrowserViewProps) {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { if (!open) setSyncing(false); }, [open]);
@@ -107,7 +108,7 @@ export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMo
             <>
               <InternalPageBar activeSector={activeSector} onClose={onClose} />
               <div className="flex-1 min-h-0 overflow-hidden">
-                <ScoreOS1Panel activeSector={activeSector} role={role} standalone={false} />
+                <ScoreOS1Panel activeSector={activeSector} role={role} standalone={false} insights={insights} />
               </div>
             </>
           ) : (
