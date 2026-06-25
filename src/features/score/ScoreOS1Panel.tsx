@@ -72,6 +72,7 @@ const NEUTRO_BASE: Omit<ScoreMock, 'companyName'> = {
 
 const NOME_POR_SECTOR: Record<string, string> = {
   mcdonalds: "McDonald's Brasil", nike: 'Oscar Calçados', nubank: 'Drogarias Pacheco',
+  'cerveja-imperio': 'Cerveja Império', 'cerveja-imperio-distribuidora-01': 'Distribuidora Império',
   ifood: 'iFood', ambev: 'Ambev', magalu: 'Magazine Luiza',
   embraer: 'Embraer', tesla: 'Tesla', netflix: 'Netflix',
   spotify: 'Spotify', airbnb: 'Airbnb', uber: 'Uber',

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
 import type { DepartmentId } from '../types';
 
-export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
+export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'cerveja-imperio' | 'cerveja-imperio-distribuidora-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
 
 export type ProfileConfig = {
   id: SectorId;
@@ -59,6 +59,24 @@ export const SECTORS: ProfileConfig[] = [
     desc: 'Oscar Calçados · Unidade piloto conectada (visão não-matriz)',
     color: '#f97316',
     logo: 'OL',
+    active: false,
+  },
+  {
+    id: 'cerveja-imperio',
+    label: 'Cerveja Império',
+    niche: 'Bebidas & Distribuição',
+    desc: 'Cerveja Puro Malte produzida em Petrópolis — rede de distribuidoras',
+    color: '#b8860b',
+    logo: 'CI',
+    active: false,
+  },
+  {
+    id: 'cerveja-imperio-distribuidora-01',
+    label: 'Distribuidora Império 01',
+    niche: 'Bebidas · Distribuidora Piloto',
+    desc: 'Cerveja Império · Distribuidora piloto conectada (visão não-matriz)',
+    color: '#b8860b',
+    logo: 'DI',
     active: false,
   },
   {
@@ -237,7 +255,7 @@ function ProfileLogo({ profile, size = 48 }: { profile: ProfileConfig; size?: nu
 }
 
 export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hideDemoProfiles, filterProfileIds, profilesHeader }: Props) {
-  const DEFAULT_PROFILE_IDS = ['os1', 'mcdonalds', 'nike', 'nubank'];
+  const DEFAULT_PROFILE_IDS = ['os1', 'mcdonalds', 'nike', 'nubank', 'cerveja-imperio'];
   const [openTab, setOpenTab] = useState<string | null>(null);
   const openTabLabel = openTab ? roleSection?.tabs.find(t => t.id === openTab)?.label : null;
   const showSubview = !!openTab && !!roleSection?.renderContent;

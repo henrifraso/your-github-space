@@ -27,6 +27,9 @@ const SCOPE_MAP: Record<SectorId, CodifyScope | null> = {
   // Backend valida via authz.require_matrix (role franchise + scope read_only
   // → 403 nos endpoints /api/governance/*).
   'oscar-piloto-01': { organizationId: 'org-oscar-calcados', unitId: 'bu-oscar-piloto-01' },
+  // Cerveja Império — sem org real ainda; não dispara fetch
+  'cerveja-imperio':                  null,
+  'cerveja-imperio-distribuidora-01': null,
   // Demais sectors permanecem sem org real — não disparam fetch
   ifood:   null,
   ambev:   null,

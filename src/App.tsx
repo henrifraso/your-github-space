@@ -119,6 +119,8 @@ const DEMO_LOGOS: Record<string, { src: string; bg: string; pad?: string }> = {
   natura:    { src: '/logos/natura.png',    bg: '#ffffff', pad: '18%' },
   // 'nike' agora é Oscar Calçados — sem logo PNG. Fallback usa o texto "Os" do ProfileLogo.
   // 'nubank' agora é Drogarias Pacheco — sem logo PNG. Fallback usa o texto "DP" do ProfileLogo.
+  'cerveja-imperio':                    { src: '/profile-photos/cerveja-imperio.png', bg: '#0a0a0a', pad: '12%' },
+  'cerveja-imperio-distribuidora-01':   { src: '/profile-photos/cerveja-imperio.png', bg: '#0a0a0a', pad: '12%' },
   ifood:     { src: '/logos/ifood.svg',     bg: '#ffffff', pad: '22%' },
   ambev:     { src: '/logos/ambev.png',     bg: '#ffffff', pad: '15%' },
   magalu:    { src: '/logos/magalu.png',    bg: '#ffffff', pad: '16%' },
@@ -456,6 +458,8 @@ function AuthenticatedApp() {
     nike:              '/profile-photos/oscar-calcados.png',
     'oscar-piloto-01': '/profile-photos/oscar-calcados.png',
     nubank:            '/profile-photos/drogarias-pacheco.png',
+    'cerveja-imperio':                  '/profile-photos/cerveja-imperio.png',
+    'cerveja-imperio-distribuidora-01': '/profile-photos/cerveja-imperio.png',
   };
 
   function loadPhotoForProfile(profileId: string): PhotoSettings {
@@ -1351,7 +1355,10 @@ function AuthenticatedApp() {
                         );
                       }
                       // oscar-piloto-01 herda identidade visual do perfil mestre oscar (nike)
-                      const avatarSectorId = activeSector === 'oscar-piloto-01' ? 'nike' : activeSector;
+                      // cerveja-imperio-distribuidora-01 herda identidade visual do perfil mestre
+                      const avatarSectorId = activeSector === 'oscar-piloto-01' ? 'nike'
+                        : activeSector === 'cerveja-imperio-distribuidora-01' ? 'cerveja-imperio'
+                        : activeSector;
                       const activeProfile = SECTORS.find(s => s.id === avatarSectorId);
                       const isOS1 = activeSector === 'os1';
                       return (
@@ -2193,7 +2200,16 @@ function AuthenticatedApp() {
             profilesHeader="Lojas Oscar"
           />
         )}
-        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' || role === 'franchise') && (
+        {sectorOpen && activeSector === 'cerveja-imperio' && role !== 'franchise' && (
+          <SectorSwitcherModal
+            active={activeSector}
+            onSelect={setActiveSector}
+            onClose={() => setSectorOpen(false)}
+            filterProfileIds={['cerveja-imperio-distribuidora-01']}
+            profilesHeader="Distribuidoras Império"
+          />
+        )}
+        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' && activeSector !== 'cerveja-imperio' || role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
             onSelect={setActiveDepartment}
