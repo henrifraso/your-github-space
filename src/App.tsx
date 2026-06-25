@@ -1349,7 +1349,9 @@ function AuthenticatedApp() {
                           </div>
                         );
                       }
-                      const activeProfile = SECTORS.find(s => s.id === activeSector);
+                      // oscar-piloto-01 herda identidade visual do perfil mestre oscar (nike)
+                      const avatarSectorId = activeSector === 'oscar-piloto-01' ? 'nike' : activeSector;
+                      const activeProfile = SECTORS.find(s => s.id === avatarSectorId);
                       const isOS1 = activeSector === 'os1';
                       return (
                         <div style={{
