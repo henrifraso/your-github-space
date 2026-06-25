@@ -25,7 +25,7 @@ export function CompetitorCard({ competitor: c, onClose, onDeepAnalysis }: Props
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 32 }}
       transition={{ duration: 0.24, ease: [0.25, 0.1, 0.25, 1] }}
-      className="absolute bottom-0 left-0 right-0 lg:bottom-auto lg:top-0 lg:right-0 lg:left-auto lg:w-80 z-10 bg-[#1a1a1a] border border-white/10 rounded-t-2xl lg:rounded-2xl lg:m-3 overflow-hidden"
+      className="absolute bottom-0 left-0 right-0 lg:bottom-auto lg:top-0 lg:right-0 lg:left-auto lg:w-80 z-[1200] bg-[#1a1a1a] border border-white/10 rounded-t-2xl lg:rounded-2xl lg:m-3 overflow-hidden"
     >
       <div className="flex items-start justify-between p-4 border-b border-white/8">
         <div>

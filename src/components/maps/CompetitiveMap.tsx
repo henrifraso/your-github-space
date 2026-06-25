@@ -14,7 +14,6 @@ import { RadiusSlider } from './RadiusSlider';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../../config/googleMaps';
 import { RADIUS_ZOOM, OSCAR_COORDS } from '../../features/map/map-ui-utils';
 import { useMapAnalysis } from '../../features/map/useMapAnalysis';
-import { MapAnalysisPanel } from '../../features/map/MapActionResult';
 
 const OSCAR_SECTORS = new Set(['nike', 'oscar-piloto-01']);
 
@@ -36,7 +35,6 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
   const coords = OSCAR_SECTORS.has(sector ?? '') ? OSCAR_COORDS : undefined;
   const [radius, setRadius] = useState(5000);
   const [selected, setSelected] = useState<Competitor | null>(null);
-  const [analysisOpen, setAnalysisOpen] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
   const isDark = useDarkMode();
   // FORCE_LEAFLET (piloto): mudar pra false só quando o projeto Google Cloud
@@ -52,19 +50,17 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (analysisOpen) { setAnalysisOpen(false); return; }
       if (selected) { setSelected(null); return; }
       onClose();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [analysisOpen, selected, onClose]);
+  }, [selected, onClose]);
 
-  const { withCoords, filtered, analysis } = useMapAnalysis(competitors, center, radius, coords);
+  const { withCoords, filtered } = useMapAnalysis(competitors, center, radius, coords);
 
   const handleRadiusChange = useCallback((meters: number) => {
     setRadius(meters);
-    setAnalysisOpen(false);
     // mapRef é do Google Maps; Leaflet re-centra sozinho via prop change.
     if (mapRef.current) {
       mapRef.current.panTo(center);
@@ -139,30 +135,15 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
         {/* Badge de fallback escondido — Leaflet continua ativo, só não exibe o badge */}
 
         <MapLegend />
-
-        <AnimatePresence>
-          {selected && (
-            <CompetitorCard competitor={selected} onClose={() => setSelected(null)} />
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* ── Botão inferior central: Analisar (ações OS¹ agora ficam na barra de cima)
-          z-[1100] pra ficar acima dos panes do Leaflet (até ~1000) e dos controles
-          do Google Maps. ── */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-[1100]">
-        <button
-          onClick={() => setAnalysisOpen(v => !v)}
-          className="px-6 h-10 bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold rounded-xl transition-colors cursor-pointer shadow-xl"
-        >
-          {analysisOpen ? 'Fechar análise' : 'Analisar este raio'}
-        </button>
-      </div>
-
-      {/* ── Card de análise — fora do div do mapa ── */}
-      {analysisOpen && analysis && (
-        <MapAnalysisPanel analysis={analysis} onClose={() => setAnalysisOpen(false)} />
-      )}
+      {/* Card de concorrente — fora do div do mapa para ficar acima do stacking
+          context do Leaflet (que sobe seus layers até z ~1000 internamente). */}
+      <AnimatePresence>
+        {selected && (
+          <CompetitorCard competitor={selected} onClose={() => setSelected(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
