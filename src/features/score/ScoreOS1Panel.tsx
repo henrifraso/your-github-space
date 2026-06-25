@@ -370,62 +370,61 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
 
         </div>
 
-        {/* Evolução */}
-        <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={TrendingUp} titulo="Evolução do Score" />
+        {/* Evolução da leitura */}
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={14} className="text-neutral-400" strokeWidth={1.8} />
+              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Evolução da leitura</h3>
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">A leitura evolui conforme novos sinais, conteúdos e evidências entram no sistema.</p>
+          </div>
 
-          <div className="flex items-center gap-4">
-            {/* Ring — padrão CircleProgress monochromatic, sem cor semântica */}
-            <div className="relative w-32 h-32 flex-shrink-0">
-              <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)]" />
-              <div className="absolute inset-0 rounded-2xl border-[0.5px] border-neutral-200 dark:border-[#4a4a4a] z-[2] pointer-events-none" />
-              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 128 128">
-                {/* track */}
-                <rect x="8" y="8" width="112" height="112" rx="28" ry="28" fill="none"
-                  stroke="currentColor" strokeWidth="5"
-                  className="text-neutral-200 dark:text-[#383838]" />
-                {/* progresso animado */}
-                <motion.rect x="8" y="8" width="112" height="112" rx="28" ry="28" fill="none"
-                  stroke="currentColor" strokeWidth="5"
-                  pathLength={100} strokeDasharray="100"
-                  initial={{ strokeDashoffset: 100 }}
-                  animate={{ strokeDashoffset: 100 - scoreGeral }}
-                  transition={{ duration: 2.8, ease: 'easeOut' }}
-                  className="text-neutral-800 dark:text-neutral-100" />
-              </svg>
-              {/* Miolo — círculo inner com Bio shadow */}
-              <div className="absolute inset-[20%] rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-[22px] font-black tabular-nums text-neutral-900 dark:text-white leading-none">{scoreGeral}</div>
-                  <div className="text-[9px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">/100</div>
+          {/* Timeline vertical */}
+          <div className="px-4 py-3">
+            {mock.evolucao.map((pt, i) => {
+              const isLast = i === mock.evolucao.length - 1;
+              return (
+                <div key={pt.semana} className="flex gap-3">
+                  {/* Coluna da linha + dot */}
+                  <div className="flex flex-col items-center w-6 flex-shrink-0">
+                    <div className={`w-4 h-4 rounded-full border flex-shrink-0 flex items-center justify-center mt-0.5 ${
+                      isLast
+                        ? 'bg-neutral-700 dark:bg-neutral-200 border-neutral-700 dark:border-neutral-200'
+                        : 'bg-neutral-100 dark:bg-[#2a2a2a] border-neutral-300 dark:border-[#484848]'
+                    }`}>
+                      {isLast && <span className="w-1.5 h-1.5 rounded-full bg-white dark:bg-[#181818]" />}
+                    </div>
+                    {!isLast && <div className="w-px flex-1 bg-neutral-200 dark:bg-[#3a3a3a] my-1" />}
+                  </div>
+                  {/* Conteúdo da linha */}
+                  <div className={`flex-1 min-w-0 ${!isLast ? 'pb-3' : ''}`}>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className={`text-[12px] font-semibold ${isLast ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-500 dark:text-neutral-400'}`}>{pt.semana}</span>
+                      <span className={`text-[13px] font-bold tabular-nums ${isLast ? 'text-neutral-900 dark:text-white' : 'text-neutral-500 dark:text-neutral-400'}`}>{pt.score}</span>
+                    </div>
+                    <div className="h-[2px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-neutral-500 dark:bg-neutral-400 transition-all duration-700"
+                        style={{ width: `${pt.score}%`, opacity: isLast ? 0.9 : 0.4 }} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Rodapé: variação total */}
+          {(() => {
+            const d = mock.evolucao[mock.evolucao.length - 1].score - mock.evolucao[0].score;
+            return (
+              <div className="px-4 pb-4">
+                <div className="flex items-center justify-between px-3 py-2 bg-neutral-50 dark:bg-[#252525] border border-neutral-200 dark:border-[#3a3a3a] rounded-xl">
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Variação total</span>
+                  <span className="text-[14px] font-black tabular-nums text-neutral-900 dark:text-white">{d >= 0 ? `+${d}` : d}</span>
                 </div>
               </div>
-            </div>
-
-            {/* Semanas — barra por semana com número, em container inner */}
-            <div className="flex-1 flex flex-col gap-2.5 bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-3 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
-              {mock.evolucao.map(pt => (
-                <div key={pt.semana} className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 w-14 flex-shrink-0">{pt.semana}</span>
-                  <div className="flex-1 h-[5px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-neutral-800 dark:bg-neutral-100 transition-all duration-700"
-                      style={{ width: `${pt.score}%`, opacity: 0.3 + (pt.score / 100) * 0.6 }} />
-                  </div>
-                  <span className="text-[13px] font-bold tabular-nums text-neutral-800 dark:text-neutral-100 w-6 text-right flex-shrink-0">{pt.score}</span>
-                </div>
-              ))}
-              {/* Delta total */}
-              {(() => {
-                const d = mock.evolucao[mock.evolucao.length - 1].score - mock.evolucao[0].score;
-                return (
-                  <div className="pt-2 border-t border-neutral-100 dark:border-[#3a3a3a] flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">Variação</span>
-                    <span className="text-[14px] font-black tabular-nums text-neutral-900 dark:text-white">{d >= 0 ? `+${d}` : d}</span>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
+            );
+          })()}
         </div>
 
         {/* Destaques da leitura */}
