@@ -428,26 +428,34 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           </div>
         </div>
 
-        {/* Dimensões */}
-        <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={BarChart2} titulo="Dimensões" />
-          <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-2.5 space-y-2 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
+        {/* Ajustes da Análise — Dimensões */}
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <div className="flex items-center gap-2">
+              <BarChart2 size={14} className="text-neutral-400" strokeWidth={1.8} />
+              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Ajustes da Análise</h3>
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Parâmetros que compõem a leitura do ambiente</p>
+          </div>
+          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
             {mock.dimensoes.map(dim => {
               const Icon = dim.icon;
               return (
-                <div key={dim.id} className="inline-flex items-center gap-2.5 pl-1 pr-3 py-1 w-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_4px_10px_-1px_rgba(0,0,0,0.12),0_1px_3px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,0.7)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.4),0_1px_3px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                  {/* círculo interno */}
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-[#f0f2f4] dark:bg-[#2a2a2a] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_3px_8px_-1px_rgba(0,0,0,0.18),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_3px_8px_-1px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.04)] flex items-center justify-center">
-                    <Icon size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.8} />
+                <div key={dim.id} className="flex items-center gap-3.5 px-4 py-3.5">
+                  {/* Círculo monocromático */}
+                  <div className="w-9 h-9 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
+                    <Icon size={14} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
                   </div>
+                  {/* Conteúdo */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[12px] font-medium text-neutral-700 dark:text-neutral-200 flex-1 truncate">{dim.label}</span>
-                      <span className="text-[13px] font-bold tabular-nums text-neutral-800 dark:text-neutral-100">{dim.score}</span>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">{dim.label}</span>
+                      <span className="text-[13px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200 flex-shrink-0">{dim.score}</span>
                     </div>
-                    <div className="h-[3px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden mt-1.5">
-                      <div className="h-full rounded-full bg-neutral-800 dark:bg-neutral-100 transition-all duration-700"
-                        style={{ width: `${dim.score}%`, opacity: 0.35 + (dim.score / 100) * 0.55 }} />
+                    <p className="text-[11px] text-neutral-400 dark:text-neutral-500 leading-snug mb-1.5">{dim.descricao}</p>
+                    <div className="h-[2px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-neutral-500 dark:bg-neutral-400 transition-all duration-700"
+                        style={{ width: `${dim.score}%`, opacity: 0.5 + (dim.score / 100) * 0.4 }} />
                     </div>
                   </div>
                 </div>
