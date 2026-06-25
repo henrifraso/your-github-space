@@ -51,6 +51,7 @@ import {
   buildBlockShortcuts, buildModeBlock,
 } from '../features/workspace/generation/workspace-block-builders';
 import { executeAction } from '../features/workspace/execute/action-executor';
+import { addContextUpload } from '../features/score/contextUploads';
 
 type Phase = 'init' | 'expanded' | 'selected';
 
@@ -1020,7 +1021,23 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
           <Upload size={22} />
           <input type="file" className="hidden" onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) alert(`Arquivo selecionado: ${f.name}`);
+            if (f) {
+              const orgId = localStorage.getItem('os1_org_id') ?? undefined;
+              const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+              const ext   = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
+              addContextUpload({
+                id: crypto.randomUUID(),
+                name: f.name,
+                extension: ext,
+                mimeType: f.type || undefined,
+                size: f.size,
+                uploadedAt: new Date().toISOString(),
+                orgId, buId,
+                activeSector: activeSector ?? undefined,
+                source: 'upload',
+              });
+              console.log('[OS¹] Contexto registrado:', f.name);
+            }
             e.currentTarget.value = '';
           }} />
         </label>
@@ -1132,7 +1149,23 @@ export function ChatMobile({
               <Upload size={22} />
               <input type="file" className="hidden" onChange={(e) => {
                 const f = e.target.files?.[0];
-                if (f) alert(`Arquivo selecionado: ${f.name}`);
+                if (f) {
+                  const orgId = localStorage.getItem('os1_org_id') ?? undefined;
+                  const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+                  const ext   = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
+                  addContextUpload({
+                    id: crypto.randomUUID(),
+                    name: f.name,
+                    extension: ext,
+                    mimeType: f.type || undefined,
+                    size: f.size,
+                    uploadedAt: new Date().toISOString(),
+                    orgId, buId,
+                    activeSector: activeSector ?? undefined,
+                    source: 'upload',
+                  });
+                  console.log('[OS¹] Contexto registrado:', f.name);
+                }
                 e.currentTarget.value = '';
               }} />
             </label>

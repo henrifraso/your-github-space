@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { apiFetch } from '../../api';
+import { getContextUploads, type ContextUpload } from './contextUploads';
 import {
   TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
   FileText, BarChart2, ShieldCheck, MapPin, Zap,
@@ -255,6 +256,23 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
 
   const evidencias = evidenciasReais ?? mock.evidencias;
 
+  const [uploads, setUploads] = useState<ContextUpload[]>([]);
+  useEffect(() => {
+    if (activeSector === 'oscar-piloto-01') return;
+    const orgId = localStorage.getItem('os1_org_id') ?? undefined;
+    const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+    setUploads(getContextUploads(orgId, buId, activeSector));
+  }, [activeSector]);
+
+  const conteudosToShow: { nome: string; tipo: string; data: string }[] =
+    activeSector === 'oscar-piloto-01'
+      ? mock.conteudos
+      : uploads.map(u => ({
+          nome: u.name,
+          tipo: u.extension ? u.extension.toUpperCase() : 'Arquivo',
+          data: new Date(u.uploadedAt).toLocaleDateString('pt-BR'),
+        }));
+
   return (
     <div className="flex flex-col h-full bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
 
@@ -287,7 +305,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
                   { label: 'Dimensões',  value: mock.dimensoes.length         },
                   { label: 'Evidências', value: evidencias.length             },
                   { label: 'Insights',   value: mock.cardsRelacionados.length },
-                  { label: 'Conteúdos', value: mock.conteudos.length         },
+                  { label: 'Conteúdos', value: conteudosToShow.length         },
                 ] as { label: string; value: number }[]).map(s => (
                   <div key={s.label}
                     className="flex-1 flex flex-col items-center justify-center gap-1 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
@@ -423,10 +441,10 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         <div className={`${cardCls} p-4`}>
           <SecaoHeader icon={FileText} titulo="Contexto enviado" />
           <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-1.5 space-y-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
-            {mock.conteudos.length === 0
-              ? <p className="px-3 py-2.5 text-[12px] text-neutral-400 dark:text-neutral-500">A empresa ainda não enviou contexto interno para enriquecer a leitura.</p>
-              : mock.conteudos.map(c => (
-                <div key={c.nome} className="flex items-center gap-3 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
+            {conteudosToShow.length === 0
+              ? <p className="px-3 py-2.5 text-[12px] text-neutral-400 dark:text-neutral-500">Nenhum conteúdo enviado ainda. Use o botão de upload para registrar contexto da empresa.</p>
+              : conteudosToShow.map((c, i) => (
+                <div key={`${c.nome}-${i}`} className="flex items-center gap-3 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
                   <FileText size={12} className="text-neutral-400 flex-shrink-0" strokeWidth={1.8} />
                   <span className="text-[12px] text-neutral-700 dark:text-neutral-300 flex-1 truncate">{c.nome}</span>
                   <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-[#353535] px-1.5 py-0.5 rounded">{c.tipo}</span>
