@@ -1012,7 +1012,7 @@ const NATURA_DATA: OmniData = {
 };
 
 const CERVEJA_IMPERIO_DATA: OmniData = {
-  negocio: { nome_fantasia: 'Cerveja Império', segmento: 'Bebidas & Distribuição', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0000', nivel: 3, pontos: 1800 },
+  negocio: { nome_fantasia: 'Cerveja Império', segmento: 'Bebidas & Mercado Regional', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0000', nivel: 3, pontos: 1800 },
   semana_label: 'Semana de 23 de Junho de 2026',
   mercado_nome: 'Cerveja Artesanal & Distribuição Regional',
   mercado_tamanho: 'R$ 2.8bi/mês no Brasil',
@@ -1044,7 +1044,7 @@ const CERVEJA_IMPERIO_DATA: OmniData = {
 };
 
 const CERVEJA_IMPERIO_DISTRIBUIDORA_DATA: OmniData = {
-  negocio: { nome_fantasia: 'Distribuidora Império', segmento: 'Bebidas · Distribuidora Piloto', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0100', nivel: 2, pontos: 900 },
+  negocio: { nome_fantasia: 'Distribuidora Império', segmento: 'Bebidas · Distribuição Regional', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0100', nivel: 2, pontos: 900 },
   semana_label: 'Semana de 23 de Junho de 2026',
   mercado_nome: 'Distribuição Regional de Bebidas',
   mercado_tamanho: 'Região Serrana + Região dos Lagos',
