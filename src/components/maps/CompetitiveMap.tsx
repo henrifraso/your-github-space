@@ -79,10 +79,8 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
       className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col select-none"
       style={{ WebkitAppRegion: 'no-drag', WebkitUserSelect: 'none' } as React.CSSProperties}
     >
-      {/* Pills de controle — estilo do navbar do Feed */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-2 flex flex-col gap-2">
-
-        {/* Pill 1: Nome da empresa + fechar */}
+      {/* Header pill — nome da empresa + fechar */}
+      <div className="flex-shrink-0 px-4 pt-4 pb-2">
         <div className={`${PILL} px-4 py-3 flex items-center justify-between gap-4`}>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
@@ -102,16 +100,15 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
             <X size={18} />
           </button>
         </div>
-
-        {/* Pill 2: Slider de raio */}
-        <div className={`${PILL} px-4 py-2.5`}>
-          <RadiusSlider value={radius} onChange={handleRadiusChange} competitorCount={filtered.length} />
-        </div>
-
       </div>
 
-      {/* Área principal: mapa + painel lateral */}
-      <div className="flex-1 min-h-0 flex gap-3 px-4 pb-4 overflow-hidden">
+      {/* Área principal: raio (esquerda) + mapa + painel lateral */}
+      <div className="flex-1 min-h-0 flex gap-2 px-4 pb-4 overflow-hidden">
+
+        {/* Raio — painel vertical à esquerda */}
+        <div className={`${PILL} w-[68px] flex-shrink-0 h-full overflow-hidden`}>
+          <RadiusSlider value={radius} onChange={handleRadiusChange} competitorCount={filtered.length} />
+        </div>
 
         {/* Mapa */}
         <div className="flex-1 min-w-0 min-h-0 relative rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
