@@ -428,6 +428,40 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           </div>
         </div>
 
+        {/* Destaques da leitura */}
+        <div className={cardCls}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Destaques da leitura</h3>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Sinais relevantes identificados neste ciclo</p>
+          </div>
+          <div className="grid grid-cols-2 gap-px bg-neutral-100 dark:bg-[#3a3a3a]">
+            {([
+              { titulo: 'Concorrência', descricao: 'Pressão local considerada na leitura.', badge: 'Atenção', icon: BarChart2 },
+              { titulo: 'Reputação',    descricao: 'Sinais de percepção e atendimento.',    badge: 'Sinal',    icon: ShieldCheck },
+              { titulo: 'Conteúdo',     descricao: 'Materiais enviados aumentam a precisão.', badge: 'Base',   icon: FileText },
+              { titulo: 'Oportunidade', descricao: 'Pontos de diferenciação detectados.',   badge: 'Potencial', icon: Zap },
+            ] as { titulo: string; descricao: string; badge: string; icon: React.ElementType }[]).map(d => {
+              const Icon = d.icon;
+              return (
+                <div key={d.titulo} className="flex flex-col gap-2 p-3.5 bg-[#f7f8f9] dark:bg-[#2a2a2a]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-[#323232] border border-neutral-200 dark:border-[#484848] flex items-center justify-center flex-shrink-0">
+                      <Icon size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
+                    </div>
+                    <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                      {d.badge}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{d.titulo}</p>
+                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug mt-0.5">{d.descricao}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Ajustes da Análise — Dimensões */}
         <div className={`${cardCls} overflow-hidden`}>
           <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
