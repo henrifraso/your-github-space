@@ -8,8 +8,8 @@ export async function apiFetch<T>(path: string, opts: RequestInit = {}): Promise
   if (orgId || buId) {
     try {
       const u = new URL(path, window.location.origin);
-      if (orgId && !u.searchParams.has('org_id')) u.searchParams.set('org_id', orgId);
-      if (buId  && !u.searchParams.has('bu_id'))  u.searchParams.set('bu_id', buId);
+      if (orgId && !u.searchParams.has('org_id') && !u.searchParams.has('organizationId')) u.searchParams.set('org_id', orgId);
+      if (buId  && !u.searchParams.has('bu_id')  && !u.searchParams.has('unitId'))          u.searchParams.set('bu_id', buId);
       url = u.pathname + u.search + u.hash;
     } catch { /* URL relativa inválida — usa path original */ }
   }

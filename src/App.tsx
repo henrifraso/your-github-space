@@ -191,8 +191,8 @@ export default function App() {
     const p = new URLSearchParams(window.location.search);
     const urlToken = p.get('token');
     if (!urlToken) return null;
-    const bu = p.get('bu') || 'bu-mcdo-paulista';
-    const org = p.get('org') || 'org-mcdonalds-brasil';
+    const bu  = p.get('bu')  ?? '';
+    const org = p.get('org') ?? '';
     const role = p.get('role') || '';
     window.history.replaceState({}, '', window.location.pathname);
     // Limpa auth anterior — força LoginScreen a renderizar e tocar a animação.
