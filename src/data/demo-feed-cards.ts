@@ -368,3 +368,6 @@ export const DEMO_FEED_CARDS: Record<string, IntelligenceCard[]> = {
        'Expandir time comercial de Ads no Brasil e lançar self-service pra PMEs em até 60 dias.'),
   ],
 };
+
+// Oscar Piloto herda cards Oscar Calçados para Feed Geral (mesmo padrão de PROFILE_SECTOR_FEEDS).
+DEMO_FEED_CARDS['oscar-piloto-01'] = DEMO_FEED_CARDS['nike'];
