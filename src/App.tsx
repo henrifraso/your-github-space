@@ -2190,7 +2190,7 @@ function AuthenticatedApp() {
             profilesHeader="Lojas Oscar"
           />
         )}
-        {sectorOpen && activeSector !== 'os1' && activeSector !== 'nike' || (sectorOpen && role === 'franchise') && (
+        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' || role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
             onSelect={setActiveDepartment}
