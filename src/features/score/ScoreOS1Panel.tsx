@@ -535,11 +535,52 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         </div>
 
         {/* Evidências */}
-        <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={ShieldCheck} titulo="Evidências" badge={evidencias.length} />
-          <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl px-3 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
-            {evidencias.map(ev => <EvidenciaItem key={ev.id} ev={ev} />)}
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={14} className="text-neutral-400" strokeWidth={1.8} />
+                <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Sinais considerados</h3>
+              </div>
+              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
+                {evidencias.length} {evidencias.length === 1 ? 'sinal' : 'sinais'}
+              </span>
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Evidências que sustentam e calibram a leitura atual</p>
           </div>
+
+          {evidencias.length === 0 ? (
+            <div className="px-4 py-5">
+              <p className="text-[12px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
+                Sem evidências específicas suficientes para este recorte. O OS¹ usa os sinais gerais do perfil até novas evidências entrarem.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
+              {evidencias.map(ev => {
+                const confPct = Math.round(ev.confianca * 100);
+                return (
+                  <div key={ev.id} className="flex items-start gap-3.5 px-4 py-3.5">
+                    <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center mt-0.5">
+                      <ShieldCheck size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{ev.titulo}</p>
+                        <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                          {ev.tipo}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5 leading-snug">{ev.fonte} · Confiança {confPct}%</p>
+                      {ev.descricao && (
+                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed">{ev.descricao}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Contexto enviado */}
