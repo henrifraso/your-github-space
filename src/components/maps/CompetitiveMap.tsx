@@ -147,7 +147,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
         </div>
 
         {/* Painel lateral — mesmo padrão dos cards/containers do sistema */}
-        <div className="w-[400px] flex-shrink-0 h-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl overflow-hidden border-[0.5px] border-neutral-200 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+        <div className="w-[340px] flex-shrink-0 h-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl overflow-hidden border-[0.5px] border-neutral-200 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
           <AnimatePresence mode="wait" initial={false}>
             {selected ? (
               <CompetitorSidePanel
