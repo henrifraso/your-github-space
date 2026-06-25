@@ -2160,7 +2160,7 @@ function AuthenticatedApp() {
         )}
       </AnimatePresence>
 
-      {/* Sector Switcher — OS1: troca empresa | franchise: troca direto pra setor | outros: troca departamento */}
+      {/* Sector Switcher — OS1: troca empresa | nike (Oscar): troca unidade Oscar | franchise: troca setor | outros: troca departamento */}
       <AnimatePresence>
         {sectorOpen && activeSector === 'os1' && role !== 'franchise' && (
           <SectorSwitcherModal
@@ -2181,7 +2181,16 @@ function AuthenticatedApp() {
             }
           />
         )}
-        {sectorOpen && (activeSector !== 'os1' || role === 'franchise') && (
+        {sectorOpen && activeSector === 'nike' && role !== 'franchise' && (
+          <SectorSwitcherModal
+            active={activeSector}
+            onSelect={setActiveSector}
+            onClose={() => setSectorOpen(false)}
+            filterProfileIds={['oscar-piloto-01']}
+            profilesHeader="Lojas Oscar"
+          />
+        )}
+        {sectorOpen && activeSector !== 'os1' && activeSector !== 'nike' || (sectorOpen && role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
             onSelect={setActiveDepartment}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { apiFetch } from '../../api';
-import { getContextUploads, type ContextUpload } from './contextUploads';
+import { getContextUploads, resolveUploadOrgBu, type ContextUpload } from './contextUploads';
 import { calcScoreInicial, nivelLabelCalculado } from './score-formula';
 import {
   TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
@@ -78,8 +78,10 @@ const NOME_POR_SECTOR: Record<string, string> = {
   apple: 'Apple', amazon: 'Amazon', natura: 'Natura', os1: 'OS¹',
 };
 
+const OSCAR_SECTORS = new Set(['oscar-piloto-01', 'nike']);
+
 function getMock(activeSector?: string): ScoreMock {
-  if (activeSector === 'oscar-piloto-01') return OSCAR_MOCK;
+  if (activeSector && OSCAR_SECTORS.has(activeSector)) return OSCAR_MOCK;
   const nome = activeSector ? (NOME_POR_SECTOR[activeSector] ?? 'Empresa selecionada') : 'Empresa selecionada';
   return { ...NEUTRO_BASE, companyName: nome };
 }
@@ -235,8 +237,8 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
   const [evidenciasReais, setEvidenciasReais] = useState<Evidencia[] | null>(null);
 
   useEffect(() => {
-    // Oscar piloto e OS¹ (Codify puro) usam mock — sem chamada de evidências
-    if (activeSector === 'oscar-piloto-01' || activeSector === 'os1' || !activeSector) return;
+    // Sectores Oscar e OS¹ (Codify puro) usam mock — sem chamada de evidências
+    if (!activeSector || OSCAR_SECTORS.has(activeSector) || activeSector === 'os1') return;
     const orgId = localStorage.getItem('os1_org_id');
     const buId  = localStorage.getItem('os1_bu_id');
     if (!orgId || !buId) return;
@@ -261,8 +263,9 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
 
   const [uploads, setUploads] = useState<ContextUpload[]>([]);
   useEffect(() => {
-    const orgId = localStorage.getItem('os1_org_id') ?? undefined;
-    const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+    const rawOrgId = localStorage.getItem('os1_org_id') ?? undefined;
+    const rawBuId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+    const { orgId, buId } = resolveUploadOrgBu(activeSector, rawOrgId, rawBuId);
     setUploads(getContextUploads(orgId, buId, activeSector));
   }, [activeSector]);
 
@@ -272,7 +275,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
     data: new Date(u.uploadedAt).toLocaleDateString('pt-BR'),
   }));
   const conteudosToShow: { nome: string; tipo: string; data: string }[] =
-    activeSector === 'oscar-piloto-01'
+    (activeSector && OSCAR_SECTORS.has(activeSector))
       ? [...mock.conteudos, ...mappedUploads]
       : mappedUploads;
 
@@ -311,7 +314,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
               {/* Stat buttons — flex-1 preenche a linha toda */}
               <div className="flex items-stretch gap-1.5">
                 {([
-                  { label: activeSector === 'oscar-piloto-01' ? 'Score OS¹' : 'Score inicial', value: scoreGeral },
+                  { label: (activeSector && OSCAR_SECTORS.has(activeSector)) ? 'Score OS¹' : 'Score inicial', value: scoreGeral },
                   { label: 'Dimensões',  value: mock.dimensoes.length         },
                   { label: 'Evidências', value: evidencias.length             },
                   { label: 'Insights',   value: mock.cardsRelacionados.length },

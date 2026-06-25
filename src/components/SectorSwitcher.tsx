@@ -185,6 +185,10 @@ interface Props {
   onClose: () => void;
   roleSection?: RoleSection;
   hideDemoProfiles?: boolean;
+  /** Quando fornecido, substitui a lista padrão de perfis exibidos. */
+  filterProfileIds?: string[];
+  /** Rótulo acima da grade de perfis. Se omitido, usa 'Perfis demo' quando roleSection presente. */
+  profilesHeader?: string;
 }
 
 const cardVariants = {
@@ -232,7 +236,8 @@ function ProfileLogo({ profile, size = 48 }: { profile: ProfileConfig; size?: nu
   );
 }
 
-export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hideDemoProfiles }: Props) {
+export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hideDemoProfiles, filterProfileIds, profilesHeader }: Props) {
+  const DEFAULT_PROFILE_IDS = ['os1', 'mcdonalds', 'nike', 'nubank'];
   const [openTab, setOpenTab] = useState<string | null>(null);
   const openTabLabel = openTab ? roleSection?.tabs.find(t => t.id === openTab)?.label : null;
   const showSubview = !!openTab && !!roleSection?.renderContent;
@@ -309,12 +314,14 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
           </div>
         )}
 
-        {!showSubview && roleSection && !hideDemoProfiles && (
-          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2.5">Perfis demo</p>
+        {!showSubview && (profilesHeader || (roleSection && !hideDemoProfiles)) && (
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2.5">
+            {profilesHeader ?? 'Perfis demo'}
+          </p>
         )}
         {!showSubview && !hideDemoProfiles && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {SECTORS.filter(p => ['os1', 'mcdonalds', 'nike', 'nubank', 'oscar-piloto-01'].includes(p.id)).map((profile, i) => {
+          {SECTORS.filter(p => (filterProfileIds ?? DEFAULT_PROFILE_IDS).includes(p.id)).map((profile, i) => {
             const isActive = active === profile.id;
             return (
               <motion.div

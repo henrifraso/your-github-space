@@ -1,3 +1,21 @@
+import { getCodifyScopeForSector } from '../feed/codify-sector-scope';
+import type { SectorId } from '../../components/SectorSwitcher';
+
+/** Retorna org/bu canônico para sectores com escopo fixo (Oscar, Pacheco…).
+ *  Sectores com escopo real sempre usam a mesma chave de upload,
+ *  independentemente de quem está logado. Fallback: valores do localStorage. */
+export function resolveUploadOrgBu(
+  activeSector: string | undefined,
+  fallbackOrgId: string | undefined,
+  fallbackBuId: string | undefined,
+): { orgId: string | undefined; buId: string | undefined } {
+  if (activeSector) {
+    const scope = getCodifyScopeForSector(activeSector as SectorId);
+    if (scope) return { orgId: scope.organizationId, buId: scope.unitId ?? undefined };
+  }
+  return { orgId: fallbackOrgId, buId: fallbackBuId };
+}
+
 export interface ContextUpload {
   id: string;
   name: string;

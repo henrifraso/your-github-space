@@ -51,7 +51,7 @@ import {
   buildBlockShortcuts, buildModeBlock,
 } from '../features/workspace/generation/workspace-block-builders';
 import { executeAction } from '../features/workspace/execute/action-executor';
-import { addContextUpload } from '../features/score/contextUploads';
+import { addContextUpload, resolveUploadOrgBu } from '../features/score/contextUploads';
 
 type Phase = 'init' | 'expanded' | 'selected';
 
@@ -1022,9 +1022,10 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
           <input type="file" className="hidden" onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) {
-              const orgId = localStorage.getItem('os1_org_id') ?? undefined;
-              const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
-              const ext   = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
+              const rawOrgId = localStorage.getItem('os1_org_id') ?? undefined;
+              const rawBuId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+              const { orgId, buId } = resolveUploadOrgBu(activeSector, rawOrgId, rawBuId);
+              const ext = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
               addContextUpload({
                 id: crypto.randomUUID(),
                 name: f.name,
@@ -1150,9 +1151,10 @@ export function ChatMobile({
               <input type="file" className="hidden" onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) {
-                  const orgId = localStorage.getItem('os1_org_id') ?? undefined;
-                  const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
-                  const ext   = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
+                  const rawOrgId = localStorage.getItem('os1_org_id') ?? undefined;
+                  const rawBuId  = localStorage.getItem('os1_bu_id')  ?? undefined;
+                  const { orgId, buId } = resolveUploadOrgBu(activeSector, rawOrgId, rawBuId);
+                  const ext = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
                   addContextUpload({
                     id: crypto.randomUUID(),
                     name: f.name,
