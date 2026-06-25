@@ -9,6 +9,7 @@ import { useDarkMode } from '../../hooks/useDarkMode';
 import { ClientMarker } from './ClientMarker';
 import { CompetitorMarker } from './CompetitorMarker';
 import { CompetitorSidePanel } from './CompetitorSidePanel';
+import { MapRadiusSummary } from './MapRadiusSummary';
 import { MapLegend } from './MapLegend';
 import { RadiusSlider } from './RadiusSlider';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../../config/googleMaps';
@@ -134,12 +135,24 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
           <MapLegend />
         </div>
 
-        {/* Painel lateral — desliza da direita quando concorrente selecionado */}
-        <AnimatePresence>
-          {selected && (
-            <CompetitorSidePanel competitor={selected} onClose={() => setSelected(null)} />
-          )}
-        </AnimatePresence>
+        {/* Painel lateral — sempre visível; conteúdo alterna entre resumo e detalhe */}
+        <div className="w-[400px] flex-shrink-0 h-full bg-[#161618] border-l border-white/10 overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            {selected ? (
+              <CompetitorSidePanel
+                key={selected.nome}
+                competitor={selected}
+                onClose={() => setSelected(null)}
+              />
+            ) : (
+              <MapRadiusSummary
+                key="radius-summary"
+                competitors={filtered.map(({ c }) => c)}
+                radiusMeters={radius}
+              />
+            )}
+          </AnimatePresence>
+        </div>
 
       </div>
     </div>

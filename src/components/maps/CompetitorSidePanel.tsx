@@ -20,11 +20,11 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
 
   return (
     <motion.div
-      initial={{ x: 400, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 400, opacity: 0 }}
-      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-      className="w-[400px] flex-shrink-0 h-full flex flex-col bg-[#161618] border-l border-white/10 overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+      className="h-full flex flex-col bg-[#161618] overflow-hidden"
     >
       {/* Cabeçalho */}
       <div className="flex items-start justify-between px-5 pt-5 pb-4 border-b border-white/8 flex-shrink-0">
