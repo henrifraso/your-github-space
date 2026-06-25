@@ -35,7 +35,7 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
     const map = L.map(containerRef.current, {
       center: [center.lat, center.lng],
       zoom,
-      zoomControl: true,
+      zoomControl: false,
       attributionControl: true,
     });
     const tileUrl = isDark
