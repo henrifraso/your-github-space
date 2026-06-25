@@ -232,8 +232,8 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
   const [evidenciasReais, setEvidenciasReais] = useState<Evidencia[] | null>(null);
 
   useEffect(() => {
-    // Oscar piloto mantém isolamento — sempre usa OSCAR_MOCK
-    if (activeSector === 'oscar-piloto-01') return;
+    // Oscar piloto e OS¹ (Codify puro) usam mock — sem chamada de evidências
+    if (activeSector === 'oscar-piloto-01' || activeSector === 'os1' || !activeSector) return;
     const orgId = localStorage.getItem('os1_org_id');
     const buId  = localStorage.getItem('os1_bu_id');
     if (!orgId || !buId) return;
