@@ -1011,11 +1011,76 @@ const NATURA_DATA: OmniData = {
   ],
 };
 
+const CERVEJA_IMPERIO_DATA: OmniData = {
+  negocio: { nome_fantasia: 'Cerveja Império', segmento: 'Bebidas & Distribuição', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0000', nivel: 3, pontos: 1800 },
+  semana_label: 'Semana de 23 de Junho de 2026',
+  mercado_nome: 'Cerveja Artesanal & Distribuição Regional',
+  mercado_tamanho: 'R$ 2.8bi/mês no Brasil',
+  ranking_local: 1, progresso_pct: 42, nivel_label: 'Referência regional', pontos_proximo: 2500,
+  concorrentes: [],
+  fornecedores: [
+    { nome: 'Maltaria Tropical', cidade: 'Ribeirão Preto', estado: 'SP', telefone: '(16) 3800-0000', email: 'comercial@malteriatropical.com.br', preco_referencia: 0, produto_servico: 'Fornecimento de malte base para produção da linha Puro Malte Império' },
+    { nome: 'Logística Serrana Express', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3320-0000', email: 'operacoes@serranaexpress.com.br', preco_referencia: 0, produto_servico: 'Transportadora parceira para distribuição regional serrana e Região dos Lagos' },
+    { nome: 'Gráfica PDV Brasil', cidade: 'Rio de Janeiro', estado: 'RJ', telefone: '(21) 3300-0000', email: 'comercial@pdvbrasil.com.br', preco_referencia: 0, produto_servico: 'Material de ponto de venda: baldes, porta-copos, displays e uniformes para promotores' },
+  ],
+  praticas: [
+    { titulo: 'Identidade Serrana como diferencial de posicionamento', conteudo: 'A origem em Petrópolis é ativo de marca: cidade com tradição em cervejas e turismo gastronômico. O posicionamento como "cerveja da Serra" cria vínculo emocional regional difícil de replicar por marcas nacionais de massa.', fonte: 'Observação de mercado interno' },
+    { titulo: 'Distribuição via rede própria e parceiros regionais', conteudo: 'O modelo híbrido — frota própria em cidades-chave e parceiros distribuidores no interior — reduz custo fixo e mantém flexibilidade de cobertura. A proximidade com o ponto de venda é a principal vantagem frente a grandes distribuidores nacionais.', fonte: 'Estratégia comercial Império 2026' },
+    { titulo: 'Linha diversificada para diferentes momentos de consumo', conteudo: 'A presença da marca em diferentes categorias (Puro Malte, Dopamina, Cidade Imperial) cobre desde o consumo popular até o premium. Essa diversidade reduz exposição a um único segmento e amplia o espaço de gôndola nas distribuidoras parceiras.', fonte: 'Mix de portfólio Cerveja Império 2026' },
+  ],
+  previsao_clima: CLIMA_SP,
+  gamificacao_log: [
+    { acao: 'Novo PDV cadastrado na rede de distribuição', pontos: 120 },
+    { acao: 'Meta de volume de verão atingida', pontos: 200 },
+  ],
+  pesquisa: { resumo: 'O mercado brasileiro de cervejas movimentou R$ 2.8bi/mês em 2025. Cervejas artesanais e regionais respondem por 4% do volume mas crescem 18% ao ano. O canal bares e restaurantes representa 42% do consumo fora de casa. Distribuidoras regionais têm margem média de 12–18% sobre produto. Sazonalidade é fator crítico: volume no verão pode ser 2,5x superior ao inverno em regiões turísticas.' },
+  timeline: [
+    { id: '1', data: '20 Jun', tipo: 'mercado', icone: '📈', titulo: 'Cervejas regionais crescem 18% ao ano — consumidor busca identidade e origem', detalhe: 'O interesse do consumidor por cervejas com identidade de origem cresce de forma consistente. Petrópolis, com tradição cervejeira desde o século XIX, é um ativo de posicionamento. Monitorar a percepção de "cerveja da Serra" como diferencial pode indicar oportunidades de comunicação de marca e expansão geográfica.' },
+    { id: '2', data: '18 Jun', tipo: 'mercado', icone: '🌞', titulo: 'Alta temporada de verão: volume de cerveja cresce até 2.5x — distribuidoras devem antecipar pedidos', detalhe: 'O período entre outubro e março concentra o maior volume de vendas de bebidas no Brasil. Distribuidoras que antecipam pedidos à fábrica e garantem estoque nos PDVs antes do pico conseguem maior participação de gôndola e evitam rupturas que beneficiam marcas concorrentes.' },
+    { id: '3', data: '15 Jun', tipo: 'concorrente', icone: '⚡', titulo: 'Ambev amplia ação de trade marketing em bares do interior do RJ e ES', detalhe: 'Ações de Brahma e Skol em bares de cidades médias do interior fluminense e capixaba incluem equipamentos de refrigeração em comodato. O modelo cria dependência do PDV com a marca que fornece o equipamento. Monitorar essa prática nos pontos atendidos pela Império pode indicar risco de perda de espaço.' },
+    { id: '4', data: '12 Jun', tipo: 'mercado', icone: '🍺', titulo: 'Eventos gastronômicos e festivais de cerveja crescem no calendário RJ/ES/MG', detalhe: 'O calendário de festivais de cerveja artesanal e eventos gastronômicos na região Sudeste ampliou 35% em 2025 vs 2024. Participar como marca patrocinadora em eventos de perfil compatível com o posicionamento Império pode aumentar recall de marca e abrir novos canais de distribuição sem custo de mídia de massa.' },
+    { id: '5', data: '08 Jun', tipo: 'mercado', icone: '🏪', titulo: 'Atacarejo cresce como canal de bebidas: Assaí e Mateus respondem por 22% das vendas de cerveja', detalhe: 'O canal atacarejo consolida-se como ponto de compra de cerveja para pequenos bares, mercadinhos e eventos particulares. Presença nesse canal amplia alcance sem necessidade de visita porta a porta. Negociar espaço preferencial no atacarejo regional pode ser alternativa de distribuição complementar.' },
+  ],
+};
+
+const CERVEJA_IMPERIO_DISTRIBUIDORA_DATA: OmniData = {
+  negocio: { nome_fantasia: 'Distribuidora Império', segmento: 'Bebidas · Distribuidora Piloto', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0100', nivel: 2, pontos: 900 },
+  semana_label: 'Semana de 23 de Junho de 2026',
+  mercado_nome: 'Distribuição Regional de Bebidas',
+  mercado_tamanho: 'Região Serrana + Região dos Lagos',
+  ranking_local: 1, progresso_pct: 28, nivel_label: 'Distribuidora piloto ativa', pontos_proximo: 1500,
+  concorrentes: [],
+  fornecedores: [
+    { nome: 'Cerveja Império (matriz)', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0000', email: 'comercial@cervejaimperio.com.br', preco_referencia: 0, produto_servico: 'Fornecimento de toda a linha Cerveja Império — Puro Malte, Dopamina e Cidade Imperial — para distribuição na região piloto' },
+    { nome: 'Logística Serrana Express', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3320-0000', email: 'operacoes@serranaexpress.com.br', preco_referencia: 0, produto_servico: 'Transporte complementar para rotas de maior distância e picos de demanda sazonal' },
+  ],
+  praticas: [
+    { titulo: 'Cobertura de rota com foco em bares e mercadinhos locais', conteudo: 'A distribuidora prioriza bares, restaurantes e pequenos mercados com perfil de consumo imediato. Esses pontos têm ticket médio menor por pedido mas maior frequência de recompra e impacto direto no consumidor final.', fonte: 'Plano de rota Distribuidora Piloto 2026' },
+    { titulo: 'Visita semanal ao PDV como diferencial de relacionamento', conteudo: 'A frequência de visita semanal aos principais pontos cria vínculo comercial difícil de substituir. O vendedor de campo que conhece o dono do bar pelo nome e antecipa necessidades reduz churn e aumenta a participação da Império no mix de produtos comprados pelo ponto.', fonte: 'Prática comercial interna' },
+    { titulo: 'Controle de estoque por PDV para evitar ruptura em pico', conteudo: 'Registrar o estoque disponível em cada PDV visitado permite antecipar pedidos antes de rupturas e evitar perda de espaço para concorrentes. Uma planilha simples por rota já entrega esse controle sem necessidade de sistema.', fonte: 'Operação piloto Distribuidora Império jun/2026' },
+  ],
+  previsao_clima: CLIMA_SP,
+  gamificacao_log: [
+    { acao: 'PDV fidelizado com visita recorrente por 4 semanas', pontos: 100 },
+    { acao: 'Zero ruptura registrada na semana de pico', pontos: 150 },
+  ],
+  pesquisa: { resumo: 'Distribuidoras regionais de bebidas cobrem em média 80–200 PDVs por rota. Margem bruta de distribuição varia de 12% a 18% sobre preço de tabela. Visita semanal ao PDV é o padrão competitivo mínimo. Ruptura de estoque no pico sazonal pode custar 30–40% do volume da semana. Relacionamento comercial pessoal com o dono do ponto é o principal ativo da distribuidora regional.' },
+  timeline: [
+    { id: '1', data: '20 Jun', tipo: 'mercado', icone: '📦', titulo: 'Giro de produto na semana: monitorar pontos com menor saída para reequilibrar pedidos', detalhe: 'Identificar PDVs com giro abaixo do esperado na semana permite ajustar o volume do próximo pedido, reduzir risco de vencimento e direcionar esforço de promoção ao ponto. Um registro simples por visita já indica onde concentrar atenção comercial.' },
+    { id: '2', data: '18 Jun', tipo: 'mercado', icone: '🚛', titulo: 'Rotas de terça e quinta concentram maior volume de entrega — verificar capacidade de frota', detalhe: 'Concentração de entregas em determinados dias pode criar gargalo operacional e atraso nas demais rotas. Distribuir a carga ao longo da semana ou ter parceiro de transporte como backup pode reduzir atrasos e aumentar a confiabilidade percebida pelo PDV.' },
+    { id: '3', data: '16 Jun', tipo: 'concorrente', icone: '⚡', titulo: 'Distribuidora concorrente local ofereceu equipamento de refrigeração em comodato a bares da região', detalhe: 'Oferta de freezer em comodato cria dependência do PDV com a marca fornecedora. Monitorar quais pontos da rota receberam esse tipo de oferta e avaliar como responder — seja com condição comercial diferenciada, visita mais frequente ou material de PDV — para manter o relacionamento.' },
+    { id: '4', data: '14 Jun', tipo: 'mercado', icone: '🍺', titulo: 'Festival de gastronomia em Petrópolis no fim de julho — oportunidade de cadastrar novos PDVs temporários', detalhe: 'Eventos gastronômicos e culturais na região serrana criam demanda pontual por bebidas premium. Cadastrar fornecedores de food trucks e bares temporários do evento amplia alcance da marca em público que ainda não é cliente e pode gerar pedidos recorrentes após o evento.' },
+    { id: '5', data: '10 Jun', tipo: 'mercado', icone: '🏪', titulo: 'Demanda por Região dos Lagos cresce no pré-verão — janela de expansão de rota', detalhe: 'Cidades do Litoral Leste (Arraial do Cabo, Búzios, Cabo Frio) registram aumento de consumo de cerveja já em junho, dois meses antes do pico. Avaliar expansão de rota para essa região antes da alta temporada pode garantir presença no período de maior volume.' },
+  ],
+};
+
 export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
   os1:       MOCK_DATA,
   mcdonalds: MCDONALDS_DATA,
   nike:      NIKE_DATA,
   nubank:    NUBANK_DATA,
+  'cerveja-imperio':                  CERVEJA_IMPERIO_DATA,
+  'cerveja-imperio-distribuidora-01': CERVEJA_IMPERIO_DISTRIBUIDORA_DATA,
   // GA3-test-loja: loja Oscar não-matriz. Reutiliza dados de NIKE_DATA (Oscar
   // Calçados) ajustando só nome_fantasia/segmento pra refletir a unidade.
   'oscar-piloto-01': {
