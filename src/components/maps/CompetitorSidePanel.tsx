@@ -17,8 +17,8 @@ function ratingCls(n: number | string): string {
 
 const CARD = [
   'bg-white dark:bg-[#242424]',
-  'border border-neutral-200 dark:border-[#2e2e2e]',
-  'rounded-xl',
+  'border border-neutral-200 dark:border-[#303030]',
+  'rounded-2xl',
   'shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]',
 ].join(' ');
 
@@ -167,7 +167,7 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
 
         {/* Oportunidade para Oscar */}
         {c.oportunidade && (
-          <div className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
+          <div className="bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
             <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400/70 mb-1.5">
               Oportunidade para Oscar
             </p>

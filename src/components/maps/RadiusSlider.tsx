@@ -23,8 +23,8 @@ export function RadiusSlider({ value, onChange, competitorCount }: Props) {
   const currentStep = STEPS[idx] ?? STEPS[4];
 
   return (
-    <div className="flex items-center gap-3 px-5 py-2.5 border-b border-neutral-200 dark:border-[#2e2e2e] bg-[#f0f2f4] dark:bg-[#242424]">
-      <span className="text-neutral-400 dark:text-neutral-500 text-[11px] font-medium flex-shrink-0 w-10">Raio</span>
+    <div className="flex items-center gap-3">
+      <span className="text-neutral-400 dark:text-neutral-500 text-[11px] font-medium flex-shrink-0">Raio</span>
       <input
         type="range"
         min={0}
