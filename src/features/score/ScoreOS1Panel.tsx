@@ -258,20 +258,20 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
 
   const [uploads, setUploads] = useState<ContextUpload[]>([]);
   useEffect(() => {
-    if (activeSector === 'oscar-piloto-01') return;
     const orgId = localStorage.getItem('os1_org_id') ?? undefined;
     const buId  = localStorage.getItem('os1_bu_id')  ?? undefined;
     setUploads(getContextUploads(orgId, buId, activeSector));
   }, [activeSector]);
 
+  const mappedUploads = uploads.map(u => ({
+    nome: u.name,
+    tipo: u.extension ? u.extension.toUpperCase() : 'Arquivo',
+    data: new Date(u.uploadedAt).toLocaleDateString('pt-BR'),
+  }));
   const conteudosToShow: { nome: string; tipo: string; data: string }[] =
     activeSector === 'oscar-piloto-01'
-      ? mock.conteudos
-      : uploads.map(u => ({
-          nome: u.name,
-          tipo: u.extension ? u.extension.toUpperCase() : 'Arquivo',
-          data: new Date(u.uploadedAt).toLocaleDateString('pt-BR'),
-        }));
+      ? [...mock.conteudos, ...mappedUploads]
+      : mappedUploads;
 
   return (
     <div className="flex flex-col h-full bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
