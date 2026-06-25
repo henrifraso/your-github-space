@@ -584,21 +584,46 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         </div>
 
         {/* Contexto enviado */}
-        <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={FileText} titulo="Contexto enviado" />
-          <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-1.5 space-y-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
-            {conteudosToShow.length === 0
-              ? <p className="px-3 py-2.5 text-[12px] text-neutral-400 dark:text-neutral-500">Nenhum conteúdo enviado ainda. Use o botão de upload para registrar contexto da empresa.</p>
-              : conteudosToShow.map((c, i) => (
-                <div key={`${c.nome}-${i}`} className="flex items-center gap-3 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
-                  <FileText size={12} className="text-neutral-400 flex-shrink-0" strokeWidth={1.8} />
-                  <span className="text-[12px] text-neutral-700 dark:text-neutral-300 flex-1 truncate">{c.nome}</span>
-                  <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-[#353535] px-1.5 py-0.5 rounded">{c.tipo}</span>
-                  <span className="text-[10px] text-neutral-400 dark:text-neutral-500 flex-shrink-0">{c.data}</span>
-                </div>
-              ))
-            }
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <FileText size={14} className="text-neutral-400" strokeWidth={1.8} />
+                <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Contexto enviado</h3>
+              </div>
+              {conteudosToShow.length > 0 && (
+                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
+                  {conteudosToShow.length} {conteudosToShow.length === 1 ? 'arquivo' : 'arquivos'}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Materiais internos usados para calibrar a análise</p>
           </div>
+
+          {conteudosToShow.length === 0 ? (
+            <div className="px-4 py-5">
+              <p className="text-[12px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
+                Nenhum conteúdo específico foi enviado para este recorte. A leitura usa os sinais disponíveis até novos materiais entrarem no sistema.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
+              {conteudosToShow.map((c, i) => (
+                <div key={`${c.nome}-${i}`} className="flex items-center gap-3.5 px-4 py-3">
+                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
+                    <FileText size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">{c.nome}</p>
+                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500">Material interno considerado na leitura atual · {c.data}</p>
+                  </div>
+                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
+                    {c.tipo}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Cards relacionados */}
