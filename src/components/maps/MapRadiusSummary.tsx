@@ -75,10 +75,6 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
   const topOp     = alto[0]?.oportunidade ?? medio[0]?.oportunidade;
 
   const dominantRisk = alto.length > 0 ? 'alto' : medio.length > 0 ? 'médio' : 'baixo';
-  const riskBadge =
-    dominantRisk === 'alto'  ? 'bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400' :
-    dominantRisk === 'médio' ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400' :
-                               'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400';
 
   return (
     <motion.div
@@ -101,7 +97,7 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
             </p>
           </div>
           {comps.length > 0 && (
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${riskBadge}`}>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 bg-neutral-100 dark:bg-[#3d3d3d] text-neutral-500 dark:text-neutral-400">
               {dominantRisk} risco
             </span>
           )}
@@ -140,7 +136,7 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
             <div className={`${CARD} px-3 py-2.5`}>
               <p className={`${LABEL} mb-1.5`}>Alto risco</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-red-600 dark:text-red-400 text-2xl font-bold tabular-nums leading-none">
+                <span className="text-neutral-800 dark:text-neutral-100 text-2xl font-bold tabular-nums leading-none">
                   {alto.length}
                 </span>
                 {alto.length > 0 && (
@@ -152,7 +148,7 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
             <div className={`${CARD} px-3 py-2.5`}>
               <p className={`${LABEL} mb-1.5`}>Risco médio</p>
               <div className="flex items-end gap-1.5">
-                <span className="text-amber-600 dark:text-amber-400 text-2xl font-bold tabular-nums leading-none">
+                <span className="text-neutral-800 dark:text-neutral-100 text-2xl font-bold tabular-nums leading-none">
                   {medio.length}
                 </span>
                 {medio.length > 0 && (
@@ -181,7 +177,7 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
                   key={c.nome}
                   className="flex items-center gap-2 py-2 border-b border-neutral-100 dark:border-[#2e2e2e] last:border-0"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600 flex-shrink-0" />
                   <span className="text-neutral-700 dark:text-neutral-300 text-xs min-w-0 truncate">{c.nome}</span>
                   {c.ticket_medio && (
                     <span className="text-neutral-400 dark:text-neutral-500 text-[10px] flex-shrink-0 ml-auto">
@@ -213,11 +209,9 @@ export function MapRadiusSummary({ competitors: comps, radiusMeters }: Props) {
 
         {/* Oportunidade para Oscar */}
         {topOp && (
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 border-[0.5px] border-emerald-200 dark:border-emerald-800 rounded-2xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
-            <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400/70 mb-1.5">
-              Oportunidade para Oscar
-            </p>
-            <p className="text-neutral-700 dark:text-neutral-300 text-xs leading-relaxed">{topOp}</p>
+          <div className={`${CARD} p-3.5`}>
+            <p className={`${LABEL} mb-1.5`}>Oportunidade para Oscar</p>
+            <p className="text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed">{topOp}</p>
           </div>
         )}
 

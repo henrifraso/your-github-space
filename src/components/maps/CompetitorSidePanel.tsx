@@ -8,13 +8,6 @@ interface Props {
   onClose: () => void;
 }
 
-function ratingCls(n: number | string): string {
-  const v = Number(n);
-  if (v >= 4.3) return 'text-emerald-600 dark:text-emerald-400';
-  if (v >= 4.0) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
-}
-
 const CARD = [
   'bg-[#f7f8f9] dark:bg-[#2f2f2f]',
   'border-[0.5px] border-neutral-200 dark:border-[#3d3d3d]',
@@ -25,10 +18,10 @@ const CARD = [
 const LABEL = 'text-[9px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500';
 
 export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
-  const riskBadge =
-    c.risco_competitivo === 'alto'  ? 'bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400' :
-    c.risco_competitivo === 'medio' ? 'bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400' :
-                                      'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400';
+  const riskLabel =
+    c.risco_competitivo === 'alto'  ? 'Alto risco' :
+    c.risco_competitivo === 'medio' ? 'Médio risco' :
+    c.risco_competitivo === 'baixo' ? 'Baixo risco' : null;
 
   return (
     <motion.div
@@ -58,10 +51,9 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
               </p>
             )}
           </div>
-          {c.risco_competitivo && (
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${riskBadge}`}>
-              {c.risco_competitivo === 'alto' ? 'Alto risco' :
-               c.risco_competitivo === 'medio' ? 'Médio' : 'Baixo'}
+          {riskLabel && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 bg-neutral-100 dark:bg-[#3d3d3d] text-neutral-500 dark:text-neutral-400">
+              {riskLabel}
             </span>
           )}
         </div>
@@ -74,7 +66,7 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
         <div className="grid grid-cols-2 gap-2">
           <div className={`${CARD} px-3 py-2.5`}>
             <p className={`${LABEL} mb-1.5`}>Google</p>
-            <p className={`text-2xl font-bold tabular-nums leading-none ${ratingCls(c.nota_google)}`}>
+            <p className="text-neutral-800 dark:text-neutral-100 text-2xl font-bold tabular-nums leading-none">
               {Number(c.nota_google).toFixed(1)}
             </p>
             <p className="text-neutral-400 dark:text-neutral-500 text-[9px] mt-1">★ avaliação</p>
@@ -108,7 +100,7 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
                   </span>
                   <div className="flex-1 h-1 bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-amber-400 dark:bg-amber-400/70"
+                      className="h-full rounded-full bg-neutral-400 dark:bg-neutral-500"
                       style={{ width: `${(nota / 5) * 100}%` }}
                     />
                   </div>
@@ -134,13 +126,11 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
           <div className="grid grid-cols-2 gap-2">
             {c.faz_bem && c.faz_bem.length > 0 && (
               <div className={`${CARD} p-3`}>
-                <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-500 mb-2">
-                  Faz bem
-                </p>
+                <p className={`${LABEL} mb-2`}>Faz bem</p>
                 <ul className="space-y-1.5">
                   {c.faz_bem.slice(0, 4).map((item, i) => (
                     <li key={i} className="flex items-start gap-1.5">
-                      <span className="text-emerald-500 text-[8px] mt-0.5 flex-shrink-0">●</span>
+                      <span className="text-neutral-300 dark:text-neutral-600 text-[8px] mt-0.5 flex-shrink-0">●</span>
                       <span className="text-neutral-600 dark:text-neutral-400 text-[10px] leading-snug">{item}</span>
                     </li>
                   ))}
@@ -149,13 +139,11 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
             )}
             {c.nao_oferece && c.nao_oferece.length > 0 && (
               <div className={`${CARD} p-3`}>
-                <p className="text-[9px] font-semibold uppercase tracking-wide text-red-500 dark:text-red-400 mb-2">
-                  Fraqueza
-                </p>
+                <p className={`${LABEL} mb-2`}>Fraqueza</p>
                 <ul className="space-y-1.5">
                   {c.nao_oferece.slice(0, 4).map((item, i) => (
                     <li key={i} className="flex items-start gap-1.5">
-                      <span className="text-red-400 text-[8px] mt-0.5 flex-shrink-0">●</span>
+                      <span className="text-neutral-300 dark:text-neutral-600 text-[8px] mt-0.5 flex-shrink-0">●</span>
                       <span className="text-neutral-600 dark:text-neutral-400 text-[10px] leading-snug">{item}</span>
                     </li>
                   ))}
@@ -167,11 +155,9 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
 
         {/* Oportunidade para Oscar */}
         {c.oportunidade && (
-          <div className="bg-emerald-50 dark:bg-emerald-900/30 border-[0.5px] border-emerald-200 dark:border-emerald-800 rounded-2xl p-3.5 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]">
-            <p className="text-[9px] font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-400/70 mb-1.5">
-              Oportunidade para Oscar
-            </p>
-            <p className="text-neutral-700 dark:text-neutral-300 text-xs leading-relaxed">{c.oportunidade}</p>
+          <div className={`${CARD} p-3.5`}>
+            <p className={`${LABEL} mb-1.5`}>Oportunidade para Oscar</p>
+            <p className="text-neutral-600 dark:text-neutral-400 text-xs leading-relaxed">{c.oportunidade}</p>
           </div>
         )}
 
