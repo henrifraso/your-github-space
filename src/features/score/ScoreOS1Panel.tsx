@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { apiFetch } from '../../api';
 import { getContextUploads, type ContextUpload } from './contextUploads';
+import { calcScoreInicial, nivelLabelCalculado } from './score-formula';
 import {
   TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
   FileText, BarChart2, ShieldCheck, MapPin, Zap,
@@ -86,9 +87,7 @@ function getMock(activeSector?: string): ScoreMock {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function nivelLabel(s: number) {
-  if (s >= 80) return 'Positivo';
-  if (s >= 60) return 'Atenção moderada';
-  return 'Em desenvolvimento';
+  return nivelLabelCalculado(s);
 }
 
 function ImpactoTag({ v }: { v: number }) {
@@ -277,6 +276,13 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
       ? [...mock.conteudos, ...mappedUploads]
       : mappedUploads;
 
+  // Score calculado apenas quando `insights` prop está presente (perfis com codifyScope).
+  // Codify puro (os1) passa insights=undefined → scoreGeral permanece do mock.
+  const scoreGeral = useMemo(() => {
+    if (!insights) return mock.scoreGeral;
+    return calcScoreInicial(insights, uploads.length);
+  }, [insights, uploads.length, mock.scoreGeral]);
+
   return (
     <div className="flex flex-col h-full bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
 
@@ -305,7 +311,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
               {/* Stat buttons — flex-1 preenche a linha toda */}
               <div className="flex items-stretch gap-1.5">
                 {([
-                  { label: activeSector === 'oscar-piloto-01' ? 'Score OS¹' : 'Score inicial', value: mock.scoreGeral },
+                  { label: activeSector === 'oscar-piloto-01' ? 'Score OS¹' : 'Score inicial', value: scoreGeral },
                   { label: 'Dimensões',  value: mock.dimensoes.length         },
                   { label: 'Evidências', value: evidencias.length             },
                   { label: 'Insights',   value: mock.cardsRelacionados.length },
@@ -327,7 +333,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
                 </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp size={11} className="text-neutral-400 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-[12px] text-neutral-700 dark:text-neutral-200">{nivelLabel(mock.scoreGeral)} · {mock.periodo}</span>
+                  <span className="text-[12px] text-neutral-700 dark:text-neutral-200">{nivelLabel(scoreGeral)} · {mock.periodo}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={11} className="text-neutral-400 flex-shrink-0" strokeWidth={2} />
@@ -337,11 +343,11 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
                 <div className="pt-1.5 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">Score geral</span>
-                    <span className="text-[11px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200">{mock.scoreGeral} <span className="text-neutral-400 dark:text-neutral-500 font-normal">/ 100</span></span>
+                    <span className="text-[11px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200">{scoreGeral} <span className="text-neutral-400 dark:text-neutral-500 font-normal">/ 100</span></span>
                   </div>
                   <div className="h-[4px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-neutral-800 dark:bg-neutral-100 transition-all duration-700"
-                      style={{ width: `${mock.scoreGeral}%`, opacity: 0.4 + (mock.scoreGeral / 100) * 0.55 }} />
+                      style={{ width: `${scoreGeral}%`, opacity: 0.4 + (scoreGeral / 100) * 0.55 }} />
                   </div>
                 </div>
               </div>
@@ -366,14 +372,14 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
                   stroke="currentColor" strokeWidth="5"
                   pathLength={100} strokeDasharray="100"
                   initial={{ strokeDashoffset: 100 }}
-                  animate={{ strokeDashoffset: 100 - mock.scoreGeral }}
+                  animate={{ strokeDashoffset: 100 - scoreGeral }}
                   transition={{ duration: 2.8, ease: 'easeOut' }}
                   className="text-neutral-800 dark:text-neutral-100" />
               </svg>
               {/* Miolo — círculo inner com Bio shadow */}
               <div className="absolute inset-[20%] rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-[22px] font-black tabular-nums text-neutral-900 dark:text-white leading-none">{mock.scoreGeral}</div>
+                  <div className="text-[22px] font-black tabular-nums text-neutral-900 dark:text-white leading-none">{scoreGeral}</div>
                   <div className="text-[9px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">/100</div>
                 </div>
               </div>
