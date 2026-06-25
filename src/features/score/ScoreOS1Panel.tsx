@@ -306,54 +306,68 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:hidden">
 
-        {/* Empresa + Score geral — layout Bio */}
-        <div className={`${cardCls} p-3 flex flex-col gap-2.5`}>
+        {/* Cabeçalho — Ajustes da Análise */}
+        <div className={`${cardCls} p-4 flex flex-col gap-3`}>
 
-              <h1 className="text-[16px] font-bold text-neutral-900 dark:text-white leading-tight truncate">{mock.companyName}</h1>
+          {/* Linha 1: nome + badge de status */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-0.5">Análise OS¹</p>
+              <h1 className="text-[17px] font-bold text-neutral-900 dark:text-white leading-tight truncate">{mock.companyName}</h1>
+            </div>
+            <span className="flex-shrink-0 mt-0.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-neutral-300 dark:border-[#484848] text-neutral-500 dark:text-neutral-400 bg-transparent whitespace-nowrap">
+              {mock.status}
+            </span>
+          </div>
 
-              {/* Stat buttons — flex-1 preenche a linha toda */}
-              <div className="flex items-stretch gap-1.5">
-                {([
-                  { label: (activeSector && OSCAR_SECTORS.has(activeSector)) ? 'Score OS¹' : 'Score inicial', value: scoreGeral },
-                  { label: 'Dimensões',  value: mock.dimensoes.length         },
-                  { label: 'Evidências', value: evidencias.length             },
-                  { label: 'Insights',   value: mock.cardsRelacionados.length },
-                  { label: 'Conteúdos', value: conteudosToShow.length         },
-                ] as { label: string; value: number }[]).map(s => (
-                  <div key={s.label}
-                    className="flex-1 flex flex-col items-center justify-center gap-1 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl">
-                    <strong className="text-[15px] leading-none tabular-nums text-neutral-800 dark:text-neutral-100">{s.value}</strong>
-                    <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 text-center leading-tight">{s.label}</span>
-                  </div>
-                ))}
+          {/* Linha 2: círculo monocromático + leitura */}
+          <div className="flex items-center gap-4">
+            {/* Círculo */}
+            <div className="relative w-[88px] h-[88px] flex-shrink-0">
+              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 88 88">
+                <circle cx="44" cy="44" r="38" fill="none"
+                  stroke="currentColor" strokeWidth="4"
+                  className="text-neutral-200 dark:text-[#383838]" />
+                <motion.circle cx="44" cy="44" r="38" fill="none"
+                  stroke="currentColor" strokeWidth="4"
+                  pathLength={100} strokeDasharray="100"
+                  initial={{ strokeDashoffset: 100 }}
+                  animate={{ strokeDashoffset: 100 - scoreGeral }}
+                  transition={{ duration: 2.4, ease: 'easeOut' }}
+                  className="text-neutral-700 dark:text-neutral-200" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-[24px] font-black tabular-nums text-neutral-900 dark:text-white leading-none">{scoreGeral}</span>
+                <span className="text-[8px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">/100</span>
               </div>
+            </div>
 
-              {/* Bio lines — status + nível + resumo (App.tsx:1427) */}
-              <div className="px-3 py-2.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-300 flex-shrink-0" />
-                  <span className="text-[12px] text-neutral-700 dark:text-neutral-200">{mock.status}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={11} className="text-neutral-400 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-[12px] text-neutral-700 dark:text-neutral-200">{nivelLabel(scoreGeral)} · {mock.periodo}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={11} className="text-neutral-400 flex-shrink-0" strokeWidth={2} />
-                  <span className="text-[12px] text-neutral-500 dark:text-neutral-400 line-clamp-1">{mock.explicacao}</span>
-                </div>
-                {/* Barra de score */}
-                <div className="pt-1.5 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">Score geral</span>
-                    <span className="text-[11px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200">{scoreGeral} <span className="text-neutral-400 dark:text-neutral-500 font-normal">/ 100</span></span>
-                  </div>
-                  <div className="h-[4px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-neutral-800 dark:bg-neutral-100 transition-all duration-700"
-                      style={{ width: `${scoreGeral}%`, opacity: 0.4 + (scoreGeral / 100) * 0.55 }} />
-                  </div>
-                </div>
+            {/* Leitura textual */}
+            <div className="flex-1 min-w-0 space-y-2">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Leitura atual</p>
+                <p className="text-[15px] font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{nivelLabel(scoreGeral)}</p>
               </div>
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2">{mock.periodo} · {mock.explicacao}</p>
+            </div>
+          </div>
+
+          {/* Linha 3: contadores como chips de borda */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {([
+              { label: 'Dimensões',  value: mock.dimensoes.length         },
+              { label: 'Evidências', value: evidencias.length             },
+              { label: 'Insights',   value: mock.cardsRelacionados.length },
+              { label: 'Conteúdos', value: conteudosToShow.length         },
+            ] as { label: string; value: number }[]).map(s => (
+              <div key={s.label}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 dark:border-[#414141] bg-transparent">
+                <strong className="text-[12px] tabular-nums text-neutral-700 dark:text-neutral-200">{s.value}</strong>
+                <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
         </div>
 
         {/* Evolução */}
