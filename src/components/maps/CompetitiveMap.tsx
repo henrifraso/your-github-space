@@ -8,7 +8,7 @@ import { LeafletFallbackMap } from './LeafletFallbackMap';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { ClientMarker } from './ClientMarker';
 import { CompetitorMarker } from './CompetitorMarker';
-import { CompetitorCard } from './CompetitorCard';
+import { CompetitorSidePanel } from './CompetitorSidePanel';
 import { MapLegend } from './MapLegend';
 import { RadiusSlider } from './RadiusSlider';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../../config/googleMaps';
@@ -98,52 +98,50 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
       {/* Slider de raio */}
       <RadiusSlider value={radius} onChange={handleRadiusChange} competitorCount={filtered.length} />
 
-      {/* Mapa — Google Maps por padrão; Leaflet (OSM) como fallback automático
-          quando Google Maps falha (Safari ITP, AdBlock, etc). */}
-      <div className="flex-1 min-h-0 relative">
-        {useFallback ? (
-          <LeafletFallbackMap
-            center={center}
-            zoom={RADIUS_ZOOM[radius] ?? DEFAULT_ZOOM}
-            radius={radius}
-            clientPosition={center}
-            markers={filtered.map(({ c, pos }) => ({ position: pos, competitor: c, onClick: setSelected }))}
-            isDark={isDark}
-          />
-        ) : (
-          <GoogleMapWrapper center={center} zoom={DEFAULT_ZOOM} onMapLoad={m => {
-            mapRef.current = m;
-            // Fix: durante animação de abertura do modal, o container pode ainda estar
-            // com altura final em transição. Força recálculo em vários momentos.
-            const trig = () => { try { (window as any).google?.maps?.event?.trigger(m, 'resize'); m.panTo(center); } catch { /* ignore */ } };
-            [50, 200, 500].forEach(ms => window.setTimeout(trig, ms));
-          }}>
-            <ClientMarker position={center} />
-            {filtered.map(({ c, pos }) => (
-              <CompetitorMarker key={c.nome} competitor={c} position={pos} onClick={setSelected} />
-            ))}
-            {radius !== Infinity && (
-              <CircleF
-                center={center}
-                radius={radius}
-                options={{ strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.08 }}
-              />
-            )}
-          </GoogleMapWrapper>
-        )}
+      {/* Área principal: mapa + painel lateral (split quando concorrente selecionado) */}
+      <div className="flex-1 min-h-0 flex overflow-hidden">
 
-        {/* Badge de fallback escondido — Leaflet continua ativo, só não exibe o badge */}
+        {/* Mapa — ocupa o espaço restante à esquerda */}
+        <div className="flex-1 min-w-0 min-h-0 relative">
+          {useFallback ? (
+            <LeafletFallbackMap
+              center={center}
+              zoom={RADIUS_ZOOM[radius] ?? DEFAULT_ZOOM}
+              radius={radius}
+              clientPosition={center}
+              markers={filtered.map(({ c, pos }) => ({ position: pos, competitor: c, onClick: setSelected }))}
+              isDark={isDark}
+            />
+          ) : (
+            <GoogleMapWrapper center={center} zoom={DEFAULT_ZOOM} onMapLoad={m => {
+              mapRef.current = m;
+              const trig = () => { try { (window as any).google?.maps?.event?.trigger(m, 'resize'); m.panTo(center); } catch { /* ignore */ } };
+              [50, 200, 500].forEach(ms => window.setTimeout(trig, ms));
+            }}>
+              <ClientMarker position={center} />
+              {filtered.map(({ c, pos }) => (
+                <CompetitorMarker key={c.nome} competitor={c} position={pos} onClick={setSelected} />
+              ))}
+              {radius !== Infinity && (
+                <CircleF
+                  center={center}
+                  radius={radius}
+                  options={{ strokeColor: '#3b82f6', strokeWeight: 2, fillColor: '#3b82f6', fillOpacity: 0.08 }}
+                />
+              )}
+            </GoogleMapWrapper>
+          )}
+          <MapLegend />
+        </div>
 
-        <MapLegend />
+        {/* Painel lateral — desliza da direita quando concorrente selecionado */}
+        <AnimatePresence>
+          {selected && (
+            <CompetitorSidePanel competitor={selected} onClose={() => setSelected(null)} />
+          )}
+        </AnimatePresence>
+
       </div>
-
-      {/* Card de concorrente — fora do div do mapa para ficar acima do stacking
-          context do Leaflet (que sobe seus layers até z ~1000 internamente). */}
-      <AnimatePresence>
-        {selected && (
-          <CompetitorCard competitor={selected} onClose={() => setSelected(null)} />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
