@@ -37,10 +37,11 @@ import { DesktopView } from '../../components/DesktopView';
 import { DESKTOP_URL, normalizeUrl } from './browser-url-utils';
 import { makeTab } from './useBrowserSession';
 import type { Tab, WebviewElement } from './useBrowserSession';
+import { recordNavigatedSource } from './navigated-sources';
 
 // ── Navegador com <webview> + abas — só funciona dentro do Electron ───────────
-export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
-  initialUrl: string; syncing?: boolean; onSyncClick?: () => void;
+export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick, activeSector }: {
+  initialUrl: string; syncing?: boolean; onSyncClick?: () => void; activeSector?: string;
 }) {
   const isDark = useDarkMode();
   const [tabs, setTabs] = useState<Tab[]>(() => [makeTab(normalizeUrl(initialUrl))]);
@@ -221,7 +222,10 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
       try {
         const u = (wv as any).getURL?.() || wv.src || '';
         const t = (wv as any).getTitle?.() || '';
-        if (u && !u.startsWith('about:')) recordVisit(u, t);
+        if (u && !u.startsWith('about:')) {
+          recordVisit(u, t);
+          if (activeSector) recordNavigatedSource(u, t, activeSector);
+        }
       } catch { /* ignore */ }
     };
     const onNavigate = (e: any) => {
@@ -461,9 +465,9 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick }: {
         </button>
       </div>
 
-      {/* ── Barra de ações inline (OS¹ · Ações) ────────────────────── */}
+      {/* ── Barra de ações inline — oculta nesta versão simplificada ── */}
       <div style={{
-        display: 'flex', gap: 8, padding: '8px 16px 16px',
+        display: 'none', gap: 8, padding: '8px 16px 16px',
         background: isDark ? '#2f2f2f' : '#f7f8f9',
         borderBottom: isDark ? '0.5px solid #3d3d3d' : '0.5px solid #e5e7eb',
         // Shadow só pra baixo (spread negativo = blur elimina halo superior)

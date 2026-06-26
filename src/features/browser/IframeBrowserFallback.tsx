@@ -307,8 +307,8 @@ export function IframeBrowser({ initialUrl, lightMode = false, syncing = false, 
           <ExternalLink size={15} strokeWidth={1.8} />
         </button>
 
-        {/* Botão OS¹ Ações (10 funções) — antes do "Ir" e do "Sincronizar" */}
-        <div style={{ position: 'relative', flexShrink: 0 }}>
+        {/* Botão OS¹ Ações — oculto nesta versão simplificada */}
+        <div style={{ position: 'relative', flexShrink: 0, display: 'none' }}>
           <button
             onClick={() => setActionsOpen(o => !o)}
             title="OS¹ — ações sobre a página atual"

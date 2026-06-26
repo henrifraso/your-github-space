@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { apiFetch } from '../../api';
 import { getContextUploads, resolveUploadOrgBu, type ContextUpload } from './contextUploads';
@@ -6,8 +6,9 @@ import { calcScoreInicial, nivelLabelCalculado } from './score-formula';
 import {
   TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
   FileText, BarChart2, ShieldCheck, MapPin, Zap,
-  ExternalLink, ArrowRight, RefreshCw, ClipboardList, X,
+  ExternalLink, ArrowRight, RefreshCw, ClipboardList, X, Globe,
 } from 'lucide-react';
+import { loadNavigatedSources, type NavigatedSource } from '../../features/browser/navigated-sources';
 
 interface Dimensao { id: string; label: string; score: number; icon: React.ElementType; descricao: string; }
 interface Evidencia { id: number; tipo: string; fonte: string; confianca: number; impacto: number; titulo: string; descricao: string; }
@@ -271,6 +272,12 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
     setUploads(getContextUploads(orgId, buId, activeSector));
   }, [activeSector]);
 
+  const [navigatedSources, setNavigatedSources] = useState<NavigatedSource[]>([]);
+  const refreshNavigatedSources = useCallback(() => {
+    if (activeSector) setNavigatedSources(loadNavigatedSources(activeSector));
+  }, [activeSector]);
+  useEffect(() => { refreshNavigatedSources(); }, [refreshNavigatedSources]);
+
   const mappedUploads = uploads.map(u => ({
     nome: u.name,
     tipo: u.extension ? u.extension.toUpperCase() : 'Arquivo',
@@ -296,10 +303,9 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         <div className="flex items-center gap-2 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] flex-shrink-0">
           <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">OS¹</span>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
-          <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">Score da Empresa</span>
-          <span className="text-[10px] text-neutral-400 dark:text-neutral-600 bg-neutral-100 dark:bg-[#2a2a2a] px-2 py-0.5 rounded-full ml-auto">{evidenciasReais ? 'evidências reais' : 'mockado'}</span>
+          <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">Score OS¹</span>
           {onClose && (
-            <button onClick={onClose} className="ml-1 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
+            <button onClick={onClose} className="ml-auto p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
               <X size={13} />
             </button>
           )}
@@ -308,78 +314,98 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:hidden">
 
-        {/* Cabeçalho — Ajustes da Análise */}
+        {/* Intro do Score OS¹ */}
         <div className={`${cardCls} p-4 flex flex-col gap-3`}>
-
-          {/* Linha 1: nome + badge de status */}
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-0.5">Análise OS¹</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-0.5">Score OS¹</p>
               <h1 className="text-[17px] font-bold text-neutral-900 dark:text-white leading-tight truncate">{mock.companyName}</h1>
+              <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1 leading-relaxed">
+                Painel de reputação, fontes e sinais da empresa nos últimos 30 dias.
+              </p>
             </div>
             <span className="flex-shrink-0 mt-0.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-neutral-300 dark:border-[#484848] text-neutral-500 dark:text-neutral-400 bg-transparent whitespace-nowrap">
               {mock.status}
             </span>
           </div>
 
-          {/* Linha 2: círculo monocromático + leitura */}
-          <div className="flex items-center gap-4">
-            {/* Círculo */}
-            <div className="relative w-[88px] h-[88px] flex-shrink-0">
-              <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 88 88">
-                <circle cx="44" cy="44" r="38" fill="none"
-                  stroke="currentColor" strokeWidth="4"
-                  className="text-neutral-200 dark:text-[#383838]" />
-                <motion.circle cx="44" cy="44" r="38" fill="none"
-                  stroke="currentColor" strokeWidth="4"
-                  pathLength={100} strokeDasharray="100"
-                  initial={{ strokeDashoffset: 100 }}
-                  animate={{ strokeDashoffset: 100 - scoreGeral }}
-                  transition={{ duration: 2.4, ease: 'easeOut' }}
-                  className="text-neutral-700 dark:text-neutral-200" />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[24px] font-black tabular-nums text-neutral-900 dark:text-white leading-none">{scoreGeral}</span>
-                <span className="text-[8px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wide">/100</span>
-              </div>
-            </div>
+          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed border-t border-neutral-200 dark:border-[#3a3a3a] pt-3">
+            O Score OS¹ organiza notas, fontes, evidências e sinais públicos ou enviados para mostrar o estado inicial da leitura da empresa. Os sinais mais relevantes podem aparecer no Feed em forma de cards de inteligência.
+          </p>
 
-            {/* Leitura textual */}
-            <div className="flex-1 min-w-0 space-y-2">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Leitura atual</p>
-                <p className="text-[15px] font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{nivelLabel(scoreGeral)}</p>
-              </div>
-              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed line-clamp-2">{mock.periodo} · {mock.explicacao}</p>
-            </div>
-          </div>
-
-          {/* Linha 3: contadores como chips de borda */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {([
-              { label: 'Dimensões',  value: mock.dimensoes.length         },
-              { label: 'Evidências', value: evidencias.length             },
-              { label: 'Insights',   value: mock.cardsRelacionados.length },
-              { label: 'Conteúdos', value: conteudosToShow.length         },
+              { label: 'Sinais',    value: evidencias.length         },
+              { label: 'Fontes',    value: mock.dimensoes.length     },
+              { label: 'Contextos', value: conteudosToShow.length    },
+              { label: 'Navegadas', value: navigatedSources.length   },
             ] as { label: string; value: number }[]).map(s => (
-              <div key={s.label}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 dark:border-[#414141] bg-transparent">
+              <div key={s.label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 dark:border-[#414141] bg-transparent">
                 <strong className="text-[12px] tabular-nums text-neutral-700 dark:text-neutral-200">{s.value}</strong>
                 <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{s.label}</span>
               </div>
             ))}
           </div>
-
         </div>
 
-        {/* Evolução da leitura */}
+        {/* Número principal do Score */}
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-5 pb-4 flex flex-col gap-5">
+            {/* Score central */}
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Score atual</p>
+              <div className="flex items-end gap-2">
+                <motion.span
+                  className="text-[80px] font-black tabular-nums leading-none text-neutral-900 dark:text-white"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                >
+                  {scoreGeral}
+                </motion.span>
+                <span className="text-[18px] font-semibold text-neutral-300 dark:text-neutral-600 pb-3 tabular-nums">/100</span>
+              </div>
+              <p className="text-[13px] font-semibold text-neutral-600 dark:text-neutral-300">{nivelLabel(scoreGeral)}</p>
+              <p className="text-[10px] text-neutral-400 dark:text-neutral-500">{mock.periodo} · leitura inicial</p>
+            </div>
+
+            {/* Barra de progresso */}
+            <div className="h-[3px] bg-neutral-100 dark:bg-[#2a2a2a] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-neutral-600 dark:bg-neutral-300"
+                initial={{ width: 0 }}
+                animate={{ width: `${scoreGeral}%` }}
+                transition={{ duration: 1.8, ease: 'easeOut', delay: 0.2 }}
+              />
+            </div>
+
+            {/* Indicadores em grade */}
+            <div className="grid grid-cols-3 gap-2">
+              {([
+                { valor: `${mock.periodo}`,           label: 'Janela de leitura'   },
+                { valor: `${evidencias.length} sinais`,     label: 'Evidências usadas'   },
+                { valor: `${mock.dimensoes.length} fontes`, label: 'Dimensões ativas'    },
+                { valor: conteudosToShow.length > 0 ? `${conteudosToShow.length} arq.` : 'Nenhum', label: 'Contexto enviado' },
+                { valor: navigatedSources.length > 0 ? `${navigatedSources.length} URLs` : 'Nenhuma', label: 'Fontes navegadas' },
+                { valor: 'Inicial',                   label: 'Maturidade da leitura' },
+              ] as { valor: string; label: string }[]).map(ind => (
+                <div key={ind.label} className="flex flex-col gap-0.5 px-3 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#252525] border border-neutral-200 dark:border-[#3a3a3a]">
+                  <span className="text-[13px] font-bold tabular-nums text-neutral-800 dark:text-neutral-100 leading-tight">{ind.valor}</span>
+                  <span className="text-[9px] text-neutral-400 dark:text-neutral-500 leading-snug">{ind.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Evolução do Score */}
         <div className={`${cardCls} overflow-hidden`}>
           <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
             <div className="flex items-center gap-2">
               <TrendingUp size={14} className="text-neutral-400" strokeWidth={1.8} />
-              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Evolução da leitura</h3>
+              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Evolução do Score</h3>
             </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">A leitura evolui conforme novos sinais, conteúdos e evidências entram no sistema.</p>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">A evolução acompanha o aumento de fontes, sinais e contextos considerados pelo OS¹.</p>
           </div>
 
           {/* Timeline vertical */}
@@ -429,48 +455,82 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           })()}
         </div>
 
-        {/* Destaques da leitura */}
-        <div className={cardCls}>
+        {/* Fontes de reputação */}
+        <div className={`${cardCls} overflow-hidden`}>
           <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Destaques da leitura</h3>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Sinais relevantes identificados neste ciclo</p>
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={14} className="text-neutral-400" strokeWidth={1.8} />
+              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Fontes de reputação</h3>
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Fontes públicas e internas que compõem ou podem compor a leitura</p>
           </div>
-          <div className="grid grid-cols-2 gap-px bg-neutral-100 dark:bg-[#3a3a3a]">
+          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
             {([
-              { titulo: 'Concorrência', descricao: 'Pressão local considerada na leitura.', badge: 'Atenção', icon: BarChart2 },
-              { titulo: 'Reputação',    descricao: 'Sinais de percepção e atendimento.',    badge: 'Sinal',    icon: ShieldCheck },
-              { titulo: 'Conteúdo',     descricao: 'Materiais enviados aumentam a precisão.', badge: 'Base',   icon: FileText },
-              { titulo: 'Oportunidade', descricao: 'Pontos de diferenciação detectados.',   badge: 'Potencial', icon: Zap },
-            ] as { titulo: string; descricao: string; badge: string; icon: React.ElementType }[]).map(d => {
-              const Icon = d.icon;
+              { icon: ShieldCheck, nome: 'Reclame Aqui',     desc: 'Reclamações públicas e percepção de atendimento.',    badge: 'Fonte possível'  },
+              { icon: MapPin,      nome: 'Google',            desc: 'Avaliações locais, presença pública e mapas.',        badge: 'Fonte possível'  },
+              { icon: Zap,         nome: 'Redes sociais',    desc: 'Menções, engajamento e reputação de marca.',          badge: 'Fonte possível'  },
+              { icon: FileText,    nome: 'Notícias',          desc: 'Cobertura pública e eventos de impacto na empresa.',  badge: 'Fonte possível'  },
+              { icon: Globe,       nome: 'Fontes navegadas',  desc: navigatedSources.length > 0 ? `${navigatedSources.length} URL${navigatedSources.length > 1 ? 's' : ''} registrada${navigatedSources.length > 1 ? 's' : ''} no Navegador OS¹.` : 'URLs acessadas no Navegador OS¹ entram como contexto externo.', badge: navigatedSources.length > 0 ? `${navigatedSources.length} registradas` : 'Sem registros' },
+              { icon: FileText,    nome: 'Contexto enviado', desc: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''} interno${conteudosToShow.length > 1 ? 's' : ''} considerado${conteudosToShow.length > 1 ? 's' : ''} na leitura.` : 'Arquivos e observações internas aumentam a precisão.', badge: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''}` : 'Aguardando' },
+            ] as { icon: React.ElementType; nome: string; desc: string; badge: string }[]).map(f => {
+              const Icon = f.icon;
               return (
-                <div key={d.titulo} className="flex flex-col gap-2 p-3.5 bg-[#f7f8f9] dark:bg-[#2a2a2a]">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="w-8 h-8 rounded-full bg-neutral-100 dark:bg-[#323232] border border-neutral-200 dark:border-[#484848] flex items-center justify-center flex-shrink-0">
-                      <Icon size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                    </div>
-                    <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-                      {d.badge}
-                    </span>
+                <div key={f.nome} className="flex items-center gap-3.5 px-4 py-3">
+                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
+                    <Icon size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
                   </div>
-                  <div>
-                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{d.titulo}</p>
-                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug mt-0.5">{d.descricao}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{f.nome}</p>
+                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug">{f.desc}</p>
                   </div>
+                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                    {f.badge}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Ajustes da Análise — Dimensões */}
+        {/* Sinais dos últimos 30 dias */}
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <div className="flex items-center gap-2">
+              <Zap size={14} className="text-neutral-400" strokeWidth={1.8} />
+              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Sinais dos últimos 30 dias</h3>
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Reclamações, elogios, eventos e oportunidades identificados neste ciclo</p>
+          </div>
+          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
+            {([
+              { titulo: 'Reclamações críticas',   valor: '0 identificadas',      desc: 'Nenhuma reclamação crítica registrada nesta leitura inicial.',         badge: 'Sem alertas'   },
+              { titulo: 'Sinais positivos',        valor: `${Math.max(0, evidencias.filter(e => e.impacto > 0).length)} sinais`,  desc: 'Evidências com impacto positivo na leitura atual.',                     badge: 'Leitura inicial' },
+              { titulo: 'Fontes externas',         valor: navigatedSources.length > 0 ? `${navigatedSources.length} URLs` : 'Em formação', desc: 'Fontes externas registradas como contexto de análise.',              badge: navigatedSources.length > 0 ? 'Ativo' : 'Em formação' },
+              { titulo: 'Contexto interno',        valor: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''}` : 'Nenhum enviado', desc: 'Contexto enviado aumenta a precisão e o Score da leitura.', badge: conteudosToShow.length > 0 ? 'Recebido' : 'Aguardando' },
+              { titulo: 'Feed de inteligência',    valor: 'Cards ativos',         desc: 'Quando um sinal ganha relevância, aparece no Feed como card de inteligência.', badge: 'Ver Feed'      },
+            ] as { titulo: string; valor: string; desc: string; badge: string }[]).map(s => (
+              <div key={s.titulo} className="flex items-start gap-3.5 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{s.titulo}</p>
+                    <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">{s.badge}</span>
+                  </div>
+                  <p className="text-[11px] font-medium tabular-nums text-neutral-600 dark:text-neutral-300 mb-0.5">{s.valor}</p>
+                  <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Indicadores do Score — Dimensões */}
         <div className={`${cardCls} overflow-hidden`}>
           <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
             <div className="flex items-center gap-2">
               <BarChart2 size={14} className="text-neutral-400" strokeWidth={1.8} />
-              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Ajustes da Análise</h3>
+              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Indicadores do Score</h3>
             </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Parâmetros que compõem a leitura do ambiente</p>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Dimensões que compõem a nota e a leitura do ambiente</p>
           </div>
           <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
             {mock.dimensoes.map(dim => {
@@ -536,6 +596,54 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           </div>
         </div>
 
+        {/* Fontes do Navegador */}
+        <div className={`${cardCls} overflow-hidden`}>
+          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Globe size={14} className="text-neutral-400" strokeWidth={1.8} />
+                <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Fontes do Navegador</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {navigatedSources.length > 0 && (
+                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
+                    {navigatedSources.length} {navigatedSources.length === 1 ? 'fonte' : 'fontes'}
+                  </span>
+                )}
+                <button onClick={refreshNavigatedSources} className="p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">
+                  <RefreshCw size={11} strokeWidth={1.8} />
+                </button>
+              </div>
+            </div>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">URLs acessadas no Navegador OS¹ para este perfil</p>
+          </div>
+          {navigatedSources.length === 0 ? (
+            <div className="px-4 py-5">
+              <p className="text-[12px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
+                Nenhuma fonte navegada registrada para este perfil. Acesse o Navegador OS¹ para adicionar fontes externas à análise.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
+              {navigatedSources.map(src => (
+                <div key={src.url} className="flex items-center gap-3.5 px-4 py-3">
+                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
+                    <Globe size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">{src.host}</p>
+                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 truncate leading-snug">{src.url}</p>
+                    <p className="text-[9px] text-neutral-300 dark:text-neutral-600 mt-0.5">{new Date(src.visitedAt).toLocaleDateString('pt-BR')}</p>
+                  </div>
+                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+                    Navegador
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Evidências */}
         <div className={`${cardCls} overflow-hidden`}>
           <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
@@ -599,7 +707,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Materiais internos usados para calibrar a análise</p>
+            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Arquivos e observações internas que aumentam a precisão do Score</p>
           </div>
 
           {conteudosToShow.length === 0 ? (
@@ -634,7 +742,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           const badge = realInsights ? realInsights.length : mock.cardsRelacionados.length;
           return (
             <div className={`${cardCls} p-4`}>
-              <SecaoHeader icon={ClipboardList} titulo="Insights relacionados" badge={badge} />
+              <SecaoHeader icon={ClipboardList} titulo="Sinais no Feed" badge={badge} />
               <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-1.5 space-y-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
                 {realInsights
                   ? realInsights.map((ins, i) => (
@@ -659,22 +767,22 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           );
         })()}
 
-        {/* Explicação */}
+        {/* O que está pesando no Score */}
         <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={Zap} titulo="Por que o score mudou?" />
+          <SecaoHeader icon={Zap} titulo="O que está pesando no Score" />
           <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-3 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
             <p className="text-[12px] text-neutral-600 dark:text-neutral-400 leading-relaxed">{mock.explicacao}</p>
           </div>
         </div>
 
-        {/* Sobre esta leitura */}
+        {/* Sobre o Score OS¹ */}
         <div className={`${cardCls} p-4`}>
-          <SecaoHeader icon={ShieldCheck} titulo="Sobre esta leitura" />
+          <SecaoHeader icon={ShieldCheck} titulo="Sobre o Score OS¹" />
           <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-2 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)] grid grid-cols-4 gap-1.5">
-            <InfoChip label="Gerado automaticamente pelo OS¹" icon={Zap} />
-            <InfoChip label="Baseado em sinais externos e conteúdo enviado" icon={FileText} />
-            <InfoChip label="Atualizado conforme novos sinais forem coletados" icon={RefreshCw} />
-            <InfoChip label="Leitura exclusiva para o perfil selecionado" icon={ShieldCheck} />
+            <InfoChip label="Painel de indicadores e reputação da empresa" icon={BarChart2} />
+            <InfoChip label="Baseado nos sinais, fontes e contexto disponíveis" icon={FileText} />
+            <InfoChip label="Aumenta conforme mais fontes e contextos entram" icon={RefreshCw} />
+            <InfoChip label="Leitura inicial — não substitui decisão estratégica" icon={ShieldCheck} />
           </div>
         </div>
 

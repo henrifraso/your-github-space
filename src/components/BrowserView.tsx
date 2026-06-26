@@ -42,6 +42,8 @@ const SECTOR_DISPLAY_URL: Record<string, string> = {
   apple:             'www.apple.com/score',
   amazon:            'www.amazon.com.br/score',
   natura:            'www.natura.com.br/score',
+  'cerveja-imperio':                  'www.cervejaimperio.com.br/score',
+  'cerveja-imperio-distribuidora-01': 'www.cervejaimperio.com.br/score',
   os1:               'www.os1.space/score',
 };
 
@@ -52,7 +54,7 @@ function InternalPageBar({ activeSector, onClose }: { activeSector?: string; onC
     <div className="flex-shrink-0 flex items-center gap-3 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
       <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider flex-shrink-0 select-none">OS¹</span>
       <span className="text-neutral-300 dark:text-neutral-600 flex-shrink-0">/</span>
-      <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300 flex-shrink-0">Score da Empresa</span>
+      <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300 flex-shrink-0">Score OS¹</span>
       <div className="flex-1 flex items-center h-11 px-3 rounded-xl bg-neutral-100 dark:bg-[#1e1e1e] border border-neutral-200 dark:border-[#3a3a3a]">
         <span className="text-[11px] text-neutral-400 dark:text-neutral-500 font-mono truncate select-none">{displayUrl}</span>
       </div>
@@ -115,7 +117,7 @@ export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMo
             /* URL externa: navegador normal (Electron webview ou iframe) */
             <div className="flex-1 min-h-0">
               {isElectron
-                ? <ElectronBrowser initialUrl={initialUrl} syncing={syncing} onSyncClick={() => {
+                ? <ElectronBrowser initialUrl={initialUrl} syncing={syncing} activeSector={activeSector} onSyncClick={() => {
                     if (syncing) { onSync ? onSync() : onClose(); }
                     else setSyncing(true);
                   }} />

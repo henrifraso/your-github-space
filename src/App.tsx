@@ -405,6 +405,9 @@ function AuthenticatedApp() {
   const [mapFeedCards, setMapFeedCards] = useState<RoleFeedCard[]>([]);
   const [esferaOpen, setEsferaOpen] = useState(false);
   const ESFERA_URL = '/esfera-ontologica.html';
+  // Ontologia desativada — Score/Análise é a tela visível ao cliente nesta versão.
+  const ONTOLOGY_HIDDEN = true;
+  const [scoreOpen, setScoreOpen] = useState(false);
   const [sectorOpen, setSectorOpen] = useState(false);
   // GA3-test-loja: se o user logou como loja Oscar Piloto 01 (bu salvo no
   // login), arranca já no sector dedicado pra não exibir "Perfil Unidade Demo"
@@ -693,8 +696,9 @@ function AuthenticatedApp() {
         _synthetic: true,
       };
 
-      // Fecha a esfera antes de transferir o foco pra Área de Trabalho.
+      // Fecha a esfera/análise antes de transferir o foco pra Área de Trabalho.
       setEsferaOpen(false);
+      setScoreOpen(false);
 
       workspaceSeqRef.current += 1;
       setWorkspaceContext({
@@ -1133,7 +1137,7 @@ function AuthenticatedApp() {
       <GoogleMapsPreloader />
 
       {/* Botão deslogar + Convite + placeholders — desktop only */}
-      {!browserOpen && !esferaOpen && !mapOpen && (
+      {!browserOpen && !esferaOpen && !mapOpen && !scoreOpen && (
         <div
           className="fixed top-[30px] right-12 z-[51] hidden lg:flex items-center gap-1"
           style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
@@ -1200,9 +1204,9 @@ function AuthenticatedApp() {
             </button>
             {canAccessCompanyVision(role) && (
               <button
-                onClick={() => setEsferaOpen(v => !v)}
+                onClick={() => setScoreOpen(v => !v)}
                 className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
-                title={companyVisionLabel(role, activeDepartment)}
+                title="Score OS¹"
               >
                 <Home size={18} className="sm:hidden" />
                 <Home size={20} className="hidden sm:block lg:hidden" />
@@ -1932,7 +1936,7 @@ function AuthenticatedApp() {
         {selectedConcorrente && <ConcorrenteModal concorrente={selectedConcorrente} onClose={() => setSelectedConcorrente(null)} />}
       </AnimatePresence>
 
-      {/* Browser / Sincronizar */}
+      {/* Browser / Navegador  +  Análise OS¹ (Score) */}
       {(() => {
         // Insights para o Score: apenas sectores com codifyScope explícito e seguro.
         // os1 (Codify puro) não usa orchCards — esses cards têm contexto de cliente
@@ -1947,22 +1951,32 @@ function AuthenticatedApp() {
             .map(c => ({ titulo: c.titulo, resumo: c.resumo, dominio: c.dominio, urgencia: c.urgencia }));
           if (scoreInsights.length === 0) scoreInsights = undefined;
         }
-        return (
+        return (<>
           <BrowserView
             open={browserOpen}
             onClose={() => setBrowserOpen(false)}
             onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
+            initialUrl="omni://desktop"
             activeSector={activeSector}
             role={role}
             insights={scoreInsights}
           />
-        );
+          {/* Análise OS¹ — abre no botão Home; Ontologia desativada nesta versão */}
+          <BrowserView
+            open={scoreOpen}
+            onClose={() => setScoreOpen(false)}
+            initialUrl="os1://score"
+            activeSector={activeSector}
+            role={role}
+            insights={scoreInsights}
+          />
+        </>);
       })()}
 
       {/* Chat */}
       <ChatDesktop
         wide={scrolled}
-        onHome={() => setEsferaOpen(v => !v)}
+        onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
@@ -2000,7 +2014,7 @@ function AuthenticatedApp() {
         codifyScope={codifyScope}
         activeSector={activeSector}
         userRole={role}
-        onHome={() => setEsferaOpen(v => !v)}
+        onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
         onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
@@ -2228,9 +2242,8 @@ function AuthenticatedApp() {
         meta={DIFF_META}
       />
 
-      {/* Esfera / Visão da Empresa — fullscreen iframe disponível pra
-          codify, franchisor, franchise, affiliate, partner, team_member. */}
-      <OntologySphereOverlay
+      {/* Esfera / Ontologia — desativada; Score/Análise OS¹ é o ponto de entrada visível ao cliente. */}
+      {!ONTOLOGY_HIDDEN && <OntologySphereOverlay
         open={esferaOpen}
         url={ESFERA_URL}
         onClose={() => setEsferaOpen(false)}
@@ -2248,7 +2261,7 @@ function AuthenticatedApp() {
         ] : undefined}
         activeDepartment={activeDepartment}
         onSelectDepartment={(id) => setActiveDepartment(id as DepartmentId)}
-      />
+      />}
 
       {/* Diagnóstico da empresa agora entra na Área de Trabalho via
           openDiagnosisInWorkspace(); o antigo overlay foi removido. */}
