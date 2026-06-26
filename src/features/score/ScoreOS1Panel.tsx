@@ -141,13 +141,75 @@ const DISTRIBUIDORA_IMPERIO_MOCK: ScoreMock = {
   explicacao: 'Score baseado em leitura demonstrativa para apresentação comercial do OS¹. Reflete sinais de operação, pressão competitiva e oportunidade de expansão identificados na rota. Base demonstrativa — precisão aumenta com dados reais da operação.',
 };
 
+const OSCAR_LOJA1_MOCK: ScoreMock = {
+  companyName: 'Oscar Loja 1', status: 'Raio competitivo mais disputado', periodo: 'Últimos 30 dias', scoreGeral: 74,
+  dimensoes: [
+    { id: 'mercado', label: 'Demanda Local', score: 80, icon: TrendingUp, descricao: 'Demanda de inverno em alta no Vale do Paraíba. Botas, couro feminino e conforto lideram o interesse de busca na região.' },
+    { id: 'concorrencia', label: 'Raio Competitivo', score: 62, icon: BarChart2, descricao: 'Centauro, Constance, Studio Z, Di Gaspi e World Tennis no mesmo raio. Raio competitivo da loja ficou mais denso nos últimos 6 meses.' },
+    { id: 'reputacao', label: 'Reputação Local', score: 76, icon: ShieldCheck, descricao: 'Avaliações Google estáveis. Atendimento consultivo é o diferencial mais citado. Fotos do Google Meu Negócio precisam de atualização.' },
+    { id: 'presenca', label: 'Presença no Bairro', score: 71, icon: MapPin, descricao: 'Visibilidade no Center Vale sólida. Bairros residenciais no raio de 3 km ainda com penetração baixa — público qualificado não chegou até a loja.' },
+    { id: 'execucao', label: 'Ações', score: 67, icon: Zap, descricao: 'Cards de inteligência gerados. Vitrine, mix Diadora e reputação local são as ações prioritárias da semana.' },
+  ],
+  evolucao: [{ semana: 'Início', score: 64 }, { semana: 'Semana 2', score: 68 }, { semana: 'Semana 3', score: 72 }, { semana: 'Agora', score: 74 }],
+  evidencias: [
+    { id: 1, tipo: 'Concorrência', fonte: 'Google Maps · Demo', confianca: 0.82, impacto: -4, titulo: 'Centauro e Constance no mesmo raio de 2 km', descricao: 'Centauro no Center Vale com esportivo premium + drops Nike. Constance no Jd. Satélite com conforto feminino. Dois dos segmentos mais fortes da Oscar com concorrente direto.' },
+    { id: 2, tipo: 'Produto', fonte: 'Leitura demonstrativa', confianca: 0.88, impacto: 6, titulo: 'Exclusividade Diadora: argumento que o concorrente não tem', descricao: 'Licença exclusiva Diadora no Brasil — nenhum concorrente no mesmo shopping oferece o mesmo produto. É o diferencial mais forte da loja e o menos comunicado.' },
+    { id: 3, tipo: 'Reputação', fonte: 'Google Avaliações · Demo', confianca: 0.75, impacto: 2, titulo: 'Avaliação Google estável com atendimento como diferencial', descricao: 'Atendimento consultivo aparece nas avaliações positivas. Fotos desatualizadas e falta de resposta a avaliações recentes podem reduzir conversão de busca.' },
+    { id: 4, tipo: 'Mercado', fonte: 'Tendência regional · Demo', confianca: 0.72, impacto: 4, titulo: 'Inverno com demanda aquecida em calçado feminino', descricao: 'Buscas por "botas femininas SJC" e "couro feminino" crescem desde maio. Vitrine atualizada para o inverno captura esse público antes do concorrente.' },
+    { id: 5, tipo: 'Presença', fonte: 'Leitura demonstrativa', confianca: 0.65, impacto: 3, titulo: 'Bairros residenciais no raio com baixa penetração', descricao: 'Moradores do Jd. Satélite e entorno próximos da loja mas com baixa frequência de visita — sinal de que a comunicação local ainda não chegou até eles.' },
+  ],
+  conteudos: [
+    { nome: 'Inventário loja junho 2026.xlsx', tipo: 'XLSX', data: '18/06/2026' },
+    { nome: 'Relatório de vendas semanal.pdf', tipo: 'PDF', data: '20/06/2026' },
+    { nome: 'Fotos vitrine inverno.jpg', tipo: 'Imagem', data: '15/06/2026' },
+  ],
+  cardsRelacionados: [
+    'A Centauro pode estar capturando o cliente esportivo antes de entrar na Oscar',
+    'Os drops Diadora podem ser o diferencial que nenhuma outra loja do shopping tem',
+    'A vitrine de inverno pode definir quem fica na memória do cliente até a próxima compra',
+  ],
+  explicacao: 'Score baseado em leitura demonstrativa para apresentação comercial do OS¹. Reflete o raio competitivo da Oscar Loja 1, oportunidades de produto e presença local. Base demonstrativa — precisão aumenta com dados reais da operação.',
+};
+
+const PACHECO_MOCK: ScoreMock = {
+  companyName: 'Drogarias Pacheco', status: 'Liderança consolidada sob pressão crescente', periodo: 'Últimos 30 dias', scoreGeral: 79,
+  dimensoes: [
+    { id: 'mercado', label: 'Mercado & Setor', score: 85, icon: TrendingUp, descricao: 'Varejo farmacêutico cresce 14,9% ao ano. Reajuste CMED de 5,8% favorece margem. Setor em consolidação com oportunidades de M&A.' },
+    { id: 'concorrencia', label: 'Pressão Competitiva', score: 68, icon: BarChart2, descricao: 'RD Saúde com adensamento agressivo em SP. Tamoio avança na Baixada Fluminense. Digital (Onofre+iFood) captura cliente de urgência.' },
+    { id: 'reputacao', label: 'Reputação', score: 81, icon: ShieldCheck, descricao: 'NPS regional 78 — acima da média do setor (64). 71% de reconhecimento espontâneo no RJ. Reclame Aqui com oportunidade de melhoria em prazo de resposta.' },
+    { id: 'presenca', label: 'Presença Territorial', score: 82, icon: MapPin, descricao: '700+ lojas no RJ + expansão em SP com 400 lojas planejadas até 2028. Presença zero no Nordeste — região em consolidação com oportunidade de M&A via Pague Menos.' },
+    { id: 'execucao', label: 'Ações', score: 74, icon: Zap, descricao: 'Same-day RJ em 90% de cobertura. App com 4 mi de downloads. Ever crescendo 30%. Próximas ações: assinatura de crônicos, adensamento SP e resposta ao digital concorrente.' },
+  ],
+  evolucao: [{ semana: 'Início', score: 73 }, { semana: 'Semana 2', score: 75 }, { semana: 'Semana 3', score: 77 }, { semana: 'Agora', score: 79 }],
+  evidencias: [
+    { id: 1, tipo: 'Concorrência', fonte: 'Setor farma · Demo', confianca: 0.84, impacto: -5, titulo: 'RD Saúde com +60 lojas em SP nos próximos 12 meses', descricao: 'Líder do setor com R$ 14,2bi no 1T26 (+14,9% YoY) acelera adensamento paulista. Cada nova Droga Raia ou Drogasil reduz o raio de influência das lojas Pacheco em SP.' },
+    { id: 2, tipo: 'Produto', fonte: 'Relatório DPSP · Demo', confianca: 0.90, impacto: 8, titulo: 'Margem Ever 18 p.p. acima de marcas comerciais', descricao: 'Linha Ever representa 14% do faturamento com 130+ SKUs. Margem bruta 18 p.p. superior. Cada ponto de share da Ever é dinheiro que ia para o fornecedor — agora fica no grupo.' },
+    { id: 3, tipo: 'Digital', fonte: 'Leitura demonstrativa', confianca: 0.76, impacto: -3, titulo: 'Assinatura digital de crônicos capturando base fidelizada', descricao: 'Farmácia Permanente com 500k assinantes e Onofre+iFood com entrega em 30 min disputam o cliente de crônico e urgência que a Pacheco atende via loja física.' },
+    { id: 4, tipo: 'M&A', fonte: 'Mercado · Demo', confianca: 0.72, impacto: 6, titulo: 'Pague Menos com -R$ 600 mi — janela de aquisição aberta', descricao: 'Vice-líder em reestruturação com ativos no Nordeste — região com 56 mi de habitantes onde a Pacheco tem zero presença. Janela de M&A a desconto raramente dura mais de 18 meses.' },
+    { id: 5, tipo: 'Reputação', fonte: 'Fonte monitorável · Demo', confianca: 0.80, impacto: 3, titulo: 'NPS 78 — líder regional com 134 anos de tradição', descricao: '71% de reconhecimento espontâneo no RJ e NPS 14 pontos acima da média do setor são o maior ativo defensivo da Pacheco frente ao adensamento da RD.' },
+  ],
+  conteudos: [
+    { nome: 'Plano de expansão SP 2026.pdf', tipo: 'PDF', data: '10/06/2026' },
+    { nome: 'Relatório Ever Q1 2026.pptx', tipo: 'PPTX', data: '05/06/2026' },
+    { nome: 'Pipeline M&A Nordeste.xlsx', tipo: 'XLSX', data: '01/06/2026' },
+    { nome: 'Análise Reclame Aqui jun/26.pdf', tipo: 'PDF', data: '20/06/2026' },
+  ],
+  cardsRelacionados: [
+    'A RD Saúde pode estar abrindo no mesmo quarteirão antes que você perceba o risco',
+    'A margem da Ever pode estar sendo deixada na mesa em quase todas as lojas',
+    'A Pague Menos em reestruturação pode ser a janela de M&A mais acessível dos últimos anos',
+  ],
+  explicacao: 'Score baseado em leitura demonstrativa para apresentação comercial do OS¹. Reflete posição de mercado, pressão competitiva e oportunidades estratégicas da Drogarias Pacheco. Base demonstrativa — precisão aumenta com dados reais da operação.',
+};
+
 const OSCAR_SECTORS = new Set(['oscar-piloto-01', 'nike']);
 
 function getMock(activeSector?: string): ScoreMock {
   if (activeSector === 'nike') return OSCAR_MOCK;
-  if (activeSector === 'oscar-piloto-01') return { ...OSCAR_MOCK, companyName: 'Oscar Loja 1' };
+  if (activeSector === 'oscar-piloto-01') return OSCAR_LOJA1_MOCK;
   if (activeSector === 'cerveja-imperio') return CERVEJA_IMPERIO_MOCK;
   if (activeSector === 'cerveja-imperio-distribuidora-01') return DISTRIBUIDORA_IMPERIO_MOCK;
+  if (activeSector === 'nubank') return PACHECO_MOCK;
   const nome = activeSector ? (NOME_POR_SECTOR[activeSector] ?? 'Empresa selecionada') : 'Empresa selecionada';
   return { ...NEUTRO_BASE, companyName: nome };
 }
