@@ -47,22 +47,20 @@ const SECTOR_DISPLAY_URL: Record<string, string> = {
   os1:               'www.os1.space/score',
 };
 
-// Barra de navegação para páginas internas OS¹ (os1://*)
-function InternalPageBar({ activeSector, onClose }: { activeSector?: string; onClose?: () => void }) {
-  const displayUrl = (activeSector && SECTOR_DISPLAY_URL[activeSector]) ?? 'os1://score';
+// Topo do Score OS¹ — pill flutuante igual ao nav da bio e ao header do mapa
+function InternalPageBar({ onClose }: { activeSector?: string; onClose?: () => void }) {
   return (
-    <div className="flex-shrink-0 flex items-center gap-3 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
-      <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider flex-shrink-0 select-none">OS¹</span>
-      <span className="text-neutral-300 dark:text-neutral-600 flex-shrink-0">/</span>
-      <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300 flex-shrink-0">Score OS¹</span>
-      <div className="flex-1 flex items-center h-11 px-3 rounded-xl bg-neutral-100 dark:bg-[#1e1e1e] border border-neutral-200 dark:border-[#3a3a3a]">
-        <span className="text-[11px] text-neutral-400 dark:text-neutral-500 font-mono truncate select-none">{displayUrl}</span>
+    <div className="flex-shrink-0 px-5 pt-8 pb-2 bg-[#dcdfe2] dark:bg-[#181818]">
+      <div className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] px-4 py-3 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Score OS¹</p>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
+            <X size={13} />
+          </button>
+        )}
       </div>
-      {onClose && (
-        <button onClick={onClose} className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
-          <X size={13} />
-        </button>
-      )}
     </div>
   );
 }
@@ -79,7 +77,7 @@ interface BrowserViewProps {
   insights?: ScoreInsight[];
 }
 
-export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMode = false, onSync, activeSector, role, insights }: BrowserViewProps) {
+export function BrowserView({ open, onClose, initialUrl = 'https://www.google.com', lightMode = false, onSync, activeSector, role, insights }: BrowserViewProps) {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => { if (!open) setSyncing(false); }, [open]);
@@ -107,12 +105,9 @@ export function BrowserView({ open, onClose, initialUrl = 'os1://score', lightMo
         >
           {/* Página interna OS¹: shell do navegador + Score na área de conteúdo */}
           {isInternal ? (
-            <>
-              <InternalPageBar activeSector={activeSector} onClose={onClose} />
-              <div className="flex-1 min-h-0 overflow-hidden">
-                <ScoreOS1Panel activeSector={activeSector} role={role} standalone={false} insights={insights} />
-              </div>
-            </>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ScoreOS1Panel activeSector={activeSector} role={role} standalone={false} insights={insights} onClose={onClose} />
+            </div>
           ) : (
             /* URL externa: navegador normal (Electron webview ou iframe) */
             <div className="flex-1 min-h-0">

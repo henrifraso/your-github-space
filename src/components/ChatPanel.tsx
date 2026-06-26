@@ -1000,11 +1000,11 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
     <div
       ref={wrapperRef}
       style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX + 12}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.02]"
+      className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
       {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
       <div className="px-5 py-5 flex-shrink-0">
-      <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.02]">
+      <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.01]">
         <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
           <Home size={22} />
         </button>

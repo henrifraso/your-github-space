@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion } from 'motion/react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { apiFetch } from '../../api';
 import { getContextUploads, resolveUploadOrgBu, type ContextUpload } from './contextUploads';
 import { calcScoreInicial, nivelLabelCalculado } from './score-formula';
@@ -9,6 +9,7 @@ import {
   ExternalLink, ArrowRight, RefreshCw, ClipboardList, X, Globe,
 } from 'lucide-react';
 import { loadNavigatedSources, type NavigatedSource } from '../../features/browser/navigated-sources';
+import { CircleProgress } from '../../components/CircleProgress';
 
 interface Dimensao { id: string; label: string; score: number; icon: React.ElementType; descricao: string; }
 interface Evidencia { id: number; tipo: string; fonte: string; confianca: number; impacto: number; titulo: string; descricao: string; }
@@ -80,11 +81,73 @@ const NOME_POR_SECTOR: Record<string, string> = {
   apple: 'Apple', amazon: 'Amazon', natura: 'Natura', os1: 'OS¹',
 };
 
+const CERVEJA_IMPERIO_MOCK: ScoreMock = {
+  companyName: 'Cerveja Império', status: 'Leitura inicial com oportunidade territorial', periodo: 'Últimos 30 dias', scoreGeral: 71,
+  dimensoes: [
+    { id: 'mercado', label: 'Mercado', score: 78, icon: TrendingUp, descricao: 'Setor de cervejas regionais em crescimento de 18% ao ano — janela favorável para expansão de presença e posicionamento.' },
+    { id: 'concorrencia', label: 'Concorrência', score: 59, icon: BarChart2, descricao: 'Ambev e Heineken ampliam ações de trade com comodato em PDVs da região. Pressão competitiva crescente no território serrano.' },
+    { id: 'reputacao', label: 'Reputação', score: 74, icon: ShieldCheck, descricao: 'Menções públicas positivas associadas à origem serrana. Monitoramento de Reclame Aqui e Google Avaliações em andamento.' },
+    { id: 'presenca', label: 'Presença Territorial', score: 63, icon: MapPin, descricao: 'Cobertura regional ainda em expansão. Regiões dos Lagos e Sul Fluminense com potencial identificado sem cobertura ativa.' },
+    { id: 'execucao', label: 'Ações', score: 61, icon: Zap, descricao: 'Cards de inteligência gerados. Ações de PDV e eventos em processo de execução pela equipe comercial.' },
+  ],
+  evolucao: [{ semana: 'Início', score: 58 }, { semana: 'Semana 2', score: 63 }, { semana: 'Semana 3', score: 68 }, { semana: 'Agora', score: 71 }],
+  evidencias: [
+    { id: 1, tipo: 'Mercado', fonte: 'Leitura demonstrativa', confianca: 0.74, impacto: 5, titulo: 'Cervejas regionais crescem 18% ao ano', descricao: 'Consumidor busca identidade e origem — Petrópolis como ativo de posicionamento tem vantagem que marcas nacionais não conseguem replicar.' },
+    { id: 2, tipo: 'Concorrência', fonte: 'Sinal demonstrativo', confianca: 0.68, impacto: -4, titulo: 'Ambev com comodato em PDVs da rota', descricao: 'Freezers instalados em bares estratégicos criam barreira de entrada. 6 pontos na rota leste receberam equipamento nos últimos 45 dias.' },
+    { id: 3, tipo: 'Território', fonte: 'Mapa OS¹ · Demo', confianca: 0.70, impacto: 4, titulo: 'Região dos Lagos sem marca regional dominante', descricao: 'Janela de entrada antes do verão — 8 municípios com alta demanda sazonal e mix concorrente ainda não consolidado.' },
+    { id: 4, tipo: 'Reputação', fonte: 'Fonte monitorável', confianca: 0.60, impacto: 2, titulo: 'Menções positivas à origem serrana', descricao: 'Associação com Petrópolis e tradição cervejeira regional aparece em menções espontâneas. Monitoramento de Reclame Aqui ativo.' },
+    { id: 5, tipo: 'Eventos', fonte: 'Calendário regional · Demo', confianca: 0.72, impacto: 3, titulo: 'Calendário de festivais cresce 35% em RJ/ES/MG', descricao: 'Oportunidade de exposição de marca em eventos de perfil compatível com posicionamento premium regional.' },
+  ],
+  conteudos: [
+    { nome: 'Mix de portfólio Império 2026.pdf', tipo: 'PDF', data: '10/06/2026' },
+    { nome: 'Estratégia comercial distribuidoras.docx', tipo: 'DOCX', data: '05/06/2026' },
+    { nome: 'Calendário de eventos RJ 2T26.csv', tipo: 'CSV', data: '01/06/2026' },
+  ],
+  cardsRelacionados: [
+    'A Império pode estar deixando espaço nos canais onde o giro acontece',
+    'Grandes marcas podem ocupar o território antes da próxima janela de consumo',
+    'O mapa mostra regiões onde a Império pode crescer antes do concorrente perceber',
+  ],
+  explicacao: 'Score baseado em leitura demonstrativa para apresentação comercial do OS¹. A nota reflete sinais de mercado, pressão competitiva e oportunidade territorial identificados. Base demonstrativa — precisão aumenta com dados reais da empresa.',
+};
+
+const DISTRIBUIDORA_IMPERIO_MOCK: ScoreMock = {
+  companyName: 'Distribuidora Império', status: 'Operação com potencial de expansão', periodo: 'Últimos 30 dias', scoreGeral: 67,
+  dimensoes: [
+    { id: 'mercado', label: 'Demanda Regional', score: 74, icon: TrendingUp, descricao: 'Pré-verão com crescimento de demanda detectado na Região dos Lagos e no entorno dos festivais serranos.' },
+    { id: 'concorrencia', label: 'Pressão Competitiva', score: 55, icon: BarChart2, descricao: 'Distribuidoras concorrentes com ação intensa de comodato e visita semanal nos mesmos PDVs. Atenção: 2 pontos âncora em risco.' },
+    { id: 'reputacao', label: 'Relacionamento PDV', score: 72, icon: ShieldCheck, descricao: 'Visita semanal consolidada nos principais pontos. Relacionamento pessoal com donos de bar é o principal ativo da operação.' },
+    { id: 'presenca', label: 'Cobertura de Rota', score: 61, icon: MapPin, descricao: 'Rota ativa com cobertura de PDVs estabelecida. Regiões de Correias, Nogueira e Litoral Leste sem cobertura regular identificadas.' },
+    { id: 'execucao', label: 'Operação', score: 58, icon: Zap, descricao: 'Gargalo de entrega em dois dias da semana detectado. Oportunidade de redistribuição de rota para aumentar confiabilidade.' },
+  ],
+  evolucao: [{ semana: 'Início', score: 54 }, { semana: 'Semana 2', score: 59 }, { semana: 'Semana 3', score: 63 }, { semana: 'Agora', score: 67 }],
+  evidencias: [
+    { id: 1, tipo: 'Operação', fonte: 'Sinal demonstrativo', confianca: 0.76, impacto: -3, titulo: 'Gargalo de entrega em terças e quintas', descricao: '70% das entregas concentradas em 2 dias. PDVs de segunda e sexta relatam atrasos — concorrente já abordou 2 desses pontos.' },
+    { id: 2, tipo: 'Concorrência', fonte: 'Sinal demonstrativo', confianca: 0.72, impacto: -5, titulo: 'Comodato concorrente em 6 bares da rota leste', descricao: 'Freezers instalados criam dependência de marca. Janela de ação em 15 dias para os 3 pontos ainda sem equipamento ativado.' },
+    { id: 3, tipo: 'Oportunidade', fonte: 'Mapa OS¹ · Demo', confianca: 0.68, impacto: 6, titulo: 'Região dos Lagos sem distribuidora regional especializada', descricao: 'Entrada antes de setembro com 20 PDVs âncora garante presença no pico sazonal de verão — custo de entrada 3× menor que em dezembro.' },
+    { id: 4, tipo: 'PDV', fonte: 'Sinal demonstrativo', confianca: 0.80, impacto: 3, titulo: '2 PDVs vulneráveis com proposta concorrente aberta', descricao: 'PDV Itamarati e PDV Centro com propostas de freezer Heineken em avaliação. Visita de relacionamento esta semana pode manter os dois pontos.' },
+    { id: 5, tipo: 'Expansão', fonte: 'Leitura demonstrativa', confianca: 0.65, impacto: 4, titulo: 'Distritos de Correias e Nogueira sem cobertura ativa', descricao: 'Território dentro da cidade sem distribuidora especializada — 23 PDVs potenciais acessíveis sem custo de deslocamento extra.' },
+  ],
+  conteudos: [
+    { nome: 'Plano de rota junho 2026.xlsx', tipo: 'XLSX', data: '01/06/2026' },
+    { nome: 'Lista de PDVs ativos.csv', tipo: 'CSV', data: '15/06/2026' },
+    { nome: 'Relatório de visita semanal.pdf', tipo: 'PDF', data: '20/06/2026' },
+  ],
+  cardsRelacionados: [
+    'A pressão concorrente pode estar chegando antes da reposição',
+    'Alguns PDVs podem estar prontos para girar mais Império',
+    'A operação pode ganhar margem priorizando os pontos certos',
+  ],
+  explicacao: 'Score baseado em leitura demonstrativa para apresentação comercial do OS¹. Reflete sinais de operação, pressão competitiva e oportunidade de expansão identificados na rota. Base demonstrativa — precisão aumenta com dados reais da operação.',
+};
+
 const OSCAR_SECTORS = new Set(['oscar-piloto-01', 'nike']);
 
 function getMock(activeSector?: string): ScoreMock {
   if (activeSector === 'nike') return OSCAR_MOCK;
   if (activeSector === 'oscar-piloto-01') return { ...OSCAR_MOCK, companyName: 'Oscar Loja 1' };
+  if (activeSector === 'cerveja-imperio') return CERVEJA_IMPERIO_MOCK;
+  if (activeSector === 'cerveja-imperio-distribuidora-01') return DISTRIBUIDORA_IMPERIO_MOCK;
   const nome = activeSector ? (NOME_POR_SECTOR[activeSector] ?? 'Empresa selecionada') : 'Empresa selecionada';
   return { ...NEUTRO_BASE, companyName: nome };
 }
@@ -227,6 +290,84 @@ function EvidenciaItem({ ev }: { ev: Evidencia }) {
   );
 }
 
+// ── Score Grid — destaques estilo bio com fontes e Score no centro ────────────
+
+function BigScoreCircle({ score }: { score: number }) {
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    const duration = 2800;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * score));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [score]);
+
+  return (
+    <div className="relative w-64 h-64">
+      <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
+      <div className="absolute inset-0 rounded-2xl border-[0.5px] border-neutral-200 dark:border-[#4a4a4a] pointer-events-none z-[2]" />
+      <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64" style={{ filter: 'drop-shadow(0 0 1.5px #88888855)' }}>
+        <rect x="6" y="6" width="52" height="52" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" className="text-neutral-400 dark:text-[#4a4a4a]" />
+        <motion.rect
+          x="6" y="6" width="52" height="52" rx="16" ry="16"
+          fill="none" stroke="#888888" strokeWidth="1"
+          strokeLinejoin="round" strokeLinecap="butt"
+          pathLength={100} strokeDasharray="100"
+          initial={{ strokeDashoffset: 100 }}
+          animate={{ strokeDashoffset: 100 - score }}
+          transition={{ duration: 2.8, ease: 'easeOut' }}
+        />
+      </svg>
+      <div className="absolute inset-[20%] rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-6xl font-black tabular-nums text-neutral-800 dark:text-neutral-100">
+          {display}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ScoreRevealCard({ scoreGeral, cardCls }: { scoreGeral: number; cardCls: string }) {
+  // Mesma cor neutra para todas as fontes; Score ligeiramente mais forte
+  const COR_FONTE = '#888888';
+  const COR_SCORE = '#444444';
+
+  const items: { pct: number; label: string; cor: string; isScore?: boolean }[] = [
+    { pct: 74, label: 'Reclame Aqui', cor: COR_FONTE },
+    { pct: 81, label: 'Google',        cor: COR_FONTE },
+    { pct: scoreGeral, label: 'Jornais', cor: COR_SCORE, isScore: true },
+    { pct: 68, label: 'Redes Sociais', cor: COR_FONTE },
+    { pct: 77, label: 'Avaliações',    cor: COR_FONTE },
+    { pct: 62, label: 'Notícias',      cor: COR_FONTE },
+    { pct: 71, label: 'Tripadvisor',   cor: COR_FONTE },
+    { pct: 65, label: 'Facebook',      cor: COR_FONTE },
+    { pct: 79, label: 'Instagram',     cor: COR_FONTE },
+    { pct: 58, label: 'Foursquare',    cor: COR_FONTE },
+    { pct: 83, label: 'Yelp',          cor: COR_FONTE },
+    { pct: 70, label: 'Seu Crédito',   cor: COR_FONTE },
+    { pct: 66, label: 'Procon',        cor: COR_FONTE },
+  ];
+
+  return (
+    <div className={`${cardCls} overflow-hidden transition-transform duration-200 hover:scale-[1.01]`}>
+      <div className="flex flex-row items-start gap-3 px-4 py-5 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+        {items.map((item, i) => (
+          <div key={item.label} className="flex-shrink-0">
+            <CircleProgress pct={item.pct} label={item.label} color={item.cor} delay={i * 0.07} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Tipos públicos ────────────────────────────────────────────────────────────
 
 export interface ScoreInsight { titulo: string; resumo?: string; dominio?: string; urgencia?: string; }
@@ -295,11 +436,33 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
     return calcScoreInicial(insights, uploads.length);
   }, [insights, uploads.length, mock.scoreGeral]);
 
+  // Completude de conteúdo: cada fator preenchido = +20 (máx 100).
+  // Quando chega em 100, refreshKey incrementa e re-renderiza as seções abaixo.
+  const completeness = useMemo(() => {
+    const fatores = [
+      evidencias.length > 0,           // tem sinais/evidências
+      conteudosToShow.length > 0,      // tem contexto enviado
+      navigatedSources.length > 0,     // tem fontes navegadas
+      mock.dimensoes.length >= 3,      // tem dimensões ativas
+      scoreGeral >= 65,                // score inicial razoável
+    ];
+    return fatores.filter(Boolean).length * 20;
+  }, [evidencias.length, conteudosToShow.length, navigatedSources.length, mock.dimensoes.length, scoreGeral]);
+
+  const [refreshKey, setRefreshKey] = useState(0);
+  const prevCompleteness = useRef(0);
+  useEffect(() => {
+    if (completeness >= 100 && prevCompleteness.current < 100) {
+      setRefreshKey(k => k + 1);
+    }
+    prevCompleteness.current = completeness;
+  }, [completeness]);
+
   return (
     <div className="flex flex-col h-full bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
 
-      {/* Barra própria — só quando standalone (fora do BrowserView) */}
-      {standalone && (
+      {/* Barra própria — standalone usa breadcrumb; dentro do BrowserView usa pill com barra de conteúdo */}
+      {standalone ? (
         <div className="flex items-center gap-2 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] flex-shrink-0">
           <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">OS¹</span>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
@@ -310,93 +473,98 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
             </button>
           )}
         </div>
+      ) : (
+        <div className="flex-shrink-0 px-5 pt-8 pb-2">
+          <div className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] px-4 py-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Conteúdo</p>
+              <span className="text-[10px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200">
+                {completeness}<span className="text-neutral-400 dark:text-neutral-500 font-normal">/100</span>
+                {completeness >= 100 && <span className="ml-2 text-[9px] font-semibold text-neutral-500 dark:text-neutral-400">✓</span>}
+              </span>
+              {onClose && (
+                <button onClick={onClose} className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-[#2a2a2a] transition-colors">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+            <div className="h-1.5 bg-neutral-200 dark:bg-[#2a2a2a] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-neutral-700 dark:bg-neutral-300"
+                initial={{ width: 0 }}
+                animate={{ width: `${completeness}%` }}
+                transition={{ duration: 1.6, ease: 'easeOut', delay: 0.1 }}
+              />
+            </div>
+          </div>
+        </div>
       )}
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 [&::-webkit-scrollbar]:hidden">
 
-        {/* Intro do Score OS¹ */}
-        <div className={`${cardCls} p-4 flex flex-col gap-3`}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 mb-0.5">Score OS¹</p>
-              <h1 className="text-[17px] font-bold text-neutral-900 dark:text-white leading-tight truncate">{mock.companyName}</h1>
-              <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1 leading-relaxed">
-                Painel de reputação, fontes e sinais da empresa nos últimos 30 dias.
-              </p>
-            </div>
-            <span className="flex-shrink-0 mt-0.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border border-neutral-300 dark:border-[#484848] text-neutral-500 dark:text-neutral-400 bg-transparent whitespace-nowrap">
-              {mock.status}
-            </span>
-          </div>
+        {/* Seções abaixo — re-renderizam com fade quando completeness atinge 100 */}
+        <AnimatePresence mode="wait">
+        <motion.div key={refreshKey} className="space-y-4"
+          initial={{ opacity: refreshKey === 0 ? 1 : 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
 
-          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed border-t border-neutral-200 dark:border-[#3a3a3a] pt-3">
-            O Score OS¹ organiza notas, fontes, evidências e sinais públicos ou enviados para mostrar o estado inicial da leitura da empresa. Os sinais mais relevantes podem aparecer no Feed em forma de cards de inteligência.
-          </p>
+        {/* Stack: fundo com dados nas laterais, score flutuando por cima no centro */}
+        <div className="relative">
 
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {([
-              { label: 'Sinais',    value: evidencias.length         },
-              { label: 'Fontes',    value: mock.dimensoes.length     },
-              { label: 'Contextos', value: conteudosToShow.length    },
-              { label: 'Navegadas', value: navigatedSources.length   },
-            ] as { label: string; value: number }[]).map(s => (
-              <div key={s.label} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-neutral-200 dark:border-[#414141] bg-transparent">
-                <strong className="text-[12px] tabular-nums text-neutral-700 dark:text-neutral-200">{s.value}</strong>
-                <span className="text-[10px] text-neutral-400 dark:text-neutral-500">{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+          {/* Fundo — vazio, só visual */}
+          <div className={`${cardCls}`} style={{ minHeight: 380 }} />
 
-        {/* Número principal do Score */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-5 pb-4 flex flex-col gap-5">
-            {/* Score central */}
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">Score atual</p>
-              <div className="flex items-end gap-2">
-                <motion.span
-                  className="text-[80px] font-black tabular-nums leading-none text-neutral-900 dark:text-white"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                >
-                  {scoreGeral}
-                </motion.span>
-                <span className="text-[18px] font-semibold text-neutral-300 dark:text-neutral-600 pb-3 tabular-nums">/100</span>
-              </div>
-              <p className="text-[13px] font-semibold text-neutral-600 dark:text-neutral-300">{nivelLabel(scoreGeral)}</p>
-              <p className="text-[10px] text-neutral-400 dark:text-neutral-500">{mock.periodo} · leitura inicial</p>
-            </div>
+          {/* Score — flutua por cima, dados nos cantos */}
+          <div className={`${cardCls} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center transition-transform duration-200 hover:scale-[1.01]`} style={{ width: 'calc(100% - 24px)' }}>
 
-            {/* Barra de progresso */}
-            <div className="h-[3px] bg-neutral-100 dark:bg-[#2a2a2a] rounded-full overflow-hidden">
-              <motion.div
-                className="h-full rounded-full bg-neutral-600 dark:bg-neutral-300"
-                initial={{ width: 0 }}
-                animate={{ width: `${scoreGeral}%` }}
-                transition={{ duration: 1.8, ease: 'easeOut', delay: 0.2 }}
-              />
-            </div>
-
-            {/* Indicadores em grade */}
-            <div className="grid grid-cols-3 gap-2">
+            {/* Esquerda — Sinais */}
+            <div className="flex flex-col gap-0 flex-1 self-stretch border-r border-neutral-100 dark:border-[#3a3a3a]">
+              <p className="text-[8px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 px-3 pt-4 pb-2">Sinais · 30d</p>
               {([
-                { valor: `${mock.periodo}`,           label: 'Janela de leitura'   },
-                { valor: `${evidencias.length} sinais`,     label: 'Evidências usadas'   },
-                { valor: `${mock.dimensoes.length} fontes`, label: 'Dimensões ativas'    },
-                { valor: conteudosToShow.length > 0 ? `${conteudosToShow.length} arq.` : 'Nenhum', label: 'Contexto enviado' },
-                { valor: navigatedSources.length > 0 ? `${navigatedSources.length} URLs` : 'Nenhuma', label: 'Fontes navegadas' },
-                { valor: 'Inicial',                   label: 'Maturidade da leitura' },
-              ] as { valor: string; label: string }[]).map(ind => (
-                <div key={ind.label} className="flex flex-col gap-0.5 px-3 py-2.5 rounded-xl bg-neutral-50 dark:bg-[#252525] border border-neutral-200 dark:border-[#3a3a3a]">
-                  <span className="text-[13px] font-bold tabular-nums text-neutral-800 dark:text-neutral-100 leading-tight">{ind.valor}</span>
-                  <span className="text-[9px] text-neutral-400 dark:text-neutral-500 leading-snug">{ind.label}</span>
+                { titulo: 'Reclamações',  valor: '0',                                                                    badge: 'Sem alertas'   },
+                { titulo: 'Positivos',    valor: `${Math.max(0, evidencias.filter(e => e.impacto > 0).length)}`,        badge: 'Leitura inicial' },
+                { titulo: 'Ext. naveg.',  valor: navigatedSources.length > 0 ? `${navigatedSources.length} URLs` : '—', badge: navigatedSources.length > 0 ? 'Ativo' : 'Em formação' },
+                { titulo: 'Contexto',     valor: conteudosToShow.length > 0 ? `${conteudosToShow.length} arq.` : '—',   badge: conteudosToShow.length > 0 ? 'Recebido' : 'Aguardando' },
+                { titulo: 'Feed',         valor: 'Cards ativos',                                                         badge: 'Ver Feed'      },
+              ] as { titulo: string; valor: string; badge: string }[]).map(s => (
+                <div key={s.titulo} className="flex items-center justify-between gap-2 px-3 py-2 border-t border-neutral-100 dark:border-[#2e2e2e]">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold text-neutral-700 dark:text-neutral-200 truncate">{s.titulo}</p>
+                    <p className="text-[11px] font-bold tabular-nums text-neutral-500 dark:text-neutral-400">{s.valor}</p>
+                  </div>
+                  <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full border border-neutral-200 dark:border-[#3a3a3a] text-neutral-400 dark:text-neutral-500 whitespace-nowrap flex-shrink-0">{s.badge}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Centro — círculo */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-3 px-5 py-8">
+              <BigScoreCircle score={scoreGeral} />
+              <span className="text-[13px] font-semibold text-neutral-500 dark:text-neutral-300 tracking-tight">Score OS¹</span>
+            </div>
+
+            {/* Direita — Indicadores */}
+            <div className="flex flex-col gap-0 flex-1 self-stretch border-l border-neutral-100 dark:border-[#3a3a3a]">
+              <p className="text-[8px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500 px-3 pt-4 pb-2">Indicadores</p>
+              {mock.dimensoes.map(dim => (
+                <div key={dim.id} className="flex items-center justify-between gap-2 px-3 py-2 border-t border-neutral-100 dark:border-[#2e2e2e]">
+                  <p className="text-[10px] font-semibold text-neutral-700 dark:text-neutral-200 truncate">{dim.label}</p>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="w-16 h-[2px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-neutral-400 dark:bg-neutral-500 transition-all duration-700" style={{ width: `${dim.score}%` }} />
+                    </div>
+                    <span className="text-[11px] font-bold tabular-nums text-neutral-500 dark:text-neutral-400 w-6 text-right">{dim.score}</span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
+
+        {/* Score grid — destaques estilo bio: fontes + Score no centro */}
+        <ScoreRevealCard scoreGeral={scoreGeral} cardCls={cardCls} />
 
         {/* Evolução do Score */}
         <div className={`${cardCls} overflow-hidden`}>
@@ -455,287 +623,6 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
           })()}
         </div>
 
-        {/* Fontes de reputação */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center gap-2">
-              <ShieldCheck size={14} className="text-neutral-400" strokeWidth={1.8} />
-              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Fontes de reputação</h3>
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Fontes públicas e internas que compõem ou podem compor a leitura</p>
-          </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-            {([
-              { icon: ShieldCheck, nome: 'Reclame Aqui',     desc: 'Reclamações públicas e percepção de atendimento.',    badge: 'Fonte possível'  },
-              { icon: MapPin,      nome: 'Google',            desc: 'Avaliações locais, presença pública e mapas.',        badge: 'Fonte possível'  },
-              { icon: Zap,         nome: 'Redes sociais',    desc: 'Menções, engajamento e reputação de marca.',          badge: 'Fonte possível'  },
-              { icon: FileText,    nome: 'Notícias',          desc: 'Cobertura pública e eventos de impacto na empresa.',  badge: 'Fonte possível'  },
-              { icon: Globe,       nome: 'Fontes navegadas',  desc: navigatedSources.length > 0 ? `${navigatedSources.length} URL${navigatedSources.length > 1 ? 's' : ''} registrada${navigatedSources.length > 1 ? 's' : ''} no Navegador OS¹.` : 'URLs acessadas no Navegador OS¹ entram como contexto externo.', badge: navigatedSources.length > 0 ? `${navigatedSources.length} registradas` : 'Sem registros' },
-              { icon: FileText,    nome: 'Contexto enviado', desc: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''} interno${conteudosToShow.length > 1 ? 's' : ''} considerado${conteudosToShow.length > 1 ? 's' : ''} na leitura.` : 'Arquivos e observações internas aumentam a precisão.', badge: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''}` : 'Aguardando' },
-            ] as { icon: React.ElementType; nome: string; desc: string; badge: string }[]).map(f => {
-              const Icon = f.icon;
-              return (
-                <div key={f.nome} className="flex items-center gap-3.5 px-4 py-3">
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
-                    <Icon size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{f.nome}</p>
-                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug">{f.desc}</p>
-                  </div>
-                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-                    {f.badge}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Sinais dos últimos 30 dias */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center gap-2">
-              <Zap size={14} className="text-neutral-400" strokeWidth={1.8} />
-              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Sinais dos últimos 30 dias</h3>
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Reclamações, elogios, eventos e oportunidades identificados neste ciclo</p>
-          </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-            {([
-              { titulo: 'Reclamações críticas',   valor: '0 identificadas',      desc: 'Nenhuma reclamação crítica registrada nesta leitura inicial.',         badge: 'Sem alertas'   },
-              { titulo: 'Sinais positivos',        valor: `${Math.max(0, evidencias.filter(e => e.impacto > 0).length)} sinais`,  desc: 'Evidências com impacto positivo na leitura atual.',                     badge: 'Leitura inicial' },
-              { titulo: 'Fontes externas',         valor: navigatedSources.length > 0 ? `${navigatedSources.length} URLs` : 'Em formação', desc: 'Fontes externas registradas como contexto de análise.',              badge: navigatedSources.length > 0 ? 'Ativo' : 'Em formação' },
-              { titulo: 'Contexto interno',        valor: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''}` : 'Nenhum enviado', desc: 'Contexto enviado aumenta a precisão e o Score da leitura.', badge: conteudosToShow.length > 0 ? 'Recebido' : 'Aguardando' },
-              { titulo: 'Feed de inteligência',    valor: 'Cards ativos',         desc: 'Quando um sinal ganha relevância, aparece no Feed como card de inteligência.', badge: 'Ver Feed'      },
-            ] as { titulo: string; valor: string; desc: string; badge: string }[]).map(s => (
-              <div key={s.titulo} className="flex items-start gap-3.5 px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-0.5">
-                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{s.titulo}</p>
-                    <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">{s.badge}</span>
-                  </div>
-                  <p className="text-[11px] font-medium tabular-nums text-neutral-600 dark:text-neutral-300 mb-0.5">{s.valor}</p>
-                  <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug">{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Indicadores do Score — Dimensões */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center gap-2">
-              <BarChart2 size={14} className="text-neutral-400" strokeWidth={1.8} />
-              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Indicadores do Score</h3>
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Dimensões que compõem a nota e a leitura do ambiente</p>
-          </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-            {mock.dimensoes.map(dim => {
-              const Icon = dim.icon;
-              return (
-                <div key={dim.id} className="flex items-center gap-3.5 px-4 py-3.5">
-                  {/* Círculo monocromático */}
-                  <div className="w-9 h-9 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
-                    <Icon size={14} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                  </div>
-                  {/* Conteúdo */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">{dim.label}</span>
-                      <span className="text-[13px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200 flex-shrink-0">{dim.score}</span>
-                    </div>
-                    <p className="text-[11px] text-neutral-400 dark:text-neutral-500 leading-snug mb-1.5">{dim.descricao}</p>
-                    <div className="h-[2px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-neutral-500 dark:bg-neutral-400 transition-all duration-700"
-                        style={{ width: `${dim.score}%`, opacity: 0.5 + (dim.score / 100) * 0.4 }} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Fontes consideradas */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center gap-2">
-              <ExternalLink size={14} className="text-neutral-400" strokeWidth={1.8} />
-              <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Fontes consideradas</h3>
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Parâmetros que alimentam a leitura deste perfil</p>
-          </div>
-          <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-            {([
-              { icon: Zap,         nome: 'Feed',                  desc: 'Sinais de mercado usados para compor a leitura.',              badge: 'Ativo'     },
-              { icon: MapPin,      nome: 'Mapa / Concorrência',   desc: 'Pressão competitiva considerada no contexto local.',           badge: 'Ativo'     },
-              { icon: FileText,    nome: 'Conteúdos enviados',    desc: 'Materiais internos ajudam a calibrar a precisão.',             badge: conteudosToShow.length > 0 ? `${conteudosToShow.length} arquivo${conteudosToShow.length > 1 ? 's' : ''}` : 'Aguardando' },
-              { icon: ShieldCheck, nome: 'Evidências',            desc: 'Sinais observados que sustentam a leitura.',                  badge: `${evidencias.length} sinal${evidencias.length !== 1 ? 'is' : ''}` },
-              { icon: BarChart2,   nome: 'Perfil',                desc: 'Contexto da empresa e unidade analisada.',                    badge: 'Ativo'     },
-              { icon: ClipboardList, nome: 'Operação',            desc: 'Sinais de resposta e capacidade de execução.',                badge: 'Em leitura'},
-            ] as { icon: React.ElementType; nome: string; desc: string; badge: string }[]).map(f => {
-              const Icon = f.icon;
-              return (
-                <div key={f.nome} className="flex items-center gap-3.5 px-4 py-3">
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
-                    <Icon size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100">{f.nome}</p>
-                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-snug">{f.desc}</p>
-                  </div>
-                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-                    {f.badge}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Fontes do Navegador */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Globe size={14} className="text-neutral-400" strokeWidth={1.8} />
-                <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Fontes do Navegador</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                {navigatedSources.length > 0 && (
-                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
-                    {navigatedSources.length} {navigatedSources.length === 1 ? 'fonte' : 'fontes'}
-                  </span>
-                )}
-                <button onClick={refreshNavigatedSources} className="p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors">
-                  <RefreshCw size={11} strokeWidth={1.8} />
-                </button>
-              </div>
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">URLs acessadas no Navegador OS¹ para este perfil</p>
-          </div>
-          {navigatedSources.length === 0 ? (
-            <div className="px-4 py-5">
-              <p className="text-[12px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
-                Nenhuma fonte navegada registrada para este perfil. Acesse o Navegador OS¹ para adicionar fontes externas à análise.
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-              {navigatedSources.map(src => (
-                <div key={src.url} className="flex items-center gap-3.5 px-4 py-3">
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
-                    <Globe size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">{src.host}</p>
-                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500 truncate leading-snug">{src.url}</p>
-                    <p className="text-[9px] text-neutral-300 dark:text-neutral-600 mt-0.5">{new Date(src.visitedAt).toLocaleDateString('pt-BR')}</p>
-                  </div>
-                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-                    Navegador
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Evidências */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={14} className="text-neutral-400" strokeWidth={1.8} />
-                <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Sinais considerados</h3>
-              </div>
-              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
-                {evidencias.length} {evidencias.length === 1 ? 'sinal' : 'sinais'}
-              </span>
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Evidências que sustentam e calibram a leitura atual</p>
-          </div>
-
-          {evidencias.length === 0 ? (
-            <div className="px-4 py-5">
-              <p className="text-[12px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
-                Sem evidências específicas suficientes para este recorte. O OS¹ usa os sinais gerais do perfil até novas evidências entrarem.
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-              {evidencias.map(ev => {
-                const confPct = Math.round(ev.confianca * 100);
-                return (
-                  <div key={ev.id} className="flex items-start gap-3.5 px-4 py-3.5">
-                    <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center mt-0.5">
-                      <ShieldCheck size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{ev.titulo}</p>
-                        <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-                          {ev.tipo}
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5 leading-snug">{ev.fonte} · Confiança {confPct}%</p>
-                      {ev.descricao && (
-                        <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 leading-relaxed">{ev.descricao}</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Contexto enviado */}
-        <div className={`${cardCls} overflow-hidden`}>
-          <div className="px-4 pt-4 pb-3 border-b border-neutral-200 dark:border-[#3a3a3a]">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <FileText size={14} className="text-neutral-400" strokeWidth={1.8} />
-                <h3 className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100">Contexto enviado</h3>
-              </div>
-              {conteudosToShow.length > 0 && (
-                <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
-                  {conteudosToShow.length} {conteudosToShow.length === 1 ? 'arquivo' : 'arquivos'}
-                </span>
-              )}
-            </div>
-            <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5">Arquivos e observações internas que aumentam a precisão do Score</p>
-          </div>
-
-          {conteudosToShow.length === 0 ? (
-            <div className="px-4 py-5">
-              <p className="text-[12px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
-                Nenhum conteúdo específico foi enviado para este recorte. A leitura usa os sinais disponíveis até novos materiais entrarem no sistema.
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-neutral-100 dark:divide-[#3a3a3a]">
-              {conteudosToShow.map((c, i) => (
-                <div key={`${c.nome}-${i}`} className="flex items-center gap-3.5 px-4 py-3">
-                  <div className="w-8 h-8 rounded-full flex-shrink-0 bg-neutral-100 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#3d3d3d] flex items-center justify-center">
-                    <FileText size={13} className="text-neutral-500 dark:text-neutral-400" strokeWidth={1.6} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-neutral-800 dark:text-neutral-100 truncate">{c.nome}</p>
-                    <p className="text-[10px] text-neutral-400 dark:text-neutral-500">Material interno considerado na leitura atual · {c.data}</p>
-                  </div>
-                  <span className="flex-shrink-0 text-[9px] font-semibold px-2 py-0.5 rounded-full border border-neutral-300 dark:border-[#505050] text-neutral-500 dark:text-neutral-400">
-                    {c.tipo}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Cards relacionados */}
         {(() => {
           const realInsights = insights && insights.length > 0 ? insights.slice(0, 5) : null;
@@ -787,6 +674,9 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         </div>
 
         <div className="h-4" />
+        </motion.div>
+        </AnimatePresence>
+
       </div>
     </div>
   );

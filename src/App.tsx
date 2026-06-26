@@ -1161,7 +1161,7 @@ function AuthenticatedApp() {
       />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 hover:scale-[1.02]"
+      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 hover:scale-[1.01]"
         style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full px-2 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 20 } : undefined}>
@@ -1238,7 +1238,7 @@ function AuthenticatedApp() {
             Em modo split (scrolled+desktop), o mr alinha exatamente com o
             right-4 do ChatDesktop (16px), pra que feed e workspace tenham
             o mesmo afastamento das bordas externas e entre si. */}
-        <div className={`ml-4 ${scrolled && isDesktop ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative transition-transform duration-200 hover:scale-[1.02]`}
+        <div className={`ml-4 ${scrolled && isDesktop ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1439,7 +1439,7 @@ function AuthenticatedApp() {
                       </div>
                     )}
                     {roleConfig.bioLines && (
-                      <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.02] origin-left">
+                      <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                         {roleConfig.bioLines.map((line, i) => {
                           const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
                           const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
@@ -1495,7 +1495,7 @@ function AuthenticatedApp() {
                 </button>
                 </div>
                 </div>
-                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.02] origin-left">
+                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
@@ -1956,7 +1956,6 @@ function AuthenticatedApp() {
             open={browserOpen}
             onClose={() => setBrowserOpen(false)}
             onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
-            initialUrl="omni://desktop"
             activeSector={activeSector}
             role={role}
             insights={scoreInsights}
