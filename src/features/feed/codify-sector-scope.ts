@@ -23,13 +23,15 @@ const SCOPE_MAP: Record<SectorId, CodifyScope | null> = {
   mcdonalds: { organizationId: 'org-mcdonalds-brasil',  unitId: 'bu-mcdo-paulista' },
   nike:      { organizationId: 'org-oscar-calcados',    unitId: 'bu-oscar-matriz' },
   nubank:    { organizationId: 'org-drogaria-pacheco',  unitId: 'bu-pacheco-matriz' },
-  // GA3-test-loja: loja Oscar não-matriz (P10 v1). Login: oscar-piloto-01.
-  // Backend valida via authz.require_matrix (role franchise + scope read_only
-  // → 403 nos endpoints /api/governance/*).
-  'oscar-piloto-01': { organizationId: 'org-oscar-calcados', unitId: 'bu-oscar-piloto-01' },
+  // GA3-test-loja: loja Oscar não-matriz. Feed usa DEMO cards específicos de loja
+  // (OSCAR_LOJA1_SECTOR_FEEDS + DEMO_FEED_CARDS['oscar-piloto-01']). Scope null
+  // evita que os cards reais do org-oscar-calcados sobrescrevam o conteúdo de loja.
+  'oscar-piloto-01': null,
   // Cerveja Império — sem org real ainda; não dispara fetch
   'cerveja-imperio':                  null,
   'cerveja-imperio-distribuidora-01': null,
+  // Pacheco Loja — feed usa DEMO cards específicos de loja; sem org real
+  'pacheco-loja-01': null,
   // Demais sectors permanecem sem org real — não disparam fetch
   ifood:   null,
   ambev:   null,

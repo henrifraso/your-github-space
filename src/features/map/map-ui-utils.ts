@@ -3,6 +3,49 @@
 // Conteúdo movido de src/components/maps/CompetitiveMap.tsx (Fase 14).
 // Sem JSX, sem hooks — só dados e funções de geometria.
 
+// ── Coordenadas Pacheco (RJ nacional) ───────────────────────────────
+// Índices mapeados para os 16 concorrentes de NUBANK_DATA.concorrentes.
+// Centro: Rio de Janeiro (HQ Pacheco). Nacionais distribuídos pelas cidades reais.
+export const NUBANK_COORDS: google.maps.LatLngLiteral[] = [
+  { lat: -23.5637, lng: -46.7388 }, // [0]  RD Saúde — Butantã/SP
+  { lat: -3.7172,  lng: -38.5434 }, // [1]  Pague Menos — Fortaleza/CE
+  { lat: -30.0346, lng: -51.2300 }, // [2]  Farmácias São João — Porto Alegre/RS
+  { lat: -30.0410, lng: -51.2045 }, // [3]  Panvel — Porto Alegre/RS
+  { lat: -19.9247, lng: -43.9382 }, // [4]  Drogaria Araujo — BH/MG
+  { lat: -23.5063, lng: -46.6282 }, // [5]  Ultrafarma — Vila Maria/SP
+  { lat: -22.9035, lng: -43.1823 }, // [6]  Drogaria Venancio — Centro/RJ
+  { lat: -25.4278, lng: -49.2713 }, // [7]  Farmácias Nissei — Curitiba/PR
+  { lat: -21.1704, lng: -47.8103 }, // [8]  Drogal — Ribeirão Preto/SP
+  { lat: -1.4558,  lng: -48.4902 }, // [9]  Big Benn — Belém/PA
+  { lat: -22.8553, lng: -43.3211 }, // [10] Drogaria Tamoio — Vila da Penha/RJ
+  { lat: -22.9840, lng: -43.2257 }, // [11] Drogaria Universitária — Leblon/RJ
+  { lat: -23.5620, lng: -46.6548 }, // [12] Pacheco SP (DPSP) — Bela Vista/SP
+  { lat: -23.3586, lng: -46.8789 }, // [13] Farmácia Permanente — Cajamar/SP
+  { lat: -23.5466, lng: -46.6385 }, // [14] Onofre Online — SP
+  { lat: -30.0505, lng: -51.2050 }, // [15] Eu Quero Mais Saúde — Porto Alegre/RS
+  // ── Locais RJ (raio próximo) ─────────────────────────────────────────────────
+  { lat: -22.9340, lng: -43.1800 }, // [16] Droga Raia — Flamengo/RJ (~3.4km)
+  { lat: -22.9083, lng: -43.1932 }, // [17] Venancio — Lapa/RJ (~1.4km)
+  { lat: -22.9201, lng: -43.1779 }, // [18] Venancio — Glória/RJ (~2km)
+  { lat: -22.9230, lng: -43.1840 }, // [19] Santa Clara — Santa Teresa/RJ (~2.2km)
+  { lat: -22.9469, lng: -43.1859 }, // [20] Drogasil — Botafogo/RJ (~4.7km)
+  { lat: -22.8980, lng: -43.2780 }, // [21] Pague Menos — Méier/RJ (~8km)
+  { lat: -22.9295, lng: -43.1773 }, // [22] Farmácia Carioca — Catete/RJ (~3km)
+  { lat: -22.9248, lng: -43.2351 }, // [23] Mais Saúde — Tijuca/RJ (~7km)
+];
+
+// ── Coordenadas Pacheco Loja Centro (RJ local) ──────────────────────
+// Índices para os 7 concorrentes de pacheco-loja-01. Centro: Centro/RJ.
+export const PACHECO_LOJA_COORDS: google.maps.LatLngLiteral[] = [
+  { lat: -22.9035, lng: -43.1823 }, // [0]  Venancio — Centro/RJ
+  { lat: -22.8553, lng: -43.3211 }, // [1]  Tamoio — Vila da Penha/RJ
+  { lat: -22.9840, lng: -43.2257 }, // [2]  Universitária — Leblon/RJ
+  { lat: -22.9200, lng: -43.1620 }, // [3]  Onofre+iFood — RJ
+  { lat: -22.9300, lng: -43.1900 }, // [4]  Farmácia Permanente — RJ
+  { lat: -22.9469, lng: -43.1859 }, // [5]  RD Saúde — Botafogo/RJ
+  { lat: -22.9676, lng: -43.1879 }, // [6]  Drogal — Copacabana/RJ
+];
+
 // ── Coordenadas Oscar (SJC) ─────────────────────────────────────────
 // Índices mapeados para os 16 concorrentes de NIKE_DATA.concorrentes.
 // Centradas em São José dos Campos (matriz Oscar) — lat -23.2237, lng -45.9009.

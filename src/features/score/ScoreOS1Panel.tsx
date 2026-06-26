@@ -75,6 +75,7 @@ const NEUTRO_BASE: Omit<ScoreMock, 'companyName'> = {
 const NOME_POR_SECTOR: Record<string, string> = {
   mcdonalds: "McDonald's Brasil", nike: 'Oscar Calçados', nubank: 'Drogarias Pacheco',
   'cerveja-imperio': 'Cerveja Império', 'cerveja-imperio-distribuidora-01': 'Distribuidora Império',
+  'oscar-piloto-01': 'Oscar Loja 1', 'pacheco-loja-01': 'Pacheco Loja Centro',
   ifood: 'iFood', ambev: 'Ambev', magalu: 'Magazine Luiza',
   embraer: 'Embraer', tesla: 'Tesla', netflix: 'Netflix',
   spotify: 'Spotify', airbnb: 'Airbnb', uber: 'Uber',
@@ -202,6 +203,37 @@ const PACHECO_MOCK: ScoreMock = {
   explicacao: 'Score baseado em leitura demonstrativa para apresentação comercial do OS¹. Reflete posição de mercado, pressão competitiva e oportunidades estratégicas da Drogarias Pacheco. Base demonstrativa — precisão aumenta com dados reais da operação.',
 };
 
+const PACHECO_LOJA1_MOCK: ScoreMock = {
+  companyName: 'Pacheco Loja Centro', status: 'Loja consolidada com pressão crescente no entorno', periodo: 'Últimos 30 dias', scoreGeral: 74,
+  dimensoes: [
+    { id: 'mercado', label: 'Demanda Local', score: 82, icon: TrendingUp, descricao: 'Bairro com alta densidade de crônicos e público envelhecido — demanda previsível. Clínica dermato no entorno gera prescrições de alto ticket. Tráfego de pedestres estável.' },
+    { id: 'concorrencia', label: 'Concorrência Próxima', score: 58, icon: BarChart2, descricao: 'Venancio com possível nova loja a 200m. Tamoio com campanha de preço em crônico. RD Saúde com 3 aberturas planejadas no Centro RJ. Onofre+iFood capturando urgências por app.' },
+    { id: 'reputacao', label: 'Reputação da Loja', score: 77, icon: ShieldCheck, descricao: 'Google 4.1 — comentário de fila sem resposta em destaque. Atendimento farmacêutico elogiado. Reclame Aqui sem ocorrências críticas. Resposta pública pode elevar nota.' },
+    { id: 'presenca', label: 'Presença no Bairro', score: 73, icon: MapPin, descricao: 'Loja conhecida no bairro há anos. WhatsApp Business subutilizado. Vacinação sem comunicação externa. Pacheco Card com baixa penetração nos clientes de crônico.' },
+    { id: 'execucao', label: 'Operação', score: 64, icon: Zap, descricao: 'Escala de farmacêutico sem cobertura no pico 11h–13h. SNGPC com divergência pendente. Ever com penetração 6% — abaixo da meta de 20%. Entrega local não estruturada.' },
+  ],
+  evolucao: [{ semana: 'Início', score: 70 }, { semana: 'Semana 2', score: 72 }, { semana: 'Semana 3', score: 73 }, { semana: 'Agora', score: 74 }],
+  evidencias: [
+    { id: 1, tipo: 'Concorrência', fonte: 'Monitoramento local · Demo', confianca: 0.81, impacto: -6, titulo: 'Venancio com sinalização de nova loja a 200 metros', descricao: 'Movimento registrado em redes sociais locais. Abertura cria janela de 60 dias onde o vizinho ganha o cliente fiel sem esforço. Ação imediata de fidelização via WhatsApp é a resposta mais rápida.' },
+    { id: 2, tipo: 'Produto', fonte: 'Operação loja · Demo', confianca: 0.86, impacto: 7, titulo: 'Ever com margem 22 p.p. acima do genérico — penetração 6%', descricao: 'Linha Ever presente na loja mas com penetração muito abaixo da meta (20%). Cada venda convertida para Ever gera R$ 8–15 a mais de margem. Treinamento de 30 min resolve.' },
+    { id: 3, tipo: 'Regulatório', fonte: 'SNGPC · Demo', confianca: 0.88, impacto: -4, titulo: 'Divergência de 3 unidades em psicotrópico pendente no SNGPC', descricao: 'Divergência não corrigida gera notificação automática ANVISA com multa de até R$ 25.000. Conferência física de 2 horas elimina o risco — é a ação com maior ROI da semana.' },
+    { id: 4, tipo: 'Oportunidade', fonte: 'Entorno loja · Demo', confianca: 0.77, impacto: 5, titulo: 'Clínica de dermatologia a 400m gera prescrições de alto ticket diariamente', descricao: 'Três dermatologistas gerando prescrições de La Roche-Posay, Vichy e Eucerin. Cliente com receita dermato não compara preço — compra onde encontra o produto. Stoque certo é a única condição.' },
+    { id: 5, tipo: 'Reputação', fonte: 'Google · Demo', confianca: 0.82, impacto: -2, titulo: 'Comentário de fila sem resposta em destaque no Google há 3 semanas', descricao: 'Reclamação de espera entre os primeiros resultados da loja. Resposta pública com solução concreta converte o problema em argumento de confiança. Sem resposta, o candidato a cliente vai para o Venancio.' },
+  ],
+  conteudos: [
+    { nome: 'Escala farmacêutico junho.xlsx', tipo: 'XLSX', data: '01/06/2026' },
+    { nome: 'Relatório SNGPC maio/26.pdf', tipo: 'PDF', data: '31/05/2026' },
+    { nome: 'Mix Ever vs genérico jun/26.xlsx', tipo: 'XLSX', data: '15/06/2026' },
+    { nome: 'Avaliações Google Loja Centro.pdf', tipo: 'PDF', data: '20/06/2026' },
+  ],
+  cardsRelacionados: [
+    'Venancio pode estar abrindo nova loja a 200 metros — movimento foi registrado em redes locais',
+    'Linha Ever tem margem 22 p.p. acima do genérico equivalente',
+    'Verificação SNGPC está atrasada — divergência de 3 unidades em psicotrópico detectada',
+  ],
+  explicacao: 'Score baseado em leitura demonstrativa de loja Pacheco. Reflete concorrência local de bairro, operação farmacêutica, reputação e oportunidades de produto. Base demonstrativa — precisão aumenta com dados reais da loja.',
+};
+
 const OSCAR_SECTORS = new Set(['oscar-piloto-01', 'nike']);
 
 function getMock(activeSector?: string): ScoreMock {
@@ -210,6 +242,7 @@ function getMock(activeSector?: string): ScoreMock {
   if (activeSector === 'cerveja-imperio') return CERVEJA_IMPERIO_MOCK;
   if (activeSector === 'cerveja-imperio-distribuidora-01') return DISTRIBUIDORA_IMPERIO_MOCK;
   if (activeSector === 'nubank') return PACHECO_MOCK;
+  if (activeSector === 'pacheco-loja-01') return PACHECO_LOJA1_MOCK;
   const nome = activeSector ? (NOME_POR_SECTOR[activeSector] ?? 'Empresa selecionada') : 'Empresa selecionada';
   return { ...NEUTRO_BASE, companyName: nome };
 }

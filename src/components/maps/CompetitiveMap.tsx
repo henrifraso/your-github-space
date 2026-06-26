@@ -13,7 +13,7 @@ import { MapRadiusSummary } from './MapRadiusSummary';
 import { MapLegend } from './MapLegend';
 import { RadiusSlider } from './RadiusSlider';
 import { DEFAULT_CENTER, DEFAULT_ZOOM } from '../../config/googleMaps';
-import { RADIUS_ZOOM, OSCAR_COORDS } from '../../features/map/map-ui-utils';
+import { RADIUS_ZOOM, OSCAR_COORDS, NUBANK_COORDS, PACHECO_LOJA_COORDS } from '../../features/map/map-ui-utils';
 import { useMapAnalysis } from '../../features/map/useMapAnalysis';
 
 const OSCAR_SECTORS = new Set(['nike', 'oscar-piloto-01']);
@@ -21,7 +21,16 @@ const OSCAR_SECTORS = new Set(['nike', 'oscar-piloto-01']);
 const SECTOR_CENTERS: Record<string, google.maps.LatLngLiteral> = {
   nike:              { lat: -23.2237, lng: -45.9009 },
   'oscar-piloto-01': { lat: -23.2237, lng: -45.9009 },
+  nubank:            { lat: -22.9068, lng: -43.1729 }, // Centro RJ — HQ Pacheco
+  'pacheco-loja-01': { lat: -22.9068, lng: -43.1729 }, // Centro RJ — loja
 };
+
+function getCoordsForSector(sector: string | undefined): google.maps.LatLngLiteral[] | undefined {
+  if (OSCAR_SECTORS.has(sector ?? '')) return OSCAR_COORDS;
+  if (sector === 'nubank') return NUBANK_COORDS;
+  if (sector === 'pacheco-loja-01') return PACHECO_LOJA_COORDS;
+  return undefined;
+}
 
 // Feed navbar pill — exatamente o mesmo estilo do nav do Feed
 const PILL = [
@@ -42,7 +51,7 @@ interface Props {
 
 export function CompetitiveMap({ competitors, onClose, clientPosition, sector, businessName }: Props) {
   const center = SECTOR_CENTERS[sector ?? ''] ?? clientPosition ?? DEFAULT_CENTER;
-  const coords = OSCAR_SECTORS.has(sector ?? '') ? OSCAR_COORDS : undefined;
+  const coords = getCoordsForSector(sector);
   const [radius, setRadius] = useState(5000);
   const [selected, setSelected] = useState<Competitor | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);

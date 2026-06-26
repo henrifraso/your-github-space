@@ -16,15 +16,16 @@ import { APPLE_SECTOR_FEEDS } from './apple';
 import { AMAZON_SECTOR_FEEDS } from './amazon';
 import { NATURA_SECTOR_FEEDS } from './natura';
 import { CERVEJA_IMPERIO_SECTOR_FEEDS } from './cerveja-imperio';
+import { OSCAR_LOJA1_SECTOR_FEEDS } from './oscar-loja1';
+import { PACHECO_LOJA1_SECTOR_FEEDS } from './pacheco-loja1';
 
 export const PROFILE_SECTOR_FEEDS: Record<string, CompanySectorFeeds> = {
   os1:       OS1_SECTOR_FEEDS,
   mcdonalds: MCDONALDS_SECTOR_FEEDS,
   nike:      NIKE_SECTOR_FEEDS,
   nubank:    NUBANK_SECTOR_FEEDS,
-  // GA4 visual fix: loja Oscar herda os feeds setoriais Oscar (NIKE_SECTOR_FEEDS).
-  // Antes caía no fallback McDonald's quando o user clicava em uma área.
-  'oscar-piloto-01': NIKE_SECTOR_FEEDS,
+  'oscar-piloto-01': OSCAR_LOJA1_SECTOR_FEEDS,
+  'pacheco-loja-01': PACHECO_LOJA1_SECTOR_FEEDS,
   'cerveja-imperio':                  CERVEJA_IMPERIO_SECTOR_FEEDS,
   'cerveja-imperio-distribuidora-01': CERVEJA_IMPERIO_SECTOR_FEEDS,
   ifood:     IFOOD_SECTOR_FEEDS,

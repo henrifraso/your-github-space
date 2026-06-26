@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
 import type { DepartmentId } from '../types';
 
-export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'cerveja-imperio' | 'cerveja-imperio-distribuidora-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
+export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'cerveja-imperio' | 'cerveja-imperio-distribuidora-01' | 'pacheco-loja-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
 
 export type ProfileConfig = {
   id: SectorId;
@@ -77,6 +77,15 @@ export const SECTORS: ProfileConfig[] = [
     desc: 'Unidade de distribuição focada em rotas, abastecimento de pontos de venda, giro de produto e execução comercial regional.',
     color: '#b8860b',
     logo: 'DI',
+    active: false,
+  },
+  {
+    id: 'pacheco-loja-01',
+    label: 'Pacheco Loja Centro',
+    niche: 'Varejo Farmacêutico · Loja',
+    desc: 'Unidade Pacheco com leitura focada em concorrência local, atendimento farmacêutico, dermocosmético e operação de loja.',
+    color: '#e11d48',
+    logo: 'PL',
     active: false,
   },
   {

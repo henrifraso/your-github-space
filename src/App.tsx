@@ -461,6 +461,7 @@ function AuthenticatedApp() {
     nike:              '/profile-photos/oscar-calcados.png',
     'oscar-piloto-01': '/profile-photos/oscar-calcados.png',
     nubank:            '/profile-photos/drogarias-pacheco.png',
+    'pacheco-loja-01': '/profile-photos/drogarias-pacheco.png',
     'cerveja-imperio':                  '/profile-photos/cerveja-imperio.png',
     'cerveja-imperio-distribuidora-01': '/profile-photos/cerveja-imperio.png',
   };
@@ -1362,6 +1363,7 @@ function AuthenticatedApp() {
                       // cerveja-imperio-distribuidora-01 herda identidade visual do perfil mestre
                       const avatarSectorId = activeSector === 'oscar-piloto-01' ? 'nike'
                         : activeSector === 'cerveja-imperio-distribuidora-01' ? 'cerveja-imperio'
+                        : activeSector === 'pacheco-loja-01' ? 'nubank'
                         : activeSector;
                       const activeProfile = SECTORS.find(s => s.id === avatarSectorId);
                       const isOS1 = activeSector === 'os1';
@@ -2222,7 +2224,16 @@ function AuthenticatedApp() {
             profilesHeader="Distribuidoras Império"
           />
         )}
-        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' && activeSector !== 'cerveja-imperio' || role === 'franchise') && (
+        {sectorOpen && activeSector === 'nubank' && role !== 'franchise' && (
+          <SectorSwitcherModal
+            active={activeSector}
+            onSelect={setActiveSector}
+            onClose={() => setSectorOpen(false)}
+            filterProfileIds={['pacheco-loja-01']}
+            profilesHeader="Lojas Pacheco"
+          />
+        )}
+        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' && activeSector !== 'cerveja-imperio' && activeSector !== 'nubank' || role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
             onSelect={setActiveDepartment}
