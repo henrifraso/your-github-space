@@ -71,6 +71,13 @@ safeConsole.log('═════════════════════
 // Carrega o .node compilado em electron/native/sck-capture. Não-bloqueante.
 // Só carrega se platform=darwin && ENABLE_SCK_CAPTURE=true.
 const nativeRequire = createRequire(import.meta.url);
+
+// ── Auto-updater ───────────────────────────────────────────────────────────
+// Verifica novas releases no GitHub ao abrir o app (só em produção).
+// Quando encontra uma versão nova, baixa em background e avisa o usuário.
+const autoUpdater = app.isPackaged
+  ? (() => { try { return nativeRequire('electron-updater').autoUpdater; } catch { return null; } })()
+  : null;
 type SckModule = {
   listContent: () => { windows: { windowID: number; title: string; ownerName: string; ownerPID: number; onScreen: boolean }[]; displays: { displayID: number; width: number; height: number }[] };
   start: (opts: { displayId?: number; excludeWindowIds?: number[]; fps?: number; scale?: number; jpegQuality?: number }) => boolean;
@@ -527,6 +534,19 @@ app.whenReady().then(() => {
   });
 
   createWindow();
+
+  // Checa atualizações 3 segundos após abrir (dá tempo da janela carregar)
+  if (autoUpdater) {
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+    setTimeout(() => {
+      autoUpdater.checkForUpdatesAndNotify().catch((err: unknown) => {
+        safeConsole.warn('[updater] erro ao checar atualização:', err);
+      });
+    }, 3000);
+    autoUpdater.on('update-available', () => safeConsole.log('[updater] nova versão disponível — baixando…'));
+    autoUpdater.on('update-downloaded', () => safeConsole.log('[updater] download concluído — será instalado ao fechar o app'));
+  }
 
   app.on('activate', () => {
     const windows = BrowserWindow.getAllWindows();
