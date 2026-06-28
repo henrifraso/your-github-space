@@ -21,8 +21,8 @@ import {
 // ─────────────────────────────────────────────────────────────────────
 export const TOOLS_GERAIS: WorkspaceTool[] = [
   {
-    id: 'gen-plano-acao', label: 'Criar plano de ação', group: 'execucao', appliesTo: ['*'],
-    description: 'Plano prático com etapas, responsáveis e prazo.',
+    id: 'gen-plano-acao', label: 'Plano de leitura do sinal', group: 'analise', appliesTo: ['*'],
+    description: 'Estrutura os próximos passos de análise com responsável e prazo.',
     template: (ctx) => ({
       title: 'Plano de ação sugerido',
       context: `Plano organizado para tratar ${ctxPhrase(ctx)}.`,
@@ -40,8 +40,8 @@ export const TOOLS_GERAIS: WorkspaceTool[] = [
     }),
   },
   {
-    id: 'gen-checklist', label: 'Criar checklist', group: 'execucao', appliesTo: ['*'],
-    description: 'Lista de verificação prática pra não esquecer nada.',
+    id: 'gen-checklist', label: 'Checklist de evidências', group: 'evidencia', appliesTo: ['*'],
+    description: 'Lista de verificação para organizar evidências do sinal.',
     template: (ctx) => ({
       title: 'Checklist sugerido',
       context: `Checklist organizado para apoiar a execução sobre ${ctxPhrase(ctx)}.`,
@@ -62,8 +62,8 @@ export const TOOLS_GERAIS: WorkspaceTool[] = [
   {
     // C1-A: id renomeado de 'gen-missao' pra 'gen-rascunho-execucao';
     // template alinhado pra "Rascunho de execução" — local, sem POST.
-    id: 'gen-rascunho-execucao', label: 'Rascunho de execução estruturado', group: 'execucao', appliesTo: ['*'],
-    description: 'Rascunho com objetivo, etapas, prazo e critério de conclusão.',
+    id: 'gen-rascunho-execucao', label: 'Rascunho de leitura estruturada', group: 'analise', appliesTo: ['*'],
+    description: 'Rascunho com hipótese central, evidências e próximo passo de análise.',
     template: (ctx) => ({
       title: 'Rascunho de execução sugerido',
       context: `Rascunho estruturado com base em ${ctxPhrase(ctx)}.`,
@@ -642,10 +642,10 @@ export const TOOLS_FINANCEIRO: WorkspaceTool[] = [
 // ─────────────────────────────────────────────────────────────────────
 export const TOOLS_MARKETING: WorkspaceTool[] = [
   {
-    id: 'mkt-briefing', label: 'Criar briefing de campanha', group: 'documento',
+    id: 'mkt-briefing', label: 'Briefing executivo do sinal', group: 'documento',
     appliesTo: ['marketing', 'campanhas', 'comercial'],
     template: (ctx) => ({
-      title: 'Briefing de campanha',
+      title: 'Briefing executivo',
       context: `Briefing rápido para campanha sobre ${ctxPhrase(ctx)}.`,
       items: [
         'Objetivo da campanha: vendas, leads, awareness ou retenção.',
@@ -1156,11 +1156,11 @@ export const TOOLS_MERCADO: WorkspaceTool[] = [
     }),
   },
   {
-    id: 'mer-campanha-raio', label: 'Criar campanha por raio', group: 'execucao',
+    id: 'mer-campanha-raio', label: 'Ver oportunidade territorial', group: 'analise',
     appliesTo: ['mercado', 'marketing', 'território'],
     template: (ctx) => ({
-      title: 'Campanha hiperlocal por raio',
-      context: `Plano de campanha territorial sobre ${ctxPhrase(ctx)}.`,
+      title: 'Análise territorial por raio',
+      context: `Mapeamento de oportunidade territorial sobre ${ctxPhrase(ctx)}.`,
       items: [
         'Definir raio inicial (ex.: 3 km do ponto central).',
         'Segmento de público dentro do raio.',
@@ -1300,11 +1300,11 @@ export const TOOLS_PERFIL_CENTRAL: WorkspaceTool[] = [
 
 export const TOOLS_PERFIL_UNIDADE: WorkspaceTool[] = [
   {
-    id: 'pu-executar-orient', label: 'Executar orientação da central', group: 'execucao',
+    id: 'pu-executar-orient', label: 'Analisar orientação da central', group: 'analise',
     appliesTo: ['*'], profile: ['franchise'],
     template: (ctx) => ({
-      title: 'Execução de orientação',
-      context: `Plano local para executar orientação sobre ${ctxPhrase(ctx)}.`,
+      title: 'Leitura da orientação',
+      context: `Análise local sobre orientação recebida de ${ctxPhrase(ctx)}.`,
       items: [
         'Entendimento da orientação central em 1 frase.',
         'Tradução para a realidade da unidade.',

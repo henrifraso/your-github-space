@@ -11,8 +11,8 @@
 import React from 'react';
 import {
   AlignLeft, Info, Layers, FileText, GitCompare, AlertTriangle, TrendingUp,
-  Gauge, Compass, Languages, ClipboardList, Target, CheckCircle, Users,
-  MessageSquare, FlaskConical, Eye, Star as StarIcon, Brain, Lightbulb,
+  Gauge, Compass, Languages, Target, Users,
+  MessageSquare, FlaskConical, Brain, Lightbulb,
   BookOpen, FileQuestion, Sparkles, Award, Bookmark, Send as SendIcon, Bell,
 } from 'lucide-react';
 import type { IntelligenceCard, WorkspaceIntent } from '../../../core/types/card';
@@ -29,13 +29,13 @@ export const INTENT_TO_MAIN: Record<WorkspaceIntent, MainKey | null> = {
 
 export const MODE_LABEL: Record<MainKey, string> = {
   pesquisar: 'Entender',
-  executar:  'Executar',
+  executar:  'Analisar',
   aprender:  'Aprender',
 };
 
 export const MODE_TITLES: Record<MainKey, string> = {
   pesquisar: 'Entendendo este sinal',
-  executar:  'Caminho de execução',
+  executar:  'Análise do sinal',
   aprender:  'Aprendizado aplicado',
 };
 
@@ -53,16 +53,16 @@ export const MODE_FIELDS: Record<MainKey, { label: string; key: string }[]> = {
     { label: 'Próximo passo recomendado',        key: 'proximo_passo' },
   ],
   executar: [
-    { label: 'Objetivo da ação',                 key: 'objetivo' },
-    { label: 'Diagnóstico prático',              key: 'diagnostico' },
-    { label: 'Primeiro passo recomendado',       key: 'primeiro_passo' },
-    { label: 'Plano de ação inicial',            key: 'plano_inicial' },
-    { label: 'Responsável sugerido',             key: 'quem_executa' },
-    { label: 'Prazo sugerido',                   key: 'prazo' },
-    { label: 'Riscos antes de executar',         key: 'risco_antes' },
-    { label: 'Métricas de sucesso',              key: 'criterio_sucesso' },
-    { label: 'Plano B',                          key: 'plano_b' },
-    { label: 'Próximo passo imediato',           key: 'proximo_passo' },
+    { label: 'Risco comercial',              key: 'risco_comercial' },
+    { label: 'Oportunidade identificada',    key: 'oportunidade' },
+    { label: 'Evidências que sustentam',     key: 'evidencias' },
+    { label: 'O que muda se ignorado',       key: 'impacto_ignorar' },
+    { label: 'Canal mais impactado',         key: 'canal_impacto' },
+    { label: 'Comparação com mercado',       key: 'comparacao_mercado' },
+    { label: 'Dados internos relacionados',  key: 'dados_internos' },
+    { label: 'Hipótese central',             key: 'hipotese_central' },
+    { label: 'Sinal de confirmação',         key: 'sinal_confirmacao' },
+    { label: 'Próximo ponto de atenção',     key: 'proximo_ponto' },
   ],
   aprender: [
     { label: 'Conceito principal',               key: 'conceito' },
@@ -83,7 +83,7 @@ export const MODE_FIELDS: Record<MainKey, { label: string; key: string }[]> = {
 // pra refletir o que a sub-ação faz de fato (template local, sem POST).
 export const MODE_TOP5: Record<MainKey, string[]> = {
   pesquisar: ['resumir', 'risco', 'evidencias', 'comparar', 'negocio'],
-  executar:  ['checklist', 'plano', 'mensagem', 'simular', 'rascunho'],
+  executar:  ['evidencias', 'simular', 'mercado', 'canal', 'ignorar'],
   aprender:  ['exemplo', 'conceito', 'erro', 'medir', 'memoria'],
 };
 
@@ -119,20 +119,16 @@ export const SUB_BTNS: Record<MainKey, SubAction[]> = {
     { key: 'negocio',         label: 'Traduzir p/ negócio',  Icon: Languages,    endpoint: 'pesquisar' },
   ],
   executar: [
-    { key: 'checklist',       label: 'Criar checklist',      Icon: ClipboardList, endpoint: 'executar', extra: { tipo: 'checklist' } },
-    { key: 'plano',           label: 'Criar plano',          Icon: FileText,     endpoint: 'executar', extra: { tipo: 'plano' } },
-    { key: 'campanha',        label: 'Criar campanha',       Icon: Target,       endpoint: 'executar', extra: { tipo: 'campanha' } },
-    { key: 'tarefa',          label: 'Criar tarefa',         Icon: CheckCircle,  endpoint: 'executar', extra: { tipo: 'tarefa' } },
-    { key: 'delegar',         label: 'Delegar',              Icon: Users,        endpoint: 'executar', extra: { tipo: 'tarefa' } },
-    { key: 'mensagem',        label: 'Criar mensagem',       Icon: MessageSquare, endpoint: 'executar', extra: { tipo: 'mensagem' } },
-    { key: 'roteiro',         label: 'Criar roteiro',        Icon: AlignLeft,    endpoint: 'executar', extra: { tipo: 'plano' } },
-    { key: 'simular',         label: 'Simular resultado',    Icon: FlaskConical, endpoint: 'simular',  extra: { cenario: 'realista' } },
-    { key: 'validar',         label: 'Validar antes',        Icon: Eye,          endpoint: 'simular',  extra: { cenario: 'realista' } },
-    // C1-A: key renomeada de 'missao' pra 'rascunho' pra alinhar com o que
-    // a sub-ação faz (template local, sem POST). Backend GM1-A continua
-    // disponível em /api/governance/missions; quando a missão real for
-    // ligada à workspace, vira outro botão explícito (não esta sub-ação).
-    { key: 'rascunho',        label: 'Rascunho de execução', Icon: StarIcon,     endpoint: null },
+    { key: 'evidencias',  label: 'Separar evidências',          Icon: FileText,      endpoint: 'executar', extra: { tipo: 'evidencias' } },
+    { key: 'simular',     label: 'Simular cenário',             Icon: FlaskConical,  endpoint: 'simular',  extra: { cenario: 'realista' } },
+    { key: 'mercado',     label: 'Comparar com mercado',        Icon: GitCompare,    endpoint: 'executar', extra: { tipo: 'mercado' } },
+    { key: 'canal',       label: 'Ver impacto por canal',       Icon: TrendingUp,    endpoint: 'executar', extra: { tipo: 'canal' } },
+    { key: 'ignorar',     label: 'O que muda se ignorado?',     Icon: AlertTriangle, endpoint: 'executar', extra: { tipo: 'ignorar' } },
+    { key: 'dados',       label: 'Comparar com dados internos', Icon: Compass,       endpoint: 'executar', extra: { tipo: 'dados_internos' } },
+    { key: 'oportunidade',label: 'Onde está a oportunidade?',  Icon: Target,        endpoint: 'executar', extra: { tipo: 'oportunidade' } },
+    { key: 'territorial', label: 'Ver impacto territorial',     Icon: Layers,        endpoint: 'executar', extra: { tipo: 'territorial' } },
+    { key: 'risco',       label: 'Qual é o risco comercial?',   Icon: Gauge,         endpoint: 'executar', extra: { tipo: 'risco' } },
+    { key: 'mensagem',    label: 'Preparar mensagem',           Icon: MessageSquare, endpoint: 'executar', extra: { tipo: 'mensagem' } },
   ],
   aprender: [
     { key: 'conceito',        label: 'Ensinar conceito',     Icon: Brain,        endpoint: 'aprender' },
@@ -184,11 +180,11 @@ export type WorkspaceBlock = {
 
 // ── Botões compactos do rodapé do bloco inicial ─────────────────────
 export const INITIAL_ACTIONS: { key: string; label: string; mode: MainKey; subKey: string }[] = [
-  { key: 'i-entender',  label: 'Entender melhor', mode: 'pesquisar', subKey: 'explicar' },
-  { key: 'i-checklist', label: 'Criar checklist', mode: 'executar',  subKey: 'checklist' },
-  { key: 'i-msg',       label: 'Gerar mensagem',  mode: 'executar',  subKey: 'mensagem' },
-  { key: 'i-exemplos',  label: 'Ver exemplos',    mode: 'aprender',  subKey: 'exemplo' },
-  { key: 'i-simular',   label: 'Simular impacto', mode: 'executar',  subKey: 'simular' },
+  { key: 'i-entender',   label: 'Entender melhor',   mode: 'pesquisar', subKey: 'explicar' },
+  { key: 'i-evidencias', label: 'Separar evidências', mode: 'executar',  subKey: 'evidencias' },
+  { key: 'i-risco',      label: 'Ver risco',          mode: 'executar',  subKey: 'risco' },
+  { key: 'i-exemplos',   label: 'Ver exemplos',       mode: 'aprender',  subKey: 'exemplo' },
+  { key: 'i-simular',    label: 'Simular cenário',    mode: 'executar',  subKey: 'simular' },
 ];
 
 // ── Opções do bloco de compartilhamento ─────────────────────────────

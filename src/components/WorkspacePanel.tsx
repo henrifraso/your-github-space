@@ -17,14 +17,13 @@ export type { IntelligenceCard, WorkspaceIntent };
 
 type ActionType = 'pesquisar' | 'executar' | 'aprender' | 'simular' | 'regenerar' | 'estender';
 type Dificuldade = 'muito_facil' | 'facil' | 'dificil' | 'muito_dificil';
-type ExecutarTipo = 'campanha' | 'checklist' | 'mensagem' | 'plano' | 'simulacao' | 'tarefa';
 
 // Mapa intent → ação inicial no painel
 const INTENT_TO_ACTION: Record<WorkspaceIntent, ActionType | null> = {
-  utilizar:     'executar',   // mostra o picker de tipo (campanha, checklist, ...)
-  perguntas:    'pesquisar',  // dispara a pesquisa (perguntas a investigar)
-  exemplos:     'aprender',   // exemplos práticos
-  compartilhar: null,         // só abre o painel
+  utilizar:     'executar',  // dispara análise direta (sem picker)
+  perguntas:    'pesquisar', // dispara entendimento
+  exemplos:     'aprender',  // exemplos práticos
+  compartilhar: null,        // só abre o painel
 };
 
 interface Shortcut {
@@ -72,13 +71,14 @@ type WorkspaceBlock = {
   createdAt: string;
 };
 
-const EXECUTAR_OPTIONS: { tipo: ExecutarTipo; label: string; icon: React.ReactNode }[] = [
-  { tipo: 'campanha',  label: 'Campanha',    icon: <Target size={16} /> },
-  { tipo: 'checklist', label: 'Checklist',   icon: <CheckSquare size={16} /> },
-  { tipo: 'mensagem',  label: 'Mensagem',    icon: <MessageSquare size={16} /> },
-  { tipo: 'plano',     label: 'Plano',       icon: <LayoutList size={16} /> },
-  { tipo: 'simulacao', label: 'Simulação',   icon: <BarChart2 size={16} /> },
-  { tipo: 'tarefa',    label: 'Tarefa',      icon: <CheckSquare size={16} /> },
+// Lentes de análise disponíveis ao acionar o modo Analisar
+const ANALISAR_OPTIONS: { key: string; label: string; icon: React.ReactNode; tipo: string }[] = [
+  { key: 'evidencias',  label: 'Separar evidências',          icon: <BarChart2 size={16} />,     tipo: 'evidencias' },
+  { key: 'simular',     label: 'Simular cenário',             icon: <LayoutList size={16} />,    tipo: 'simular' },
+  { key: 'mercado',     label: 'Comparar com mercado',        icon: <Share2 size={16} />,        tipo: 'mercado' },
+  { key: 'canal',       label: 'Ver impacto por canal',       icon: <TrendingUp size={16} />,    tipo: 'canal' },
+  { key: 'ignorar',     label: 'O que muda se ignorado?',     icon: <AlertTriangle size={16} />, tipo: 'ignorar' },
+  { key: 'dados',       label: 'Comparar com dados internos', icon: <Target size={16} />,        tipo: 'dados_internos' },
 ];
 
 // ── Componente principal ──────────────────────────────────────────────────────
@@ -88,8 +88,6 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
   const [activeAction, setActiveAction] = useState<ActionType | null>(null);
   const [blocks, setBlocks]             = useState<WorkspaceBlock[]>([]);
   const [loading, setLoading]           = useState(false);
-  const [executarStep, setExecutarStep] = useState<'choose' | 'result'>('choose');
-  const [executarTipo, setExecutarTipo] = useState<ExecutarTipo>('checklist');
   const [shortcuts, setShortcuts]       = useState<Shortcut[]>([]);
   const scrollEndRef                    = useRef<HTMLDivElement>(null);
 
@@ -170,31 +168,23 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
   }, [blocks.length]);
 
   const handleAction = (action: ActionType) => {
-    if (action === 'executar') { setActiveAction('executar'); setExecutarStep('choose'); return; }
     if (action === 'regenerar') { callApi('regenerar'); return; }
     callApi(action);
   };
 
-  const handleExecutar = (tipo: ExecutarTipo) => {
-    setExecutarTipo(tipo);
-    setExecutarStep('result');
+  const handleAnalisar = (tipo: string) => {
     callApi('executar', { tipo });
   };
 
   // Pré-seleciona ação com base no intent que abriu o painel.
   // Para perguntas/exemplos: dispara a API automaticamente (backend tem fallback).
-  // Para utilizar: deixa no step 'choose' para o usuário escolher o tipo.
+  // Para utilizar (Analisar): dispara análise direta — sem picker.
   // Para compartilhar: não pré-seleciona nada.
   // Card sintético: skip auto-dispatch (evita 404 confuso na abertura).
   useEffect(() => {
     if (!initialIntent) return;
     const action = INTENT_TO_ACTION[initialIntent];
     if (!action) return;
-    if (action === 'executar') {
-      setActiveAction('executar');
-      setExecutarStep('choose');
-      return;
-    }
     if (card._synthetic) return;
     handleAction(action);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -278,18 +268,18 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
             </div>
           </div>
 
-          {/* Seletor de tipo de Executar */}
+          {/* Lentes de análise — aparecem quando Analisar está ativo e sem bloco ainda */}
           <AnimatePresence>
-            {activeAction === 'executar' && executarStep === 'choose' && (
+            {activeAction === 'executar' && blocks.filter(b => b.mode === 'executar').length === 0 && !loading && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
                 className="bg-white dark:bg-[#242424] border border-neutral-200 dark:border-[#303030] rounded-2xl p-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-500 mb-3">Escolha o que gerar</p>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {EXECUTAR_OPTIONS.map(opt => (
-                    <button key={opt.tipo} onClick={() => handleExecutar(opt.tipo)}
-                      className="flex flex-col items-center gap-2 p-3 rounded-xl bg-neutral-50 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#353535] hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all cursor-pointer text-neutral-700 dark:text-neutral-300">
+                <p className="text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-500 mb-3">Lentes de análise</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {ANALISAR_OPTIONS.map(opt => (
+                    <button key={opt.key} onClick={() => handleAnalisar(opt.tipo)}
+                      className="flex flex-col items-center gap-2 p-3 rounded-xl bg-neutral-50 dark:bg-[#2a2a2a] border border-neutral-200 dark:border-[#353535] hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all cursor-pointer text-neutral-700 dark:text-neutral-300 text-center">
                       {opt.icon}
-                      <span className="text-[11px] font-semibold">{opt.label}</span>
+                      <span className="text-[11px] font-semibold leading-snug">{opt.label}</span>
                     </button>
                   ))}
                 </div>
@@ -641,7 +631,7 @@ const PRIMARY_MODES: { action: ActionType; label: string; icon: React.ReactNode 
 
 // Ações secundárias — chips discretos abaixo.
 const SECONDARY_ACTIONS: { action: ActionType; label: string; icon: React.ReactNode }[] = [
-  { action: 'executar',  label: 'Como agir agora?',          icon: <Zap size={13} /> },
+  { action: 'executar',  label: 'Próximo ponto de atenção',  icon: <Zap size={13} /> },
   { action: 'estender',  label: 'Ver sinais relacionados',   icon: <Share2 size={13} /> },
   { action: 'regenerar', label: 'Reler com nova lente',      icon: <RefreshCw size={13} /> },
 ];
@@ -649,7 +639,7 @@ const SECONDARY_ACTIONS: { action: ActionType; label: string; icon: React.ReactN
 // Label amigável usada no título do bloco e no estado de loading.
 const LABEL_BY_ACTION: Record<string, string> = {
   pesquisar: 'Por que isso importa?',
-  executar:  'Como agir agora?',
+  executar:  'Análise do sinal',
   aprender:  'Onde está a oportunidade?',
   simular:   'Qual é o risco comercial?',
   regenerar: 'Reler com nova lente',

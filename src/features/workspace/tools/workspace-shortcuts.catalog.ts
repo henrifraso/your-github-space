@@ -388,28 +388,6 @@ export const SHORTCUTS_JURIDICO: WorkspaceShortcut[] = [
 // ─────────────────────────────────────────────────────────────────────
 export const SHORTCUTS_MARKETING: WorkspaceShortcut[] = [
   {
-    id: 'sc-mkt-campanha',
-    kind: 'ferramenta',
-    tier: 'api_parceira',
-    tagline: 'Transforme este sinal em uma campanha local testável. O OS¹ gera briefing com objetivo, público, mensagem central, canal e métrica de sucesso — para você rodar um teste curto e barato antes de comprometer orçamento em campanha grande.',
-    cta: 'Abrir campanha',
-    appliesTo: ['marketing', 'campanhas', 'vendas', 'comercial'],
-    template: (ctx) => ({
-      title: 'Briefing de campanha local',
-      context: `Briefing pra campanha relacionada a ${ctxPhrase(ctx)}.`,
-      items: [
-        'Objetivo: vendas, leads, awareness ou retenção.',
-        'Público-alvo: segmento e momento da jornada.',
-        'Mensagem central em 1 frase.',
-        'Canais recomendados: geofence, social local, parcerias.',
-        'Critérios de sucesso: CTR, CPA, leads, vendas atribuídas.',
-        'Prazo: 7-14 dias pra primeiro teste.',
-      ],
-      expectedResult: 'Briefing pronto pra time ou agência.',
-      nextStep: 'Validar com responsável de marketing antes de ativar.',
-    }),
-  },
-  {
     id: 'sc-mkt-plano7',
     kind: 'atalho',
     tagline: 'Em vez de virar projeto de mês, transforme a oportunidade em sprint de 7 dias. Dia a dia com responsável, criativo, ativação, leitura de métrica e decisão de escalar ou parar — para aprender com risco pequeno antes de comprometer time grande.',

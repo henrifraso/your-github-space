@@ -39,40 +39,40 @@ function narDom(card: IntelligenceCard): string {
 export function shortcutsForCard(card: IntelligenceCard): LocalShortcut[] {
   const d = ((card.dominio || '') + ' ' + (card.area || '')).toLowerCase();
   if (/reput|nota|avalia|review/.test(d)) return [
-    { id: 'sc-r1', kind: 'local', label: 'Responder avaliações pendentes', mode: 'executar', subKey: 'mensagem' },
-    { id: 'sc-r2', kind: 'local', label: 'Criar plano de recuperação de nota', mode: 'executar', subKey: 'plano' },
-    { id: 'sc-r3', kind: 'local', label: 'Gerar mensagem para equipe', mode: 'executar', subKey: 'mensagem' },
-    { id: 'sc-r4', kind: 'local', label: 'Criar checklist de atendimento', mode: 'executar', subKey: 'checklist' },
-    { id: 'sc-r5', kind: 'local', label: 'Ver concorrentes com melhor avaliação', mode: 'pesquisar', subKey: 'comparar' },
+    { id: 'sc-r1', kind: 'local', label: 'Separar evidências de avaliação', mode: 'executar', subKey: 'evidencias' },
+    { id: 'sc-r2', kind: 'local', label: 'Ver impacto da queda de nota',    mode: 'executar', subKey: 'ignorar' },
+    { id: 'sc-r3', kind: 'local', label: 'Preparar mensagem para equipe',   mode: 'executar', subKey: 'mensagem' },
+    { id: 'sc-r4', kind: 'local', label: 'Simular cenário de recuperação',  mode: 'executar', subKey: 'simular' },
+    { id: 'sc-r5', kind: 'local', label: 'Ver concorrentes com melhor nota',mode: 'pesquisar', subKey: 'comparar' },
   ];
   if (/concorr|posicio/.test(d)) return [
-    { id: 'sc-c1', kind: 'local', label: 'Comparar concorrente',         mode: 'pesquisar', subKey: 'comparar' },
-    { id: 'sc-c2', kind: 'local', label: 'Criar resposta comercial',     mode: 'executar',  subKey: 'campanha' },
-    { id: 'sc-c3', kind: 'local', label: 'Monitorar este concorrente',   mode: 'executar',  subKey: 'tarefa' },
-    { id: 'sc-c4', kind: 'local', label: 'Analisar raio no mapa',        mode: 'pesquisar', subKey: 'cruzar' },
-    { id: 'sc-c5', kind: 'local', label: 'Criar campanha local',         mode: 'executar',  subKey: 'campanha' },
+    { id: 'sc-c1', kind: 'local', label: 'Comparar com concorrente',        mode: 'pesquisar', subKey: 'comparar' },
+    { id: 'sc-c2', kind: 'local', label: 'Separar evidências competitivas', mode: 'executar',  subKey: 'evidencias' },
+    { id: 'sc-c3', kind: 'local', label: 'Ver impacto territorial',         mode: 'executar',  subKey: 'territorial' },
+    { id: 'sc-c4', kind: 'local', label: 'Analisar raio no mapa',           mode: 'pesquisar', subKey: 'cruzar' },
+    { id: 'sc-c5', kind: 'local', label: 'Simular cenário competitivo',     mode: 'executar',  subKey: 'simular' },
   ];
   if (/forneced|supply|estoque/.test(d)) return [
-    { id: 'sc-f1', kind: 'local', label: 'Comparar fornecedor',          mode: 'pesquisar', subKey: 'comparar' },
-    { id: 'sc-f2', kind: 'local', label: 'Criar mensagem de cotação',    mode: 'executar',  subKey: 'mensagem' },
-    { id: 'sc-f3', kind: 'local', label: 'Simular economia',             mode: 'executar',  subKey: 'simular' },
-    { id: 'sc-f4', kind: 'local', label: 'Criar checklist de troca',     mode: 'executar',  subKey: 'checklist' },
-    { id: 'sc-f5', kind: 'local', label: 'Validar risco operacional',    mode: 'executar',  subKey: 'validar' },
+    { id: 'sc-f1', kind: 'local', label: 'Comparar com mercado',            mode: 'executar',  subKey: 'mercado' },
+    { id: 'sc-f2', kind: 'local', label: 'Preparar mensagem para fornecedor', mode: 'executar', subKey: 'mensagem' },
+    { id: 'sc-f3', kind: 'local', label: 'Simular cenário de ruptura',      mode: 'executar',  subKey: 'simular' },
+    { id: 'sc-f4', kind: 'local', label: 'Separar evidências de estoque',   mode: 'executar',  subKey: 'evidencias' },
+    { id: 'sc-f5', kind: 'local', label: 'Ver impacto por canal',           mode: 'executar',  subKey: 'canal' },
   ];
   if (/marketing|midia|trafego|presenca/.test(d)) return [
-    { id: 'sc-m1', kind: 'local', label: 'Criar campanha',               mode: 'executar',  subKey: 'campanha' },
-    { id: 'sc-m2', kind: 'local', label: 'Gerar post',                   mode: 'executar',  subKey: 'mensagem' },
-    { id: 'sc-m3', kind: 'local', label: 'Criar WhatsApp',               mode: 'executar',  subKey: 'mensagem' },
-    { id: 'sc-m4', kind: 'local', label: 'Atualizar Google Maps',        mode: 'executar',  subKey: 'tarefa' },
-    { id: 'sc-m5', kind: 'local', label: 'Calendário de ação',           mode: 'executar',  subKey: 'plano' },
+    { id: 'sc-m1', kind: 'local', label: 'Separar evidências de presença',  mode: 'executar',  subKey: 'evidencias' },
+    { id: 'sc-m2', kind: 'local', label: 'Preparar mensagem para equipe',   mode: 'executar',  subKey: 'mensagem' },
+    { id: 'sc-m3', kind: 'local', label: 'Ver impacto por canal',           mode: 'executar',  subKey: 'canal' },
+    { id: 'sc-m4', kind: 'local', label: 'Comparar com mercado',            mode: 'executar',  subKey: 'mercado' },
+    { id: 'sc-m5', kind: 'local', label: 'Simular cenário de oportunidade', mode: 'executar',  subKey: 'simular' },
   ];
   // Genérico
   return [
-    { id: 'sc-g1', kind: 'local', label: 'Entender melhor',  mode: 'pesquisar', subKey: 'explicar' },
-    { id: 'sc-g2', kind: 'local', label: 'Criar plano',      mode: 'executar',  subKey: 'plano' },
-    { id: 'sc-g3', kind: 'local', label: 'Criar checklist',  mode: 'executar',  subKey: 'checklist' },
-    { id: 'sc-g4', kind: 'local', label: 'Gerar mensagem',   mode: 'executar',  subKey: 'mensagem' },
-    { id: 'sc-g5', kind: 'local', label: 'Simular resultado',mode: 'executar',  subKey: 'simular' },
+    { id: 'sc-g1', kind: 'local', label: 'Entender melhor',       mode: 'pesquisar', subKey: 'explicar' },
+    { id: 'sc-g2', kind: 'local', label: 'Separar evidências',    mode: 'executar',  subKey: 'evidencias' },
+    { id: 'sc-g3', kind: 'local', label: 'Simular cenário',       mode: 'executar',  subKey: 'simular' },
+    { id: 'sc-g4', kind: 'local', label: 'Preparar mensagem',     mode: 'executar',  subKey: 'mensagem' },
+    { id: 'sc-g5', kind: 'local', label: 'Comparar com mercado',  mode: 'executar',  subKey: 'mercado' },
   ];
 }
 export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
@@ -130,7 +130,7 @@ export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldad
 
   const proximo_passo = isHyp
     ? `1) Use os atalhos abaixo para aprofundar o tema. 2) Definir 1 indicador interno para checar a hipótese. 3) Atribuir responsável pela leitura. 4) Revisar quando a primeira medição estiver disponível.`
-    : `1) Use os atalhos abaixo (Entender melhor / Criar checklist / Gerar mensagem / Ver exemplos / Simular impacto) pra aprofundar. 2) Decidir nos próximos 3 dias se vira ação ou monitoramento. 3) Se virar ação, definir responsável e KPI antes do fim da semana. 4) Revisar em ${urg === 'alta' ? '14' : '30'} dias.`;
+    : `1) Use os atalhos abaixo (Entender melhor / Separar evidências / Ver risco / Ver exemplos / Simular cenário) pra aprofundar. 2) Decidir nos próximos 3 dias se vira monitoramento contínuo ou ponto de atenção. 3) Identificar responsável e indicador antes do fim da semana. 4) Revisar em ${urg === 'alta' ? '14' : '30'} dias.`;
   return {
     id:         `blk-init-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     cardId:     card.id,
@@ -200,107 +200,87 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
   const mk = (label: string, mode: MainKey, subKey: string, suffix: string): LocalShortcut =>
     ({ id: `bsc-${block.id}-${suffix}`, kind: 'local', label, mode, subKey });
 
-  // ── EXECUTAR — atalhos por sub ────────────────────────────────────────────
-  if (s === 'checklist') return [
-    // C1-A: subKey alinhada à key canônica nova ('rascunho') de SUB_BTNS.executar.
-    mk('Rascunho de execução',          'executar',  'rascunho',  '1'),
-    mk('Definir responsável',           'executar',  'delegar',   '2'),
-    mk('Adicionar prazo',               'executar',  'tarefa',    '3'),
-    mk('Gerar mensagem p/ equipe',      'executar',  'mensagem',  '4'),
-    mk('Compartilhar checklist',        'executar',  'mensagem',  '5'),
+  // ── ANALISAR (executar) — atalhos por sub ────────────────────────────────
+  if (s === 'evidencias') return [
+    mk('Simular cenário',               'executar',  'simular',       '1'),
+    mk('Comparar com mercado',          'executar',  'mercado',       '2'),
+    mk('Ver impacto por canal',         'executar',  'canal',         '3'),
+    mk('Preparar mensagem',             'executar',  'mensagem',      '4'),
+    mk('Cruzar sinais',                 'pesquisar', 'cruzar',        '5'),
   ];
-  if (s === 'plano') return [
-    mk('Quebrar em tarefas',            'executar',  'checklist', '1'),
-    mk('Criar cronograma',              'executar',  'roteiro',   '2'),
-    mk('Definir prioridades',           'executar',  'validar',   '3'),
-    mk('Simular resultado',             'executar',  'simular',   '4'),
-    mk('Validar antes de executar',     'executar',  'validar',   '5'),
+  if (s === 'simular') return [
+    mk('Separar evidências',            'executar',  'evidencias',    '1'),
+    mk('Ver risco comercial',           'executar',  'risco',         '2'),
+    mk('Comparar com mercado',          'executar',  'mercado',       '3'),
+    mk('Ver impacto territorial',       'executar',  'territorial',   '4'),
+    mk('Onde está a oportunidade?',     'executar',  'oportunidade',  '5'),
   ];
-  if (s === 'campanha') return [
-    mk('Gerar post',                    'executar',  'mensagem',  '1'),
-    mk('Gerar WhatsApp',                'executar',  'mensagem',  '2'),
-    mk('Versão mais agressiva',         'executar',  'campanha',  '3'),
-    mk('Versão premium',                'executar',  'campanha',  '4'),
-    mk('Simular impacto',               'executar',  'simular',   '5'),
+  if (s === 'mercado') return [
+    mk('Separar evidências',            'executar',  'evidencias',    '1'),
+    mk('Ver impacto territorial',       'executar',  'territorial',   '2'),
+    mk('Ver impacto por canal',         'executar',  'canal',         '3'),
+    mk('Onde está a oportunidade?',     'executar',  'oportunidade',  '4'),
+    mk('Cruzar sinais',                 'pesquisar', 'cruzar',        '5'),
+  ];
+  if (s === 'canal' || s === 'territorial') return [
+    mk('Separar evidências',            'executar',  'evidencias',    '1'),
+    mk('Simular cenário',               'executar',  'simular',       '2'),
+    mk('Ver risco comercial',           'executar',  'risco',         '3'),
+    mk('Comparar com mercado',          'executar',  'mercado',       '4'),
+    mk('Comparar com dados internos',   'executar',  'dados',         '5'),
+  ];
+  if (s === 'ignorar') return [
+    mk('Separar evidências',            'executar',  'evidencias',    '1'),
+    mk('Simular cenário',               'executar',  'simular',       '2'),
+    mk('Ver risco comercial',           'executar',  'risco',         '3'),
+    mk('Preparar mensagem',             'executar',  'mensagem',      '4'),
+    mk('Ver sinais relacionados',       'pesquisar', 'cruzar',        '5'),
+  ];
+  if (s === 'risco') return [
+    mk('Separar evidências',            'executar',  'evidencias',    '1'),
+    mk('Simular cenário',               'executar',  'simular',       '2'),
+    mk('O que muda se ignorado?',       'executar',  'ignorar',       '3'),
+    mk('Preparar mensagem',             'executar',  'mensagem',      '4'),
+    mk('Ver sinais relacionados',       'pesquisar', 'cruzar',        '5'),
+  ];
+  if (s === 'oportunidade' || s === 'dados') return [
+    mk('Separar evidências',            'executar',  'evidencias',    '1'),
+    mk('Comparar com mercado',          'executar',  'mercado',       '2'),
+    mk('Simular cenário',               'executar',  'simular',       '3'),
+    mk('Ver impacto por canal',         'executar',  'canal',         '4'),
+    mk('Preparar mensagem',             'executar',  'mensagem',      '5'),
   ];
   if (s === 'mensagem') return [
-    mk('Adaptar para WhatsApp',         'executar',  'mensagem',  '1'),
-    mk('Adaptar para e-mail',           'executar',  'mensagem',  '2'),
-    mk('Deixar mais direto',            'executar',  'mensagem',  '3'),
-    mk('Deixar mais premium',           'executar',  'mensagem',  '4'),
-    mk('Versão para equipe',            'executar',  'mensagem',  '5'),
-  ];
-  if (s === 'tarefa' || s === 'delegar') return [
-    mk('Adicionar prazo',               'executar',  'tarefa',    '1'),
-    mk('Definir responsável',           'executar',  'delegar',   '2'),
-    mk('Criar checklist',               'executar',  'checklist', '3'),
-    // C1-A: subKey alinhada à key canônica nova ('rascunho').
-    mk('Rascunho de execução',          'executar',  'rascunho',  '4'),
-    mk('Compartilhar tarefa',           'executar',  'mensagem',  '5'),
-  ];
-  if (s === 'simular' || s === 'validar') return [
-    mk('Plano para melhor cenário',     'executar',  'plano',     '1'),
-    mk('Riscos do pior cenário',        'pesquisar', 'risco',     '2'),
-    mk('Comparar cenários',             'pesquisar', 'comparar',  '3'),
-    // C1-A: subKey alinhada à key canônica nova ('rascunho').
-    mk('Transformar em decisão',        'executar',  'rascunho',  '4'),
-    mk('Checklist de validação',        'executar',  'checklist', '5'),
-  ];
-  // C1-A: 'rascunho' é a key canônica; 'missao' mantido por 1 release
-  // pra compat com blocos restaurados de sessão antiga.
-  if (s === 'rascunho' || s === 'missao') return [
-    mk('Criar checklist',               'executar',  'checklist', '1'),
-    mk('Definir responsável',           'executar',  'delegar',   '2'),
-    mk('Criar cronograma',              'executar',  'roteiro',   '3'),
-    mk('Gerar mensagem',                'executar',  'mensagem',  '4'),
-    mk('Simular impacto',               'executar',  'simular',   '5'),
-  ];
-  if (s === 'roteiro') return [
-    mk('Criar checklist',               'executar',  'checklist', '1'),
-    mk('Definir responsáveis',          'executar',  'delegar',   '2'),
-    mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
-    // C1-A: subKey alinhada à key canônica nova ('rascunho').
-    mk('Rascunho de execução',          'executar',  'rascunho',  '4'),
-    mk('Simular resultado',             'executar',  'simular',   '5'),
+    mk('Adaptar versão para equipe',    'executar',  'mensagem',      '1'),
+    mk('Preparar para reunião',         'executar',  'mensagem',      '2'),
+    mk('Separar evidências',            'executar',  'evidencias',    '3'),
+    mk('Resumir sinal',                 'pesquisar', 'resumir',       '4'),
+    mk('Ver risco comercial',           'executar',  'risco',         '5'),
   ];
 
   // ── ENTENDER — atalhos por sub ────────────────────────────────────────────
-  if (s === 'risco') return [
-    mk('Plano de prevenção',            'executar',  'plano',     '1'),
-    mk('Simular impacto',               'executar',  'simular',   '2'),
-    mk('Checklist de risco',            'executar',  'checklist', '3'),
-    mk('Alerta para equipe',            'executar',  'mensagem',  '4'),
-    mk('Ver sinais relacionados',       'pesquisar', 'cruzar',    '5'),
-  ];
-  if (s === 'evidencias') return [
-    mk('Resumir evidências',            'pesquisar', 'resumir',   '1'),
-    mk('Comparar com concorrente',      'pesquisar', 'comparar',  '2'),
-    mk('Ver confiança',                 'pesquisar', 'confianca', '3'),
-    mk('Cruzar sinais',                 'pesquisar', 'cruzar',    '4'),
-    mk('Criar relatório curto',         'executar',  'plano',     '5'),
-  ];
   if (s === 'comparar') return [
-    mk('Resposta competitiva',          'executar',  'campanha',  '1'),
-    mk('Gerar campanha',                'executar',  'campanha',  '2'),
-    mk('Ver pontos fracos',             'pesquisar', 'risco',     '3'),
-    mk('Ver oportunidade',              'pesquisar', 'oportunidade','4'),
-    mk('Plano de ação',                 'executar',  'plano',     '5'),
+    mk('Ver impacto competitivo',       'executar',  'territorial',   '1'),
+    mk('Separar evidências',            'executar',  'evidencias',    '2'),
+    mk('Ver pontos de risco',           'pesquisar', 'risco',         '3'),
+    mk('Onde está a oportunidade?',     'pesquisar', 'oportunidade',  '4'),
+    mk('Simular cenário',               'executar',  'simular',       '5'),
   ];
   if (m === 'pesquisar') return [
-    mk('Explicar mais simples',         'pesquisar', 'explicar',  '1'),
-    mk('Ver evidências',                'pesquisar', 'evidencias','2'),
-    mk('Ver risco',                     'pesquisar', 'risco',     '3'),
-    mk('Ver oportunidade',              'pesquisar', 'oportunidade','4'),
-    mk('Traduzir para ação',            'executar',  'tarefa',    '5'),
+    mk('Explicar mais simples',         'pesquisar', 'explicar',      '1'),
+    mk('Ver evidências',                'pesquisar', 'evidencias',    '2'),
+    mk('Ver risco',                     'pesquisar', 'risco',         '3'),
+    mk('Ver oportunidade',              'pesquisar', 'oportunidade',  '4'),
+    mk('Separar evidências',            'executar',  'evidencias',    '5'),
   ];
 
   // ── APRENDER — atalhos por sub ────────────────────────────────────────────
   if (s === 'exemplo') return [
-    mk('Exemplo p/ meu negócio',        'aprender',  'exemplo',   '1'),
-    mk('Transformar em checklist',      'executar',  'checklist', '2'),
-    mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
-    mk('Criar plano',                   'executar',  'plano',     '4'),
-    mk('Próximo nível',                 'aprender',  'nivel',     '5'),
+    mk('Exemplo p/ meu negócio',        'aprender',  'exemplo',       '1'),
+    mk('Separar evidências',            'executar',  'evidencias',    '2'),
+    mk('Preparar mensagem',             'executar',  'mensagem',      '3'),
+    mk('Simular cenário',               'executar',  'simular',       '4'),
+    mk('Próximo nível',                 'aprender',  'nivel',         '5'),
   ];
   if (s === 'conceito') return [
     mk('Explicar mais simples',         'pesquisar', 'explicar',  '1'),
@@ -319,11 +299,11 @@ export function buildBlockShortcuts(block: WorkspaceBlock): LocalShortcut[] {
 
   // ── Fallback genérico ─────────────────────────────────────────────────────
   return [
-    mk('Entender melhor',               'pesquisar', 'explicar',  '1'),
-    mk('Criar checklist',               'executar',  'checklist', '2'),
-    mk('Gerar mensagem',                'executar',  'mensagem',  '3'),
-    mk('Simular resultado',             'executar',  'simular',   '4'),
-    mk('Salvar referência',             'aprender',  'memoria',   '5'),
+    mk('Entender melhor',               'pesquisar', 'explicar',    '1'),
+    mk('Separar evidências',            'executar',  'evidencias',  '2'),
+    mk('Preparar mensagem',             'executar',  'mensagem',    '3'),
+    mk('Simular cenário',               'executar',  'simular',     '4'),
+    mk('Salvar referência',             'aprender',  'memoria',     '5'),
   ];
 }
 
