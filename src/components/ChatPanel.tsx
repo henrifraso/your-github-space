@@ -4,7 +4,7 @@ import {
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
   Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
-  Sparkles, Loader2, History,
+  Sparkles, Loader2, History, MapPin,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
@@ -964,10 +964,11 @@ interface ChatDesktopProps {
   onSelectHistorySession?: (id: string) => void;
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
   onWorkspaceCleared?: () => void;
+  onMapOpen?: () => void;
   codifyScope?: CodifyScope | null;
 }
 
-export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
@@ -1017,31 +1018,9 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, acti
         <button onClick={onBrowser} className={btnCls} title="Sincronizar">
           <Search size={22} />
         </button>
-        <label className={`${btnCls} relative`} title="Enviar arquivo">
-          <Upload size={22} />
-          <input type="file" className="hidden" onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) {
-              const rawOrgId = localStorage.getItem('os1_org_id') ?? undefined;
-              const rawBuId  = localStorage.getItem('os1_bu_id')  ?? undefined;
-              const { orgId, buId } = resolveUploadOrgBu(activeSector, rawOrgId, rawBuId);
-              const ext = f.name.includes('.') ? (f.name.split('.').pop() ?? '') : '';
-              addContextUpload({
-                id: crypto.randomUUID(),
-                name: f.name,
-                extension: ext,
-                mimeType: f.type || undefined,
-                size: f.size,
-                uploadedAt: new Date().toISOString(),
-                orgId, buId,
-                activeSector: activeSector ?? undefined,
-                source: 'upload',
-              });
-              console.log('[OS¹] Contexto registrado:', f.name);
-            }
-            e.currentTarget.value = '';
-          }} />
-        </label>
+        <button onClick={() => onMapOpen?.()} className={btnCls} title="Mapa">
+          <MapPin size={22} />
+        </button>
         <button onClick={() => onShowHistory?.()} className={btnCls} title="Conversas anteriores">
           <History size={22} />
         </button>
