@@ -321,7 +321,7 @@ export function CompanySettingsModal({
                               onChange={v => setToggle(field.id, v)}
                             />
                             <span className={`text-[9px] font-semibold uppercase tracking-wider ${settings.toggles[field.id] ? 'text-neutral-500 dark:text-neutral-400' : 'text-neutral-400 dark:text-neutral-700'}`}>
-                              {settings.toggles[field.id] ? 'Ativo' : 'Off'}
+                              {settings.toggles[field.id] ? 'Ativo' : 'Inativo'}
                             </span>
                           </div>
                         </div>

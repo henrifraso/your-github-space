@@ -78,7 +78,7 @@ const ANALISAR_OPTIONS: { key: string; label: string; icon: React.ReactNode; tip
   { key: 'mercado',     label: 'Comparar com mercado',        icon: <Share2 size={16} />,        tipo: 'mercado' },
   { key: 'canal',       label: 'Ver impacto por canal',       icon: <TrendingUp size={16} />,    tipo: 'canal' },
   { key: 'ignorar',     label: 'O que muda se ignorado?',     icon: <AlertTriangle size={16} />, tipo: 'ignorar' },
-  { key: 'dados',       label: 'Comparar com dados internos', icon: <Target size={16} />,        tipo: 'dados_internos' },
+  { key: 'dados',       label: 'Comparar com contexto da empresa', icon: <Target size={16} />,   tipo: 'dados_internos' },
 ];
 
 // ── Componente principal ──────────────────────────────────────────────────────
