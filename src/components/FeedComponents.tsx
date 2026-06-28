@@ -335,7 +335,7 @@ export function FeedCard({ onClick, onFullscreen, containerType, onUtilizar, onW
                   <Rocket size={18} className="lg:hidden text-neutral-400 dark:text-white flex-shrink-0" />
                   <Rocket size={22} className="hidden lg:block text-neutral-400 dark:text-white flex-shrink-0" />
                 </div>
-                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Executar</span>
+                <span className="text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap">Analisar</span>
               </motion.div>
             )}
             {utilStatus === 'loading' && (

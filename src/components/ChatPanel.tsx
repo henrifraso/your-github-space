@@ -57,7 +57,7 @@ type Phase = 'init' | 'expanded' | 'selected';
 
 const MAIN_BTNS: { key: MainKey; label: string; Icon: React.ElementType }[] = [
   { key: 'pesquisar', label: 'Entender', Icon: Search    },
-  { key: 'executar',  label: 'Executar', Icon: Zap       },
+  { key: 'executar',  label: 'Analisar', Icon: Zap       },
   { key: 'aprender',  label: 'Aprender', Icon: BookOpen  },
 ];
 
