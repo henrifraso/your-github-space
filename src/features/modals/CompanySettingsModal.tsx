@@ -233,23 +233,23 @@ export function CompanySettingsModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-            className="w-full max-w-[1480px] max-h-[calc(100vh-48px)] bg-[#111111] border border-[#2a2a2a] rounded-2xl shadow-[0_32px_80px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden"
+            className="w-full max-w-[1480px] max-h-[calc(100vh-48px)] bg-white dark:bg-[#111111] border border-neutral-200 dark:border-[#2a2a2a] rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] dark:shadow-[0_32px_80px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
             {/* Header */}
-            <div className="flex-shrink-0 px-6 pt-6 pb-5 border-b border-[#222222] flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-[#1e1e1e] border border-[#2e2e2e] flex items-center justify-center">
+            <div className="flex-shrink-0 px-6 pt-6 pb-5 border-b border-neutral-200 dark:border-[#222222] flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-neutral-100 dark:bg-[#1e1e1e] border border-neutral-200 dark:border-[#2e2e2e] flex items-center justify-center">
                 <Building2 size={18} className="text-neutral-400" />
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base font-bold text-neutral-100 leading-tight">Configuração da Empresa</h2>
+                <h2 className="text-base font-bold text-neutral-900 dark:text-neutral-100 leading-tight">Configuração da Empresa</h2>
                 <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
                   Calibre o radar de inteligência do OS¹ para ler o mercado externo com mais precisão.
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="flex-shrink-0 p-1.5 rounded-lg text-neutral-500 hover:text-neutral-300 hover:bg-white/5 transition-all cursor-pointer"
+                className="flex-shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -259,7 +259,7 @@ export function CompanySettingsModal({
             <div className="flex-1 overflow-y-auto min-h-0">
 
               {/* Subtítulo */}
-              <div className="px-6 py-4 border-b border-[#1e1e1e]">
+              <div className="px-6 py-4 border-b border-neutral-100 dark:border-[#1e1e1e]">
                 <p className="text-xs text-neutral-500 leading-relaxed">
                   Essas informações ajudam o motor a entender setor, território, canais, concorrentes,
                   prioridades e sinais relevantes para transformar fontes externas em inteligência acionável.
@@ -267,8 +267,8 @@ export function CompanySettingsModal({
               </div>
 
               {/* Tipo da empresa */}
-              <div className="px-6 py-5 border-b border-[#1e1e1e]">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 mb-3">Tipo da empresa</p>
+              <div className="px-6 py-5 border-b border-neutral-100 dark:border-[#1e1e1e]">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-600 mb-3">Tipo da empresa</p>
                 <div className="flex flex-wrap gap-2">
                   {COMPANY_TYPES.map(ct => (
                     <button
@@ -277,8 +277,8 @@ export function CompanySettingsModal({
                       onClick={() => setSettings(s => ({ ...s, companyType: ct.value }))}
                       className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer ${
                         settings.companyType === ct.value
-                          ? 'bg-neutral-100 text-neutral-900 border-neutral-100'
-                          : 'bg-transparent text-neutral-500 border-[#2a2a2a] hover:border-neutral-500 hover:text-neutral-300'
+                          ? 'bg-neutral-900 text-white border-neutral-900 dark:bg-neutral-100 dark:text-neutral-900 dark:border-neutral-100'
+                          : 'bg-transparent text-neutral-500 border-neutral-200 dark:border-[#2a2a2a] hover:border-neutral-400 hover:text-neutral-700 dark:hover:border-neutral-500 dark:hover:text-neutral-300'
                       }`}
                     >
                       {ct.label}
@@ -288,13 +288,13 @@ export function CompanySettingsModal({
               </div>
 
               {/* Seções — 2 colunas em telas largas */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 border-b border-[#1a1a1a]">
+              <div className="grid grid-cols-1 xl:grid-cols-2 border-b border-neutral-100 dark:border-[#1a1a1a]">
                 {SECTIONS.map((section, idx) => (
                   <div
                     key={section.title}
-                    className={`px-6 py-5 border-b border-[#1a1a1a] xl:border-b-0 ${idx % 2 === 0 ? 'xl:border-r xl:border-r-[#1a1a1a]' : ''}`}
+                    className={`px-6 py-5 border-b border-neutral-100 dark:border-[#1a1a1a] xl:border-b-0 ${idx % 2 === 0 ? 'xl:border-r xl:border-r-neutral-100 dark:xl:border-r-[#1a1a1a]' : ''}`}
                   >
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 mb-4">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-600 mb-4">
                       {section.title}
                     </p>
                     <div className="space-y-5">
@@ -302,15 +302,15 @@ export function CompanySettingsModal({
                         <div key={field.id} className="flex items-start gap-4">
                           {/* Texto */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-neutral-200 leading-snug mb-1">{field.question}</p>
-                            <p className="text-[11px] text-neutral-600 mb-2 leading-snug">{field.explanation}</p>
+                            <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200 leading-snug mb-1">{field.question}</p>
+                            <p className="text-[11px] text-neutral-500 dark:text-neutral-600 mb-2 leading-snug">{field.explanation}</p>
                             {settings.toggles[field.id] && (
                               <input
                                 type="text"
                                 value={settings.values[field.id] ?? ''}
                                 onChange={e => setValue(field.id, e.target.value)}
                                 placeholder={field.placeholder}
-                                className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-3 py-2 text-sm text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-neutral-500 transition-colors"
+                                className="w-full bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 dark:bg-[#1a1a1a] dark:border-[#2e2e2e] dark:text-neutral-300 dark:placeholder-neutral-600 focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-500 transition-colors"
                               />
                             )}
                           </div>
@@ -320,7 +320,7 @@ export function CompanySettingsModal({
                               active={settings.toggles[field.id] ?? field.defaultActive}
                               onChange={v => setToggle(field.id, v)}
                             />
-                            <span className={`text-[9px] font-semibold uppercase tracking-wider ${settings.toggles[field.id] ? 'text-neutral-400' : 'text-neutral-700'}`}>
+                            <span className={`text-[9px] font-semibold uppercase tracking-wider ${settings.toggles[field.id] ? 'text-neutral-500 dark:text-neutral-400' : 'text-neutral-400 dark:text-neutral-700'}`}>
                               {settings.toggles[field.id] ? 'Ativo' : 'Off'}
                             </span>
                           </div>
@@ -333,38 +333,38 @@ export function CompanySettingsModal({
 
               {/* Fontes de inteligência — 3 colunas em telas largas */}
               <div className="px-6 py-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 mb-4">Fontes de inteligência</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-600 mb-4">Fontes de inteligência</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div>
                     <div className="flex items-center gap-1.5 mb-2.5">
                       <CircleDot size={10} className="text-emerald-600" />
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-600">Ativas</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-600">Ativas</p>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {ACTIVE_INPUTS.map(i => (
-                        <span key={i.id} className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-[10px] text-neutral-400">{i.label}</span>
+                        <span key={i.id} className="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-[#1a1a1a] border border-neutral-200 dark:border-[#2a2a2a] text-[10px] text-neutral-600 dark:text-neutral-400">{i.label}</span>
                       ))}
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5 mb-2.5">
-                      <CircleDot size={10} className="text-neutral-600" />
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-600">Demonstrativas</p>
+                      <CircleDot size={10} className="text-neutral-400 dark:text-neutral-600" />
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-600">Demonstrativas</p>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {DEMO_INPUTS.map(i => (
-                        <span key={i.id} className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#222] text-[10px] text-neutral-600">{i.label}</span>
+                        <span key={i.id} className="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-[#1a1a1a] border border-neutral-200 dark:border-[#222] text-[10px] text-neutral-500 dark:text-neutral-600">{i.label}</span>
                       ))}
                     </div>
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5 mb-2.5">
-                      <Wifi size={10} className="text-neutral-700" />
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-700">Monitoráveis</p>
+                      <Wifi size={10} className="text-neutral-400 dark:text-neutral-700" />
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-700">Monitoráveis</p>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {VERTICAL_API_INPUTS.map(i => (
-                        <span key={i.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#1e1e1e] text-[10px] text-neutral-700">
+                        <span key={i.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-50 dark:bg-[#1a1a1a] border border-neutral-100 dark:border-[#1e1e1e] text-[10px] text-neutral-500 dark:text-neutral-700">
                           <Clock size={8} />
                           {i.label}
                         </span>
@@ -377,7 +377,7 @@ export function CompanySettingsModal({
             </div>{/* fim scroll */}
 
             {/* Footer */}
-            <div className="flex-shrink-0 px-6 py-5 border-t border-[#222222] flex items-center justify-between gap-4">
+            <div className="flex-shrink-0 px-6 py-5 border-t border-neutral-200 dark:border-[#222222] flex items-center justify-between gap-4">
               <div className="flex-1">
                 <AnimatePresence>
                   {saved && (
@@ -396,14 +396,14 @@ export function CompanySettingsModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-neutral-500 hover:text-neutral-300 hover:bg-white/5 transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
                 >
                   Fechar
                 </button>
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-5 py-2 rounded-lg text-sm font-semibold bg-neutral-100 text-neutral-900 hover:bg-white transition-colors cursor-pointer"
+                  className="px-5 py-2 rounded-lg text-sm font-semibold bg-neutral-900 text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white transition-colors cursor-pointer"
                 >
                   Salvar configuração
                 </button>
