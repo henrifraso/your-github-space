@@ -1,13 +1,11 @@
 // Registry de fontes de inteligência do OS¹.
 //
-// O OS¹ não é um dashboard por integração.
-// Ele é um motor de inteligência que transforma qualquer fonte em sinal padronizado.
-// O horizontal usa fontes gerais. O vertical usa conectores específicos de setor.
-// Mas a interface, o motor e a lógica continuam os mesmos.
+// O OS¹ transforma fontes externas de mercado em sinais acionáveis.
+// O horizontal define o motor. O vertical define quais fontes externas
+// o motor prioriza para cada setor.
 //
-// Não expor termos técnicos ao usuário final.
-// Na interface usar: "Fontes de dados", "Configuração da Empresa",
-// "Sinais acompanhados", "Cruzamentos de inteligência", "Dados conectáveis".
+// Não é objetivo do OS¹ conectar ERP, CRM, PDV ou sistemas internos.
+// O motor lê o mercado de fora para dentro.
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -17,13 +15,14 @@ export type IntelligenceInputOrigin = 'manual' | 'upload' | 'browser' | 'map' | 
 export type IntelligenceTargetScreen = 'feed' | 'score' | 'map' | 'workspace' | 'settings';
 
 export type IntelligenceInputCategory =
-  | 'context'       // dados internos declarados
-  | 'signal'        // eventos externos captados
-  | 'reputation'    // percepção e avaliações públicas
-  | 'competitor'    // concorrência e posicionamento
-  | 'territory'     // geográfico e territorial
-  | 'internal'      // operacional interno via API
-  | 'integration';  // conectores e integrações futuras
+  | 'context'      // dados declarados pelo usuário para calibrar o motor
+  | 'signal'       // sinais externos captados de fontes públicas
+  | 'reputation'   // percepção pública, avaliações e menções
+  | 'competitor'   // presença e movimentos de concorrentes
+  | 'territory'    // geográfico e territorial
+  | 'search'       // busca web, notícias e tendências
+  | 'pricing'      // preços e marketplaces públicos
+  | 'trend';       // tendências de mercado e indicadores externos
 
 export interface IntelligenceInput {
   id:             string;
@@ -37,18 +36,18 @@ export interface IntelligenceInput {
   isConnected:    boolean;
   isDemo:         boolean;
   isFuture:       boolean;
-  verticals:      string[];        // IDs de pacotes verticais que usam esta entrada
-  exampleSignals: string[];        // exemplos legíveis de sinais que esta fonte gera
+  verticals:      string[];
+  exampleSignals: string[];
 }
 
-// ── Entradas horizontais ──────────────────────────────────────────────────────
+// ── Fontes horizontais ────────────────────────────────────────────────────────
 // Servem para qualquer empresa, independente de setor.
 
 const HORIZONTAL_INPUTS: IntelligenceInput[] = [
   {
     id:          'company_settings',
     label:       'Configuração da Empresa',
-    description: 'Dados internos declarados pela empresa para calibrar o motor, como tipo de empresa, regiões, canais, metas, concorrentes e sinais relevantes.',
+    description: 'Dados declarados pela empresa para calibrar o radar: setor, região, concorrentes, marcas acompanhadas, canais e sinais prioritários.',
     origin:      'manual',
     mode:        'horizontal',
     status:      'active',
@@ -59,15 +58,15 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   [],
     exampleSignals: [
-      'Meta comercial ativa: crescer em bares na região Norte',
-      'Sinal de alerta configurado: ruptura de PDV',
+      'Setor configurado: bebidas e distribuição — foco em bares e mercados',
       'Região prioritária: Curitiba e Região Metropolitana',
+      'Concorrentes monitorados: 3 marcas regionais',
     ],
   },
   {
     id:          'uploaded_file',
-    label:       'Arquivos enviados',
-    description: 'Materiais internos enviados pela empresa para enriquecer a leitura do negócio.',
+    label:       'Arquivos e documentos',
+    description: 'Materiais enviados pelo usuário para enriquecer a leitura: pesquisas, relatórios, listas de pontos, planilhas e contextos de mercado.',
     origin:      'upload',
     mode:        'horizontal',
     status:      'active',
@@ -78,14 +77,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   [],
     exampleSignals: [
-      'Planilha de PDVs enviada — 42 pontos mapeados',
-      'Contrato de distribuição carregado como contexto',
+      'Relatório de mercado enviado — 3 tendências identificadas',
+      'Lista de pontos de interesse carregada como contexto territorial',
     ],
   },
   {
     id:          'manual_context',
     label:       'Contexto manual',
-    description: 'Informações inseridas manualmente por operador ou usuário para alimentar a inteligência.',
+    description: 'Informações inseridas diretamente pelo usuário para alimentar a análise do motor com observações de campo.',
     origin:      'manual',
     mode:        'horizontal',
     status:      'active',
@@ -96,14 +95,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   [],
     exampleSignals: [
-      'Operador relatou queda de giro no canal bares',
-      'Usuário inseriu contexto: distribuidora Oeste com estoque crítico',
+      'Usuário relatou: concorrente abriu ponto novo na região Norte',
+      'Observação de campo: canal de bares com menos movimento nos últimos 15 dias',
     ],
   },
   {
     id:          'browser_url',
     label:       'Fontes navegadas',
-    description: 'URLs acessadas dentro do Navegador do OS¹ que entram como fontes externas simples da análise.',
+    description: 'URLs acessadas no Navegador OS¹ que entram como contexto de inteligência — sites de concorrentes, notícias, dados públicos.',
     origin:      'browser',
     mode:        'horizontal',
     status:      'active',
@@ -114,14 +113,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   [],
     exampleSignals: [
-      'Fonte navegada: g1.globo.com — matéria sobre mercado de bebidas',
-      'Fonte navegada: reclameaqui.com.br — menções à marca',
+      'Fonte navegada: site do concorrente — nova campanha de preço identificada',
+      'Fonte navegada: notícia regional sobre evento com impacto no mercado',
     ],
   },
   {
     id:          'map_signal',
     label:       'Sinais do Mapa',
-    description: 'Pontos, concorrentes, territórios, regiões e pressões competitivas observadas no mapa.',
+    description: 'Pontos, territórios, concorrentes e pressões competitivas observadas no mapa.',
     origin:      'map',
     mode:        'horizontal',
     status:      'active',
@@ -133,14 +132,13 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     verticals:   ['beverage_distribution', 'pharmacy_retail', 'food_franchise'],
     exampleSignals: [
       '3 concorrentes novos no raio de 2 km',
-      'Região Sul com menor cobertura de PDV identificada',
-      'Concentração de bares sem distribuidora mapeada',
+      'Região Sul com baixa presença de marcas — oportunidade territorial',
     ],
   },
   {
     id:          'public_reputation',
     label:       'Reputação pública',
-    description: 'Sinais públicos de avaliação, percepção, reclamações e presença da marca.',
+    description: 'Sinais públicos de avaliação, percepção, menções e presença da marca em fontes abertas.',
     origin:      'public',
     mode:        'horizontal',
     status:      'active',
@@ -151,14 +149,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   ['pharmacy_retail', 'food_franchise'],
     exampleSignals: [
-      'Nota Google caiu de 4,3 para 3,9 nos últimos 30 dias',
-      'Pico de reclamações na semana do feriado',
+      'Nota pública caiu de 4,3 para 3,9 nos últimos 30 dias',
+      'Pico de menções negativas na semana do feriado',
     ],
   },
   {
     id:          'google_reviews',
     label:       'Google Avaliações',
-    description: 'Fonte monitorável para avaliações públicas, presença local e percepção do cliente.',
+    description: 'Fonte monitorável de avaliações públicas, presença local e percepção em busca.',
     origin:      'public',
     mode:        'horizontal',
     status:      'demo',
@@ -169,14 +167,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   ['pharmacy_retail', 'food_franchise'],
     exampleSignals: [
-      'Avaliação recente: "atendimento rápido mas produto sem estoque"',
       'Nota média local: 4,1 vs concorrente: 4,6',
+      'Avaliação recente menciona: "produto indisponível"',
     ],
   },
   {
     id:          'reclame_aqui',
     label:       'Reclame Aqui',
-    description: 'Fonte monitorável para reclamações públicas, atendimento e confiança da marca.',
+    description: 'Fonte monitorável de reclamações públicas, tempo de resposta e confiança da marca.',
     origin:      'public',
     mode:        'horizontal',
     status:      'demo',
@@ -212,25 +210,25 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
   {
     id:          'news_signal',
     label:       'Notícias e imprensa',
-    description: 'Menções públicas, imprensa regional, notícias de mercado e movimentos relevantes.',
+    description: 'Menções públicas, imprensa regional, notícias de mercado e movimentos relevantes no setor.',
     origin:      'public',
     mode:        'horizontal',
     status:      'demo',
-    category:    'signal',
+    category:    'search',
     screens:     ['feed', 'workspace'],
     isConnected: false,
     isDemo:      true,
     isFuture:    false,
     verticals:   [],
     exampleSignals: [
-      'Notícia regional: "cidade recebe evento com 30 mil pessoas no fim de semana"',
-      'Imprensa: nova regulação afeta importação de insumos da categoria',
+      'Notícia regional: cidade recebe evento com 30 mil pessoas no fim de semana',
+      'Nova regulação pode afetar importação de insumos da categoria',
     ],
   },
   {
     id:          'events_signal',
     label:       'Eventos e calendário',
-    description: 'Eventos locais, sazonalidade e datas que podem afetar demanda, presença e giro.',
+    description: 'Eventos locais, sazonalidade e datas que podem afetar demanda, presença e oportunidades de mercado.',
     origin:      'public',
     mode:        'horizontal',
     status:      'demo',
@@ -241,14 +239,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   ['beverage_distribution'],
     exampleSignals: [
-      'Carnaval fora de época confirmado na região — demanda de bebidas +40%',
-      'Feira setorial prevista para próximo mês: oportunidade de posicionamento',
+      'Carnaval fora de época confirmado na região — oportunidade de demanda',
+      'Feira setorial no próximo mês: janela de posicionamento',
     ],
   },
   {
     id:          'competitor_signal',
-    label:       'Concorrência',
-    description: 'Sinais de presença, pressão, expansão ou posicionamento de concorrentes.',
+    label:       'Movimentos de concorrentes',
+    description: 'Sinais públicos de presença, expansão, campanhas e posicionamento de concorrentes observáveis externamente.',
     origin:      'public',
     mode:        'horizontal',
     status:      'demo',
@@ -259,14 +257,14 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     isFuture:    false,
     verticals:   ['beverage_distribution', 'pharmacy_retail', 'food_franchise'],
     exampleSignals: [
-      'Concorrente abriu PDV novo no raio de 500m',
+      'Concorrente abriu ponto novo no raio de 500m',
       'Marca nacional lançou campanha de preço baixo na região',
     ],
   },
   {
     id:          'official_registry_signal',
     label:       'Registros públicos',
-    description: 'Fontes públicas monitoráveis como CNPJ, marcas, registros oficiais e informações institucionais.',
+    description: 'Fontes monitoráveis como registros empresariais, marcas, CNPJ e informações institucionais públicas.',
     origin:      'public',
     mode:        'horizontal',
     status:      'future',
@@ -278,229 +276,194 @@ const HORIZONTAL_INPUTS: IntelligenceInput[] = [
     verticals:   [],
     exampleSignals: [
       'Novo CNPJ de concorrente registrado na região',
-      'Alvará de funcionamento renovado — empresa operacional confirmada',
+      'Registro de marca nova na categoria — monitorar',
     ],
   },
 ];
 
-// ── Entradas verticais por API ────────────────────────────────────────────────
-// Não conectadas agora. Preparam a arquitetura para integração futura por setor.
+// ── Fontes externas verticais/especializadas ─────────────────────────────────
+// Fontes de inteligência de mercado monitoráveis por setor.
+// Não são sistemas internos da empresa — são leituras externas de mercado.
 
-const VERTICAL_INPUTS: IntelligenceInput[] = [
+const VERTICAL_MARKET_INPUTS: IntelligenceInput[] = [
   {
-    id:          'sales_api',
-    label:       'Vendas',
-    description: 'Dados de vendas, faturamento, ticket médio, queda, crescimento e performance comercial.',
-    origin:      'api',
+    id:          'web_search',
+    label:       'Busca web',
+    description: 'Resultados de busca pública sobre temas, marcas, concorrentes e mercado.',
+    origin:      'public',
     mode:        'vertical',
     status:      'api_vertical',
-    category:    'internal',
+    category:    'search',
+    screens:     ['feed', 'workspace'],
+    isConnected: false,
+    isDemo:      false,
+    isFuture:    true,
+    verticals:   ['beverage_distribution', 'pharmacy_retail', 'food_franchise'],
+    exampleSignals: [
+      'Pico de buscas por "cerveja artesanal Curitiba" — tendência de demanda',
+      'Buscas por concorrente cresceram 34% no mês',
+    ],
+  },
+  {
+    id:          'market_trends',
+    label:       'Tendências de mercado',
+    description: 'Sinais de tendência setorial, comportamento de consumo e movimentos de categoria.',
+    origin:      'public',
+    mode:        'both',
+    status:      'api_vertical',
+    category:    'trend',
     screens:     ['feed', 'score', 'workspace'],
     isConnected: false,
     isDemo:      false,
     isFuture:    true,
     verticals:   ['beverage_distribution', 'pharmacy_retail', 'food_franchise'],
     exampleSignals: [
-      'Venda caiu 18% no canal bares nos últimos 14 dias',
-      'Ticket médio subiu em mercados — oportunidade de mix',
+      'Categoria de bebidas sem álcool em crescimento de 18% no trimestre',
+      'Tendência de farmácias com espaço de bem-estar cresce no Brasil',
     ],
   },
   {
-    id:          'inventory_api',
-    label:       'Estoque',
-    description: 'Dados de estoque, ruptura, excesso, disponibilidade e cobertura operacional.',
-    origin:      'api',
-    mode:        'vertical',
+    id:          'pricing_public_signals',
+    label:       'Preços públicos',
+    description: 'Dados públicos de preços em canais digitais, anúncios e marketplaces observáveis.',
+    origin:      'public',
+    mode:        'both',
     status:      'api_vertical',
-    category:    'internal',
-    screens:     ['feed', 'workspace'],
+    category:    'pricing',
+    screens:     ['feed', 'score'],
     isConnected: false,
     isDemo:      false,
     isFuture:    true,
-    verticals:   ['beverage_distribution', 'pharmacy_retail'],
+    verticals:   ['beverage_distribution', 'pharmacy_retail', 'food_franchise'],
     exampleSignals: [
-      'Produto pilsen com cobertura crítica — reposição urgente',
-      'Estoque de long neck excessivo — risco de vencimento',
+      'Concorrente reduziu preço de produto-chave em 12% no iFood',
+      'Produto da categoria com variação de 23% entre canais na região',
     ],
   },
   {
-    id:          'crm_api',
-    label:       'CRM',
-    description: 'Dados de relacionamento, clientes ativos, oportunidades, funil e histórico comercial.',
-    origin:      'api',
+    id:          'marketplace_public_signals',
+    label:       'Marketplaces e delivery',
+    description: 'Sinais públicos de presença, avaliação e posicionamento em plataformas de delivery e marketplaces.',
+    origin:      'public',
     mode:        'vertical',
     status:      'api_vertical',
-    category:    'internal',
-    screens:     ['feed', 'workspace'],
-    isConnected: false,
-    isDemo:      false,
-    isFuture:    true,
-    verticals:   ['beverage_distribution'],
-    exampleSignals: [
-      '14 clientes sem visita há mais de 21 dias',
-      'Oportunidade de reativação: bar com histórico de compra alto',
-    ],
-  },
-  {
-    id:          'erp_api',
-    label:       'ERP',
-    description: 'Dados estruturados de operação, financeiro, cadastro, pedidos e gestão interna.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'internal',
-    screens:     ['score', 'workspace'],
-    isConnected: false,
-    isDemo:      false,
-    isFuture:    true,
-    verticals:   ['beverage_distribution', 'pharmacy_retail'],
-    exampleSignals: [
-      'Margem operacional abaixo do target nos últimos 2 meses',
-      'Pedidos com atraso de faturamento acima de 5 dias',
-    ],
-  },
-  {
-    id:          'pdv_api',
-    label:       'PDV',
-    description: 'Dados de ponto de venda, giro, recompra, canais, lojas, bares, mercados ou unidades.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'internal',
+    category:    'pricing',
     screens:     ['feed', 'map', 'score'],
     isConnected: false,
     isDemo:      false,
     isFuture:    true,
-    verticals:   ['beverage_distribution', 'pharmacy_retail'],
+    verticals:   ['food_franchise', 'pharmacy_retail'],
     exampleSignals: [
-      '3 PDVs sem recompra nos últimos 30 dias — risco de perda de canal',
-      'Bar com giro crescente — oportunidade de mix ou exclusividade',
+      'Concorrente com 4,8★ no iFood vs 3,9★ da unidade — gap de reputação',
+      'Produto indisponível em 3 plataformas — risco de perda de visibilidade',
     ],
   },
   {
-    id:          'orders_api',
-    label:       'Pedidos',
-    description: 'Dados de pedidos, frequência, recompra, cancelamento, demanda e comportamento comercial.',
-    origin:      'api',
-    mode:        'vertical',
+    id:          'ads_public_signals',
+    label:       'Anúncios públicos',
+    description: 'Campanhas e anúncios públicos observáveis de concorrentes em Google, redes sociais e mídia programática.',
+    origin:      'public',
+    mode:        'both',
     status:      'api_vertical',
-    category:    'internal',
-    screens:     ['feed', 'workspace'],
+    category:    'competitor',
+    screens:     ['feed', 'score'],
     isConnected: false,
     isDemo:      false,
     isFuture:    true,
-    verticals:   ['beverage_distribution', 'food_franchise'],
+    verticals:   ['food_franchise', 'beverage_distribution'],
     exampleSignals: [
-      'Queda de 22% em pedidos recorrentes na semana',
-      'Cancelamento concentrado em canal de entrega — investigar',
+      'Concorrente com campanha ativa de geolocalização na região',
+      'Anúncio de promoção de produto-chave detectado no canal local',
     ],
   },
   {
-    id:          'logistics_api',
-    label:       'Logística',
-    description: 'Dados de rotas, entregas, prazos, frota, cobertura e eficiência operacional.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'internal',
-    screens:     ['map', 'feed'],
-    isConnected: false,
-    isDemo:      false,
-    isFuture:    true,
-    verticals:   ['beverage_distribution'],
-    exampleSignals: [
-      'Rota Sul com atraso médio de 2,3h — acima do SLA',
-      'Região Leste sem cobertura nos últimos 3 dias',
-    ],
-  },
-  {
-    id:          'support_api',
-    label:       'Atendimento',
-    description: 'Dados de chamados, reclamações internas, tempo de resposta e satisfação.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'internal',
-    screens:     ['score', 'workspace'],
-    isConnected: false,
-    isDemo:      false,
-    isFuture:    true,
-    verticals:   ['pharmacy_retail', 'food_franchise'],
-    exampleSignals: [
-      'Pico de chamados: produto indisponível — correlato com ruptura de estoque',
-      'NPS caiu 12 pontos — investigar origem',
-    ],
-  },
-  {
-    id:          'reviews_api',
-    label:       'Avaliações',
-    description: 'Dados conectados de avaliações, notas, comentários e percepção do cliente.',
-    origin:      'api',
-    mode:        'vertical',
+    id:          'brand_mentions',
+    label:       'Menções da marca',
+    description: 'Menções públicas da marca ou setor em fóruns, notícias, blogs e redes sociais abertas.',
+    origin:      'public',
+    mode:        'both',
     status:      'api_vertical',
     category:    'reputation',
+    screens:     ['feed', 'score'],
+    isConnected: false,
+    isDemo:      false,
+    isFuture:    true,
+    verticals:   ['beverage_distribution', 'pharmacy_retail', 'food_franchise'],
+    exampleSignals: [
+      'Menção positiva em blog regional: marca citada como referência',
+      'Comentário negativo em fórum sobre disponibilidade na região Sul',
+    ],
+  },
+  {
+    id:          'weather_seasonality',
+    label:       'Clima e sazonalidade',
+    description: 'Dados climáticos e sazonais que afetam demanda, consumo e padrões de mercado.',
+    origin:      'public',
+    mode:        'both',
+    status:      'api_vertical',
+    category:    'trend',
+    screens:     ['feed', 'map'],
+    isConnected: false,
+    isDemo:      false,
+    isFuture:    true,
+    verticals:   ['beverage_distribution', 'pharmacy_retail'],
+    exampleSignals: [
+      'Onda de calor prevista — demanda de bebidas deve subir 40% na semana',
+      'Temporada de gripe: busca por antigripais 3× acima da média',
+    ],
+  },
+  {
+    id:          'seo_visibility',
+    label:       'Visibilidade em busca',
+    description: 'Presença e posicionamento público da marca e concorrentes em resultados de busca.',
+    origin:      'public',
+    mode:        'both',
+    status:      'future',
+    category:    'search',
     screens:     ['score', 'feed'],
     isConnected: false,
     isDemo:      false,
     isFuture:    true,
     verticals:   ['pharmacy_retail', 'food_franchise'],
     exampleSignals: [
-      'Avaliação interna média: 3,7 — abaixo da meta de 4,2',
-      'Comentários negativos concentrados em "tempo de espera"',
+      'Concorrente aparece em 1ª posição para "farmácia 24h Curitiba"',
+      'Queda de posição em busca local nos últimos 30 dias',
     ],
   },
   {
-    id:          'delivery_api',
-    label:       'Delivery',
-    description: 'Dados de pedidos, tempo de entrega, raio de atendimento, canais digitais e avaliação.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'internal',
-    screens:     ['feed', 'map', 'workspace'],
-    isConnected: false,
-    isDemo:      false,
-    isFuture:    true,
-    verticals:   ['food_franchise'],
-    exampleSignals: [
-      'Tempo médio de entrega: 38 min — 8 min acima da meta',
-      'Bairro Centro com alta demanda e nenhum entregador disponível',
-    ],
-  },
-  {
-    id:          'routes_api',
-    label:       'Rotas',
-    description: 'Dados de rotas, cobertura territorial, visitas, frequência comercial e oportunidades por região.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'territory',
-    screens:     ['map', 'feed', 'workspace'],
-    isConnected: false,
-    isDemo:      false,
-    isFuture:    true,
-    verticals:   ['beverage_distribution'],
-    exampleSignals: [
-      'Rota 7 com potencial de +8 PDVs não visitados',
-      'Região industrial sem cobertura semanal — oportunidade de expansão',
-    ],
-  },
-  {
-    id:          'production_api',
-    label:       'Produção',
-    description: 'Dados de capacidade produtiva, máquinas, volumes, gargalos e disponibilidade operacional.',
-    origin:      'api',
-    mode:        'vertical',
-    status:      'api_vertical',
-    category:    'internal',
+    id:          'economic_indicators',
+    label:       'Indicadores econômicos',
+    description: 'Dados macroeconômicos públicos relevantes para o setor: inflação, renda, consumo, câmbio.',
+    origin:      'public',
+    mode:        'horizontal',
+    status:      'future',
+    category:    'trend',
     screens:     ['score', 'workspace'],
     isConnected: false,
     isDemo:      false,
     isFuture:    true,
-    verticals:   ['beverage_distribution'],
+    verticals:   [],
     exampleSignals: [
-      'Linha 2 operando a 67% da capacidade — oportunidade de volume',
-      'Parada técnica programada: planejar estoque antecipado',
+      'Índice de confiança do consumidor em queda — pressão sobre ticket médio',
+      'Alta do dólar impacta importados da categoria',
+    ],
+  },
+  {
+    id:          'jobs_and_hiring_signals',
+    label:       'Vagas e contratação',
+    description: 'Sinais públicos de contratação que indicam expansão, abertura de filiais ou movimentos estratégicos de concorrentes.',
+    origin:      'public',
+    mode:        'both',
+    status:      'future',
+    category:    'competitor',
+    screens:     ['feed', 'score'],
+    isConnected: false,
+    isDemo:      false,
+    isFuture:    true,
+    verticals:   ['pharmacy_retail', 'food_franchise'],
+    exampleSignals: [
+      'Concorrente publicou 8 vagas de operador em bairros sem unidade — sinal de expansão',
+      'Rede farmacêutica contratando gerente de loja na região Sul',
     ],
   },
 ];
@@ -509,13 +472,13 @@ const VERTICAL_INPUTS: IntelligenceInput[] = [
 
 export const INTELLIGENCE_INPUTS: IntelligenceInput[] = [
   ...HORIZONTAL_INPUTS,
-  ...VERTICAL_INPUTS,
+  ...VERTICAL_MARKET_INPUTS,
 ];
 
 // Filtros utilitários
-export const ACTIVE_INPUTS      = INTELLIGENCE_INPUTS.filter(i => i.status === 'active');
-export const DEMO_INPUTS        = INTELLIGENCE_INPUTS.filter(i => i.status === 'demo');
-export const FUTURE_INPUTS      = INTELLIGENCE_INPUTS.filter(i => i.status === 'future');
+export const ACTIVE_INPUTS       = INTELLIGENCE_INPUTS.filter(i => i.status === 'active');
+export const DEMO_INPUTS         = INTELLIGENCE_INPUTS.filter(i => i.status === 'demo');
+export const FUTURE_INPUTS       = INTELLIGENCE_INPUTS.filter(i => i.status === 'future');
 export const VERTICAL_API_INPUTS = INTELLIGENCE_INPUTS.filter(i => i.status === 'api_vertical');
 
 export function getInputsByScreen(screen: IntelligenceTargetScreen): IntelligenceInput[] {

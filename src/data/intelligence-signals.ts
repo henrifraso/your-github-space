@@ -1,11 +1,10 @@
 // Modelo de sinal padronizado do motor OS¹.
 //
-// Raw data from APIs, uploads, browser, map or manual context should be
-// normalized into StandardIntelligenceSignal before feeding OS¹ surfaces.
+// Fontes externas de mercado → normalização → StandardIntelligenceSignal
+// → Feed / Score / Mapa / Área de Trabalho.
 //
-// O motor não recebe dados crus — recebe sinais padronizados.
-// Isso garante que Feed, Score, Mapa e Área de Trabalho sempre consumam
-// o mesmo formato, independente da origem (horizontal ou vertical).
+// O motor lê o mercado de fora para dentro.
+// Não processa dados internos de ERP, CRM ou PDV.
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -15,41 +14,48 @@ export type SignalStatus     = 'active' | 'dismissed' | 'archived' | 'pending';
 export type SignalTarget     = 'feed' | 'score' | 'map' | 'workspace';
 
 export type SignalType =
-  | 'competitive_pressure'   // presença ou movimento de concorrente
-  | 'reputation_signal'      // avaliações, menções, percepção pública
-  | 'demand_signal'          // oportunidade ou queda de demanda
-  | 'territory_opportunity'  // oportunidade geográfica ou territorial
-  | 'sales_drop'             // queda de venda detectada
-  | 'inventory_risk'         // risco de ruptura ou excesso de estoque
-  | 'route_opportunity'      // oportunidade em rota ou cobertura
-  | 'customer_complaint'     // reclamação ou insatisfação
-  | 'public_mention'         // menção pública (notícia, imprensa, rede social)
-  | 'uploaded_context'       // contexto inserido via arquivo
-  | 'navigated_source'       // fonte acessada no Navegador
-  | 'map_pressure'           // pressão competitiva ou territorial via mapa
-  | 'pdv_opportunity'        // oportunidade em ponto de venda
-  | 'seasonality_signal'     // sazonalidade ou evento com impacto de demanda
-  | 'settings_context';      // dado inserido via Configuração da Empresa
+  | 'competitive_movement'     // presença, expansão ou campanha de concorrente
+  | 'reputation_signal'        // avaliações, menções e percepção pública
+  | 'market_opportunity'       // oportunidade identificada no mercado
+  | 'territorial_gap'          // lacuna ou oportunidade geográfica
+  | 'public_demand_signal'     // sinal de demanda observável externamente
+  | 'trend_signal'             // tendência de mercado ou comportamento de categoria
+  | 'event_signal'             // evento ou sazonalidade com impacto de mercado
+  | 'pricing_signal'           // variação de preço ou posicionamento de mercado
+  | 'brand_visibility_signal'  // presença pública da marca em busca, ads ou mídia
+  | 'regulatory_signal'        // movimentos regulatórios, registros ou normas públicas
+  | 'customer_complaint'       // reclamação pública
+  | 'public_mention'           // menção em notícia, imprensa ou rede social
+  | 'uploaded_context'         // contexto inserido via arquivo
+  | 'navigated_source'         // fonte acessada no Navegador
+  | 'map_pressure'             // pressão competitiva ou territorial via mapa
+  | 'seasonality_signal'       // sazonalidade ou demanda sazonal
+  | 'source_context_signal';   // dado declarado via Configuração da Empresa
 
 export interface StandardIntelligenceSignal {
   id:                string;
   type:              SignalType;
   title:             string;
   summary:           string;
-  originInputId:     string;       // ID da entrada em intelligence-inputs.ts
-  profileId:         string;       // perfil/setor onde o sinal foi gerado
-  entity?:           string;       // ex: "Bar do João", "Rua XV", "Produto X"
-  metric?:           string;       // ex: "queda de 18%", "nota 3,7", "3 concorrentes"
-  evidence?:         string;       // trecho ou dado que sustenta o sinal
+  originInputId:     string;         // ID da fonte em intelligence-inputs.ts
+  profileId:         string;         // perfil/empresa onde o sinal foi gerado
+  verticalPackage?:  string;         // ID do pacote vertical que gerou o sinal
+  sector?:           string;         // setor de mercado
+  entities?:         string[];       // entidades observadas (marcas, pontos, regiões)
+  geography?:        string;         // área geográfica do sinal
+  entity?:           string;         // entidade principal (compat)
+  metric?:           string;         // ex: "queda de 18%", "nota 3,7"
+  evidence?:         string;         // dado ou trecho que sustenta o sinal
   impact:            SignalImpact;
   confidence:        SignalConfidence;
-  timeframe?:        string;       // ex: "últimos 14 dias", "próximas 2 semanas"
+  timeframe?:        string;         // ex: "últimos 14 dias", "próximas 2 semanas"
   targets:           SignalTarget[];
+  recommendedScreens?: SignalTarget[];
   riskLevel?:        SignalImpact;
   opportunityLevel?: SignalImpact;
   status:            SignalStatus;
   isDemo:            boolean;
-  createdAt:         string;       // ISO 8601
+  createdAt:         string;         // ISO 8601
 }
 
 // ── Normalizer conceitual ─────────────────────────────────────────────────────
@@ -109,66 +115,68 @@ export function normalizeInputToSignal(
   return { ...base, ...overrides };
 }
 
-// Mapeamento de entrada → tipo de sinal padrão
+// Mapeamento de fonte externa → tipo de sinal
 function inferSignalType(inputId: string): SignalType {
   const map: Record<string, SignalType> = {
-    sales_api:              'sales_drop',
-    inventory_api:          'inventory_risk',
-    pdv_api:                'pdv_opportunity',
-    orders_api:             'demand_signal',
-    crm_api:                'demand_signal',
-    erp_api:                'sales_drop',
-    logistics_api:          'route_opportunity',
-    routes_api:             'route_opportunity',
-    production_api:         'inventory_risk',
-    delivery_api:           'demand_signal',
-    support_api:            'customer_complaint',
-    reviews_api:            'reputation_signal',
-    google_reviews:         'reputation_signal',
-    reclame_aqui:           'customer_complaint',
-    social_public_signal:   'public_mention',
-    news_signal:            'public_mention',
-    events_signal:          'seasonality_signal',
-    competitor_signal:      'competitive_pressure',
-    official_registry_signal: 'competitive_pressure',
-    map_signal:             'map_pressure',
-    public_reputation:      'reputation_signal',
-    browser_url:            'navigated_source',
-    uploaded_file:          'uploaded_context',
-    manual_context:         'uploaded_context',
-    company_settings:       'settings_context',
+    // fontes horizontais ativas
+    company_settings:          'source_context_signal',
+    uploaded_file:             'uploaded_context',
+    manual_context:            'uploaded_context',
+    browser_url:               'navigated_source',
+    map_signal:                'map_pressure',
+    public_reputation:         'reputation_signal',
+    // fontes públicas demo
+    google_reviews:            'reputation_signal',
+    reclame_aqui:              'customer_complaint',
+    social_public_signal:      'public_mention',
+    news_signal:               'public_mention',
+    events_signal:             'event_signal',
+    competitor_signal:         'competitive_movement',
+    official_registry_signal:  'regulatory_signal',
+    // fontes externas verticais monitoráveis
+    web_search:                'public_demand_signal',
+    market_trends:             'trend_signal',
+    pricing_public_signals:    'pricing_signal',
+    marketplace_public_signals:'pricing_signal',
+    ads_public_signals:        'competitive_movement',
+    brand_mentions:            'brand_visibility_signal',
+    weather_seasonality:       'seasonality_signal',
+    seo_visibility:            'brand_visibility_signal',
+    economic_indicators:       'trend_signal',
+    jobs_and_hiring_signals:   'competitive_movement',
   };
-  return map[inputId] ?? 'demand_signal';
+  return map[inputId] ?? 'market_opportunity';
 }
 
-// Mapeamento de entrada → telas que recebem o sinal
+// Mapeamento de fonte → telas que recebem o sinal
 function inferTargets(inputId: string): SignalTarget[] {
   const map: Record<string, SignalTarget[]> = {
-    sales_api:              ['feed', 'score', 'map', 'workspace'],
-    inventory_api:          ['feed', 'workspace'],
-    pdv_api:                ['feed', 'map', 'score'],
-    orders_api:             ['feed', 'workspace'],
-    crm_api:                ['feed', 'workspace'],
-    erp_api:                ['score', 'workspace'],
-    logistics_api:          ['map', 'feed'],
-    routes_api:             ['map', 'feed', 'workspace'],
-    production_api:         ['score', 'workspace'],
-    delivery_api:           ['feed', 'map', 'workspace'],
-    support_api:            ['score', 'workspace'],
-    reviews_api:            ['score', 'feed'],
-    google_reviews:         ['score', 'feed', 'map'],
-    reclame_aqui:           ['score', 'feed'],
-    social_public_signal:   ['feed', 'score'],
-    news_signal:            ['feed', 'workspace'],
-    events_signal:          ['feed', 'map'],
-    competitor_signal:      ['feed', 'map', 'score'],
-    official_registry_signal: ['score', 'feed'],
-    map_signal:             ['map', 'feed', 'score'],
-    public_reputation:      ['score', 'feed'],
-    browser_url:            ['score', 'workspace'],
-    uploaded_file:          ['score', 'workspace', 'feed'],
-    manual_context:         ['feed', 'score', 'workspace'],
-    company_settings:       ['feed', 'score', 'map', 'workspace'],
+    // fontes horizontais ativas
+    company_settings:          ['feed', 'score', 'map', 'workspace'],
+    uploaded_file:             ['score', 'workspace', 'feed'],
+    manual_context:            ['feed', 'score', 'workspace'],
+    browser_url:               ['score', 'workspace'],
+    map_signal:                ['map', 'feed', 'score'],
+    public_reputation:         ['score', 'feed'],
+    // fontes públicas demo
+    google_reviews:            ['score', 'feed', 'map'],
+    reclame_aqui:              ['score', 'feed'],
+    social_public_signal:      ['feed', 'score'],
+    news_signal:               ['feed', 'workspace'],
+    events_signal:             ['feed', 'map'],
+    competitor_signal:         ['feed', 'map', 'score'],
+    official_registry_signal:  ['score', 'feed'],
+    // fontes externas verticais monitoráveis
+    web_search:                ['feed', 'workspace'],
+    market_trends:             ['feed', 'score', 'workspace'],
+    pricing_public_signals:    ['feed', 'score'],
+    marketplace_public_signals:['feed', 'map', 'score'],
+    ads_public_signals:        ['feed', 'score'],
+    brand_mentions:            ['feed', 'score'],
+    weather_seasonality:       ['feed', 'map'],
+    seo_visibility:            ['score', 'feed'],
+    economic_indicators:       ['score', 'workspace'],
+    jobs_and_hiring_signals:   ['feed', 'score'],
   };
   return map[inputId] ?? ['feed'];
 }

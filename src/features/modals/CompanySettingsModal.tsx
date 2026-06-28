@@ -131,7 +131,7 @@ const SECTIONS: SettingSection[] = [
         id: 'alertas',
         question: 'Quais sinais devem gerar alerta?',
         explanation: 'Define os gatilhos do Feed e do Score para este perfil.',
-        placeholder: 'Ex.: queda de reputação, concorrente novo, ruptura, perda de PDV',
+        placeholder: 'Ex.: queda de reputação, concorrente novo, menção negativa, entrada de marca',
         defaultActive: true,
       },
       {
@@ -144,13 +144,13 @@ const SECTIONS: SettingSection[] = [
     ],
   },
   {
-    title: 'Dados futuros por API',
+    title: 'Radar de fontes',
     fields: [
       {
         id: 'api_vertical',
-        question: 'Quais dados internos podem entrar depois por integração?',
-        explanation: 'Prepara a versão conectada sem implementar integração agora.',
-        placeholder: 'Ex.: vendas, estoque, pedidos, CRM, ERP, PDV, logística, atendimento',
+        question: 'Quais fontes externas devem ter prioridade no radar?',
+        explanation: 'Calibra quais fontes de mercado o motor monitora com maior atenção.',
+        placeholder: 'Ex.: Google Maps, Reclame Aqui, iFood, notícias regionais, sites de concorrentes',
         defaultActive: false,
       },
     ],
@@ -337,7 +337,7 @@ export function CompanySettingsModal({
 
             {/* Fontes de dados conectáveis */}
             <div className="px-6 py-5 border-t border-[#1e1e1e]">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 mb-4">Fontes de dados conectáveis</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 mb-4">Fontes de inteligência</p>
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
@@ -364,7 +364,7 @@ export function CompanySettingsModal({
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Wifi size={10} className="text-neutral-700" />
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-700">Dados conectáveis</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-700">Fontes monitoráveis</p>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {VERTICAL_API_INPUTS.map(i => (
