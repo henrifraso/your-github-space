@@ -364,7 +364,7 @@ export function CompanySettingsModal({
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <Wifi size={10} className="text-neutral-700" />
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-700">APIs verticais disponíveis</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-700">Dados conectáveis</p>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {VERTICAL_API_INPUTS.map(i => (
