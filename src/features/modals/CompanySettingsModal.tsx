@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Building2 } from 'lucide-react';
+import { X, Building2, CircleDot, Clock, Wifi } from 'lucide-react';
+import { ACTIVE_INPUTS, DEMO_INPUTS, VERTICAL_API_INPUTS } from '../../data/intelligence-inputs';
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -332,6 +333,49 @@ export function CompanySettingsModal({
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Fontes de dados conectáveis */}
+            <div className="px-6 py-5 border-t border-[#1e1e1e]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-600 mb-4">Fontes de dados conectáveis</p>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <CircleDot size={10} className="text-emerald-600" />
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-600">Ativas</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {ACTIVE_INPUTS.map(i => (
+                      <span key={i.id} className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#2a2a2a] text-[10px] text-neutral-400">{i.label}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <CircleDot size={10} className="text-neutral-600" />
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-600">Demonstrativas</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DEMO_INPUTS.map(i => (
+                      <span key={i.id} className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#222] text-[10px] text-neutral-600">{i.label}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Wifi size={10} className="text-neutral-700" />
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-700">APIs verticais disponíveis</p>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {VERTICAL_API_INPUTS.map(i => (
+                      <span key={i.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#1e1e1e] text-[10px] text-neutral-700">
+                        <Clock size={8} />
+                        {i.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Footer */}
