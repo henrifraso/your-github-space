@@ -268,8 +268,17 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick, acti
     const onTitle = (e: any) => update({ title: e.title || new URL(wv.src || 'about:blank').hostname });
     const onFavicon = (e: any) => update({ favicon: e.favicons?.[0] || '' });
 
+    // ERR_ABORTED (-3) é cancelamento normal de navegação (redirecionar antes
+    // de concluir, usuário digitou nova URL, etc.). Não tratar como erro.
+    const onFailLoad = (e: any) => {
+      if (e.errorCode === -3) return;
+      update({ loading: false });
+      refreshNav();
+    };
+
     wv.addEventListener('did-start-loading', onStart);
     wv.addEventListener('did-stop-loading', onStop);
+    wv.addEventListener('did-fail-load', onFailLoad);
     wv.addEventListener('did-navigate', onNavigate);
     wv.addEventListener('did-navigate-in-page', onNavigate);
     wv.addEventListener('page-title-updated', onTitle);
@@ -531,7 +540,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick, acti
                   src={tab.url}
                   partition="persist:omni-browser"
                   useragent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                  allowpopups
+                  {...({ allowpopups: '' } as any)}
                   style={{ width: '100%', height: '100%', display: 'flex' }}
                 />
               )}

@@ -51,16 +51,24 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
 
     // Fix: container pode estar com altura 0 durante animação de entrada do CompetitiveMap.
     // Força recálculo de tiles em vários momentos cobrindo possibilidades de timing.
-    requestAnimationFrame(() => map.invalidateSize());
+    // `cancelled` evita chamar invalidateSize() após desmontagem (crash _leaflet_pos).
+    let cancelled = false;
+    const raf = requestAnimationFrame(() => {
+      if (!cancelled && mapRef.current) map.invalidateSize();
+    });
     const tids = [50, 150, 300, 600, 1000].map(ms =>
-      window.setTimeout(() => map.invalidateSize(), ms)
+      window.setTimeout(() => { if (!cancelled && mapRef.current) map.invalidateSize(); }, ms)
     );
 
     // ResizeObserver pega qualquer mudança subsequente (ex.: split view do ChatPanel)
-    const ro = new ResizeObserver(() => map.invalidateSize());
+    const ro = new ResizeObserver(() => {
+      if (!cancelled && mapRef.current) mapRef.current.invalidateSize();
+    });
     if (containerRef.current) ro.observe(containerRef.current);
 
     return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
       tids.forEach(t => window.clearTimeout(t));
       ro.disconnect();
       map.remove();
