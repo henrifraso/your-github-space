@@ -47,13 +47,13 @@ const COMPANY_TYPES: { value: CompanyType; label: string }[] = [
 
 const SECTIONS: SettingSection[] = [
   {
-    title: 'Dados do negócio',
+    title: 'Perfil de mercado',
     fields: [
       {
         id: 'faturamento',
-        question: 'Quanto a empresa fatura por mês?',
-        explanation: 'Ajuda a calibrar porte, relevância e impacto dos sinais no motor.',
-        placeholder: 'Ex.: R$ 500 mil, R$ 2 milhões, R$ 10 milhões',
+        question: 'Qual é a faixa de porte da empresa?',
+        explanation: 'Ajuda o motor a calibrar prioridade, impacto estimado e relevância dos sinais de mercado.',
+        placeholder: 'Ex.: R$ 500 mil, R$ 2 milhões, R$ 10 milhões por mês',
         defaultActive: true,
       },
       {
@@ -92,28 +92,21 @@ const SECTIONS: SettingSection[] = [
     ],
   },
   {
-    title: 'Capacidade interna',
+    title: 'Prioridades estratégicas',
     fields: [
-      {
-        id: 'capacidade',
-        question: 'Qual é a capacidade operacional atual?',
-        explanation: 'Cruza oportunidade externa com capacidade real de execução.',
-        placeholder: 'Ex.: equipe comercial, frota, máquinas, estoque, entregas por dia',
-        defaultActive: false,
-      },
-      {
-        id: 'ativos',
-        question: 'Quais máquinas, ativos ou recursos a empresa possui?',
-        explanation: 'Ajuda a entender limite e vantagem operacional para cada sinal.',
-        placeholder: 'Ex.: câmara fria, frota própria, equipe de promotores, estoque regional',
-        defaultActive: false,
-      },
       {
         id: 'metas',
         question: 'Quais metas comerciais importam agora?',
         explanation: 'Orienta o motor sobre quais oportunidades devem virar prioridade.',
-        placeholder: 'Ex.: crescer em bares, aumentar presença em mercados, reduzir ruptura',
+        placeholder: 'Ex.: crescer em bares, fortalecer presença regional, acompanhar concorrentes, abrir novos canais',
         defaultActive: true,
+      },
+      {
+        id: 'capacidade',
+        question: 'Quais limites ou prioridades devem orientar a leitura do mercado?',
+        explanation: 'Ajuda o motor a evitar sinais pouco relevantes e priorizar oportunidades alinhadas ao momento da empresa.',
+        placeholder: 'Ex.: crescer em bares, fortalecer presença regional, proteger marca, abrir novos canais',
+        defaultActive: false,
       },
     ],
   },
@@ -251,7 +244,7 @@ export function CompanySettingsModal({
               <div className="flex-1 min-w-0">
                 <h2 className="text-base font-bold text-neutral-100 leading-tight">Configuração da Empresa</h2>
                 <p className="text-[11px] text-neutral-500 mt-0.5 leading-snug">
-                  Configure os dados internos que ajudam o OS¹ a cruzar sinais externos com a realidade da empresa.
+                  Calibre o radar de inteligência do OS¹ para ler o mercado externo com mais precisão.
                 </p>
               </div>
               <button
@@ -265,9 +258,8 @@ export function CompanySettingsModal({
             {/* Subtítulo */}
             <div className="px-6 py-4 border-b border-[#1e1e1e]">
               <p className="text-xs text-neutral-500 leading-relaxed">
-                Essas informações ajudam o motor a entender operação, território, canais, capacidade, metas
-                e sinais relevantes para a leitura de mercado. Ative os dados que já existem e preencha os
-                que fizerem sentido agora.
+                Essas informações ajudam o motor a entender setor, território, canais, concorrentes,
+                prioridades e sinais relevantes para transformar fontes externas em inteligência acionável.
               </p>
             </div>
 

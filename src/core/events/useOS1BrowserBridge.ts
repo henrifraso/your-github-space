@@ -106,7 +106,7 @@ export function useOS1BrowserBridge({
           'notícia':     'Extrair fato principal · Avaliar repercussão para o setor · Decidir comunicação interna ou externa',
           'rede-social': 'Capturar sinal e contexto · Avaliar tom e alcance · Decidir resposta ou monitoramento',
           'pesquisa':    'Listar 3 fontes complementares · Validar achado central · Consolidar conclusão',
-          'genérico':    'Identificar fato principal · Cruzar com dados internos · Decidir próxima ação',
+          'genérico':    'Identificar fato principal · Separar evidências · Decidir próxima ação',
         };
 
         const card: IntelligenceCard = {
