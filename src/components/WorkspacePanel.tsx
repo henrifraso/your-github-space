@@ -252,7 +252,7 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
 
           {/* Barra de ações */}
           <div className="pt-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-3">Área de Decisão</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-3">Lentes de Análise</p>
 
             {/* 3 modos principais — dominantes */}
             <div className="grid grid-cols-3 gap-2">
@@ -265,7 +265,7 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
 
             {/* Outras ações — discretas */}
             <div className="mt-3 flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-600">Outras ações</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-600">Aprofundar</span>
               {SECONDARY_ACTIONS.map(a => (
                 <button key={a.action} onClick={() => handleAction(a.action)}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer ${activeAction === a.action
@@ -337,7 +337,7 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
           {/* Seção de Atalhos */}
           {shortcuts.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-3">Atalhos para este insight</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-neutral-600 mb-3">Análises disponíveis para este sinal</p>
               <div className="flex flex-col gap-2">
                 {shortcuts.map(s => <ShortcutCard key={s.id} shortcut={s} />)}
               </div>
@@ -634,24 +634,24 @@ function ShortcutCard({ shortcut: s }: { shortcut: Shortcut }) {
 
 // Modos principais — UI dominante. Cada um chama o endpoint já existente.
 const PRIMARY_MODES: { action: ActionType; label: string; icon: React.ReactNode }[] = [
-  { action: 'pesquisar', label: 'Entender', icon: <Search size={16} /> },
-  { action: 'executar',  label: 'Executar', icon: <Zap size={16} /> },
-  { action: 'aprender',  label: 'Aprender', icon: <BookOpen size={16} /> },
+  { action: 'pesquisar', label: 'Por que isso importa?',    icon: <Search size={16} /> },
+  { action: 'aprender',  label: 'Onde está a oportunidade?', icon: <TrendingUp size={16} /> },
+  { action: 'simular',   label: 'Qual é o risco comercial?', icon: <AlertTriangle size={16} /> },
 ];
 
 // Ações secundárias — chips discretos abaixo.
 const SECONDARY_ACTIONS: { action: ActionType; label: string; icon: React.ReactNode }[] = [
-  { action: 'simular',   label: 'Simular',   icon: <BarChart2 size={13} /> },
-  { action: 'regenerar', label: 'Regenerar', icon: <RefreshCw size={13} /> },
-  { action: 'estender',  label: 'Estender',  icon: <Share2 size={13} /> },
+  { action: 'executar',  label: 'Como agir agora?',          icon: <Zap size={13} /> },
+  { action: 'estender',  label: 'Ver sinais relacionados',   icon: <Share2 size={13} /> },
+  { action: 'regenerar', label: 'Reler com nova lente',      icon: <RefreshCw size={13} /> },
 ];
 
 // Label amigável usada no título do bloco e no estado de loading.
 const LABEL_BY_ACTION: Record<string, string> = {
-  pesquisar: 'Entender',
-  executar:  'Executar',
-  aprender:  'Aprender',
-  simular:   'Simular',
-  regenerar: 'Regenerar',
-  estender:  'Estender',
+  pesquisar: 'Por que isso importa?',
+  executar:  'Como agir agora?',
+  aprender:  'Onde está a oportunidade?',
+  simular:   'Qual é o risco comercial?',
+  regenerar: 'Reler com nova lente',
+  estender:  'Ver sinais relacionados',
 };

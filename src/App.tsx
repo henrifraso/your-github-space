@@ -139,7 +139,7 @@ import type { RoleFeedCard } from './config/roleConfig';
 import { CODIFY_TAB_DATA, AFFILIATE_TAB_DATA, FRANCHISOR_FRANCHISE_NAMES, PARTNER_SOLD_COMPANIES } from './data/roleMocks';
 import { isPersonalizedRole, filterFranchisorCardsByTab, shouldShowRoleDemos } from './utils/roleUtils';
 import { Toast, useToast } from './components/Toast';
-import { Mail, MapPinned, Target, Eye, Award, Search, Sparkles, Layers3, UserCircle } from 'lucide-react';
+import { Mail, MapPinned, Target, Eye, Award, Search, Sparkles, Layers3, UserCircle, Settings } from 'lucide-react';
 import {
   appendSession,
   createArchivedSession,
@@ -172,6 +172,7 @@ import { useOS1WorkspaceBridge } from './core/events/useOS1WorkspaceBridge';
 import { StatInfoModal } from './features/modals/StatInfoModal';
 import { EmpresaModal } from './features/modals/EmpresaModal';
 import { SettingsModal } from './features/modals/SettingsModal';
+import { CompanySettingsModal } from './features/modals/CompanySettingsModal';
 import { OntologySphereOverlay } from './features/ontology/OntologySphereOverlay';
 
 function GoogleMapsPreloader() {
@@ -408,6 +409,7 @@ function AuthenticatedApp() {
   // Ontologia desativada — Score/Análise é a tela visível ao cliente nesta versão.
   const ONTOLOGY_HIDDEN = true;
   const [scoreOpen, setScoreOpen] = useState(false);
+  const [companySettingsOpen, setCompanySettingsOpen] = useState(false);
   const [sectorOpen, setSectorOpen] = useState(false);
   // GA3-test-loja: se o user logou como loja Oscar Piloto 01 (bu salvo no
   // login), arranca já no sector dedicado pra não exibir "Perfil Unidade Demo"
@@ -1215,6 +1217,15 @@ function AuthenticatedApp() {
               </button>
             )}
             <button
+              onClick={() => setMapOpen(true)}
+              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+              title="Mapa"
+            >
+              <MapPinned size={18} className="sm:hidden" />
+              <MapPinned size={20} className="hidden sm:block lg:hidden" />
+              <MapPinned size={24} className="hidden lg:block" />
+            </button>
+            <button
               onClick={() => showToast('Notificações em breve', 'blue')}
               className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
             >
@@ -1414,20 +1425,17 @@ function AuthenticatedApp() {
                         ))}
                         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                         <button
-                          onClick={() => setMapOpen(true)}
+                          onClick={() => setChatOpen(true)}
                           className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
                         >
                           <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                            <MapPinned size={18} className="text-neutral-400 dark:text-white" />
+                            <Layers size={18} className="text-neutral-400 dark:text-white" />
                           </div>
-                          <span>Concorrentes</span>
+                          <span>Enviar contexto</span>
                         </button>
-                        <button onClick={() => openInviteInWorkspace()} title="Convite"
-                          className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
-                          <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                            <Mail size={18} className="text-neutral-400 dark:text-white" />
-                          </div>
-                          Convite
+                        <button onClick={() => setCompanySettingsOpen(true)} title="Configuração da Empresa"
+                          className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                          <Settings size={16} className="text-neutral-400 dark:text-white" />
                         </button>
                         </div>
                       </div>
@@ -1480,20 +1488,17 @@ function AuthenticatedApp() {
                   ))}
                 <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                 <button
-                  onClick={() => setMapOpen(true)}
+                  onClick={() => setChatOpen(true)}
                   className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm font-medium text-neutral-500 dark:text-white"
                 >
                   <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                    <MapPinned size={18} className="text-neutral-400 dark:text-white" />
+                    <Layers size={18} className="text-neutral-400 dark:text-white" />
                   </div>
-                  <span>Concorrentes</span>
+                  <span>Enviar contexto</span>
                 </button>
-                <button onClick={() => openInviteInWorkspace()} title="Convite"
-                  className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97] text-[11px] sm:text-xs md:text-sm text-neutral-500 dark:text-white font-medium">
-                  <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]">
-                    <Mail size={18} className="text-neutral-400 dark:text-white" />
-                  </div>
-                  Convite
+                <button onClick={() => setCompanySettingsOpen(true)} title="Configuração da Empresa"
+                  className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                  <Settings size={16} className="text-neutral-400 dark:text-white" />
                 </button>
                 </div>
                 </div>
@@ -1852,6 +1857,13 @@ function AuthenticatedApp() {
       <AnimatePresence>
         {mapOpen && <MarketMapContent open={mapOpen} onClose={() => setMapOpen(false)} competitors={data.concorrentes} onCompetitorClick={setSelectedConcorrente} sector={activeSector} businessName={data.negocio?.nome_fantasia} />}
       </AnimatePresence>
+
+      {/* Modal Configuração da Empresa */}
+      <CompanySettingsModal
+        open={companySettingsOpen}
+        onClose={() => setCompanySettingsOpen(false)}
+        profileId={activeSector}
+      />
 
 
       {/* Modal Evolução */}
