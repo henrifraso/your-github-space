@@ -555,7 +555,11 @@ function AuthenticatedApp() {
   // perfis (codify + demos).
   const openEmpresaInWorkspace = () => {
     const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
-    const displayName = isRoleView ? roleConfig.bio.displayName : data.negocio.nome_fantasia;
+    const displayName = isRoleView
+      ? roleConfig.bio.displayName
+      : activeSector === 'nubank'
+        ? 'OS¹ Farmácia — Medicamentos Mais Vendidos'
+        : data.negocio.nome_fantasia;
     const segmento    = data.negocio.segmento;
     const cidade      = data.negocio.cidade;
     const estado      = data.negocio.estado;
@@ -1171,9 +1175,20 @@ function AuthenticatedApp() {
           <button onClick={openEmpresaInWorkspace}
             className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
-              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
-            </h1>
+            {activeSector === 'nubank' ? (
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 leading-tight">
+                  OS¹ Farmácia — Medicamentos Mais Vendidos
+                </span>
+                <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 leading-none tracking-widest uppercase">
+                  Vertical Segmentado
+                </span>
+              </div>
+            ) : (
+              <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+                {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
+              </h1>
+            )}
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
               Modo escuro foi movido pro header da Área de Trabalho. */}
