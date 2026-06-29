@@ -561,7 +561,9 @@ function AuthenticatedApp() {
         ? 'OS¹ Farmácia — Análise de Demanda e Categorias'
         : activeSector === 'nike'
           ? 'OS¹ Calçados — Análise de Mercado'
-          : data.negocio.nome_fantasia;
+          : activeSector === 'mcdonalds'
+            ? 'OS¹ Fast Food — Inteligência Preditiva de Mercado'
+            : data.negocio.nome_fantasia;
     const segmento    = data.negocio.segmento;
     const cidade      = data.negocio.cidade;
     const estado      = data.negocio.estado;
@@ -1195,6 +1197,15 @@ function AuthenticatedApp() {
                   Horizontal Segmentado
                 </span>
               </div>
+            ) : activeSector === 'mcdonalds' ? (
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 leading-tight">
+                  OS¹ Fast Food — Inteligência Preditiva de Mercado
+                </span>
+                <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 leading-none tracking-widest uppercase">
+                  Radial — Preditivo
+                </span>
+              </div>
             ) : (
               <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
                 {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
@@ -1214,7 +1225,7 @@ function AuthenticatedApp() {
               <Power size={20} className="hidden sm:block" />
             </button>
             <button
-              onClick={() => activeSector !== 'nubank' && activeSector !== 'nike' && setSectorOpen(true)}
+              onClick={() => activeSector !== 'nubank' && activeSector !== 'nike' && activeSector !== 'mcdonalds' && setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
               title={activeSector === 'os1' ? 'Trocar perfil de empresa' : 'Trocar área da empresa'}
             >
@@ -1999,7 +2010,7 @@ function AuthenticatedApp() {
         wide={scrolled}
         onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => activeSector !== 'nubank' && activeSector !== 'nike' && setSectorOpen(true)}
+        onSector={() => activeSector !== 'nubank' && activeSector !== 'nike' && activeSector !== 'mcdonalds' && setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         onMapOpen={() => setMapOpen(true)}
         activeSector={activeSector}
@@ -2038,7 +2049,7 @@ function AuthenticatedApp() {
         userRole={role}
         onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => activeSector !== 'nubank' && activeSector !== 'nike' && setSectorOpen(true)}
+        onSector={() => activeSector !== 'nubank' && activeSector !== 'nike' && activeSector !== 'mcdonalds' && setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         unreadCount={unreadCount}
         dark={dark}
