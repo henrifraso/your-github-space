@@ -558,7 +558,7 @@ function AuthenticatedApp() {
     const displayName = isRoleView
       ? roleConfig.bio.displayName
       : activeSector === 'nubank'
-        ? 'OS¹ Farmácia — Medicamentos Mais Vendidos'
+        ? 'OS¹ Farmácia — Análise de Demanda e Categorias'
         : data.negocio.nome_fantasia;
     const segmento    = data.negocio.segmento;
     const cidade      = data.negocio.cidade;
@@ -1178,7 +1178,7 @@ function AuthenticatedApp() {
             {activeSector === 'nubank' ? (
               <div className="flex flex-col items-start gap-0.5">
                 <span className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 leading-tight">
-                  OS¹ Farmácia — Medicamentos Mais Vendidos
+                  OS¹ Farmácia — Análise de Demanda e Categorias
                 </span>
                 <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 leading-none tracking-widest uppercase">
                   Vertical Segmentado
@@ -1203,7 +1203,7 @@ function AuthenticatedApp() {
               <Power size={20} className="hidden sm:block" />
             </button>
             <button
-              onClick={() => setSectorOpen(true)}
+              onClick={() => activeSector !== 'nubank' && setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
               title={activeSector === 'os1' ? 'Trocar perfil de empresa' : 'Trocar área da empresa'}
             >
@@ -1988,7 +1988,7 @@ function AuthenticatedApp() {
         wide={scrolled}
         onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => setSectorOpen(true)}
+        onSector={() => activeSector !== 'nubank' && setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         onMapOpen={() => setMapOpen(true)}
         activeSector={activeSector}
@@ -2027,7 +2027,7 @@ function AuthenticatedApp() {
         userRole={role}
         onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => setSectorOpen(true)}
+        onSector={() => activeSector !== 'nubank' && setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         unreadCount={unreadCount}
         dark={dark}
@@ -2234,15 +2234,7 @@ function AuthenticatedApp() {
             profilesHeader="Distribuidoras Império"
           />
         )}
-        {sectorOpen && activeSector === 'nubank' && role !== 'franchise' && (
-          <SectorSwitcherModal
-            active={activeSector}
-            onSelect={setActiveSector}
-            onClose={() => setSectorOpen(false)}
-            filterProfileIds={['pacheco-loja-01']}
-            profilesHeader="Lojas Pacheco"
-          />
-        )}
+        {/* nubank (Pacheco vertical): seletor de lojas desabilitado — pacheco-loja-01 contém conteúdo operacional incompatível com a demo vertical */}
         {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' && activeSector !== 'cerveja-imperio' && activeSector !== 'nubank' || role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
