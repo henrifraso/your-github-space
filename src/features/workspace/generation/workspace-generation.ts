@@ -124,7 +124,7 @@ export const SUB_BTNS: Record<MainKey, SubAction[]> = {
     { key: 'mercado',     label: 'Comparar com mercado',        Icon: GitCompare,    endpoint: 'executar', extra: { tipo: 'mercado' } },
     { key: 'canal',       label: 'Ver impacto por canal',       Icon: TrendingUp,    endpoint: 'executar', extra: { tipo: 'canal' } },
     { key: 'ignorar',     label: 'O que muda se ignorado?',     Icon: AlertTriangle, endpoint: 'executar', extra: { tipo: 'ignorar' } },
-    { key: 'dados',       label: 'Comparar com dados internos', Icon: Compass,       endpoint: 'executar', extra: { tipo: 'dados_internos' } },
+    { key: 'dados',       label: 'Comparar com contexto da empresa', Icon: Compass,       endpoint: 'executar', extra: { tipo: 'dados_internos' } },
     { key: 'oportunidade',label: 'Onde está a oportunidade?',  Icon: Target,        endpoint: 'executar', extra: { tipo: 'oportunidade' } },
     { key: 'territorial', label: 'Ver impacto territorial',     Icon: Layers,        endpoint: 'executar', extra: { tipo: 'territorial' } },
     { key: 'risco',       label: 'Qual é o risco comercial?',   Icon: Gauge,         endpoint: 'executar', extra: { tipo: 'risco' } },
