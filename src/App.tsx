@@ -1175,20 +1175,9 @@ function AuthenticatedApp() {
           <button onClick={openEmpresaInWorkspace}
             className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            {activeProduct ? (
-              <div className="flex flex-col items-start gap-0.5">
-                <span className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 leading-tight">
-                  {activeProduct.name}
-                </span>
-                <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500 leading-none tracking-widest uppercase">
-                  {activeProduct.badge}
-                </span>
-              </div>
-            ) : (
-              <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
-                {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
-              </h1>
-            )}
+            <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
+            </h1>
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
               Modo escuro foi movido pro header da Área de Trabalho. */}
@@ -1515,6 +1504,13 @@ function AuthenticatedApp() {
                     <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
                     <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
                   </div>
+                  {activeProduct && (
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                      <Layers size={13} className="sm:hidden text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
+                      <Layers size={15} className="hidden sm:block text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
+                      <span className="text-neutral-800 dark:text-neutral-200 truncate">Versão · {activeProduct.versionLabel}</span>
+                    </div>
+                  )}
                 </div>
                   </>
                 )}
