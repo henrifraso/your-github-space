@@ -9,12 +9,11 @@
 import type { SectorId } from '../../components/SectorSwitcher';
 import type { AnalysisType } from '../adapters/source-connector';
 
-// Direção geométrica do produto — nomenclatura OS¹ (decisão 29/jun/2026).
-// HORIZONTAL = análise ampla/rasa de mercado.
-// VERTICAL   = análise estreita/funda de uma dor específica.
-// DIAGONAL   = horizontal + vertical combinados (pendente).
-// RADIAL     = eixo tempo/preditivo.
-export type ProductFormat = 'horizontal' | 'vertical' | 'diagonal' | 'radial';
+// Direção do produto — maturidade tecnológica da empresa cliente (decisão 30/jun/2026).
+// HORIZONTAL = empresa sem inteligência de mercado (entrada); pode receber módulos conforme cresce.
+// VERTICAL   = empresa que já tem tecnologia (avançada); tem módulo(s) dentro.
+// HIBRIDA    = transição: horizontal que ganhou a camada vertical.
+export type ProductFormat = 'horizontal' | 'vertical' | 'hibrida';
 
 export interface ProductVersion {
   // Identificador semântico do produto (não é o sectorId legado).
@@ -51,4 +50,7 @@ export interface ProductVersion {
   // true quando o botão "+" de loja/abas está bloqueado via guard no App.tsx.
   // Todos os 3 produtos em ar têm true — os sector-feeds internos estão sujos ou incompletos.
   blocksStoreSwitcher: boolean;
+
+  // Texto da versão exibido na bio ("Versão · X"), sem o prefixo "OS¹ [setor] — ".
+  versionLabel: string;
 }
