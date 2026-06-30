@@ -175,6 +175,8 @@ import { SettingsModal } from './features/modals/SettingsModal';
 import { CompanySettingsModal } from './features/modals/CompanySettingsModal';
 import { OntologySphereOverlay } from './features/ontology/OntologySphereOverlay';
 import { getProductBySector } from './core/product/product-registry';
+import { CMED_CONNECTOR } from './core/adapters/cmed-connector';
+import { CMED_FIXTURE } from './data/cmed-fixture';
 
 function GoogleMapsPreloader() {
   useGoogleMaps();
@@ -978,6 +980,11 @@ function AuthenticatedApp() {
     return circles.map((c, i) => ({ ...c, slices: allSlices[i], descricao: descricoes[i] }));
   }, [data]);
 
+  const cmedCards = useMemo(
+    () => activeSector === 'nubank' ? CMED_CONNECTOR.toIntelligenceCards(CMED_FIXTURE) : [],
+    [activeSector]
+  );
+
   // ─── helpers ─────────────────────────────────────────────────────────────────
   const timeline = data.timeline ?? MOCK_DATA.timeline!;
   const notaMediaNum = (() => {
@@ -1714,7 +1721,11 @@ function AuthenticatedApp() {
         {(() => {
           const base = activeSector === 'os1' ? [] : (DEMO_FEED_CARDS[activeSector] ?? []);
           const realIds = new Set(apiIntelligenceCards.map(c => c.id));
-          const merged = [...apiIntelligenceCards, ...base.filter(c => !realIds.has(c.id))];
+          const merged = [
+            ...apiIntelligenceCards,
+            ...cmedCards.filter(c => !realIds.has(c.id)),
+            ...base.filter(c => !realIds.has(c.id) && !cmedCards.some(r => r.id === c.id)),
+          ];
           return merged;
         })().map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
