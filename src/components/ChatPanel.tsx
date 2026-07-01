@@ -966,9 +966,10 @@ interface ChatDesktopProps {
   onWorkspaceCleared?: () => void;
   onMapOpen?: () => void;
   codifyScope?: CodifyScope | null;
+  windowWidth?: number;
 }
 
-export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope, windowWidth }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
@@ -997,11 +998,19 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
     el.addEventListener('wheel', handler, { passive: false });
     return () => el.removeEventListener('wheel', handler);
   }, []);
+  const ww = windowWidth ?? window.innerWidth;
+  const pr = ww >= 1280 ? 336 : 320;
+  const rightPx = wide ? 20 : Math.max(5, (ww + pr - 1575) / 2);
   return (
     <div
       ref={wrapperRef}
-      style={{ width: wide ? 'calc(50vw - 20px)' : '340px', top: `${SPLIT_FRAME_TOP_PX + 12}px`, transition: 'width 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="fixed right-5 bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
+      style={{
+        width: wide ? 'calc(50vw - 20px)' : '340px',
+        top: `${SPLIT_FRAME_TOP_PX + 12}px`,
+        right: `${rightPx}px`,
+        transition: 'right 500ms cubic-bezier(0.25,0.1,0.25,1), width 500ms cubic-bezier(0.25,0.1,0.25,1)',
+      }}
+      className="fixed bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
       {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
       <div className="px-5 py-5 flex-shrink-0">

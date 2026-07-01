@@ -340,8 +340,9 @@ function AuthenticatedApp() {
   const txt = (key: TextKey) => TEXTS[key][difficulty];
   const [scrolled, setScrolled] = useState(false);
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 1024);
+  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
   useEffect(() => {
-    const fn = () => setIsDesktop(window.innerWidth >= 1024);
+    const fn = () => { setIsDesktop(window.innerWidth >= 1024); setWindowWidth(window.innerWidth); };
     window.addEventListener('resize', fn);
     return () => window.removeEventListener('resize', fn);
   }, []);
@@ -2002,6 +2003,7 @@ function AuthenticatedApp() {
         userRole={role}
         workspaceContext={workspaceContext}
         codifyScope={codifyScope}
+        windowWidth={windowWidth}
         dark={dark}
         onToggleTheme={toggleTheme}
         onShowHistory={() => setChatHistoryOpen(o => !o)}
