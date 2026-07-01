@@ -65,3 +65,12 @@ export function generateCandidateRelations(activeTerms: OntologyTerm[]): Relatio
     r => termIds.has(r.sourceTermId) && termIds.has(r.targetTermId)
   );
 }
+
+/**
+ * Retorna todas as setas de fixture sem filtro — para demonstração visual
+ * (demo Pacheco/nubank). Bypass do match de termos: as 4 setas aparecem sempre.
+ * Futuro: substituir por generateCandidateRelations(activeTerms) quando o match existir.
+ */
+export function getFixtureRelations(): Relation[] {
+  return FIXTURE_RELATIONS;
+}

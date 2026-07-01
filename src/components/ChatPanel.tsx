@@ -9,6 +9,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
 import { ActionResult } from './WorkspacePanel';
+import { getFixtureRelations } from '../core/relations/relation-generator';
+import type { Relation } from '../core/relations/relation';
 import { apiFetch } from '../api';
 import { SPLIT_TOP_GAP_PB, SPLIT_FRAME_TOP_PX } from '../constants/split-layout';
 import { WorkspaceTools, ToolBlockContent } from './WorkspaceTools';
@@ -571,6 +573,28 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                   {/* Rodapé: ações + seletor de dificuldade no próprio bloco */}
                   {isInitial ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
+                      {/* Setas de direção — demo visual fixture, só Pacheco (nubank) */}
+                      {activeSector === 'nubank' && (
+                        <div className="flex flex-col gap-1.5 pb-2 mb-1 border-b border-neutral-100 dark:border-[#414141]">
+                          <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">
+                            Direções possíveis
+                          </p>
+                          <div className="flex flex-col gap-1.5">
+                            {(getFixtureRelations() as Relation[]).map((r, i) => (
+                              <button
+                                key={i}
+                                onClick={() => {}}
+                                title={r.rationale}
+                                className="text-left flex items-start gap-2 px-2.5 py-2 rounded-lg text-[11px] sm:text-xs border bg-white dark:bg-[#242424] text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-[#2e2e2e] hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-blue-500 mt-0.5 flex-shrink-0">
+                                  {r.type}
+                                </span>
+                                <span className="leading-snug">{r.rationale}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       {/* Atalhos principais do card */}
                       <div className="flex items-center gap-1 flex-wrap">
                         {INITIAL_ACTIONS.map(a => {
