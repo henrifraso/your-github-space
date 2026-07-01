@@ -20,7 +20,7 @@ type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnosti
 // MODE_LABEL idêntico ao original do ChatPanel (rótulo visível por modo).
 const MODE_LABEL: Record<MainKey, string> = {
   pesquisar: 'Entender',
-  executar:  'Executar',
+  executar:  'Analisar',
   aprender:  'Aprender',
 };
 

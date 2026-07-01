@@ -46,7 +46,7 @@ import type {
 } from '../features/workspace/generation/workspace-generation';
 import {
   INTENT_TO_MAIN, DIFICULDADE_LABELS, MODE_LABEL, MODE_FIELDS, MODE_TOP5,
-  SUB_BTNS, INITIAL_ACTIONS, SHARE_OPTIONS,
+  SUB_BTNS, SHARE_OPTIONS,
 } from '../features/workspace/generation/workspace-generation';
 import {
   shortcutsForCard, buildInitialBlock, buildDiagnosticBlock, buildShareBlock,
@@ -595,20 +595,6 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                           </div>
                         </div>
                       )}
-                      {/* Atalhos principais do card */}
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {INITIAL_ACTIONS.map(a => {
-                          const sub = SUB_BTNS[a.mode].find(s => s.key === a.subKey);
-                          return (
-                            <BlockCtrl
-                              key={a.key}
-                              Icon={sub?.Icon || Sparkles}
-                              label={a.label}
-                              onClick={() => { if (sub) handleSubAction(a.mode, sub); }}
-                            />
-                          );
-                        })}
-                      </div>
                       {/* Controles do bloco — mesma estética dos outros blocos */}
                       <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
                         <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => {
@@ -638,7 +624,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
                     </div>
                   ) : isMode ? (
-                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141]">
                       <ModeShortcuts
                         mode={b.mode}
                         onPick={(subKey) => {
@@ -646,16 +632,6 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                           if (sub) handleSubAction(b.mode, sub);
                         }}
                       />
-                      <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
-                        <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => {
-                          const newBlock = buildModeBlock(activeCard!, b.mode, dificuldade);
-                          setMessages(prev => [...prev, { id: newBlock.id, role: 'block', text: newBlock.subLabel, block: newBlock }]);
-                        }} />
-                        <BlockCtrl Icon={Lightbulb} label="Exemplos" onClick={blockExamples} />
-                        <BlockCtrl Icon={Pin}       label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
-                        <BlockCtrl Icon={Copy}      label="Copiar"   onClick={() => copyBlock(b)} />
-                      </div>
-                      <DifficultyRow value={dificuldade} onChange={setDificuldade} />
                     </div>
                   ) : (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
