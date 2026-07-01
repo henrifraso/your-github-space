@@ -1,7 +1,26 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Building2, CircleDot, Clock, Wifi } from 'lucide-react';
+import { X, Building2, CircleDot, Clock, Wifi, Lock } from 'lucide-react';
 import { ACTIVE_INPUTS, DEMO_INPUTS, VERTICAL_API_INPUTS } from '../../data/intelligence-inputs';
+import type { AnalysisType } from '../../core/adapters/source-connector';
+
+const ANALYSIS_TYPE_LABELS: Record<AnalysisType, string> = {
+  descritiva:    'Descritiva',
+  diagnostica:   'Diagnóstica',
+  preditiva:     'Preditiva',
+  prescritiva:   'Prescritiva',
+  comparativa:   'Comparativa',
+  tendencias:    'Tendências',
+  sentimento:    'Sentimento',
+  inferencial:   'Inferencial',
+  exploratoria:  'Exploratória',
+  cognitiva:     'Cognitiva',
+};
+
+const ALL_ANALYSIS_TYPES: AnalysisType[] = [
+  'descritiva', 'diagnostica', 'preditiva', 'prescritiva', 'comparativa',
+  'tendencias', 'sentimento', 'inferencial', 'exploratoria', 'cognitiva',
+];
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -193,10 +212,12 @@ export function CompanySettingsModal({
   open,
   onClose,
   profileId,
+  analysisTypes,
 }: {
   open: boolean;
   onClose: () => void;
   profileId: string;
+  analysisTypes?: AnalysisType[];
 }) {
   const [settings, setSettings] = useState<CompanySettings>(() => loadSettings(profileId));
   const [saved, setSaved] = useState(false);
@@ -373,6 +394,38 @@ export function CompanySettingsModal({
                   </div>
                 </div>
               </div>
+
+              {/* Módulos de análise — bloqueados até lançamento/cobrança */}
+              {analysisTypes && (
+                <div className="px-6 py-5 border-t border-neutral-200 dark:border-[#414141]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-neutral-500">Módulos de análise</p>
+                    <Lock size={9} className="text-neutral-400 dark:text-neutral-600" />
+                  </div>
+                  <p className="text-[10px] text-neutral-400 dark:text-neutral-600 mb-4">Os módulos incluídos neste perfil estão marcados. Novos módulos estarão disponíveis em breve.</p>
+                  <div className="flex flex-col gap-2">
+                    {ALL_ANALYSIS_TYPES.map(type => {
+                      const included = analysisTypes.includes(type);
+                      return (
+                        <div key={type} className="flex items-center justify-between gap-3 opacity-70 cursor-not-allowed" title="Em breve">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Lock size={10} className="text-neutral-400 dark:text-neutral-600 flex-shrink-0" />
+                            <span className={`text-[11px] font-medium truncate ${included ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 dark:text-neutral-600'}`}>
+                              {ANALYSIS_TYPE_LABELS[type]}
+                            </span>
+                            {included && (
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 dark:text-blue-400">incluído</span>
+                            )}
+                          </div>
+                          <div className={`relative w-8 h-4.5 rounded-full flex-shrink-0 ${included ? 'bg-blue-400 dark:bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-600'}`}>
+                            <div className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-all ${included ? 'left-[18px]' : 'left-0.5'}`} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
             </div>{/* fim scroll */}
 

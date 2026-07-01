@@ -1873,6 +1873,7 @@ function AuthenticatedApp() {
         open={companySettingsOpen}
         onClose={() => setCompanySettingsOpen(false)}
         profileId={activeSector}
+        analysisTypes={activeProduct?.analysisTypes}
       />
 
 
