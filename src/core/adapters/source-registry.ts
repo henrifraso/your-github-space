@@ -12,6 +12,12 @@
 
 import type { SourceConnector } from './source-connector';
 import { CMED_CONNECTOR } from './cmed-connector';
+import { CMED_FIXTURE } from '../../data/cmed-fixture';
+
+/** Dados brutos de demonstração por sourceId. Alimenta toIntelligenceCards em dev/demo. */
+export const FIXTURE_MAP: Record<string, unknown> = {
+  cmed: CMED_FIXTURE,
+};
 
 // Fontes planejadas para Fase 2 (sem conector implementado ainda).
 // Referência: Bright Data, Oxylabs, Zyte (licença comercial — exige contrato);

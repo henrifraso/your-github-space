@@ -175,8 +175,7 @@ import { SettingsModal } from './features/modals/SettingsModal';
 import { CompanySettingsModal } from './features/modals/CompanySettingsModal';
 import { OntologySphereOverlay } from './features/ontology/OntologySphereOverlay';
 import { getProductBySector } from './core/product/product-registry';
-import { CMED_CONNECTOR } from './core/adapters/cmed-connector';
-import { CMED_FIXTURE } from './data/cmed-fixture';
+import { getConnector, FIXTURE_MAP } from './core/adapters/source-registry';
 
 function GoogleMapsPreloader() {
   useGoogleMaps();
@@ -982,8 +981,12 @@ function AuthenticatedApp() {
   }, [data]);
 
   const cmedCards = useMemo(
-    () => activeSector === 'nubank' ? CMED_CONNECTOR.toIntelligenceCards(CMED_FIXTURE) : [],
-    [activeSector]
+    () => (activeProduct?.sourceIds ?? []).flatMap(id => {
+      const c = getConnector(id);
+      const f = FIXTURE_MAP[id];
+      return c && f ? c.toIntelligenceCards(f) : [];
+    }),
+    [activeProduct]
   );
 
   // ─── helpers ─────────────────────────────────────────────────────────────────
