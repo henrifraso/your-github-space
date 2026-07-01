@@ -543,7 +543,7 @@ function AuthenticatedApp() {
     }
     // Envia o card pro contêiner do chat (botão "Área de trabalho") em vez de fullscreen.
     workspaceSeqRef.current += 1;
-    setWorkspaceContext({ card, intent, seq: workspaceSeqRef.current });
+    setWorkspaceContext({ card, intent, seq: workspaceSeqRef.current, arrowsUnlocked: activeProduct?.arrowsUnlocked ?? false });
     // Alinhamento automático: simula o "deslize manual" que divide a tela ao meio.
     // No mobile abre o drawer do chat fullscreen; no desktop ativa o split view.
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
@@ -715,6 +715,7 @@ function AuthenticatedApp() {
         card,
         intent: 'utilizar',
         seq: workspaceSeqRef.current,
+        arrowsUnlocked: activeProduct?.arrowsUnlocked ?? false,
         diagnostic: payload,
       });
 

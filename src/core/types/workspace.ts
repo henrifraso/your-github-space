@@ -30,6 +30,7 @@ export type WorkspaceContext = {
   intent: WorkspaceIntent;
   seq: number;
   diagnostic?: CompanyDiagnosticPayload;
+  arrowsUnlocked?: boolean;
 };
 
 // ── Ferramentas da Área de Trabalho ─────────────────────────────────

@@ -573,8 +573,8 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                   {/* Rodapé: ações + seletor de dificuldade no próprio bloco */}
                   {isInitial ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
-                      {/* Setas de direção — demo visual fixture, só Pacheco (nubank) */}
-                      {activeSector === 'nubank' && (
+                      {/* Setas de direção — destravadas pela ficha do perfil (arrowsUnlocked) */}
+                      {workspaceContext?.arrowsUnlocked && (
                         <div className="flex flex-col gap-1.5 pb-2 mb-1 border-b border-neutral-100 dark:border-[#414141]">
                           <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">
                             Direções possíveis

@@ -27,6 +27,9 @@ export interface ProductVersion {
   // Normalmente igual ao sectorId, mas desacopla o dado do sector legado.
   feedKey: string;
 
+  // true = setas de direção (Business Brain) exibidas na área de trabalho.
+  arrowsUnlocked: boolean;
+
   // Nome visual completo exibido no header e na Área de Trabalho.
   name: string;
 
