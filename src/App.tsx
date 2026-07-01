@@ -443,6 +443,7 @@ function AuthenticatedApp() {
   //   - os1 e demais sectors  → null (sem fetch real, demos seguem)
   const codifyScope = getCodifyScopeForSector(activeSector);
   const activeProduct = getProductBySector(activeSector);
+  const feedKey = activeProduct?.feedKey ?? activeSector;
   const apiFeedCards = useCodifyFeed({
     enabled: codifyScope !== null,
     organizationId: codifyScope?.organizationId,
@@ -1563,7 +1564,7 @@ function AuthenticatedApp() {
       {((activeSector !== 'os1' && activeDepartment !== 'geral') || (role === 'franchise' && activeDepartment !== 'geral')) && (
         <SectorFeed
           department={activeDepartment as Exclude<DepartmentId, 'geral'>}
-          feeds={PROFILE_SECTOR_FEEDS[activeSector] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
+          feeds={PROFILE_SECTOR_FEEDS[feedKey] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
           onOpenWorkspace={openWorkspaceFromCard}
           topGapClass={scrolled && isDesktop ? SPLIT_TOP_GAP_MT : undefined}
           rightPadClass={scrolled && isDesktop ? 'pr-5' : 'pr-10'}
@@ -1723,7 +1724,7 @@ function AuthenticatedApp() {
               quando sector != os1) entram NO TOPO antes do fallback demo.
               Dedupe por id pra evitar duplicação caso um demo coincida. */}
         {(() => {
-          const base = activeSector === 'os1' ? [] : (DEMO_FEED_CARDS[activeSector] ?? []);
+          const base = activeSector === 'os1' ? [] : (DEMO_FEED_CARDS[feedKey] ?? []);
           const realIds = new Set(apiIntelligenceCards.map(c => c.id));
           const merged = [
             ...apiIntelligenceCards,

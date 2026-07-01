@@ -17,6 +17,7 @@ export const PRODUCT_VERSION_REGISTRY: ProductVersion[] = [
   {
     id:                  'pacheco',
     sectorId:            'nubank',
+    feedKey:             'nubank',
     name:                'OS¹ Farmácia — Análise de Demanda e Categorias',
     badge:               'Vertical Segmentado',
     format:              'vertical',
@@ -30,6 +31,7 @@ export const PRODUCT_VERSION_REGISTRY: ProductVersion[] = [
   {
     id:                  'oscar',
     sectorId:            'nike',
+    feedKey:             'nike',
     name:                'OS¹ Calçados — Análise de Mercado',
     badge:               'Horizontal Segmentado',
     format:              'horizontal',
@@ -43,6 +45,7 @@ export const PRODUCT_VERSION_REGISTRY: ProductVersion[] = [
   {
     id:                  'mcdonalds',
     sectorId:            'mcdonalds',
+    feedKey:             'mcdonalds',
     name:                "OS¹ Fast Food — Inteligência Preditiva de Mercado",
     badge:               'Vertical Segmentado',
     format:              'vertical',
@@ -56,6 +59,7 @@ export const PRODUCT_VERSION_REGISTRY: ProductVersion[] = [
   {
     id:                  'imperio',
     sectorId:            'cerveja-imperio',
+    feedKey:             'cerveja-imperio',
     name:                'OS¹ Bebidas — Análise de Produtos Mais Vendidos',
     badge:               'Vertical Segmentado',
     format:              'vertical',

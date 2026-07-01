@@ -23,6 +23,10 @@ export interface ProductVersion {
   // Os nomes 'nubank'/'nike' são legados do SectorSwitcher — não indicam as empresas.
   sectorId: SectorId;
 
+  // Chave usada para buscar o feed demo (PROFILE_SECTOR_FEEDS e DEMO_FEED_CARDS).
+  // Normalmente igual ao sectorId, mas desacopla o dado do sector legado.
+  feedKey: string;
+
   // Nome visual completo exibido no header e na Área de Trabalho.
   name: string;
 
