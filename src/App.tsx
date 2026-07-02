@@ -1205,7 +1205,7 @@ function AuthenticatedApp() {
               <Power size={20} className="hidden sm:block" />
             </button>
             <button
-              onClick={() => activeSector !== 'nubank' && activeSector !== 'nike' && activeSector !== 'mcdonalds' && setSectorOpen(true)}
+              onClick={() => setSectorOpen(true)}
               className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
               title={activeSector === 'os1' ? 'Trocar perfil de empresa' : 'Trocar área da empresa'}
             >
@@ -2002,7 +2002,7 @@ function AuthenticatedApp() {
         wide={scrolled}
         onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => activeSector !== 'nubank' && activeSector !== 'nike' && activeSector !== 'mcdonalds' && setSectorOpen(true)}
+        onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         onMapOpen={() => setMapOpen(true)}
         activeSector={activeSector}
@@ -2042,7 +2042,7 @@ function AuthenticatedApp() {
         userRole={role}
         onHome={() => setScoreOpen(v => !v)}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => activeSector !== 'nubank' && activeSector !== 'nike' && activeSector !== 'mcdonalds' && setSectorOpen(true)}
+        onSector={() => setSectorOpen(true)}
         onBrowser={() => setBrowserOpen(true)}
         unreadCount={unreadCount}
         dark={dark}
@@ -2242,7 +2242,7 @@ function AuthenticatedApp() {
           />
         )}
         {/* nubank (Pacheco vertical): seletor de lojas desabilitado — pacheco-loja-01 contém conteúdo operacional incompatível com a demo vertical */}
-        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'nike' && activeSector !== 'cerveja-imperio' && activeSector !== 'nubank' || role === 'franchise') && (
+        {sectorOpen && (activeSector !== 'os1' && activeSector !== 'cerveja-imperio' || role === 'franchise') && (
           <DepartmentSwitcherModal
             active={activeDepartment}
             onSelect={setActiveDepartment}

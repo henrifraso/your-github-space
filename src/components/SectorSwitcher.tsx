@@ -398,19 +398,19 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
 // ─── DepartmentSwitcher (usado em perfis não-OS1) ─────────────────────────────
 
 const DEPARTMENTS: { id: Exclude<DepartmentId, 'geral'>; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'marketing',  label: 'Presença & Posicionamento',             desc: 'Marca, reputação pública e posicionamento no mercado',         icon: <Megaphone size={22}/>,  color: '#ec4899' },
-  { id: 'vendas',     label: 'Canais & Demanda',                      desc: 'Demanda, canais e oportunidades comerciais',                   icon: <TrendingUp size={22}/>, color: '#10b981' },
-  { id: 'financeiro', label: 'Pressão Econômica & Margem de Mercado', desc: 'Pressões econômicas, margem pública e risco de mercado',       icon: <Banknote size={22}/>,   color: '#f59e0b' },
-  { id: 'rh',         label: 'Talentos & Expansão de Capacidade',     desc: 'Sinais de expansão, capacidade e talentos no setor',           icon: <Users size={22}/>,      color: '#8b5cf6' },
-  { id: 'operacoes',  label: 'Capacidade de Resposta ao Mercado',     desc: 'Capacidade de resposta ao mercado e experiência percebida',    icon: <Settings2 size={22}/>,  color: '#06b6d4' },
-  { id: 'estoque',    label: 'Território & Abastecimento',            desc: 'Território, abastecimento e disponibilidade por região',       icon: <Package size={22}/>,    color: '#84cc16' },
-  { id: 'juridico',   label: 'Regulação & Conformidade de Mercado',   desc: 'Regulação, normas setoriais e conformidade de mercado',        icon: <Scale size={22}/>,      color: '#f97316' },
+  { id: 'marketing',  label: 'Marketing',   desc: 'Campanhas, marca e reputação',    icon: <Megaphone size={22}/>,  color: '#ec4899' },
+  { id: 'vendas',     label: 'Vendas',       desc: 'Resultados, metas e canais',      icon: <TrendingUp size={22}/>, color: '#10b981' },
+  { id: 'financeiro', label: 'Financeiro',   desc: 'Fiscal, custos e margens',        icon: <Banknote size={22}/>,   color: '#f59e0b' },
+  { id: 'rh',         label: 'RH',           desc: 'Equipe, escalas e treinamentos',  icon: <Users size={22}/>,      color: '#8b5cf6' },
+  { id: 'operacoes',  label: 'Operações',    desc: 'Qualidade e processos internos',  icon: <Settings2 size={22}/>,  color: '#06b6d4' },
+  { id: 'estoque',    label: 'Estoque',      desc: 'Insumos, pedidos e fornecedores', icon: <Package size={22}/>,    color: '#84cc16' },
+  { id: 'juridico',   label: 'Jurídico',     desc: 'Compliance, contratos e leis',    icon: <Scale size={22}/>,      color: '#f97316' },
 ];
 
 // Óticas com conteúdo alinhado à análise de mercado — visíveis na navegação.
 // As demais (financeiro, rh, operacoes, estoque, juridico) permanecem na estrutura
 // de dados mas ocultas até o conteúdo ser revisado para linguagem de mercado.
-const VISIBLE_DEPARTMENT_IDS = new Set<string>(['marketing', 'vendas']);
+const VISIBLE_DEPARTMENT_IDS = new Set<string>(['marketing', 'vendas', 'financeiro', 'rh', 'operacoes', 'estoque', 'juridico']);
 
 interface DeptProps {
   active: DepartmentId;
@@ -430,8 +430,8 @@ export function DepartmentSwitcherModal({ active, onSelect, onClose }: DeptProps
     >
       <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
         <div>
-          <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Óticas de Análise</h1>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400">Escolha uma ótica de análise de mercado</p>
+          <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Feed por Área</h1>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">Escolha uma área da empresa</p>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer">
           <X size={20} />
