@@ -399,7 +399,188 @@ export const NUBANK_SECTOR_FEEDS: CompanySectorFeeds = {
     },
   ],
   administrativo: [],
-  comercial: [],
+  comercial: [
+    {
+      sectionTitle: 'Posicionamento & Concorrência',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'MAPA COMERCIAL',
+          title: 'Existe um vácuo de posicionamento em "dermocosmético" num raio de 800 m de várias lojas Pacheco — e o cliente está buscando agora',
+          detail: '2.400 buscas/mês por "farmácia com dermo" num raio de 1 km em bairros B/C do RJ — e quase nenhuma loja aparece. Ficha Google com tag de especialidade gera 34% mais cliques no Maps. A primeira que posicionar captura esse fluxo por padrão; custo de ocupar o vácuo: zero. Fonte: Google Business Insights / Abrafarma Digital 2025.',
+          badge: { label: 'Vácuo aberto', type: 'info' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'CONCORRENTE RD',
+          title: 'A RD Saúde prevê mais 47 lojas no RJ até dezembro — cada abertura cria um raio de captura de 1,5 km que absorve clientes fidelizados pela proximidade',
+          detail: 'Nova farmácia de rede no raio de 700 m reduz faturamento vizinho em até 19% nos 90 dias seguintes — e 43% dos clientes que migram não voltam. A RD planeja mais 47 lojas no RJ até dezembro, além das 12 abertas em 2026. Cada unidade age como recrutador silencioso no raio de 1,5 km. Fonte: monitor de varejo farmacêutico / Neofeed jun/26.',
+          badge: { label: '+47 lojas RD no RJ', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Canais & Captação',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'B2B CONVÊNIO',
+          title: 'Planos de saúde que reembolsam medicamentos são uma carteira B2B de volume constante que a maioria das lojas Pacheco ainda não prospecta ativamente',
+          detail: 'Bradesco, SulAmérica e Amil reembolsam R$ 380/mês por beneficiário credenciado. No raio de 2 km de uma loja em zona comercial do RJ há 8.000 a 14.000 elegíveis — receita previsível sem promoção ou desconto. Taxa de conversão após credenciamento ativo: 11–17%. Cada empresa do bairro com plano é uma carteira cativa ainda não ativada. Fonte: ANS / dados de credenciamento 2025.',
+          badge: { label: 'R$ 380/mês por beneficiário', type: 'ok' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'BUSCAS NOTURNAS',
+          title: '4 em cada 10 buscas por farmácia no RJ acontecem depois das 20h — e a maioria das fichas Google das lojas não está otimizada para esse horário',
+          detail: '41% das buscas por farmácia no RJ ocorrem entre 19h e 23h — mas a maioria das fichas Google não tem horário confirmado nem foto atualizada. Quem aparece nessa janela com perfil completo tem 2,7x mais conversão de mapa para visita. O cliente que vai de noite volta de manhã. Custo de ajustar: zero. Fonte: Google Business Insights / Abrafarma Digital 2025.',
+          badge: { label: '41% das buscas à noite', type: 'info' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'iFOOD FARMA',
+          title: 'O Venancio subsidiou frete grátis no iFood Farma e saltou da posição #7 para #3 no RJ em 60 dias — a Pacheco ainda aparece abaixo no app',
+          detail: 'O Venancio saltou da posição #7 para #3 no iFood Farma RJ em 60 dias subsidiando frete a R$ 4/entrega — cada posição ganha vale +7% de volume. 29% dos clientes via app repetem em 30 dias, criando hábito fora da loja física. No delivery, posição é visibilidade; visibilidade é pedido. Fonte: iFood Seller Center / análise de posicionamento jun/26.',
+          badge: { label: 'Concorrente: #3 no app', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Retenção & Margem',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'RUPTURA VS PREÇO',
+          title: 'Todo mundo acha que farmácia perde cliente por preço — os dados mostram que ruptura de produto é o motivo real em 3 de cada 5 trocas',
+          detail: '68% dos consumidores trocam de farmácia por ruptura de produto — só 22% citam preço. Lojas com ruptura abaixo de 1,2% têm NPS 18 pontos acima da média e retenção 31% superior. Disponibilidade retém mais do que desconto. Fonte: análise de comportamento de compra do setor / relatório de saúde do varejo 2025.',
+          badge: { label: 'Dado contra-intuitivo', type: 'info' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'FIDELIDADE',
+          title: 'O cliente Bem-Estar que não voltou nos últimos 60 dias tem 67% de chance de já estar comprando no concorrente — e a janela de reativação está fechando',
+          detail: 'Após 90 dias sem compra, a taxa de recuperação de cliente cai para menos de 12%. 67% dos que ficam 60+ dias inativos no Bem-Estar já migraram para o concorrente. Reativar via WhatsApp custa R$ 0,08 — vs R$ 24 de CAC de cliente novo. Fonte: Salesforce / Braze Benchmark Pharma 2025.',
+          badge: { label: 'Reativar até 90 dias', type: 'warn' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'SUPLEMENTOS',
+          title: 'Suplementos têm margem bruta de até 44% — quase o dobro do genérico — e a maioria das lojas ainda precifica por tabela sem estratégia',
+          detail: 'Suplementos: margem de 38–44% vs 22–28% do OTC, cresceram 31% YoY no RJ. Farmácias que precificaram 5–8% acima da tabela base em premium não perderam volume — o cliente tem renda superior e menor sensibilidade a preço. A margem está disponível; falta a estratégia. Fonte: painel de OTC do varejo farmacêutico 2025.',
+          badge: { label: 'Margem até 44%', type: 'ok' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Sazonalidade & Captação',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'JANELA INVERNO',
+          title: 'A janela de captação do cliente de saúde preventiva abre em 3 semanas — depois disso, quem posicionou fica, quem não posicionou perde pelo ano',
+          detail: 'Anti-gripais e imunidade crescem 38% no varejo farmacêutico de jun–ago, com pico na 3ª semana de junho. Cliente de saúde preventiva tem 31% de chance de virar recorrente. Farmácias que antecipam com mix e comunicação capturam 22% mais novos clientes no pico. A janela é curta. Fonte: relatório sazonal de varejo farmacêutico / análise de mercado de consumo 2025.',
+          badge: { label: 'Janela: 3 semanas', type: 'warn' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'CLIENTE ROPO',
+          title: 'Existe um perfil de cliente que pesquisa no app, decide na loja e tem ticket 40% maior — mas nenhum canal está capturando o CPF dele',
+          detail: '54% dos compradores pesquisam online antes de ir à farmácia — mas a maioria não é cadastrada. Lojas com captura de CPF em 100% das compras têm LTV 2,8x maior em 12 meses. Recaptura via WhatsApp em 30 dias: 41%. Cada CPF perdido é uma venda sem retorno. Fonte: painel de comportamento do shopper / Salesforce Health Retail 2025.',
+          badge: { label: 'LTV 2,8x com CPF', type: 'ok' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Concorrência & Share de Carteira',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'ASSINATURA CRÔNICO',
+          title: 'O Onofre lançou assinatura mensal de medicamentos crônicos com frete grátis — e já tem 80 mil assinantes no RJ em 4 meses',
+          detail: 'Onofre+iFood: 80 mil assinantes de crônico no RJ em 4 meses, cancelamento 6%/mês. Cada assinante é R$ 290/mês que sai da loja física — e o programa cresce 18%/mês. O hábito de visita que gera cross-sell vai junto. Fonte: iFood Health Partnerships / Abrafarma Digital 2026.',
+          badge: { label: '80k assinantes RJ', type: 'warn' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'SHARE DE CARTEIRA',
+          title: '7 em cada 10 pacientes crônicos do RJ compram em mais de uma farmácia por mês — a Pacheco pode não ser a principal para todos eles',
+          detail: '71% dos pacientes crônicos do RJ dividem o gasto entre 2+ farmácias por mês — ticket médio R$ 340. Quem oferece separação antecipada via WhatsApp concentra 68% do gasto desse perfil vs 41% das que não oferecem. Capturar 20% a mais dos existentes não exige cliente novo. Fonte: análise de comportamento de compra do setor / Abrafarma CRM 2025.',
+          badge: { label: '71% dividem gasto', type: 'info' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Mix & Abordagem Comercial',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'SKINCARE CONSULTIVO',
+          title: 'Existe uma abordagem de balcão que triplica o ticket de quem entrou pedindo "só um creme para manchas"',
+          detail: 'Ticket de skincare sobe de R$ 35 para R$ 110 quando o farmacêutico apresenta a rotina completa — sem argumento de preço, só educação. Retorno em 30 dias sobe 38%. Farmácias que treinaram 5 SKUs de rotina cresceram 26% na dermo em 60 dias. Fonte: painel de dermocosméticos do varejo / L\'Oréal Pharma Channel 2025.',
+          badge: { label: 'Ticket 3x com rotina', type: 'ok' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'CATÁLOGO DIGITAL',
+          title: 'Clientes mandam mensagem no WhatsApp da loja perguntando preço — sem catálogo digital, a resposta demora e a venda vai para o app do concorrente',
+          detail: 'Farmácias com catálogo ativo no WhatsApp convertem consulta em pedido a 52% vs 19% sem catálogo — e respondem 4x mais rápido. Média de 34 mensagens/dia em farmácias de bairro do RJ. Custo de ativação: zero. Fonte: Meta Business / Abrafarma Digital Commerce 2025.',
+          badge: { label: 'Conversão 52% com catálogo', type: 'ok' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'PROMOÇÃO DE SERVIÇO',
+          title: 'Todo mundo faz promoção de desconto em farmácia — mas cliente que veio por preço vai embora pelo próximo desconto do concorrente',
+          detail: 'Cliente que usa serviço gratuito (aferição, glicemia, orientação) tem LTV 3,1x maior em 12 meses e retorna em 30 dias a 71% vs 23% do cliente de desconto. Custo marginal: zero — o farmacêutico já está presente. Desconto compra uma visita; serviço compra o hábito. Fonte: Abrafarma / CFF 2025.',
+          badge: { label: 'LTV 3x maior', type: 'ok' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Parcerias & Movimentos de Mercado',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'PRESCRITOR LOCAL',
+          title: 'O médico clínico-geral que atende a 3 quadras da loja pode ser o canal de indicação mais barato que existe — mas ninguém foi até ele',
+          detail: 'Farmácias com 3+ prescritores próximos ativos têm volume 24% superior em medicamentos tarjados e NPS 11 pontos acima da média. Conversão de paciente indicado por médico: 78% na primeira visita vs 34% orgânico. Custo da visita: zero. Fonte: Abrafarma / CFF Canal Prescritores 2025.',
+          badge: { label: 'Conversão 78%', type: 'ok' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'FARMÁCIA NO CARREFOUR',
+          title: 'A Raia Drogasil abriu 8 unidades dentro de Carrefour no RJ — o cliente resolve tudo numa parada e para de ir até a farmácia de rua',
+          detail: 'RD abriu 8 unidades no Carrefour RJ em 2026, meta de 23 até dez/26. Farmácias em supermercado capturam 31% das compras de OTC que antes iam para lojas de rua no raio de 800 m. O cliente não migra por escolha — migra por comodidade instalada. Fonte: Raia Drogasil RI / pesquisa de jornada de compra 2025.',
+          badge: { label: '8 lojas Carrefour RJ', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Precificação & Programa',
+      cards: [
+        {
+          color: '#0ea5e9',
+          tag: 'REAJUSTE CMED',
+          title: 'O reajuste CMED de 5,8% entra em 1º de julho — há 3 semanas para comunicar com transparência antes que o cliente perceba como oportunismo',
+          detail: 'Farmácias que comunicaram o reajuste de 5,8% via WhatsApp antes de 1º/jul tiveram 34% menos reclamações e NPS 7 pontos superior. 63% dos consumidores aceitam com naturalidade quando informados antes — o cliente surpreendido reclama no Reclame Aqui. Prazo não espera. Fonte: CMED/ANVISA / Abrafarma jun/26.',
+          badge: { label: 'Prazo: 1º de julho', type: 'warn' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'BEM-ESTAR+',
+          title: 'Membros Bem-Estar+ têm ticket de R$ 84 vs R$ 62 da base geral — o gap de R$ 22 por visita ainda não foi ativado na maioria dos elegíveis',
+          detail: 'Conversão para Bem-Estar+ ainda em 11% da base elegível em SP. Membros+ têm frequência 2,4x maior e ticket 35% superior — 5% de migração adicional rende R$ 8.200/mês por loja sem cliente novo. A alavanca está na base ativa; falta a abordagem no balcão. Fonte: dados DPSP / Abrafarma Loyalty 2025.',
+          badge: { label: '+R$22 por visita no +', type: 'ok' },
+        },
+        {
+          color: '#0ea5e9',
+          tag: 'KIT SAZONAL',
+          title: 'Existe um bundle de inverno que eleva o ticket em 28% sem negociação de preço — e nenhum concorrente local montou o kit ainda',
+          detail: 'Kit Anti-Gripe Inverno (vitamina C + analgésico + spray nasal): ticket 28% superior e margem combinada 51% vs 32% dos itens vendidos isoladamente. Adesão no checkout quando oferecido ativamente: 38%. O produto está na gôndola — falta o kit. Fonte: Abrafarma / análise de cesta de compras do varejo 2025.',
+          badge: { label: '+28% ticket', type: 'ok' },
+        },
+      ],
+    },
+  ],
   compras: [],
   ti: [],
   atendimento: [],
