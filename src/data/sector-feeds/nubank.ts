@@ -398,4 +398,9 @@ export const NUBANK_SECTOR_FEEDS: CompanySectorFeeds = {
       ],
     },
   ],
+  administrativo: [],
+  comercial: [],
+  compras: [],
+  ti: [],
+  atendimento: [],
 };

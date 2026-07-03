@@ -379,4 +379,9 @@ export const MCDONALDS_SECTOR_FEEDS: CompanySectorFeeds = {
       ],
     },
   ],
+  administrativo: [],
+  comercial: [],
+  compras: [],
+  ti: [],
+  atendimento: [],
 };

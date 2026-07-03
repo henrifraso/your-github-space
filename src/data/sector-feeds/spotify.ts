@@ -395,4 +395,9 @@ export const SPOTIFY_SECTOR_FEEDS: CompanySectorFeeds = {
       ],
     },
   ],
+  administrativo: [],
+  comercial: [],
+  compras: [],
+  ti: [],
+  atendimento: [],
 };

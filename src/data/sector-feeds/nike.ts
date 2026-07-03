@@ -405,4 +405,9 @@ export const NIKE_SECTOR_FEEDS: CompanySectorFeeds = {
       ],
     },
   ],
+  administrativo: [],
+  comercial: [],
+  compras: [],
+  ti: [],
+  atendimento: [],
 };

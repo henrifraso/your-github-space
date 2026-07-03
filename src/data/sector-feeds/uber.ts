@@ -384,4 +384,9 @@ export const UBER_SECTOR_FEEDS: CompanySectorFeeds = {
       ],
     },
   ],
+  administrativo: [],
+  comercial: [],
+  compras: [],
+  ti: [],
+  atendimento: [],
 };

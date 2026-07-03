@@ -2270,13 +2270,18 @@ function AuthenticatedApp() {
         analyzeLabel={computeAnalyzeLabel(role, activeDepartment)}
         title={companyVisionLabel(role, activeDepartment)}
         departments={activeDepartment === 'geral' ? [
-          { id: 'marketing',  label: 'Marketing' },
-          { id: 'vendas',     label: 'Vendas' },
-          { id: 'financeiro', label: 'Financeiro' },
-          { id: 'rh',         label: 'RH' },
-          { id: 'operacoes',  label: 'Operações' },
-          { id: 'estoque',    label: 'Estoque' },
-          { id: 'juridico',   label: 'Jurídico' },
+          { id: 'administrativo', label: 'Administrativo' },
+          { id: 'comercial',      label: 'Comercial' },
+          { id: 'vendas',         label: 'Vendas' },
+          { id: 'marketing',      label: 'Marketing' },
+          { id: 'financeiro',     label: 'Financeiro' },
+          { id: 'rh',             label: 'RH' },
+          { id: 'operacoes',      label: 'Operações' },
+          { id: 'compras',        label: 'Compras' },
+          { id: 'estoque',        label: 'Logística & Estoque' },
+          { id: 'ti',             label: 'TI' },
+          { id: 'juridico',       label: 'Jurídico' },
+          { id: 'atendimento',    label: 'Atendimento' },
         ] : undefined}
         activeDepartment={activeDepartment}
         onSelectDepartment={(id) => setActiveDepartment(id as DepartmentId)}

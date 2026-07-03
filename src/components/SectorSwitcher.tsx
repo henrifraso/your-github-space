@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale } from 'lucide-react';
+import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale, Briefcase, Handshake, ShoppingCart, Monitor, HeadphonesIcon } from 'lucide-react';
 import type { DepartmentId } from '../types';
 
 export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'cerveja-imperio' | 'cerveja-imperio-distribuidora-01' | 'pacheco-loja-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
@@ -398,19 +398,24 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
 // ─── DepartmentSwitcher (usado em perfis não-OS1) ─────────────────────────────
 
 const DEPARTMENTS: { id: Exclude<DepartmentId, 'geral'>; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'marketing',  label: 'Marketing',   desc: 'Campanhas, marca e reputação',    icon: <Megaphone size={22}/>,  color: '#ec4899' },
-  { id: 'vendas',     label: 'Vendas',       desc: 'Resultados, metas e canais',      icon: <TrendingUp size={22}/>, color: '#10b981' },
-  { id: 'financeiro', label: 'Financeiro',   desc: 'Fiscal, custos e margens',        icon: <Banknote size={22}/>,   color: '#f59e0b' },
-  { id: 'rh',         label: 'RH',           desc: 'Equipe, escalas e treinamentos',  icon: <Users size={22}/>,      color: '#8b5cf6' },
-  { id: 'operacoes',  label: 'Operações',    desc: 'Qualidade e processos internos',  icon: <Settings2 size={22}/>,  color: '#06b6d4' },
-  { id: 'estoque',    label: 'Estoque',      desc: 'Insumos, pedidos e fornecedores', icon: <Package size={22}/>,    color: '#84cc16' },
-  { id: 'juridico',   label: 'Jurídico',     desc: 'Compliance, contratos e leis',    icon: <Scale size={22}/>,      color: '#f97316' },
+  { id: 'administrativo', label: 'Administrativo', desc: 'Gestão, processos e infraestrutura',  icon: <Briefcase size={22}/>,      color: '#64748b' },
+  { id: 'comercial',      label: 'Comercial',      desc: 'Prospecção, parcerias e expansão',    icon: <Handshake size={22}/>,      color: '#0ea5e9' },
+  { id: 'vendas',         label: 'Vendas',         desc: 'Resultados, metas e canais',          icon: <TrendingUp size={22}/>,     color: '#10b981' },
+  { id: 'marketing',      label: 'Marketing',      desc: 'Campanhas, marca e reputação',        icon: <Megaphone size={22}/>,      color: '#ec4899' },
+  { id: 'financeiro',     label: 'Financeiro',     desc: 'Fiscal, custos e margens',            icon: <Banknote size={22}/>,       color: '#f59e0b' },
+  { id: 'rh',             label: 'RH',             desc: 'Equipe, escalas e treinamentos',      icon: <Users size={22}/>,          color: '#8b5cf6' },
+  { id: 'operacoes',      label: 'Operações',      desc: 'Qualidade e processos internos',      icon: <Settings2 size={22}/>,      color: '#06b6d4' },
+  { id: 'compras',        label: 'Compras',        desc: 'Fornecedores, insumos e contratos',   icon: <ShoppingCart size={22}/>,   color: '#d946ef' },
+  { id: 'estoque',        label: 'Logística & Estoque', desc: 'Armazenagem, giro e distribuição', icon: <Package size={22}/>,     color: '#84cc16' },
+  { id: 'ti',             label: 'TI',             desc: 'Sistemas, infraestrutura e dados',    icon: <Monitor size={22}/>,        color: '#6366f1' },
+  { id: 'juridico',       label: 'Jurídico',       desc: 'Compliance, contratos e leis',        icon: <Scale size={22}/>,          color: '#f97316' },
+  { id: 'atendimento',    label: 'Atendimento',    desc: 'Suporte, NPS e experiência do cliente', icon: <HeadphonesIcon size={22}/>, color: '#14b8a6' },
 ];
 
 // Óticas com conteúdo alinhado à análise de mercado — visíveis na navegação.
 // As demais (financeiro, rh, operacoes, estoque, juridico) permanecem na estrutura
 // de dados mas ocultas até o conteúdo ser revisado para linguagem de mercado.
-const VISIBLE_DEPARTMENT_IDS = new Set<string>(['marketing', 'vendas', 'financeiro', 'rh', 'operacoes', 'estoque', 'juridico']);
+const VISIBLE_DEPARTMENT_IDS = new Set<string>(['administrativo', 'comercial', 'vendas', 'marketing', 'financeiro', 'rh', 'operacoes', 'compras', 'estoque', 'ti', 'juridico', 'atendimento']);
 
 interface DeptProps {
   active: DepartmentId;

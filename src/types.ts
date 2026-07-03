@@ -98,7 +98,7 @@ export interface OmniData {
   pep?: Record<string, PEPContainer>;
 }
 
-export type DepartmentId = 'geral' | 'marketing' | 'vendas' | 'financeiro' | 'rh' | 'operacoes' | 'estoque' | 'juridico';
+export type DepartmentId = 'geral' | 'administrativo' | 'comercial' | 'vendas' | 'marketing' | 'financeiro' | 'rh' | 'operacoes' | 'compras' | 'estoque' | 'ti' | 'juridico' | 'atendimento';
 
 export interface SectorCard {
   color: string;
