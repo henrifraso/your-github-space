@@ -374,47 +374,187 @@ export const NUBANK_SECTOR_FEEDS: CompanySectorFeeds = {
 
   financeiro: [
     {
-      sectionTitle: 'Margens & Mix',
+      sectionTitle: 'Margem & Mix de Mercado',
       cards: [
         {
           color: '#f59e0b',
-          tag: 'MARGEM',
-          title: 'Margem bruta consolidada 28% — Ever puxa pra cima',
-          detail: 'Marcas próprias Ever rendem 18 p.p. de margem extra vs medicamento comercial. Ever respondeu por 14% do mix e 24% da margem em mai/26. Meta 2026: ampliar Ever pra 20% do mix.',
-          badge: { label: '+18pp Ever', type: 'ok' },
-        },
-        {
-          color: '#f59e0b',
-          tag: 'CMED',
-          title: 'CMED autoriza reajuste de 5,8% — impacto positivo na margem',
-          detail: 'Câmara de Regulação aprovou teto de reajuste anual de 5,8% em medicamentos. Compensa 1,2 p.p. na margem bruta do 2T26. Comunicação à indústria já enviada. Repasse em ondas a partir de 01/jul.',
-          badge: { label: '+1,2pp margem', type: 'ok' },
-        },
-        {
-          color: '#f59e0b',
-          tag: 'CARTÃO/PIX',
-          title: 'PIX = 38% do tíquete em loja física',
-          detail: 'PIX cresceu 8 p.p. em 12 meses no mix de pagamentos. Margem PIX é melhor: zero taxa de antecipação. Campanha "Compra com PIX, ganha R$ 10 de cashback" rodando em SP em jun/26.',
-          badge: { label: '38% PIX', type: 'ok' },
+          tag: 'MIX E MARGEM',
+          title: 'Cada 1 ponto percentual que migra de medicamento de referência para não-medicamento eleva a margem bruta em 0,6 p.p. — dermocosméticos e suplementos têm margem 3x maior que referência',
+          detail: 'Margem bruta média em medicamentos de referência: 22–24%. Dermocosméticos e suplementos: 40–52%. Para cada 1 p.p. transferido do mix para essas categorias, a margem sobe 0,5–0,7 p.p. Farmácias com não-medicamentos acima de 30% do faturamento têm margem 8–12 p.p. superior à média do setor. Fonte: análise de composição de margem no varejo farmacêutico / Abrafarma Mix Report 2026.',
+          badge: { label: 'Dermo = margem 3x maior', type: 'ok' },
         },
       ],
     },
     {
-      sectionTitle: 'Resultado Grupo DPSP',
+      sectionTitle: 'Riscos Financeiros do Setor',
       cards: [
         {
           color: '#f59e0b',
-          tag: 'EBITDA',
-          title: 'EBITDA 1T26: R$ 412 mi — +18% YoY',
-          detail: 'Sinergia operacional Pacheco+DSP rende R$ 32 mi/ano em overhead reduzido. CD compartilhado (7 ao todo) corta frete em 14%. Margem operacional 9,1% (vs 8,2% no 1T25).',
-          badge: { label: '+18% YoY', type: 'ok' },
+          tag: 'INADIMPLÊNCIA SETORIAL',
+          title: 'Inadimplência no crediário próprio acima de 4% corrói mais margem do que a receita extra que o crédito gera — o crediário vira armadilha sem controle de risco',
+          detail: 'Inadimplência média no crediário de farmácias: 3,2% (dentro do aceitável). Acima de 4%, o custo de provisão + cobrança + capital parado supera o ganho de volume gerado. O setor registrou alta de 0,8 p.p. em H1/26, puxada por pressão de renda nas classes C/D. Fonte: BNDES + Abrafarma Crédito ao Consumidor 2026.',
+          badge: { label: 'Inadimpl. +0,8pp H1/26', type: 'warn' },
         },
         {
           color: '#f59e0b',
-          tag: 'CAPEX',
-          title: 'CAPEX expansão: R$ 1,2 bi pra 400 lojas até 2028',
-          detail: 'Plano de expansão aprovado prevê 400 novas lojas, com CAPEX médio de R$ 3 mi/loja. Foco: Grande SP (180), interior SP (110), MG/ES (70), Nordeste novo (40). ROI projetado: 22 meses por loja.',
-          badge: { label: 'R$ 1,2 bi', type: 'info' },
+          tag: 'CUSTO DE ESTOQUE',
+          title: 'Manter estoque parado custa em média 3,2% do faturamento anual — segundo maior custo operacional de uma farmácia, logo atrás da folha de pagamento',
+          detail: 'O custo total de manutenção de estoque (capital imobilizado, vencimento, armazenagem, perdas) representa 3,2% do faturamento no varejo farmacêutico independente. Farmácias com giro de estoque abaixo de 8x/ano pagam 1,4 p.p. a mais que as que giram 12x+. Reduzir o prazo médio em 5 dias libera R$ 12–18 mil para cada R$ 1 mi de faturamento. Fonte: CFF + Abrafarma Custo Operacional 2025.',
+          badge: { label: '3,2% do fat. em estoque', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Capital de Giro & Fornecedores',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'PRAZO DE FORNECEDOR',
+          title: 'Distribuidoras de genéricos oferecem até 90 dias de prazo para farmácias com compra mínima de R$ 50 mil/mês — capital de giro gratuito que apenas 34% das elegíveis negociam',
+          detail: 'Distribuidoras Profarma, Neodist e Panarello concedem prazo de 60–90 dias para compradores com volume acima de R$ 50 mil/mês e histórico limpo. Apenas 34% das farmácias elegíveis negociam esse prazo formalmente. O prazo extra libera caixa equivalente a 2–3 semanas de capital de giro sem custo financeiro. Fonte: análise de condições comerciais no atacado farmacêutico / Abrafarma Distribuição 2025.',
+          badge: { label: 'Até 90 dias sem custo', type: 'ok' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'CUSTO DE CAPITAL',
+          title: 'Raia e Drogasil antecipam recebíveis via FIDC próprio a CDI+0,8% — farmácias independentes pagam CDI+3% pelo mesmo serviço nos bancos, diferença de R$ 15–22 mil/ano por R$ 1 mi em cartão',
+          detail: 'Raia Drogasil e DPSP operam FIDCs próprios para antecipação de recebíveis de cartão a CDI+0,8%–1,2%. Farmácias independentes acessam o mesmo serviço via banco a CDI+3%–4%. A diferença equivale a R$ 15–22 mil/ano para cada R$ 1 mi de faturamento em cartão. Cooperativas como Unifarma oferecem FIDC coletivo — mas só 18% dos associados aderem. Fonte: Abrafarma Finanças + CVM 2026.',
+          badge: { label: 'CDI+0,8% vs CDI+3%', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Compras & Fornecedores',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'DIRETO VS DISTRIBUIDOR',
+          title: 'Comprar genérico direto do laboratório rende margem 6–9 p.p. maior que pelo distribuidor — mas exige R$ 150 mil/mês de volume. Cooperativas como Unifarma chegam lá comprando junto',
+          detail: 'Compra direta junto a laboratórios como Eurofarma, Teuto e EMS eleva margem bruta em 6–9 p.p. vs distribuidor intermediário. Exigência: volume mínimo de R$ 150 mil/mês por linha. Cooperativas Unifarma e FarmaClub consolidam volume de dezenas de associadas para atingir o threshold. Taxa de adesão atual: 22% das farmácias elegíveis. Fonte: análise de cadeia de fornecimento farmacêutico / Abrafarma Compras 2026.',
+          badge: { label: '+6–9pp compra direta', type: 'ok' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'VARIAÇÃO NO ATACADO',
+          title: 'O mesmo genérico pode custar até 34% a menos em uma distribuidora do que em outra — farmácias sem cotação mensal deixam em média R$ 28 mil/ano na mesa',
+          detail: 'Levantamento de 200 genéricos de alto giro em 5 distribuidoras registrou variação de até 34% para o mesmo produto. Dispersão maior em antibióticos, anti-hipertensivos e ansiolíticos. Farmácias com processo de cotação mensal automatizada economizam em média R$ 28 mil/ano vs as que compram do fornecedor habitual sem comparação. Fonte: análise de preço no atacado farmacêutico / Abrafarma Compras 2026.',
+          badge: { label: 'Variação até 34% no atacado', type: 'info' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'RISCO DE PRAZO REVOGADO',
+          title: 'Distribuidor que concede 60 dias pode revogar o prazo após 2 boletos em atraso e recolocar em 30 — o custo de capital do estoque dobra e a renegociação leva em média 4 meses',
+          detail: 'Contratos de distribuição farmacêutica permitem revisão unilateral de prazo após inadimplência de 2+ títulos. Farmácias que perdem o prazo estendido precisam financiar o mesmo estoque com capital próprio ou crédito bancário — custo adicional de R$ 8–14 mil/mês por R$ 1 mi de estoque. Renegociação após revogação: média de 4 meses. Fonte: análise de contratos de distribuição / Abrafarma + CFF 2025.',
+          badge: { label: '4 meses p/ renegociar', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Tributário & Precificação',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'REGIME TRIBUTÁRIO',
+          title: 'Farmácia com até R$ 4,8 mi/ano no Lucro Presumido paga até 10 p.p. mais imposto do que poderia no Simples Nacional — 59% não revisa o enquadramento anualmente',
+          detail: 'Até R$ 4,8 mi/ano de faturamento, o Simples Nacional pode reduzir a carga tributária efetiva em 6–10 p.p. no varejo farmacêutico vs Lucro Presumido. Apenas 41% das farmácias independentes revisam o regime anualmente. Simulação com contador custa menos de R$ 500 e pode render R$ 30–80 mil/ano em economia fiscal. Fonte: Receita Federal + Abrafarma Gestão Tributária 2025.',
+          badge: { label: 'Até 10pp a menos no Simples', type: 'ok' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'JANELA DO REAJUSTE CMED',
+          title: 'CMED publica o teto em março com vigência em abril — farmácia que demora a atualizar tabela vende estoque reajustado no preço antigo e comprime margem por um trimestre',
+          detail: 'O calendário CMED é fixo: publicação em março, vigência 1º de abril. Distribuidoras repassam imediatamente. Atraso médio de atualização de tabela no varejo independente: 18 dias. Cada dia de atraso equivale a 0,016 p.p. de margem perdida por medicamento reajustado — acumulado no trimestre chega a 0,9 p.p. Fonte: CMED + análise de repasse de preço / Abrafarma Precificação 2026.',
+          badge: { label: 'Atraso médio: 18 dias', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Gestão de Estoque & Precificação',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'COMPRA PROGRAMADA',
+          title: 'RaiaDrogasil e DPSP usam forecast automático de demanda para comprar com 30 dias de antecedência — independentes compram por intuição e têm estoque 40% mais gordo com o dobro de ruptura',
+          detail: 'Redes com compra programada por algoritmo de demanda histórica mantêm estoque médio 40% menor e ruptura 54% menor que independentes sem o sistema. O excesso de estoque nas independentes representa capital imobilizado de R$ 18–35 mil para cada R$ 500 mil de faturamento mensal. Fonte: análise de gestão de estoque no varejo farmacêutico / Abrafarma Tech 2026.',
+          badge: { label: 'Estoque 40% mais gordo', type: 'warn' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'CUSTO DA RUPTURA',
+          title: 'O custo de ruptura de estoque equivale a 2,1x o custo do excesso que a farmácia tentou evitar — cortar pedido por medo de encalhe sai mais caro do que manter o item a mais',
+          detail: 'Ruptura gera perda imediata da venda + 34% de chance de o cliente não retornar naquele mês. Custo total por evento de ruptura: 2,1x o custo de manter o item extra em gôndola. Farmácias que cortam pedido preventivamente pagam o dobro em receita perdida. Fonte: análise de custo total de estoque / Abrafarma + FGV Logística 2025.',
+          badge: { label: 'Ruptura custa 2,1x o excesso', type: 'info' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'PREÇO DE REPOSIÇÃO',
+          title: 'Farmácia que precifica pelo custo de reposição — não pelo que pagou — tem margem 3–5 p.p. maior em períodos de reajuste. A maioria precifica pelo passado e vende abaixo do mercado sem perceber',
+          detail: 'Precificação pelo custo de aquisição gera descasamento em reajustes: a farmácia vende pelo preço antigo enquanto o próximo pedido já será mais caro. Precificação pelo custo de reposição preserva 3–5 p.p. de margem nos meses de reajuste CMED. Apenas 29% das independentes adotam o método. Fonte: análise de política de precificação / Abrafarma Gestão 2025.',
+          badge: { label: '+3–5pp com preço de reposição', type: 'ok' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Receita & Risco Fiscal',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'SERVIÇOS FARMACÊUTICOS',
+          title: 'Serviços farmacêuticos (aferição de pressão, teste de glicemia, injetável) têm margem de 60–80% e isenção de ICMS em 14 estados — menos de 20% das farmácias cobram formalmente',
+          detail: 'A RDC 44/09 autoriza cobrança por serviços farmacêuticos clínicos. Margem bruta: 60–80% sem custo de produto. Quatorze estados concedem isenção de ICMS sobre a receita de serviços. Farmácias que formalizam a cobrança faturam em média R$ 4.200/mês adicionais com os mesmos recursos. Menos de 20% das independentes adotam. Fonte: CFF + Abrafarma Serviços Farmacêuticos 2026.',
+          badge: { label: 'Margem 60–80% em serviços', type: 'ok' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'BONIFICAÇÃO TRIBUTADA',
+          title: 'Bonificação de indústria (produto grátis no pedido) é tributada como receita desde 2024 — farmácias que não ajustaram a contabilidade acumulam passivo fiscal retroativo de até 5 anos',
+          detail: 'A Solução de Consulta COSIT 215/2023 consolidou tributação de bonificações em produto como receita operacional. IRPJ, CSLL, PIS e COFINS incidem sobre o valor de mercado do produto bonificado. Farmácias no Lucro Real ou Presumido sem ajuste contábil ficam expostas a autuação retroativa de até 5 anos. Fonte: Receita Federal COSIT 215/2023 + Abrafarma Fiscal 2024.',
+          badge: { label: 'Passivo retroativo 5 anos', type: 'warn' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Crédito & Indicadores Econômicos',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'CUSTO DO BOLETO NÃO PAGO',
+          title: 'O custo total de um boleto não pago (tarifa + cobrança + administrativo) chega a R$ 47 em média — mais do que o valor de vários boletos de pequenos fornecedores. Inadimplir sai mais caro do que antecipar',
+          detail: 'Custo médio de um boleto não pago no varejo: R$ 14 de tarifa bancária + R$ 18 de custo de cobrança + R$ 15 de custo administrativo interno = R$ 47. Para fornecedores com boletos abaixo de R$ 200, o custo da inadimplência supera 23% do valor da dívida. Antecipar com desconto de 1–2% é sempre mais barato. Fonte: análise de custo de inadimplência no atacado / Abrafarma + Febraban 2025.',
+          badge: { label: 'R$47 por boleto não pago', type: 'info' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'PRONAMPE',
+          title: 'Farmácias com faturamento acima de R$ 2 mi/ano acessam Pronampe a Selic+1,25% para capital de giro — custo 60% menor que o cheque especial PJ. Apenas 11% das elegíveis usaram em 2025',
+          detail: 'O Pronampe oferece crédito a Selic+1,25% com prazo de até 48 meses. Custo efetivo anual: ~13% vs 34–42% do cheque especial PJ. Apenas 11% das farmácias elegíveis acessaram a linha em 2025 — a maioria desconhece a elegibilidade ou usa crédito bancário por inércia. Fonte: SEBRAE + Abrafarma Finanças 2026.',
+          badge: { label: 'Selic+1,25% vs 34% cheque esp.', type: 'ok' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'DESCASAMENTO DE CONVÊNIO',
+          title: 'Convênios pagam em 32 dias; estoque vence em 28 — os 4 dias de descasamento criam necessidade de capital de giro permanente de R$ 12–18 mil para cada R$ 1 mi faturado em plano de saúde',
+          detail: 'Prazo médio de recebimento de convênios no varejo farmacêutico: 32 dias. Prazo médio de pagamento de estoque: 28 dias. O descasamento de 4 dias exige capital de giro permanente de R$ 12–18 mil por R$ 1 mi de faturamento em convênio. Farmácias com carteira de convênio acima de 40% do faturamento sentem o efeito no fluxo de caixa toda quinzena. Fonte: Abrafarma + ANS 2026.',
+          badge: { label: '4 dias de descasamento', type: 'info' },
+        },
+      ],
+    },
+    {
+      sectionTitle: 'Tributário & Benefícios',
+      cards: [
+        {
+          color: '#f59e0b',
+          tag: 'REFORMA TRIBUTÁRIA',
+          title: 'A substituição de PIS/COFINS pelo CBS começa em 2027 — medicamentos hoje isentos podem perder a isenção parcialmente. Farmácias que não modelaram o impacto até 2026 serão pegas de surpresa na margem',
+          detail: 'A reforma tributária (LC 214/2024) substitui PIS/COFINS pelo CBS a partir de 2027. Medicamentos isentos de PIS/COFINS podem ter tratamento distinto no novo regime conforme a lista de essencialidade. Impacto estimado na margem bruta: 2–5 p.p. para produtos sem confirmação de isenção no CBS. Modelagem recomendada: contratada até dez/26. Fonte: LC 214/2024 + Abrafarma Fiscal 2026.',
+          badge: { label: 'CBS vigência 2027', type: 'warn' },
+        },
+        {
+          color: '#f59e0b',
+          tag: 'ANTECIPAÇÃO DE FGTS',
+          title: 'Pague Menos e Extrafarma oferecem antecipação de FGTS como benefício ao colaborador — turnover cai 18% e o custo de substituição (R$ 5.800/pessoa) reduz sem tocar na folha',
+          detail: 'Pague Menos e Extrafarma integraram plataformas de antecipação de FGTS (Saque-Aniversário) como benefício corporativo. Resultado: turnover -18% nas lojas do programa vs grupo de controle. Custo de substituição de colaborador no varejo farmacêutico: R$ 5.800. O benefício não aumenta a folha — redistribui acesso ao crédito do próprio trabalhador. Fonte: Abrafarma RH + relatórios de benefícios corporativos 2026.',
+          badge: { label: 'Turnover -18% sem custo', type: 'ok' },
         },
       ],
     },
