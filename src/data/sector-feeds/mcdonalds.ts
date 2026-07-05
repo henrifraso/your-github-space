@@ -301,7 +301,7 @@ export const MCDONALDS_SECTOR_FEEDS: CompanySectorFeeds = {
           color: C,
           tag: 'PRIMEIRA VISITA — 68% DOS CLIENTES QUE VOLTAM EM 7 DIAS VIRAM CLIENTES MENSAIS',
           title: '68% dos clientes de fast food que retornam à mesma unidade em até 7 dias após a primeira visita tornam-se clientes mensais recorrentes — contra 12% dos que demoram mais de 30 dias para voltar; Habib\'s e Bob\'s operam cupom de segunda visita impresso na embalagem da primeira compra com validade de 7 dias especificamente para capturar essa janela, e McDonald\'s tem o programa mas sem execução ativa na maioria das franqueadas',
-          detail: 'Abrasel Retenção + análise de mercado do setor 2025: taxa de conversão para cliente mensal recorrente por tempo até segunda visita — retorno em at�� 7 dias: 68% de conversão para mensal. Retorno entre 8–14 dias: 41%. Retorno entre 15–30 dias: 24%. Retorno após 30 dias: 12%. Mecanismo: segunda visita dentro de 7 dias consolida o hábito antes que o cliente experimente o concorrente. Habib\'s: cupom de 15% OFF na segunda visita impresso no verso do recibo, validade 7 dias — taxa de resgate: 29%. Bob\'s: QR Code na embalagem com desconto de segunda visita — resgate: 24%. McDonald\'s: programa de segunda visita disponível via app mas sem comunicação física no PDV em 69% das franqueadas. Fonte: Abrasel + análise de mercado do setor + Habib\'s Ops + Bob\'s Press 2025.',
+          detail: 'Abrasel Retenção + análise de mercado do setor 2025: taxa de conversão para cliente mensal recorrente por tempo até segunda visita — retorno em até 7 dias: 68% de conversão para mensal. Retorno entre 8–14 dias: 41%. Retorno entre 15–30 dias: 24%. Retorno após 30 dias: 12%. Mecanismo: segunda visita dentro de 7 dias consolida o hábito antes que o cliente experimente o concorrente. Habib\'s: cupom de 15% OFF na segunda visita impresso no verso do recibo, validade 7 dias — taxa de resgate: 29%. Bob\'s: QR Code na embalagem com desconto de segunda visita — resgate: 24%. McDonald\'s: programa de segunda visita disponível via app mas sem comunicação física no PDV em 69% das franqueadas. Fonte: Abrasel + análise de mercado do setor + Habib\'s Ops + Bob\'s Press 2025.',
           badge: { label: 'Retorno em 7 dias: 68% viram mensais — Habib\'s tem cupom de volta na embalagem', type: 'warn' },
         },
         {
@@ -973,51 +973,6 @@ export const MCDONALDS_SECTOR_FEEDS: CompanySectorFeeds = {
 
   juridico: [
     {
-      sectionTitle: 'Saúde Regulatória',
-      cards: [
-        {
-          color: '#f97316',
-          tag: 'VIGILÂNCIA',
-          title: 'Vigilância Sanitária — auditoria Q2 prevista para junho',
-          detail: 'Auditoria trimestral da Vigilância Sanitária prevista para junho de 2026 (data exata não comunicada). Última auditoria (março): aprovação com pontuação 9,2/10 — 2 observações de baixo risco já corrigidas. Checklist de preparação disponível com o gerente operacional.',
-          badge: { label: 'Audita em jun', type: 'info' },
-        },
-        {
-          color: '#f97316',
-          tag: 'PROCON',
-          title: 'PROCON — 0 reclamações ativas no mês',
-          detail: 'Nenhuma reclamação registrada no PROCON em abril. Histórico do ano: 2 reclamações em fevereiro (ambas encerradas com acordo) e 0 em março. Política de resolução imediata no balcão — gerente autorizado a refazer pedido ou reembolsar até R$80 sem necessidade de aprovação superior.',
-          badge: { label: '0 reclamações', type: 'ok' },
-        },
-      ],
-    },
-    {
-      sectionTitle: 'Contratos',
-      cards: [
-        {
-          color: '#f97316',
-          tag: 'ALUGUEL',
-          title: 'Contrato de locação — renovação em julho/2026',
-          detail: 'Contrato de locação do imóvel vence em 31/07/2026. Locador já sinalizou interesse em renovação com reajuste pelo IGPM (acumulado 12 meses: 6,8%). Negociação iniciada pelo jurídico da franquia. Meta: assinar renovação até 30/05 para garantir condições atuais.',
-          badge: { label: 'Renovar até mai', type: 'warn' },
-        },
-        {
-          color: '#f97316',
-          tag: 'FRANQUIA',
-          title: 'Taxa de royalties — pagamento mensal em dia',
-          detail: 'Royalties mensais da franquia McDonald\'s (4% do faturamento bruto + 4% fundo de propaganda) pagos em dia. Abril: R$31.744 (faturamento bruto R$396.800). Comprovante enviado à franqueadora via portal. Próximo vencimento: 10/06.',
-          badge: { label: 'Em dia', type: 'ok' },
-        },
-        {
-          color: '#f97316',
-          tag: 'TRABALHISTA',
-          title: 'Ação trabalhista ex-colaborador — audiência 22/05',
-          detail: 'Ação trabalhista movida por ex-colaborador demitido em outubro/2025 (alegação de horas extras não pagas). Audiência de conciliação marcada para 22/05 na Vara do Trabalho. Advogado trabalhista contratado. Proposta de acordo pré-audiência em análise (R$3.200).',
-          badge: { label: 'Audiência 22/05', type: 'warn' },
-        },
-      ],
-    },
-    {
       sectionTitle: 'Regulatório, Consumidor & Passivo Trabalhista no Fast Food',
       cards: [
         {
@@ -1129,6 +1084,41 @@ export const MCDONALDS_SECTOR_FEEDS: CompanySectorFeeds = {
           title: 'Ex-franqueado que mantém letreiro, uniforme ou identidade visual da marca após o fim do contrato já foi alvo de ação por uso indevido de propriedade intelectual movida pela franqueadora — o prazo de descaracterização costuma ser curto e contratual.',
           detail: 'INPI + Lei de Franquia (Lei 13.966/2019) + Abrasel Jurídico 2024: contrato de franquia define prazo exato (geralmente 30 a 90 dias) para remoção total de marca registrada após encerramento. Descumprimento gera multa diária cumulativa, independente de má-fé.',
           badge: { label: 'Uso indevido de marca pós-saída: multa diária cumulativa, prazo curto', type: 'warn' },
+        },
+        {
+          color: C,
+          tag: 'CERTIFICADO DE MANIPULAÇÃO VENCIDO — AUTO DE INFRAÇÃO MESMO COM O RESTAURANTE TODO EM ORDEM',
+          title: 'Colaborador que manipula alimento sem certificado de curso de manipulação válido gera autuação sanitária independente de o restante da unidade estar em conformidade — um único crachá vencido pode gerar o mesmo auto de infração que uma falha estrutural de cozinha.',
+          detail: 'ANVISA RDC 216/2004 + Abrasel Compliance Sanitário 2024: curso de manipulação de alimentos tem validade determinada e renovação obrigatória por colaborador, não pela unidade como um todo. Fiscalização já autuou rede de fast food por certificado vencido de um único funcionário durante inspeção de rotina.',
+          badge: { label: 'Certificado de manipulação vencido de 1 funcionário já gerou autuação em rotina', type: 'warn' },
+        },
+        {
+          color: C,
+          tag: 'FOTO DO COMBO MAIOR QUE O PRODUTO REAL — PUBLICIDADE ENGANOSA JÁ GEROU AÇÃO CONTRA REDE DE FAST FOOD',
+          title: 'Imagem publicitária de combo com aparência maior ou mais completa que o produto efetivamente servido no balcão já foi alvo de ação por publicidade enganosa no setor de fast food — a diferença entre a foto do cardápio e o prato real é o tipo de reclamação que vira processo, não só insatisfação.',
+          detail: 'CDC (art. 37) + Abrasel Publicidade de Produto 2024: publicidade enganosa por indução a erro sobre característica do produto é vedada independente de intenção. Padronizar a montagem para bater com a foto usada na comunicação é a defesa mais citada contra esse tipo de reclamação.',
+          badge: { label: 'Diferença entre foto do combo e produto real já virou ação por publicidade enganosa', type: 'warn' },
+        },
+        {
+          color: C,
+          tag: 'ALTA ROTATIVIDADE — ERRO DE CÁLCULO DE VERBA RESCISÓRIA EM VOLUME VIRA PASSIVO CUMULATIVO',
+          title: 'Fast food com rotatividade de até 80% ao ano processa um volume grande de rescisões todo mês — um pequeno erro recorrente no cálculo de aviso prévio ou verba rescisória, multiplicado por esse volume, acumula passivo trabalhista muito maior do que um erro isolado em um setor de baixa rotatividade.',
+          detail: 'CLT + TST + Abrasel RH Jurídico 2024: erro sistemático de cálculo em alta rotatividade tende a gerar ação coletiva ou múltiplas reclamações individuais com o mesmo fundamento, diferente de um erro pontual. Auditoria periódica do processo de rescisão reduz esse risco cumulativo específico do setor.',
+          badge: { label: 'Erro de cálculo recorrente em alta rotatividade vira passivo trabalhista multiplicado', type: 'warn' },
+        },
+        {
+          color: C,
+          tag: 'RESCISÃO ANTECIPADA DO CONTRATO DE FRANQUIA — MULTA PROPORCIONAL ASSINADA SEM NEGOCIAR',
+          title: 'Contrato de franquia costuma prever multa por rescisão antecipada proporcional ao tempo restante do contrato — cláusula presente desde a assinatura inicial, mas que franqueado só nota o peso real quando decide sair antes do prazo por motivo pessoal ou financeiro.',
+          detail: 'Lei 13.966/2019 (Lei de Franquias) + Sebrae Contratos de Franquia 2024: cláusula de multa por rescisão antecipada é válida e comum no setor, mas seu valor efetivo (calculado sobre royalties futuros projetados) raramente é dimensionado pelo franqueado no momento da assinatura, só na hora da saída.',
+          badge: { label: 'Multa de rescisão antecipada só é dimensionada de verdade na hora de sair', type: 'info' },
+        },
+        {
+          color: C,
+          tag: 'CÂMERA NO SALÃO — LGPD EXIGE AVISO CLARO DE CAPTAÇÃO DE IMAGEM, ITEM QUE MUITAS UNIDADES IGNORAM',
+          title: 'Câmera de monitoramento no salão e na cozinha capta imagem de cliente e de colaborador de forma contínua — a LGPD exige aviso visível e claro sobre essa captação, e unidade sem esse aviso está tratando dado pessoal (a própria imagem) sem a transparência que a lei exige.',
+          detail: 'LGPD + ANPD + Abrasel Compliance Digital 2024: aviso de monitoramento por câmera é item de baixo custo de implementação (placa visível na entrada) mas frequentemente esquecido em fiscalização de conformidade de dados, mesmo em unidades que já cumprem outros requisitos da lei.',
+          badge: { label: 'Câmera sem aviso visível de monitoramento é falha de LGPD de baixo custo pra corrigir', type: 'info' },
         },
       ],
     },
