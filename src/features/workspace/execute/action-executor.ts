@@ -11,8 +11,20 @@
 
 import { apiFetch } from '../../../api';
 import { buildFallbackForSub } from '../generation/workspace-mode-generators';
-import type { WorkspaceBlock } from '../generation/workspace-generation';
+import type { WorkspaceBlock, WorkspaceLlmMeta } from '../generation/workspace-generation';
 import type { ActionContext } from './action-context';
+
+// Lê used_llm/llm_provider/fallback_reason (ver agents/base_agent.py e
+// server/workspace.py) do corpo cru da resposta, sem exigir esses campos —
+// endpoints/fallbacks antigos continuam funcionando sem eles.
+function extractLlmMeta(result: Record<string, unknown>): WorkspaceLlmMeta | undefined {
+  if (!('used_llm' in result)) return undefined;
+  return {
+    usedLlm: Boolean(result.used_llm),
+    llmProvider: (result.llm_provider as string | null) ?? null,
+    fallbackReason: (result.fallback_reason as string | null) ?? null,
+  };
+}
 
 export interface ExecuteResult {
   block: WorkspaceBlock;
@@ -63,6 +75,7 @@ async function _executeWorkspace(context: ActionContext): Promise<ExecuteResult 
     endpoint:   sub.endpoint,
     extra:      sub.extra,
     result,
+    llmMeta:    extractLlmMeta(result),
     difficulty: dificuldade,
     pinned:     false,
     createdAt:  new Date().toISOString(),

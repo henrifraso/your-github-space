@@ -163,6 +163,17 @@ export interface RemoteShortcut {
 // ── Bloco gerado por uma ação ───────────────────────────────────────
 export type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico';
 
+// Metadados de proveniência do LLM, ecoados pelo backend (agents/base_agent.py)
+// em cada resposta de /api/workspace/*. Ausente quando o bloco veio de
+// fallback local do frontend (card sintético ou sem endpoint) — nesse caso
+// não houve tentativa de chamar o backend, então não há o que reportar aqui.
+export type WorkspaceLlmMeta = {
+  usedLlm: boolean;
+  llmProvider: string | null;
+  /** "missing_api_key" | "missing_package" | "llm_error" | null (LLM não tentado ou respondeu de verdade) */
+  fallbackReason: string | null;
+};
+
 export type WorkspaceBlock = {
   id: string;
   cardId: string;
@@ -172,6 +183,8 @@ export type WorkspaceBlock = {
   endpoint: SubAction['endpoint'];
   extra?: Record<string, string>;
   result: Record<string, unknown>;
+  /** Presente só quando `result` veio de uma chamada real ao backend (não fallback local). */
+  llmMeta?: WorkspaceLlmMeta;
   difficulty: Dificuldade;
   pinned: boolean;
   createdAt: string;
