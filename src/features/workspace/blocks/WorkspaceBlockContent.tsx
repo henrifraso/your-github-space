@@ -29,7 +29,7 @@ export function InitialBlockContent({ result }: { result: Record<string, unknown
     { label: 'Risco',             key: 'risco' },
     { label: 'Oportunidade',      key: 'oportunidade' },
     { label: 'Domínio',           key: 'dominio' },
-    { label: 'Ação recomendada',  key: 'acao_recomendada', emphasis: true },
+    { label: 'Contexto para análise', key: 'acao_recomendada', emphasis: true },
     { label: 'Próximo passo',     key: 'proximo_passo' },
   ];
   return (
