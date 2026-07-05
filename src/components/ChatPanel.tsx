@@ -57,6 +57,12 @@ import { addContextUpload, resolveUploadOrgBu } from '../features/score/contextU
 
 type Phase = 'init' | 'expanded' | 'selected';
 
+// Flags de experiência — leitura simples a partir do card, sem parecer painel
+// de ferramentas soltas. Desligadas nesta versão; lógica/JSX preservados
+// para reativação futura.
+const SHOW_BLOCK_SHORTCUTS = false; // atalhos "Separar evidências/Simular cenário/..." por bloco
+const SHOW_SAVE_BUTTON = false;     // botão "Salvar" — hoje idêntico a arquivar, sem persistência própria
+
 const MAIN_BTNS: { key: MainKey; label: string; Icon: React.ElementType }[] = [
   { key: 'pesquisar', label: 'Entender', Icon: Search    },
   { key: 'executar',  label: 'Analisar', Icon: Zap       },
@@ -88,21 +94,35 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
   return (
     <div className="flex flex-col gap-1.5">
       {hasContent ? (
-        // 3 botões: Apagar · Salvar · Finalizar
-        <div className="grid grid-cols-3 gap-1.5">
-          <button type="button" onClick={onErase} disabled={disabled}
-            className={`${chipBase} !h-11 ${sharedBg}`}>
-            <span className={labelCls}>Apagar</span>
-          </button>
-          <button type="button" onClick={onWorkspaceClick} disabled={disabled}
-            className={`${chipBase} !h-11 ${sharedBg}`}>
-            <span className={labelCls}>Salvar</span>
-          </button>
-          <button type="button" onClick={onFinish} disabled={disabled}
-            className={`${chipBase} !h-11 ${sharedBg}`}>
-            <span className={labelCls}>Finalizar</span>
-          </button>
-        </div>
+        SHOW_SAVE_BUTTON ? (
+          // 3 botões: Apagar · Salvar · Finalizar
+          <div className="grid grid-cols-3 gap-1.5">
+            <button type="button" onClick={onErase} disabled={disabled}
+              className={`${chipBase} !h-11 ${sharedBg}`}>
+              <span className={labelCls}>Apagar</span>
+            </button>
+            <button type="button" onClick={onWorkspaceClick} disabled={disabled}
+              className={`${chipBase} !h-11 ${sharedBg}`}>
+              <span className={labelCls}>Salvar</span>
+            </button>
+            <button type="button" onClick={onFinish} disabled={disabled}
+              className={`${chipBase} !h-11 ${sharedBg}`}>
+              <span className={labelCls}>Finalizar</span>
+            </button>
+          </div>
+        ) : (
+          // 2 botões: Apagar · Finalizar (Salvar oculto — sem persistência própria)
+          <div className="grid grid-cols-2 gap-1.5">
+            <button type="button" onClick={onErase} disabled={disabled}
+              className={`${chipBase} !h-11 ${sharedBg}`}>
+              <span className={labelCls}>Apagar</span>
+            </button>
+            <button type="button" onClick={onFinish} disabled={disabled}
+              className={`${chipBase} !h-11 ${sharedBg}`}>
+              <span className={labelCls}>Finalizar</span>
+            </button>
+          </div>
+        )
       ) : (
         // Botão único: Área de Trabalho
         <button type="button" onClick={onWorkspaceClick} disabled={disabled}
@@ -149,8 +169,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
   const firstBlockRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // true logo após abrir um card novo — sinaliza ao efeito de scroll abaixo
+  // para pousar no overview (firstBlockRef), não no fim da lista.
+  const skipBottomScrollRef = useRef(false);
 
   useEffect(() => {
+    if (skipBottomScrollRef.current) {
+      skipBottomScrollRef.current = false;
+      firstBlockRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, actionLoading]);
 
@@ -243,11 +271,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     setActiveCard(card);
 
     // 1) Card pequeno na conversa.
-    //    GM1-C UX fix: o card carrega os botões de governança (Aprovar/
-    //    Rejeitar/Distribuir/Criar missão). Ficar como primeiro item
-    //    da área de trabalho jogava as ações pra fora do fluxo natural.
-    //    Inserimos como ÚLTIMO item — após análise/diagnóstico, share
-    //    e modo — para que a decisão venha ao fim do raciocínio.
+    //    GM1-C UX fix (revertido — leitura simples a partir do card): o
+    //    card carrega os botões de governança (Aprovar/Rejeitar/Distribuir/
+    //    Criar missão). A versão GM1-C colocava o card por ÚLTIMO, "para
+    //    que a decisão venha ao fim do raciocínio". A diretriz atual de
+    //    produto pede o oposto: a experiência deve abrir como uma leitura
+    //    rica a partir do card/post do feed — por isso o card (contexto
+    //    original: tag/categoria, título, resumo) volta a ser o PRIMEIRO
+    //    item, com a análise/diagnóstico/modo se desenvolvendo depois dele.
     const cardMsg: Message = { id: `card-${seq}-${card.id}`, role: 'card', text: card.titulo, card };
 
     // 2) Bloco principal:
@@ -258,7 +289,8 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       : buildInitialBlock(card, dificuldade);
     const initialMsg: Message = { id: mainBlock.id, role: 'block', text: mainBlock.subLabel, block: mainBlock };
 
-    const newMessages: Message[] = [initialMsg];
+    // Card primeiro (overview/contexto original), depois a análise que se desenvolve a partir dele.
+    const newMessages: Message[] = [cardMsg, initialMsg];
 
     // 3) Bloco de compartilhamento (apenas para intent='compartilhar')
     if (intent === 'compartilhar') {
@@ -277,9 +309,8 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       // Intent compartilhar (ou desconhecido) — mantém workspace fechado.
       setWorkspaceOpen(false);
     }
-    // 5) Card com botões de governança vira o ÚLTIMO item da área —
-    //    decisão/ação ao fim do raciocínio.
-    newMessages.push(cardMsg);
+    // Card novo: pousar no contexto original do card (firstBlockRef), não no fim da lista.
+    skipBottomScrollRef.current = true;
     setMessages(prev => [...prev, ...newMessages]);
 
     // 4) Atalhos: começa com fallback local por domínio; tenta backend e mescla
@@ -484,6 +515,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
             return (
               <React.Fragment key={msg.id}>
                 <motion.div
+                  ref={firstBlockRef}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2, ease: 'easeOut' }}
@@ -533,7 +565,6 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
             const toolCtx = !isShare && !isTool && !isInitial ? buildToolCtx(activeCard, b) : null;
             return (
               <motion.div
-                ref={isInitial ? firstBlockRef : undefined}
                 key={msg.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -624,15 +655,17 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
                     </div>
                   ) : isMode ? (
-                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141]">
-                      <ModeShortcuts
-                        mode={b.mode}
-                        onPick={(subKey) => {
-                          const sub = SUB_BTNS[b.mode].find(x => x.key === subKey);
-                          if (sub) handleSubAction(b.mode, sub);
-                        }}
-                      />
-                    </div>
+                    SHOW_BLOCK_SHORTCUTS && (
+                      <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141]">
+                        <ModeShortcuts
+                          mode={b.mode}
+                          onPick={(subKey) => {
+                            const sub = SUB_BTNS[b.mode].find(x => x.key === subKey);
+                            if (sub) handleSubAction(b.mode, sub);
+                          }}
+                        />
+                      </div>
+                    )
                   ) : (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
                       <div className="flex items-center gap-1 flex-wrap">
@@ -642,10 +675,12 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                         <BlockCtrl Icon={Copy}       label="Copiar"       onClick={() => copyBlock(b)} />
                       </div>
                       <DifficultyRow value={dificuldade} onChange={setDificuldade} />
-                      <BlockShortcutsRow shortcuts={buildBlockShortcuts(b)} onPick={(mode, subKey) => {
-                        const sub = SUB_BTNS[mode].find(x => x.key === subKey);
-                        if (sub) handleSubAction(mode, sub);
-                      }} />
+                      {SHOW_BLOCK_SHORTCUTS && (
+                        <BlockShortcutsRow shortcuts={buildBlockShortcuts(b)} onPick={(mode, subKey) => {
+                          const sub = SUB_BTNS[mode].find(x => x.key === subKey);
+                          if (sub) handleSubAction(mode, sub);
+                        }} />
+                      )}
                     </div>
                   )}
                 </div>
