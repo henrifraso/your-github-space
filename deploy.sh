@@ -2,7 +2,7 @@
 set -e
 
 SCOPE="smith4"
-ALIAS="os1app.vercel.app"
+ALIAS="app.os1.space"
 DEPLOY_DIR="/tmp/os1-deploy"
 
 echo "→ build..."
