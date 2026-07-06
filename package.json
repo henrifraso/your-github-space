@@ -1,7 +1,7 @@
 {
   "name": "omni-interface",
   "private": true,
-  "version": "1.0.10",
+  "version": "1.0.14",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
