@@ -177,6 +177,30 @@ import { OntologySphereOverlay } from './features/ontology/OntologySphereOverlay
 import { getProductBySector } from './core/product/product-registry';
 import { getConnector, FIXTURE_MAP } from './core/adapters/source-registry';
 
+// Destaques (chips abaixo da bio) por área/departamento (`activeDepartment`).
+// Lentes de leitura de mercado — sinais externos/minerados, não tarefas
+// internas. Lista estática por enquanto; a mineradora poderá substituir
+// dinamicamente depois. Sempre 9 palavras únicas por chave.
+const FEED_HIGHLIGHTS: Record<string, string[]> = {
+  geral: ['Mercado', 'Concorrência', 'Reputação', 'Preços', 'Eventos', 'Consumo', 'Risco', 'Demanda', 'Região'],
+  marketing: ['Consumo', 'Tendência', 'Viral', 'Marca', 'Canal', 'Busca', 'Sazonal', 'Público', 'Narrativa'],
+  vendas: ['Demanda', 'Preço', 'Ticket', 'Procura', 'Promoção', 'Conversão', 'Categoria', 'Sazonalidade', 'Oferta'],
+  financeiro: ['Margem', 'Juros', 'Crédito', 'Câmbio', 'Inflação', 'Custo', 'Receita', 'Inadimplência', 'Tributos'],
+  juridico: ['Regra', 'Norma', 'Fiscalização', 'Processo', 'Contrato', 'Prazo', 'Risco', 'Decisão', 'LGPD'],
+  fiscal: ['Imposto', 'Nota', 'CNPJ', 'Alíquota', 'Prazo', 'Simples', 'Receita', 'Multa', 'Conformidade'],
+  estoque: ['Ruptura', 'Oferta', 'Insumo', 'Logística', 'Demanda', 'Fornecedor', 'Categoria', 'Giro', 'Substituto'],
+  operacoes: ['Fluxo', 'Unidade', 'Atendimento', 'Fila', 'Entrega', 'Horário', 'Capacidade', 'Qualidade', 'Produtividade'],
+  rh: ['Salários', 'Vagas', 'Turnover', 'Escala', 'Treinamento', 'Sindical', 'Benefícios', 'Cultura', 'Produtividade'],
+  eventos: ['Data', 'Cidade', 'Fluxo', 'Público', 'Clima', 'Sazonal', 'Agenda', 'Movimento', 'Oportunidade'],
+  reputacao: ['Avaliações', 'Reclamações', 'Sentimento', 'Crise', 'Atendimento', 'Imagem', 'Respostas', 'Redes', 'Confiança'],
+  concorrencia: ['Preço', 'Promoção', 'Expansão', 'Produto', 'Loja', 'Oferta', 'Mídia', 'Movimento', 'Diferencial'],
+  administrativo: ['Regulação', 'Licitação', 'Compliance', 'Documentos', 'Auditoria', 'Digitalização', 'Terceirização', 'Eficiência', 'Governança'],
+  comercial: ['Canal', 'Parceria', 'Distribuição', 'Contrato', 'Território', 'Cliente', 'Negociação', 'Expansão', 'Rede'],
+  compras: ['Fornecedor', 'Insumo', 'Preço', 'Contrato', 'Prazo', 'Qualidade', 'Frete', 'Importação', 'Negociação'],
+  ti: ['Tecnologia', 'Segurança', 'Sistema', 'Nuvem', 'Automação', 'Dados', 'Integração', 'Software', 'Inovação'],
+  atendimento: ['Espera', 'Reclamação', 'Canal', 'Satisfação', 'Resposta', 'Chatbot', 'Presencial', 'Digital', 'Experiência'],
+};
+
 function GoogleMapsPreloader() {
   useGoogleMaps();
   return null;
@@ -944,17 +968,11 @@ function AuthenticatedApp() {
     const p_rh    = Math.min(100, fn * 8);
     const p_evt   = Math.max(0, 100 - (chuva / Math.max(1, data.previsao_clima.length)) * 100);
     const p_rep   = data.progresso_pct;
-    const circles = [
-      { label: 'Marketing',  pct: p_mkt, color: urg(p_mkt) },
-      { label: 'Vendas',     pct: p_vds, color: urg(p_vds) },
-      { label: 'Financeiro', pct: p_fin, color: urg(p_fin) },
-      { label: 'Jurídico',   pct: p_jur, color: urg(p_jur) },
-      { label: 'Estoque',    pct: p_est, color: urg(p_est) },
-      { label: 'Operações',  pct: p_ops, color: urg(p_ops) },
-      { label: 'RH',         pct: p_rh,  color: urg(p_rh)  },
-      { label: 'Eventos',    pct: p_evt, color: urg(p_evt) },
-      { label: 'Reputação',  pct: p_rep, color: urg(p_rep) },
-    ];
+    // Destaques são lentes de leitura do feed/área atual (activeDepartment),
+    // não setores fixos universais — rótulos vêm de FEED_HIGHLIGHTS.
+    const highlightLabels = FEED_HIGHLIGHTS[activeDepartment] ?? FEED_HIGHLIGHTS.geral;
+    const pctByIndex = [p_mkt, p_vds, p_fin, p_jur, p_est, p_ops, p_rh, p_evt, p_rep];
+    const circles = highlightLabels.map((label, i) => ({ label, pct: pctByIndex[i], color: urg(pctByIndex[i]) }));
     const allSlices = [
       [{ label: `Com nota (${comNota})`, value: Math.max(1, comNota), color: '#ef4444' }, { label: `Sem nota (${n - comNota})`, value: Math.max(1, n - comNota), color: '#1e3a5f' }],
       [{ label: `Notas Google (${comNota})`, value: Math.max(1, comNota), color: '#3b82f6' }, { label: `Faixa de preço (${comFaixa})`, value: Math.max(1, comFaixa), color: '#60a5fa' }, { label: `A mapear (${n - comNota})`, value: Math.max(1, n - comNota), color: '#1e3a5f' }],
@@ -980,7 +998,7 @@ function AuthenticatedApp() {
       `Progresso no programa de evolução do negócio.\nA cada meta cumprida, pontos são acumulados rumo ao próximo nível.\nNível mais alto libera novos recursos e análises na plataforma.`,
     ];
     return circles.map((c, i) => ({ ...c, slices: allSlices[i], descricao: descricoes[i] }));
-  }, [data]);
+  }, [data, activeDepartment]);
 
   const cmedCards = useMemo(
     () => (activeProduct?.sourceIds ?? []).flatMap(id => {
