@@ -457,6 +457,26 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     if (sub) handleSubAction('aprender', sub);
   }
 
+  // Fonte única dos botões de conteúdo — overview, Analisar/Entender/Aprender/
+  // Compartilhar e o conteúdo aprofundado gerado por eles usam esta mesma
+  // lista. Adicionar um botão novo no futuro = adicionar um item aqui.
+  const CONTENT_ACTIONS: { key: string; label: string; Icon: React.ElementType; onClick: () => void }[] = [
+    { key: 'exemplos',  label: 'Exemplos',  Icon: Lightbulb,  onClick: blockExamples },
+    { key: 'ideias',    label: 'Ideias',    Icon: Sparkles,   onClick: blockIdeias },
+    { key: 'analogias', label: 'Analogias', Icon: GitCompare, onClick: blockAnalogias },
+    { key: 'cases',     label: 'Cases',     Icon: BookOpen,   onClick: blockCases },
+  ];
+
+  function ContentActionButtons() {
+    return (
+      <div className="flex items-center gap-1 flex-wrap">
+        {CONTENT_ACTIONS.map(a => (
+          <BlockCtrl key={a.key} Icon={a.Icon} label={a.label} onClick={a.onClick} />
+        ))}
+      </div>
+    );
+  }
+
 
   async function handleSend() {
     const text = input.trim();
@@ -640,20 +660,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                           </div>
                         </div>
                       )}
-                      {/* Botões de aprofundamento do raciocínio — mesma estética dos outros blocos */}
-                      <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
-                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
-                        <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
-                        <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
-                        <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
+                      {/* Botões de conteúdo — mesma estética dos outros blocos */}
+                      <div className="pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
+                        <ContentActionButtons />
                       </div>
                     </div>
                   ) : isShare ? (
-                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
-                      <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
-                      <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
-                      <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
-                      <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141]">
+                      <ContentActionButtons />
                     </div>
                   ) : isTool ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
@@ -667,12 +681,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     </div>
                   ) : isMode ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
-                        <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
-                        <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
-                        <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
-                      </div>
+                      <ContentActionButtons />
                       {SHOW_BLOCK_SHORTCUTS && (
                         <ModeShortcuts
                           mode={b.mode}
@@ -685,12 +694,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     </div>
                   ) : (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
-                        <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
-                        <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
-                        <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
-                      </div>
+                      <ContentActionButtons />
                       {SHOW_BLOCK_SHORTCUTS && (
                         <BlockShortcutsRow shortcuts={buildBlockShortcuts(b)} onPick={(mode, subKey) => {
                           const sub = SUB_BTNS[mode].find(x => x.key === subKey);
