@@ -42,7 +42,7 @@ export interface DesktopChatLayout {
 // de antes, só extraída pra um lugar só.
 export function getDesktopChatLayout(windowWidth: number, wide: boolean): DesktopChatLayout {
   const pr = windowWidth >= 1280 ? 336 : 320;
-  const rightPx = wide ? 20 : Math.max(5, (windowWidth + pr - 1575) / 2);
+  const rightPx = 20;
   const widthPx = wide ? undefined : 340;
   const reservedRightPx = rightPx + (widthPx ?? 0) + 20;
   return { reservedRightPx, rightPx, widthPx };
