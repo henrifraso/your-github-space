@@ -438,11 +438,25 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     }
   }
 
-  // "Exemplos" no bloco: chama Aprender · exemplo pro mesmo card.
+  // Botões de aprofundamento do raciocínio — fixos, mode-agnósticos,
+  // reaproveitam sub-ações já existentes (sem LLM/backend novo).
   function blockExamples() {
     const sub = SUB_BTNS.aprender.find(s => s.key === 'exemplo');
     if (sub) handleSubAction('aprender', sub);
   }
+  function blockIdeias() {
+    const sub = SUB_BTNS.pesquisar.find(s => s.key === 'oportunidade');
+    if (sub) handleSubAction('pesquisar', sub);
+  }
+  function blockAnalogias() {
+    const sub = SUB_BTNS.aprender.find(s => s.key === 'analogia');
+    if (sub) handleSubAction('aprender', sub);
+  }
+  function blockCases() {
+    const sub = SUB_BTNS.aprender.find(s => s.key === 'referencia');
+    if (sub) handleSubAction('aprender', sub);
+  }
+
 
   async function handleSend() {
     const text = input.trim();
@@ -626,23 +640,20 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                           </div>
                         </div>
                       )}
-                      {/* Controles do bloco — mesma estética dos outros blocos */}
+                      {/* Botões de aprofundamento do raciocínio — mesma estética dos outros blocos */}
                       <div className="flex items-center gap-1 flex-wrap pt-1 border-t border-dashed border-neutral-100 dark:border-[#414141]">
-                        <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => {
-                          if (!activeCard) return;
-                          const newBlock = buildInitialBlock(activeCard, dificuldade);
-                          setMessages(prev => [...prev, { id: newBlock.id, role: 'block', text: newBlock.subLabel, block: newBlock }]);
-                        }} />
-                        <BlockCtrl Icon={Lightbulb} label="Exemplos" onClick={blockExamples} />
-                        <BlockCtrl Icon={Pin}       label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
-                        <BlockCtrl Icon={Copy}      label="Copiar"   onClick={() => copyBlock(b)} />
+                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
+                        <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
+                        <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
+                        <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
                       </div>
-                      <DifficultyRow value={dificuldade} onChange={setDificuldade} />
                     </div>
                   ) : isShare ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
-                      <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
-                      <BlockCtrl Icon={Copy} label="Copiar tudo" onClick={() => copyBlock(b)} />
+                      <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
+                      <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
+                      <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
+                      <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
                     </div>
                   ) : isTool ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
@@ -655,8 +666,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
                     </div>
                   ) : isMode ? (
-                    SHOW_BLOCK_SHORTCUTS && (
-                      <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141]">
+                    <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
+                        <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
+                        <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
+                        <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
+                      </div>
+                      {SHOW_BLOCK_SHORTCUTS && (
                         <ModeShortcuts
                           mode={b.mode}
                           onPick={(subKey) => {
@@ -664,17 +681,16 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                             if (sub) handleSubAction(b.mode, sub);
                           }}
                         />
-                      </div>
-                    )
+                      )}
+                    </div>
                   ) : (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
                       <div className="flex items-center gap-1 flex-wrap">
-                        <BlockCtrl Icon={RefreshCw} label="Gerar novamente" onClick={() => regenerateBlock(b)} />
-                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"     onClick={blockExamples} />
-                        <BlockCtrl Icon={Pin}        label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
-                        <BlockCtrl Icon={Copy}       label="Copiar"       onClick={() => copyBlock(b)} />
+                        <BlockCtrl Icon={Lightbulb}  label="Exemplos"  onClick={blockExamples} />
+                        <BlockCtrl Icon={Sparkles}   label="Ideias"    onClick={blockIdeias} />
+                        <BlockCtrl Icon={GitCompare} label="Analogias" onClick={blockAnalogias} />
+                        <BlockCtrl Icon={BookOpen}   label="Cases"     onClick={blockCases} />
                       </div>
-                      <DifficultyRow value={dificuldade} onChange={setDificuldade} />
                       {SHOW_BLOCK_SHORTCUTS && (
                         <BlockShortcutsRow shortcuts={buildBlockShortcuts(b)} onPick={(mode, subKey) => {
                           const sub = SUB_BTNS[mode].find(x => x.key === subKey);
