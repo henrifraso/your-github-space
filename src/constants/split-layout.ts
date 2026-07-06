@@ -14,3 +14,9 @@ export const SPLIT_TOP_GAP_PB = 'pb-5';
 export const SPLIT_FRAME_GAP_PX = 20;
 export const SPLIT_FRAME_TOP_PX = 98;
 export const NAV_STICKY_TOP_PX = 20;
+
+// Ajuste fino aplicado a SPLIT_FRAME_TOP_PX tanto no topo do ChatDesktop
+// (ChatPanel.tsx) quanto no mainPadTop do feed (App.tsx). Precisa ser o
+// MESMO valor nos dois lados — por isso vive aqui como constante única, em
+// vez de "+ 12" solto repetido nos dois arquivos.
+export const SPLIT_FRAME_TOP_EXTRA_PX = 12;

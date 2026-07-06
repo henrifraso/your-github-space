@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
-import { FeedSection, FeedCard } from './FeedComponents';
+import { FeedCard } from './FeedComponents';
 import type { DepartmentId, CompanySectorFeeds } from '../types';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
 
@@ -46,11 +46,11 @@ function SimpleCard({ color, tag, title, detail, badge, onOpenWorkspace, intelli
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color }}>{tag}</p>
-          <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{title}</p>
+          <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug line-clamp-4">{title}</p>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">{detail}</p>
         </div>
         {badge && (
-          <span className={`flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5
+          <span className={`flex-shrink-0 max-w-[120px] truncate text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5
             ${badge.type === 'ok'   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
               badge.type === 'warn' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
               'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
@@ -75,6 +75,13 @@ interface Props {
 
 export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass, rightPadClass }: Props) {
   const sections = feeds[department] ?? [];
+  // Cards achatados numa lista única — sem sectionTitle/cabeçalho visual entre
+  // grupos, pra manter o mesmo ritmo (space-y-5) de qualquer outro feed. O
+  // dado `sectionTitle` continua existindo em src/data/sector-feeds/*.ts,
+  // só deixou de ser renderizado aqui.
+  const cards = sections.flatMap((section, i) =>
+    section.cards.map((card, j) => ({ card, idx: i * 100 + j }))
+  );
 
   return (
     <motion.div
@@ -83,7 +90,7 @@ export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass, ri
       animate="visible"
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
     >
-      {sections.length === 0 ? (
+      {cards.length === 0 ? (
         <motion.div variants={fadeItem}>
           <FeedCard>
             <div className="flex flex-col items-center justify-center py-10 gap-3 text-center">
@@ -93,18 +100,13 @@ export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass, ri
           </FeedCard>
         </motion.div>
       ) : (
-        sections.map((section, i) => (
-          <motion.div key={i} variants={fadeItem}>
-            <FeedSection title={section.sectionTitle} icon={<ChevronRight size={18}/>}>
-              {section.cards.map((card, j) => (
-                <SimpleCard
-                  key={j}
-                  {...card}
-                  onOpenWorkspace={onOpenWorkspace}
-                  intelligence={sectorCardToIntelligence(card, department, i * 100 + j)}
-                />
-              ))}
-            </FeedSection>
+        cards.map(({ card, idx }) => (
+          <motion.div key={idx} variants={fadeItem}>
+            <SimpleCard
+              {...card}
+              onOpenWorkspace={onOpenWorkspace}
+              intelligence={sectorCardToIntelligence(card, department, idx)}
+            />
           </motion.div>
         ))
       )}

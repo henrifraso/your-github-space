@@ -397,7 +397,7 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
 
 // ─── DepartmentSwitcher (usado em perfis não-OS1) ─────────────────────────────
 
-const DEPARTMENTS: { id: Exclude<DepartmentId, 'geral'>; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
+export const DEPARTMENTS: { id: Exclude<DepartmentId, 'geral'>; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
   { id: 'administrativo', label: 'Administrativo', desc: 'Gestão, processos e infraestrutura',  icon: <Briefcase size={22}/>,      color: '#64748b' },
   { id: 'comercial',      label: 'Comercial',      desc: 'Prospecção, parcerias e expansão',    icon: <Handshake size={22}/>,      color: '#0ea5e9' },
   { id: 'vendas',         label: 'Vendas',         desc: 'Resultados, metas e canais',          icon: <TrendingUp size={22}/>,     color: '#10b981' },
@@ -415,7 +415,7 @@ const DEPARTMENTS: { id: Exclude<DepartmentId, 'geral'>; label: string; desc: st
 // Óticas com conteúdo alinhado à análise de mercado — visíveis na navegação.
 // As demais (financeiro, rh, operacoes, estoque, juridico) permanecem na estrutura
 // de dados mas ocultas até o conteúdo ser revisado para linguagem de mercado.
-const VISIBLE_DEPARTMENT_IDS = new Set<string>(['administrativo', 'comercial', 'vendas', 'marketing', 'financeiro', 'rh', 'operacoes', 'compras', 'estoque', 'ti', 'juridico', 'atendimento']);
+export const VISIBLE_DEPARTMENT_IDS = new Set<string>(['administrativo', 'comercial', 'vendas', 'marketing', 'financeiro', 'rh', 'operacoes', 'compras', 'estoque', 'ti', 'juridico', 'atendimento']);
 
 interface DeptProps {
   active: DepartmentId;

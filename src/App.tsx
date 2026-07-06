@@ -97,7 +97,7 @@ import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
 import { OS1_EVENTS } from './core/events/os1-events';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
 import type { CompanyDiagnosticPayload } from './components/ChatPanel';
-import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, NAV_STICKY_TOP_PX } from './constants/split-layout';
+import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX, NAV_STICKY_TOP_PX } from './constants/split-layout';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -399,23 +399,40 @@ function AuthenticatedApp() {
   // Ref espelha workspaceContext pra ser lido dentro de listeners do useEffect[scrolled].
   const workspaceContextRef = useRef<WorkspaceContext | null>(null);
   useEffect(() => { workspaceContextRef.current = workspaceContext; }, [workspaceContext]);
-  // Mede a altura da navbar pra calcular o paddingTop do <main> quando
-  // scrolled=true (alinha topo do feed com top-[72px] do ChatPanel).
+  // Mede a altura da navbar pra calcular o paddingTop do <main> em split-view
+  // (alinha o topo do feed com o topo do ChatDesktop). ResizeObserver (em vez
+  // de só window resize) pega qualquer mudança real de altura da navbar —
+  // ex.: fonte carregando depois do mount — que window resize não detecta e
+  // deixava mainPadTop com um valor desatualizado (causa provável do
+  // desalinhamento intermitente "às vezes acima, às vezes abaixo").
   const navRef = useRef<HTMLElement>(null);
   const [navHeight, setNavHeight] = useState(56);
   useEffect(() => {
-    const measure = () => { if (navRef.current) setNavHeight(navRef.current.offsetHeight); };
+    const el = navRef.current;
+    if (!el) return;
+    const measure = () => setNavHeight(el.offsetHeight);
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
+  // Meio a meio (split-view) só deve existir quando há conteúdo real na Área
+  // de Trabalho — scrolled sozinho continua controlando só o colapso da bio
+  // (efeito "bio recolhe ao rolar", mantido igual em qualquer caso). Os 4
+  // launchers novos (Score/Feed por área/Navegador/Mapa) e o diagnóstico
+  // passam todos por openWorkspaceFromCard, que seta workspaceContext — já
+  // cobertos aqui sem precisar listar kinds.
+  const hasWorkspaceContent = workspaceContext !== null;
+  const isSplitView = scrolled && isDesktop && hasWorkspaceContent;
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
-  // O ChatDesktop está em `SPLIT_FRAME_TOP_PX + 12` (offset extra aplicado no
-  // inline style do ChatPanel). O feed em modo split precisa do MESMO offset
-  // pra topo do primeiro card alinhar com o topo do ChatDesktop — assim o gap
-  // nav→feed fica igual ao gap nav→ChatDesktop.
-  const mainPadTop = scrolled ? Math.max(0, SPLIT_FRAME_TOP_PX + 12 - NAV_STICKY_TOP_PX - navHeight) : undefined;
+  // O ChatDesktop está em `SPLIT_FRAME_TOP_PX + SPLIT_FRAME_TOP_EXTRA_PX`
+  // (mesma constante usada no inline style do ChatPanel). O feed em modo
+  // split precisa do MESMO offset pra topo do primeiro card alinhar com o
+  // topo do ChatDesktop — assim o gap nav→feed fica igual ao gap
+  // nav→ChatDesktop. Depende de isSplitView (não só de scrolled) — sem
+  // conteúdo, não faz sentido compensar esse gap.
+  const mainPadTop = isSplitView ? Math.max(0, SPLIT_FRAME_TOP_PX + SPLIT_FRAME_TOP_EXTRA_PX - NAV_STICKY_TOP_PX - navHeight) : undefined;
   type FullscreenContent =
     | { type: 'card'; label: string; color: string; titulo: string; detalhe: string }
     | { type: 'plano' }
@@ -427,6 +444,9 @@ function AuthenticatedApp() {
   const [consentAccepted, setConsentAccepted] = useState(true);
   const [consentChecks, setConsentChecks] = useState({ termos: false, navegador: false, lido: false });
   const [browserOpen, setBrowserOpen] = useState(false);
+  // URL alvo do navegador fullscreen principal — setada pelo bloco lançador
+  // (WorkspaceBrowserLauncherBlock) antes de abrir; default = mesmo de sempre.
+  const [browserInitialUrl, setBrowserInitialUrl] = useState('https://www.google.com');
   // Fase 5 — cards gerados pelo navegador interno (Função 4 / Função 5)
   const [browserFeedCards, setBrowserFeedCards] = useState<RoleFeedCard[]>([]);
   // Fase 6 — cards gerados pelo Mapa Competitivo (F1 + outras saídas com `tipo='card'`)
@@ -656,6 +676,130 @@ function AuthenticatedApp() {
       _synthetic:      true,
     };
     openWorkspaceFromCard(card, 'utilizar');
+  };
+
+  // Abre o Score OS¹ como bloco leve dentro da Área de Trabalho — Score não
+  // tem tela cheia (regra final: só Mapa/Navegador expandem depois de um
+  // bloco inicial). Card sintético com dominio: 'Score' — o ChatPanel
+  // reconhece esse marcador e monta um bloco kind:'score' com números/textos
+  // curtos (mock local), sem gerar bloco de modo/compartilhamento.
+  // `scoreOpen`/`setScoreOpen`/`os1://score` no BrowserView ficam como rota
+  // legada, sem nenhum gatilho de UI chamando-a mais.
+  const openScoreInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-score-${Date.now()}`,
+      titulo:          'Score OS¹',
+      resumo:          'Painel de score e evolução do negócio.',
+      dominio:         'Score',
+      area:            'score',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
+  // Abre o Navegador como bloco lançador dentro da Área de Trabalho — não
+  // renderiza o navegador inteiro ali, só um campo de URL. O fullscreen
+  // (ElectronBrowser/iframe) continua existindo, só passa a abrir depois
+  // que o usuário digitar/colar a URL no bloco (ver onOpenBrowserUrl).
+  const openBrowserLauncherInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-browser-launcher-${Date.now()}`,
+      titulo:          'Navegador',
+      resumo:          'Cole um link para abrir ou analisar.',
+      dominio:         'Navegador',
+      area:            'navegador',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
+  // Abre o Mapa como bloco lançador dentro da Área de Trabalho — não
+  // renderiza o CompetitiveMap inteiro ali, só a escolha de raio. O
+  // fullscreen continua existindo, só passa a abrir depois que o usuário
+  // escolher o raio no bloco (ver onOpenMapWithRadius).
+  const openMapLauncherInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-map-launcher-${Date.now()}`,
+      titulo:          'Mapa de mercado',
+      resumo:          'Escolha um raio para observar região, concorrência e sinais locais.',
+      dominio:         'Mapa',
+      area:            'mapa',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
+  // Chamado pelo bloco lançador do Navegador depois que o usuário informa a
+  // URL — abre o fullscreen já existente com essa URL.
+  const openBrowserWithUrl = (url: string) => {
+    setBrowserInitialUrl(url);
+    setBrowserOpen(true);
+  };
+
+  // Chamado pelo bloco lançador do Mapa depois que o usuário escolhe o raio.
+  // PENDÊNCIA: CompetitiveMap/MarketMapContent ainda não aceitam raio como
+  // parâmetro — por enquanto o raio é só contexto visual do bloco; o mapa
+  // abre fullscreen normalmente, sem aplicar o raio escolhido.
+  const openMapWithRadius = (_radiusKm: number) => {
+    setMapOpen(true);
+  };
+
+  // Abre o Feed por área como bloco seletor dentro da Área de Trabalho — não
+  // navega pra outra página nem abre o DepartmentSwitcherModal fullscreen;
+  // o clique numa área chama diretamente setActiveDepartment (mesma função
+  // usada pelo seletor "Mais"/DepartmentSwitcherModal), mudando o feed
+  // principal com a Área de Trabalho aberta.
+  const openDepartmentLauncherInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-department-launcher-${Date.now()}`,
+      titulo:          'Feed por área',
+      resumo:          'Escolha uma área para mudar a leitura do feed.',
+      dominio:         'Feed',
+      area:            'feed',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
+  // Botão "+"/"Mais" (onSector) — o mesmo `sectorOpen` controla 3 modais
+  // diferentes conforme activeSector/role (ver comentário "Sector Switcher"
+  // no render): OS¹ e cerveja-imperio abrem SectorSwitcherModal (troca
+  // empresa/unidade — recurso diferente, não mexido aqui); os demais casos
+  // (nike/nubank/mcdonalds e role=franchise) abriam DepartmentSwitcherModal
+  // fullscreen (troca departamento) — esse caso agora abre o bloco leve na
+  // Área de Trabalho em vez do modal fullscreen. Mesma condição usada no
+  // render para decidir qual dos 3 modais aparece.
+  const isDepartmentSwitchContext = (activeSector !== 'os1' && activeSector !== 'cerveja-imperio') || role === 'franchise';
+  const handleSectorButtonClick = () => {
+    if (isDepartmentSwitchContext) {
+      openDepartmentLauncherInWorkspace();
+    } else {
+      setSectorOpen(true);
+    }
   };
 
   // Envia o Diagnóstico da empresa pra Área de Trabalho como bloco — NÃO abre
@@ -1242,7 +1386,7 @@ function AuthenticatedApp() {
             </button>
             {canAccessCompanyVision(role) && (
               <button
-                onClick={() => setScoreOpen(v => !v)}
+                onClick={openScoreInWorkspace}
                 className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
                 title="Score OS¹"
               >
@@ -1252,7 +1396,7 @@ function AuthenticatedApp() {
               </button>
             )}
             <button
-              onClick={() => setMapOpen(true)}
+              onClick={openMapLauncherInWorkspace}
               className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
               title="Mapa"
             >
@@ -1273,19 +1417,19 @@ function AuthenticatedApp() {
       </nav>
 
     <div
-      style={{ paddingRight: (scrolled && isDesktop) ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      style={{ paddingRight: isSplitView ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[320px] xl:pr-[336px]"
     >
 
       <main
         style={mainPadTop !== undefined ? { paddingTop: mainPadTop } : undefined}
-        className={`${scrolled && isDesktop ? 'max-w-none' : 'max-w-[935px]'} mx-auto ${scrolled ? '' : 'pt-5'}`}
+        className={`${isSplitView ? 'max-w-none' : 'max-w-[935px]'} mx-auto ${scrolled ? '' : 'pt-5'}`}
       >
         {/* Container unificado de fundo — os elementos internos flutuam por cima.
-            Em modo split (scrolled+desktop), o mr alinha exatamente com o
+            Em modo split (isSplitView), o mr alinha exatamente com o
             right-4 do ChatDesktop (16px), pra que feed e workspace tenham
             o mesmo afastamento das bordas externas e entre si. */}
-        <div className={`ml-4 ${scrolled && isDesktop ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
+        <div className={`ml-4 ${isSplitView ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1585,8 +1729,8 @@ function AuthenticatedApp() {
           department={activeDepartment as Exclude<DepartmentId, 'geral'>}
           feeds={PROFILE_SECTOR_FEEDS[feedKey] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
           onOpenWorkspace={openWorkspaceFromCard}
-          topGapClass={scrolled && isDesktop ? SPLIT_TOP_GAP_MT : undefined}
-          rightPadClass={scrolled && isDesktop ? 'pr-5' : 'pr-10'}
+          topGapClass={isSplitView ? SPLIT_TOP_GAP_MT : undefined}
+          rightPadClass={isSplitView ? 'pr-5' : 'pr-10'}
         />
       )}
 
@@ -1615,7 +1759,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className={`max-w-[935px] mx-auto ${scrolled && isDesktop ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
+            className={`max-w-[935px] mx-auto ${isSplitView ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${isSplitView ? 'pr-5' : 'pr-10'}`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1712,7 +1856,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${scrolled && isDesktop ? 'pr-5' : 'pr-10'}`}
+        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${isSplitView ? 'pr-5' : 'pr-10'}`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
@@ -1999,6 +2143,7 @@ function AuthenticatedApp() {
             open={browserOpen}
             onClose={() => setBrowserOpen(false)}
             onSync={() => { setBrowserOpen(false); setTimeout(() => setScrolled(false), 300); }}
+            initialUrl={browserInitialUrl}
             activeSector={activeSector}
             role={role}
             insights={scoreInsights}
@@ -2017,12 +2162,16 @@ function AuthenticatedApp() {
 
       {/* Chat */}
       <ChatDesktop
-        wide={scrolled}
-        onHome={() => setScoreOpen(v => !v)}
+        wide={isSplitView}
+        onHome={openScoreInWorkspace}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => setSectorOpen(true)}
-        onBrowser={() => setBrowserOpen(true)}
-        onMapOpen={() => setMapOpen(true)}
+        onSector={handleSectorButtonClick}
+        onBrowser={openBrowserLauncherInWorkspace}
+        onMapOpen={openMapLauncherInWorkspace}
+        onOpenBrowserUrl={openBrowserWithUrl}
+        onOpenMapWithRadius={openMapWithRadius}
+        activeDepartment={activeDepartment}
+        onSelectDepartment={setActiveDepartment}
         activeSector={activeSector}
         userRole={role}
         workspaceContext={workspaceContext}
@@ -2058,10 +2207,14 @@ function AuthenticatedApp() {
         codifyScope={codifyScope}
         activeSector={activeSector}
         userRole={role}
-        onHome={() => setScoreOpen(v => !v)}
+        onHome={openScoreInWorkspace}
         homeTitle={companyVisionLabel(role, activeDepartment)}
-        onSector={() => setSectorOpen(true)}
-        onBrowser={() => setBrowserOpen(true)}
+        onSector={handleSectorButtonClick}
+        onBrowser={openBrowserLauncherInWorkspace}
+        onOpenBrowserUrl={openBrowserWithUrl}
+        onOpenMapWithRadius={openMapWithRadius}
+        activeDepartment={activeDepartment}
+        onSelectDepartment={setActiveDepartment}
         unreadCount={unreadCount}
         dark={dark}
         onToggleTheme={toggleTheme}

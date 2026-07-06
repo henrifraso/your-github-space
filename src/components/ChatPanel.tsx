@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
-  Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, Layers, GitCompare,
+  Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, GitCompare,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
   Sparkles, Loader2, History, MapPin,
 } from 'lucide-react';
@@ -12,7 +12,7 @@ import { ActionResult } from './WorkspacePanel';
 import { getFixtureRelations } from '../core/relations/relation-generator';
 import type { Relation } from '../core/relations/relation';
 import { apiFetch } from '../api';
-import { SPLIT_TOP_GAP_PB, SPLIT_FRAME_TOP_PX } from '../constants/split-layout';
+import { SPLIT_TOP_GAP_PB, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX } from '../constants/split-layout';
 import { WorkspaceTools, ToolBlockContent } from './WorkspaceTools';
 import {
   InitialBlockContent,
@@ -21,6 +21,9 @@ import {
 import { WorkspaceBlockHeader } from '../features/workspace/blocks/WorkspaceBlockHeader';
 import { BlockCtrl } from '../features/workspace/blocks/WorkspaceBlockActions';
 import { CardGovernanceActions } from './CardGovernanceActions';
+import { normalizeUrl } from '../features/browser/browser-url-utils';
+import { DEPARTMENTS, VISIBLE_DEPARTMENT_IDS } from './SectorSwitcher';
+import type { DepartmentId } from '../types';
 import type {
   WorkspaceTool,
   WorkspaceToolContext,
@@ -143,7 +146,7 @@ interface Message {
   _fromPersistence?: boolean;
 }
 
-function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, onWorkspaceCleared, chatHistoryOpen, archivedSessions, onSelectHistorySession, codifyScope }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; onWorkspaceCleared?: () => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void; codifyScope?: CodifyScope | null }) {
+function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole, onArchive, onWorkspaceCleared, chatHistoryOpen, archivedSessions, onSelectHistorySession, codifyScope, onOpenBrowserUrl, onOpenMapWithRadius, activeDepartment, onSelectDepartment }: { onClose?: () => void; showClose?: boolean; workspaceContext?: WorkspaceContext | null; activeSector?: string; userRole?: string; onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void; onWorkspaceCleared?: () => void; chatHistoryOpen?: boolean; archivedSessions?: Array<{ id: string; ts: number; cardTitle: string; sector: string; snapshot?: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null } }>; onSelectHistorySession?: (id: string) => void; codifyScope?: CodifyScope | null; onOpenBrowserUrl?: (url: string) => void; onOpenMapWithRadius?: (radiusKm: number) => void; activeDepartment?: DepartmentId; onSelectDepartment?: (id: DepartmentId) => void }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -250,9 +253,18 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
   useEffect(() => {
     if (!workspaceContext) return;
     const { card, intent, seq } = workspaceContext;
+    // Marcadores dos cards sintéticos de Score/Navegador/Mapa/Feed (App.tsx) —
+    // nenhum deles gera bloco de modo/compartilhamento, só o bloco leve
+    // correspondente (kind: 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher').
+    const isScoreCard           = card.dominio === 'Score';
+    const isBrowserLauncherCard = card.dominio === 'Navegador';
+    const isMapLauncherCard     = card.dominio === 'Mapa';
+    const isDeptLauncherCard    = card.dominio === 'Feed';
+    const isLauncherCard        = isScoreCard || isBrowserLauncherCard || isMapLauncherCard || isDeptLauncherCard;
 
     // Mesmo card reativado: só dispara bloco de modo conforme intent (sem duplicar análise).
     if (lastCardIdRef.current === card.id) {
+      if (isLauncherCard) return;
       const mainKey = INTENT_TO_MAIN[intent];
       if (mainKey) {
         setActiveMode(mainKey);
@@ -282,15 +294,95 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     const cardMsg: Message = { id: `card-${seq}-${card.id}`, role: 'card', text: card.titulo, card };
 
     // 2) Bloco principal:
+    //    - Card de Score → bloco leve kind:'score' (números + textos curtos,
+    //      mock/preview local — sem componente grande, sem tela cheia).
+    //    - Card de Navegador/Mapa → bloco lançador (kind:'browserLauncher' /
+    //      'mapLauncher') — só a intenção (URL / raio), o fullscreen abre
+    //      depois, disparado pelo próprio conteúdo do bloco.
     //    - Se o contexto carrega payload de Diagnóstico → bloco de diagnóstico.
     //    - Caso contrário → bloco inicial expandido padrão.
-    const mainBlock = workspaceContext.diagnostic
-      ? buildDiagnosticBlock(card, workspaceContext.diagnostic, dificuldade)
-      : buildInitialBlock(card, dificuldade);
+    const mainBlock: WorkspaceBlock = isScoreCard
+      ? {
+          id: `blk-score-${Date.now()}`,
+          cardId: card.id,
+          mode: 'pesquisar',
+          subKey: 'score',
+          subLabel: 'Score OS¹',
+          endpoint: null,
+          result: {
+            score_geral: 76,
+            resumo: 'Leitura geral da empresa diante do mercado',
+            dimensoes: [
+              { label: 'Mercado',      valor: 78, texto: 'Sinais externos indicam atenção moderada ao comportamento da categoria.' },
+              { label: 'Concorrência', valor: 72, texto: 'Movimentos próximos sugerem observar preço, oferta e presença regional.' },
+              { label: 'Reputação',    valor: 81, texto: 'Percepção pública estável, com atenção a avaliações e atendimento.' },
+              { label: 'Presença',     valor: 69, texto: 'Há espaço para melhorar visibilidade e consistência nos canais.' },
+              { label: 'Execução',     valor: 74, texto: 'A leitura operacional indica bom ponto de partida, com pontos a acompanhar.' },
+            ],
+          },
+          difficulty: dificuldade,
+          pinned: false,
+          createdAt: new Date().toISOString(),
+          kind: 'score',
+        }
+      : isBrowserLauncherCard
+        ? {
+            id: `blk-browser-launcher-${Date.now()}`,
+            cardId: card.id,
+            mode: 'pesquisar',
+            subKey: 'browserLauncher',
+            subLabel: 'Navegador',
+            endpoint: null,
+            result: {},
+            difficulty: dificuldade,
+            pinned: false,
+            createdAt: new Date().toISOString(),
+            kind: 'browserLauncher',
+          }
+        : isMapLauncherCard
+          ? {
+              id: `blk-map-launcher-${Date.now()}`,
+              cardId: card.id,
+              mode: 'pesquisar',
+              subKey: 'mapLauncher',
+              subLabel: 'Mapa de mercado',
+              endpoint: null,
+              result: {},
+              difficulty: dificuldade,
+              pinned: false,
+              createdAt: new Date().toISOString(),
+              kind: 'mapLauncher',
+            }
+          : isDeptLauncherCard
+            ? {
+                id: `blk-department-launcher-${Date.now()}`,
+                cardId: card.id,
+                mode: 'pesquisar',
+                subKey: 'departmentLauncher',
+                subLabel: 'Feed por área',
+                endpoint: null,
+                result: {},
+                difficulty: dificuldade,
+                pinned: false,
+                createdAt: new Date().toISOString(),
+                kind: 'departmentLauncher',
+              }
+            : workspaceContext.diagnostic
+              ? buildDiagnosticBlock(card, workspaceContext.diagnostic, dificuldade)
+              : buildInitialBlock(card, dificuldade);
     const initialMsg: Message = { id: mainBlock.id, role: 'block', text: mainBlock.subLabel, block: mainBlock };
 
     // Card primeiro (overview/contexto original), depois a análise que se desenvolve a partir dele.
     const newMessages: Message[] = [cardMsg, initialMsg];
+
+    // Score/Navegador/Mapa não geram bloco de modo/compartilhamento — só o bloco leve.
+    if (isLauncherCard) {
+      setWorkspaceOpen(false);
+      skipBottomScrollRef.current = true;
+      setMessages(prev => [...prev, ...newMessages]);
+      setShortcuts([]);
+      return;
+    }
 
     // 3) Bloco de compartilhamento (apenas para intent='compartilhar')
     if (intent === 'compartilhar') {
@@ -593,10 +685,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
             const isMode    = b.kind === 'mode';
             const isTool    = b.kind === 'tool';
             const isDiag    = b.kind === 'diagnostico';
-            const headerColor = isDiag ? '#0ea5e9' : isInitial ? '#10b981' : isShare ? '#f59e0b' : isTool ? '#8b5cf6' : isMode ? '#3b82f6' : '#3b82f6';
+            const isScore   = b.kind === 'score';
+            const isBrowserLauncher = b.kind === 'browserLauncher';
+            const isMapLauncher     = b.kind === 'mapLauncher';
+            const isDeptLauncher    = b.kind === 'departmentLauncher';
+            const headerColor = isDiag ? '#0ea5e9' : isInitial ? '#10b981' : isShare ? '#f59e0b' : isTool ? '#8b5cf6' : isScore ? '#6366f1' : isBrowserLauncher ? '#0891b2' : isMapLauncher ? '#059669' : isDeptLauncher ? '#d946ef' : isMode ? '#3b82f6' : '#3b82f6';
             // Tools aparecem em blocos com conteúdo gerado (mode, standard, diagnostico).
-            // Initial / share / tool não geram contêiner.
-            const toolCtx = !isShare && !isTool && !isInitial ? buildToolCtx(activeCard, b) : null;
+            // Initial / share / tool / score / browserLauncher / mapLauncher / departmentLauncher não geram contêiner.
+            const toolCtx = !isShare && !isTool && !isInitial && !isScore && !isBrowserLauncher && !isMapLauncher && !isDeptLauncher ? buildToolCtx(activeCard, b) : null;
             return (
               <motion.div
                 key={msg.id}
@@ -629,6 +725,14 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <ToolBlockContent output={b.result as unknown as ToolOutput} />
                     ) : isDiag ? (
                       <DiagnosticBlockContent payload={b.result as unknown as CompanyDiagnosticPayload} />
+                    ) : isScore ? (
+                      <ScoreBlockContent result={b.result} />
+                    ) : isBrowserLauncher ? (
+                      <WorkspaceBrowserLauncherBlock onOpen={(url) => onOpenBrowserUrl?.(url)} />
+                    ) : isMapLauncher ? (
+                      <WorkspaceMapLauncherBlock onOpen={(radiusKm) => onOpenMapWithRadius?.(radiusKm)} />
+                    ) : isDeptLauncher ? (
+                      <WorkspaceDepartmentLauncherBlock active={activeDepartment} onSelect={(id) => onSelectDepartment?.(id)} />
                     ) : isMode ? (
                       <ModeBlockContent result={b.result} mode={b.mode} />
                     ) : (
@@ -674,7 +778,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
                     </div>
-                  ) : isDiag ? (
+                  ) : isScore || isBrowserLauncher || isMapLauncher || isDeptLauncher ? null : isDiag ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
                       <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
@@ -831,6 +935,143 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
 // Renderiza os 8 campos do bloco inicial em formato de lista.
 // InitialBlockContent e DiagnosticBlockContent migrados na Fase 9 para
 // src/features/workspace/blocks/WorkspaceBlockContent.tsx (re-import abaixo).
+
+// Bloco leve de Score — números e textos curtos, sem componente grande
+// (ScoreOS1Panel) e sem tela cheia. Mock/preview local; sem chamada de API.
+function ScoreBlockContent({ result }: { result: Record<string, unknown> }) {
+  const scoreGeral = typeof result.score_geral === 'number' ? result.score_geral : null;
+  const resumo = typeof result.resumo === 'string' ? result.resumo : '';
+  const dimensoes = Array.isArray(result.dimensoes)
+    ? result.dimensoes as { label: string; valor: number; texto: string }[]
+    : [];
+  return (
+    <div className="space-y-3">
+      {resumo && (
+        <p className="text-neutral-500 dark:text-neutral-400">{resumo}</p>
+      )}
+      {scoreGeral !== null && (
+        <p className="text-[26px] font-bold text-neutral-800 dark:text-neutral-100 tabular-nums">
+          {scoreGeral}<span className="text-[13px] font-normal text-neutral-400 dark:text-neutral-500">/100</span>
+        </p>
+      )}
+      <div className="space-y-2.5">
+        {dimensoes.map((d, i) => (
+          <div key={i}>
+            <p className="font-semibold text-neutral-700 dark:text-neutral-200">{d.label} · {d.valor}</p>
+            <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">{d.texto}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Bloco lançador do Navegador — só o campo de URL, sem renderizar o
+// navegador (ElectronBrowser/iframe) dentro da Área de Trabalho. Abre o
+// fullscreen já existente via onOpen, que recebe a URL já normalizada.
+function WorkspaceBrowserLauncherBlock({ onOpen }: { onOpen: (url: string) => void }) {
+  const [url, setUrl] = useState('');
+  const handleOpen = () => {
+    const normalized = normalizeUrl(url);
+    if (!normalized) return;
+    onOpen(normalized);
+  };
+  return (
+    <div className="space-y-2.5">
+      <p className="text-neutral-500 dark:text-neutral-400">Cole um link para abrir ou analisar.</p>
+      <input
+        type="text"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') handleOpen(); }}
+        placeholder="https://..."
+        className="w-full px-3 py-2 rounded-lg text-[12px] bg-neutral-50 dark:bg-[#353535] border border-neutral-200 dark:border-[#414141] text-neutral-700 dark:text-neutral-200 placeholder:text-neutral-400 focus:outline-none focus:border-[#3b82f6]"
+      />
+      <button
+        type="button"
+        onClick={handleOpen}
+        disabled={!url.trim()}
+        className="w-full h-9 rounded-lg text-[12px] font-medium bg-[#3b82f6] text-white disabled:opacity-40 disabled:cursor-default cursor-pointer hover:bg-[#2f6fd6] transition-colors"
+      >
+        Abrir navegador
+      </button>
+    </div>
+  );
+}
+
+// Bloco lançador do Mapa — só a escolha de raio, sem renderizar o
+// CompetitiveMap dentro da Área de Trabalho. Abre o fullscreen já
+// existente via onOpen(radiusKm). PENDÊNCIA: CompetitiveMap ainda não
+// aceita raio como parâmetro — o valor escolhido aqui ainda não é
+// aplicado no mapa fullscreen (ver App.tsx: openMapWithRadius).
+const MAP_RADIUS_OPTIONS_KM = [1, 3, 5, 10];
+
+function WorkspaceMapLauncherBlock({ onOpen }: { onOpen: (radiusKm: number) => void }) {
+  const [radiusKm, setRadiusKm] = useState(3);
+  return (
+    <div className="space-y-2.5">
+      <p className="text-neutral-500 dark:text-neutral-400">Escolha um raio para observar região, concorrência e sinais locais.</p>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {MAP_RADIUS_OPTIONS_KM.map((km) => (
+          <button
+            key={km}
+            type="button"
+            onClick={() => setRadiusKm(km)}
+            className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition-colors ${
+              radiusKm === km
+                ? 'bg-[#3b82f6] text-white border-[#3b82f6]'
+                : 'bg-neutral-50 dark:bg-[#353535] text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-[#414141]'
+            }`}
+          >
+            {km} km
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onOpen(radiusKm)}
+        className="w-full h-9 rounded-lg text-[12px] font-medium bg-[#3b82f6] text-white cursor-pointer hover:bg-[#2f6fd6] transition-colors"
+      >
+        Abrir mapa
+      </button>
+    </div>
+  );
+}
+
+// Bloco seletor de Feed por área — reaproveita a lista real de departamentos
+// (DEPARTMENTS/VISIBLE_DEPARTMENT_IDS de SectorSwitcher.tsx, a mesma fonte
+// do seletor "Mais"/DepartmentSwitcherModal). Clicar muda activeDepartment
+// direto — sem navegar, sem fechar a Área de Trabalho, sem abrir modal.
+const DEPARTMENT_LAUNCHER_OPTIONS: { id: DepartmentId; label: string; color: string }[] = [
+  { id: 'geral', label: 'Geral', color: '#3b82f6' },
+  ...DEPARTMENTS.filter((d) => VISIBLE_DEPARTMENT_IDS.has(d.id)).map((d) => ({ id: d.id as DepartmentId, label: d.label, color: d.color })),
+];
+
+function WorkspaceDepartmentLauncherBlock({ active, onSelect }: { active?: DepartmentId; onSelect: (id: DepartmentId) => void }) {
+  return (
+    <div className="space-y-2.5">
+      <p className="text-neutral-500 dark:text-neutral-400">Escolha uma área para mudar a leitura do feed.</p>
+      <div className="flex flex-wrap gap-1.5">
+        {DEPARTMENT_LAUNCHER_OPTIONS.map((opt) => {
+          const isActive = active === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onSelect(opt.id)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border cursor-pointer transition-colors ${
+                isActive ? 'text-white' : 'bg-neutral-50 dark:bg-[#353535] text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-[#414141]'
+              }`}
+              style={isActive ? { backgroundColor: opt.color, borderColor: opt.color } : undefined}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 // Render do bloco de compartilhamento — 5 opções, cada uma copia/envia o texto formatado.
 function ShareOptionsContent({ card }: { card: IntelligenceCard | null }) {
@@ -1020,11 +1261,17 @@ interface ChatDesktopProps {
   onArchive?: (cardTitle: string, sector: string, snapshot: { messages: Message[]; activeCard: IntelligenceCard | null; activeMode: MainKey | null }) => void;
   onWorkspaceCleared?: () => void;
   onMapOpen?: () => void;
+  /** Abre o navegador fullscreen com a URL informada no bloco lançador. */
+  onOpenBrowserUrl?: (url: string) => void;
+  /** Abre o mapa fullscreen depois do raio escolhido no bloco lançador. */
+  onOpenMapWithRadius?: (radiusKm: number) => void;
+  activeDepartment?: DepartmentId;
+  onSelectDepartment?: (id: DepartmentId) => void;
   codifyScope?: CodifyScope | null;
   windowWidth?: number;
 }
 
-export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope, windowWidth }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, onOpenBrowserUrl, onOpenMapWithRadius, activeDepartment, onSelectDepartment, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onWorkspaceCleared, codifyScope, windowWidth }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
@@ -1061,7 +1308,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
       ref={wrapperRef}
       style={{
         width: wide ? 'calc(50vw - 20px)' : '340px',
-        top: `${SPLIT_FRAME_TOP_PX + 12}px`,
+        top: `${SPLIT_FRAME_TOP_PX + SPLIT_FRAME_TOP_EXTRA_PX}px`,
         right: `${rightPx}px`,
         transition: 'right 500ms cubic-bezier(0.25,0.1,0.25,1), width 500ms cubic-bezier(0.25,0.1,0.25,1)',
       }}
@@ -1094,7 +1341,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
       </div>
       </div>
       <div className="flex-1 min-h-0">
-        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} onWorkspaceCleared={onWorkspaceCleared} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} codifyScope={codifyScope} />
+        <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} onWorkspaceCleared={onWorkspaceCleared} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} codifyScope={codifyScope} onOpenBrowserUrl={onOpenBrowserUrl} onOpenMapWithRadius={onOpenMapWithRadius} activeDepartment={activeDepartment} onSelectDepartment={onSelectDepartment} />
       </div>
     </div>
   );
@@ -1139,7 +1386,7 @@ export function ChatFAB({ onClick }: { onClick: () => void }) {
 
 export function ChatMobile({
   open, onClose, workspaceContext, activeSector, userRole,
-  onHome, homeTitle, onSector, onBrowser, unreadCount,
+  onHome, homeTitle, onSector, onBrowser, onOpenBrowserUrl, onOpenMapWithRadius, activeDepartment, onSelectDepartment, unreadCount,
   dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, codifyScope,
 }: {
   open: boolean;
@@ -1151,6 +1398,12 @@ export function ChatMobile({
   homeTitle?: string;
   onSector?: () => void;
   onBrowser?: () => void;
+  /** Abre o navegador fullscreen com a URL informada no bloco lançador. */
+  onOpenBrowserUrl?: (url: string) => void;
+  /** Abre o mapa fullscreen depois do raio escolhido no bloco lançador. */
+  onOpenMapWithRadius?: (radiusKm: number) => void;
+  activeDepartment?: DepartmentId;
+  onSelectDepartment?: (id: DepartmentId) => void;
   /** Mantido por compat — não renderiza mais botão dedicado. */
   onDifficulty?: () => void;
   unreadCount?: number;
@@ -1229,7 +1482,7 @@ export function ChatMobile({
           </div>
           </div>
           <div className="flex-1 min-h-0">
-            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} codifyScope={codifyScope} />
+            <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} codifyScope={codifyScope} onOpenBrowserUrl={onOpenBrowserUrl} onOpenMapWithRadius={onOpenMapWithRadius} activeDepartment={activeDepartment} onSelectDepartment={onSelectDepartment} />
           </div>
         </motion.div>
       )}
