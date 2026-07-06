@@ -97,7 +97,7 @@ import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
 import { OS1_EVENTS } from './core/events/os1-events';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
 import type { CompanyDiagnosticPayload } from './components/ChatPanel';
-import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX, NAV_STICKY_TOP_PX } from './constants/split-layout';
+import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX, NAV_STICKY_TOP_PX, getDesktopChatLayout } from './constants/split-layout';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -424,6 +424,13 @@ function AuthenticatedApp() {
   // cobertos aqui sem precisar listar kinds.
   const hasWorkspaceContent = workspaceContext !== null;
   const isSplitView = scrolled && isDesktop && hasWorkspaceContent;
+  // Fora do split, o feed precisa reservar espaço pro ChatDesktop pequeno
+  // (sempre visível em desktop, com ou sem conteúdo na Área de Trabalho) —
+  // mesma fórmula de getDesktopChatLayout usada em ChatPanel.tsx pra
+  // posicionar o painel de verdade. Antes isso era feito com classes
+  // Tailwind fixas (lg:pr-[320px] xl:pr-[336px]) que não acompanhavam a
+  // posição real do painel em larguras de janela intermediárias.
+  const normalFeedRightPadding = isDesktop ? getDesktopChatLayout(windowWidth, false).reservedRightPx : 0;
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
   // O ChatDesktop está em `SPLIT_FRAME_TOP_PX + SPLIT_FRAME_TOP_EXTRA_PX`
@@ -1417,8 +1424,8 @@ function AuthenticatedApp() {
       </nav>
 
     <div
-      style={{ paddingRight: isSplitView ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans lg:pr-[320px] xl:pr-[336px]"
+      style={{ paddingRight: isSplitView ? '50vw' : (normalFeedRightPadding || undefined), transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans"
     >
 
       <main

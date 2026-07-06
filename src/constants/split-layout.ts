@@ -20,3 +20,30 @@ export const NAV_STICKY_TOP_PX = 20;
 // MESMO valor nos dois lados — por isso vive aqui como constante única, em
 // vez de "+ 12" solto repetido nos dois arquivos.
 export const SPLIT_FRAME_TOP_EXTRA_PX = 12;
+
+export interface DesktopChatLayout {
+  /** Espaço total (px) que o feed precisa reservar à direita pra não ficar
+      coberto pelo ChatDesktop pequeno (rightPx + largura do painel + gap). */
+  reservedRightPx: number;
+  /** Distância (px) do painel até a borda direita da viewport. */
+  rightPx: number;
+  /** Largura (px) do painel — undefined quando `wide` (split-view usa
+      'calc(50vw - 20px)', uma largura relativa, não um px fixo). */
+  widthPx: number | undefined;
+}
+
+// Fonte única da posição/largura do ChatDesktop — usada tanto por
+// ChatPanel.tsx (posiciona o painel de verdade) quanto por App.tsx (calcula
+// quanto espaço o feed precisa reservar pra não ficar coberto por ele).
+// Antes essa fórmula só existia em ChatPanel.tsx, e App.tsx usava classes
+// Tailwind fixas (lg:pr-[320px] xl:pr-[336px]) que não acompanhavam a
+// posição real — daí o feed ficar mais ou menos espremido dependendo da
+// largura exata da janela. Não inventar matemática nova aqui: mesma fórmula
+// de antes, só extraída pra um lugar só.
+export function getDesktopChatLayout(windowWidth: number, wide: boolean): DesktopChatLayout {
+  const pr = windowWidth >= 1280 ? 336 : 320;
+  const rightPx = wide ? 20 : Math.max(5, (windowWidth + pr - 1575) / 2);
+  const widthPx = wide ? undefined : 340;
+  const reservedRightPx = rightPx + (widthPx ?? 0) + 20;
+  return { reservedRightPx, rightPx, widthPx };
+}

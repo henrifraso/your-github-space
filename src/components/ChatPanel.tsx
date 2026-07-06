@@ -12,7 +12,7 @@ import { ActionResult } from './WorkspacePanel';
 import { getFixtureRelations } from '../core/relations/relation-generator';
 import type { Relation } from '../core/relations/relation';
 import { apiFetch } from '../api';
-import { SPLIT_TOP_GAP_PB, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX } from '../constants/split-layout';
+import { SPLIT_TOP_GAP_PB, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX, getDesktopChatLayout } from '../constants/split-layout';
 import { WorkspaceTools, ToolBlockContent } from './WorkspaceTools';
 import {
   InitialBlockContent,
@@ -1301,13 +1301,12 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
     return () => el.removeEventListener('wheel', handler);
   }, []);
   const ww = windowWidth ?? window.innerWidth;
-  const pr = ww >= 1280 ? 336 : 320;
-  const rightPx = wide ? 20 : Math.max(5, (ww + pr - 1575) / 2);
+  const { rightPx, widthPx } = getDesktopChatLayout(ww, !!wide);
   return (
     <div
       ref={wrapperRef}
       style={{
-        width: wide ? 'calc(50vw - 20px)' : '340px',
+        width: wide ? 'calc(50vw - 20px)' : `${widthPx}px`,
         top: `${SPLIT_FRAME_TOP_PX + SPLIT_FRAME_TOP_EXTRA_PX}px`,
         right: `${rightPx}px`,
         transition: 'right 500ms cubic-bezier(0.25,0.1,0.25,1), width 500ms cubic-bezier(0.25,0.1,0.25,1)',
