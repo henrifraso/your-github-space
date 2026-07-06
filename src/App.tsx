@@ -97,7 +97,7 @@ import { runFullDiagnosis, LEGAL_NOTICE } from './lib/ontology-diagnostics';
 import { OS1_EVENTS } from './core/events/os1-events';
 import { ChatDesktop, ChatFAB, ChatMobile } from './components/ChatPanel';
 import type { CompanyDiagnosticPayload } from './components/ChatPanel';
-import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX, NAV_STICKY_TOP_PX, getDesktopChatLayout } from './constants/split-layout';
+import { SPLIT_TOP_GAP_MT, SPLIT_FRAME_TOP_PX, SPLIT_FRAME_TOP_EXTRA_PX, NAV_STICKY_TOP_PX } from './constants/split-layout';
 import { TimelineModal } from './components/TimelineComponents';
 import { MarketMapButton, MarketMapContent } from './components/MarketMap';
 import { PhotoEditor, loadPhotoSettings } from './components/PhotoEditor';
@@ -424,13 +424,11 @@ function AuthenticatedApp() {
   // cobertos aqui sem precisar listar kinds.
   const hasWorkspaceContent = workspaceContext !== null;
   const isSplitView = scrolled && isDesktop && hasWorkspaceContent;
-  // Fora do split, o feed precisa reservar espaço pro ChatDesktop pequeno
-  // (sempre visível em desktop, com ou sem conteúdo na Área de Trabalho) —
-  // mesma fórmula de getDesktopChatLayout usada em ChatPanel.tsx pra
-  // posicionar o painel de verdade. Antes isso era feito com classes
-  // Tailwind fixas (lg:pr-[320px] xl:pr-[336px]) que não acompanhavam a
-  // posição real do painel em larguras de janela intermediárias.
-  const normalFeedRightPadding = isDesktop ? getDesktopChatLayout(windowWidth, false).reservedRightPx : 0;
+  // Fora do split, o feed NÃO reserva espaço pro ChatDesktop pequeno — ele
+  // flutua por cima quando visível (fixed, z-40), sem comprimir a largura
+  // do feed/bio. Reservar espaço pra ele (via getDesktopChatLayout) foi
+  // tentado numa correção anterior mas deixava o layout normal comprimido;
+  // a regra visual atual prioriza feed/bio ocupando a largura disponível.
   // Quando scrolled=true, paddingTop do <main> compensa o gap entre fim
   // da navbar e o top-[72px] do ChatPanel. Feed encosta exatamente em 72px.
   // O ChatDesktop está em `SPLIT_FRAME_TOP_PX + SPLIT_FRAME_TOP_EXTRA_PX`
@@ -1424,19 +1422,21 @@ function AuthenticatedApp() {
       </nav>
 
     <div
-      style={{ paddingRight: isSplitView ? '50vw' : (normalFeedRightPadding || undefined), transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
+      style={{ paddingRight: isSplitView ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
       className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans"
     >
 
       <main
         style={mainPadTop !== undefined ? { paddingTop: mainPadTop } : undefined}
-        className={`${isSplitView ? 'max-w-none' : 'max-w-[935px]'} mx-auto ${scrolled ? '' : 'pt-5'}`}
+        className={`${scrolled ? '' : 'pt-5'}`}
       >
         {/* Container unificado de fundo — os elementos internos flutuam por cima.
-            Em modo split (isSplitView), o mr alinha exatamente com o
-            right-4 do ChatDesktop (16px), pra que feed e workspace tenham
-            o mesmo afastamento das bordas externas e entre si. */}
-        <div className={`ml-4 ${isSplitView ? 'mr-5' : 'mr-10'} sm:ml-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
+            Gap externo único (mx-4/sm:mx-5) igual nos dois lados e em
+            qualquer estado — sem reservar espaço extra pro ChatDesktop
+            pequeno (ele flutua por cima quando visível, não comprime o
+            feed). Em split, o mesmo mx alinha com o right-4/right-5 do
+            ChatDesktop, pra feed e workspace terem o mesmo afastamento. */}
+        <div className={`mx-4 sm:mx-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1737,7 +1737,7 @@ function AuthenticatedApp() {
           feeds={PROFILE_SECTOR_FEEDS[feedKey] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
           onOpenWorkspace={openWorkspaceFromCard}
           topGapClass={isSplitView ? SPLIT_TOP_GAP_MT : undefined}
-          rightPadClass={isSplitView ? 'pr-5' : 'pr-10'}
+          rightPadClass="pr-5"
         />
       )}
 
@@ -1766,7 +1766,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className={`max-w-[935px] mx-auto ${isSplitView ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${isSplitView ? 'pr-5' : 'pr-10'}`}
+            className={`${isSplitView ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 pr-5`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1863,7 +1863,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className={`max-w-[935px] mx-auto ${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${isSplitView ? 'pr-5' : 'pr-10'}`}
+        className={`${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 pr-5`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
