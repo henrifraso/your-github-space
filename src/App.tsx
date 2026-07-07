@@ -422,8 +422,7 @@ function AuthenticatedApp() {
   // launchers novos (Score/Feed por área/Navegador/Mapa) e o diagnóstico
   // passam todos por openWorkspaceFromCard, que seta workspaceContext — já
   // cobertos aqui sem precisar listar kinds.
-  const hasWorkspaceContent = workspaceContext !== null;
-  const isSplitView = scrolled && isDesktop && hasWorkspaceContent;
+  const isSplitView = scrolled && isDesktop;
   // Fora do split, o feed NÃO reserva espaço pro ChatDesktop pequeno — ele
   // flutua por cima quando visível (fixed, z-40), sem comprimir a largura
   // do feed/bio. Reservar espaço pra ele (via getDesktopChatLayout) foi
