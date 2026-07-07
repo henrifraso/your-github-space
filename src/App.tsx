@@ -1436,7 +1436,7 @@ function AuthenticatedApp() {
             pequeno (ele flutua por cima quando visível, não comprime o
             feed). Em split, o mesmo mx alinha com o right-4/right-5 do
             ChatDesktop, pra feed e workspace terem o mesmo afastamento. */}
-        <div className={`mx-4 sm:mx-5 bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
+        <div className={`ml-4 sm:ml-5 ${isSplitView ? 'mr-5' : 'mr-10'} bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1737,7 +1737,7 @@ function AuthenticatedApp() {
           feeds={PROFILE_SECTOR_FEEDS[feedKey] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
           onOpenWorkspace={openWorkspaceFromCard}
           topGapClass={isSplitView ? SPLIT_TOP_GAP_MT : undefined}
-          rightPadClass="pr-5"
+          rightPadClass={isSplitView ? 'pr-5' : 'pr-10'}
         />
       )}
 
@@ -1766,7 +1766,7 @@ function AuthenticatedApp() {
 
         return (
           <motion.div
-            className={`${isSplitView ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 pr-5`}
+            className={`${isSplitView ? SPLIT_TOP_GAP_MT : scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${isSplitView ? 'pr-5' : 'pr-10'}`}
             initial="hidden"
             animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
@@ -1863,7 +1863,7 @@ function AuthenticatedApp() {
         ((role === 'codify' || role === 'affiliate' || role === 'team_member') && activeRoleTab === 'demos') ||
         (roleConfig.swipeOptions.length === 0)
        ) && <motion.div
-        className={`${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 pr-5`}
+        className={`${scrolled ? '' : 'mt-5'} pb-32 space-y-5 pl-5 ${isSplitView ? 'pr-5' : 'pr-10'}`}
         initial="hidden"
         animate="visible"
         variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
