@@ -85,7 +85,7 @@ export function SectorFeed({ department, feeds, onOpenWorkspace, topGapClass, ri
 
   return (
     <motion.div
-      className={`${topGapClass ?? 'mt-5'} pb-32 space-y-5 pl-2 ${rightPadClass ?? 'pr-5'}`}
+      className={`${topGapClass ?? 'mt-5'} pb-32 space-y-5 pl-5 ${rightPadClass ?? 'pr-5'}`}
       initial="hidden"
       animate="visible"
       variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } } }}
