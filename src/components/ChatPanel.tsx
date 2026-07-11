@@ -1167,9 +1167,9 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     ) : isScore ? (
                       <ScoreBlockContent result={b.result} />
                     ) : isBrowserLauncher ? (
-                      <WorkspaceBrowserLauncherBlock onOpen={(url) => onOpenBrowserUrl?.(url)} />
+                      <WorkspaceBrowserLauncherBlock onOpen={(url) => { onOpenBrowserUrl?.(url); handleApagar(); }} />
                     ) : isMapLauncher ? (
-                      <WorkspaceMapLauncherBlock onOpen={(radiusKm) => onOpenMapWithRadius?.(radiusKm)} />
+                      <WorkspaceMapLauncherBlock onOpen={(radiusKm) => { onOpenMapWithRadius?.(radiusKm); handleApagar(); }} />
                     ) : isDeptLauncher ? (
                       <WorkspaceDepartmentLauncherBlock active={activeDepartment} onSelect={(id) => { onSelectDepartment?.(id); handleApagar(); }} />
                     ) : isSettingsLauncher ? (

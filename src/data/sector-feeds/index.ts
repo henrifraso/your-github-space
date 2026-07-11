@@ -18,6 +18,7 @@ import { NATURA_SECTOR_FEEDS } from './natura';
 import { CERVEJA_IMPERIO_SECTOR_FEEDS } from './cerveja-imperio';
 import { OSCAR_LOJA1_SECTOR_FEEDS } from './oscar-loja1';
 import { PACHECO_LOJA1_SECTOR_FEEDS } from './pacheco-loja1';
+import { COMBRASIL_SECTOR_FEEDS } from './combrasil';
 
 export const PROFILE_SECTOR_FEEDS: Record<string, CompanySectorFeeds> = {
   os1:       OS1_SECTOR_FEEDS,
@@ -28,6 +29,7 @@ export const PROFILE_SECTOR_FEEDS: Record<string, CompanySectorFeeds> = {
   'pacheco-loja-01': PACHECO_LOJA1_SECTOR_FEEDS,
   'cerveja-imperio':                  CERVEJA_IMPERIO_SECTOR_FEEDS,
   'cerveja-imperio-distribuidora-01': CERVEJA_IMPERIO_SECTOR_FEEDS,
+  'combrasil':                        COMBRASIL_SECTOR_FEEDS,
   ifood:     IFOOD_SECTOR_FEEDS,
   ambev:     AMBEV_SECTOR_FEEDS,
   magalu:    MAGALU_SECTOR_FEEDS,
