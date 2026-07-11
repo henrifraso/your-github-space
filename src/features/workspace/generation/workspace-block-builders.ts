@@ -75,13 +75,11 @@ export function shortcutsForCard(card: IntelligenceCard): LocalShortcut[] {
     { id: 'sc-g5', kind: 'local', label: 'Comparar com mercado',  mode: 'executar',  subKey: 'mercado' },
   ];
 }
-export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
+// Campos de contexto inicial reutilizados no topo dos blocos de modo/share unificados.
+function buildInitialContextFields(card: IntelligenceCard): Record<string, unknown> {
   const dom = narDom(card);
   const urg = card.urgencia || 'media';
-  const acao = card.o_que_fazer || 'definir próximo passo';
   const janela = urg === 'alta' ? '48 a 72 horas' : urg === 'media' ? '2 semanas' : '30 dias';
-  // F6b: cards de hipótese ganham variante editorial conservadora —
-  // sem percentual inventado, sem prazo arbitrário, sem previsão forte.
   const isHyp = card.isHypothesis === true;
 
   const o_que_aconteceu = card.resumo
@@ -100,8 +98,6 @@ export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldad
         ? `Tema relevante para ${dom}, mas ainda depende de validação com dado interno antes de virar ação ampla.`
         : `Esse tipo de sinal afeta diretamente a percepção do cliente local, a operação cotidiana e a competitividade da unidade. Empresas que leem cedo ganham 2-4 semanas de vantagem; quem reage tarde paga mais pra recuperar.`);
 
-  // card.onde_afeta pode vir do bridge como entity slug ('nike', etc.) —
-  // mesmo filtro de ENTITY_AND_TECH_IDS para não vazar em prosa narrativa.
   const ondeAfetaSafe = (card.onde_afeta && !ENTITY_AND_TECH_IDS.has(card.onde_afeta.toLowerCase().trim()))
     ? card.onde_afeta : null;
   const onde_afeta = ondeAfetaSafe
@@ -131,6 +127,20 @@ export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldad
   const proximo_passo = isHyp
     ? `1) Use os atalhos abaixo para aprofundar o tema. 2) Definir 1 indicador interno para checar a hipótese. 3) Atribuir responsável pela leitura. 4) Revisar quando a primeira medição estiver disponível.`
     : `1) Use os atalhos abaixo (Entender melhor / Separar evidências / Ver risco / Ver exemplos / Simular cenário) pra aprofundar. 2) Decidir nos próximos 3 dias se vira monitoramento contínuo ou ponto de atenção. 3) Identificar responsável e indicador antes do fim da semana. 4) Revisar em ${urg === 'alta' ? '14' : '30'} dias.`;
+
+  return {
+    o_que_aconteceu,
+    por_que_importa,
+    onde_afeta,
+    risco,
+    oportunidade,
+    dominio: dom,
+    acao_recomendada,
+    proximo_passo,
+  };
+}
+
+export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldade): WorkspaceBlock {
   return {
     id:         `blk-init-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     cardId:     card.id,
@@ -138,16 +148,7 @@ export function buildInitialBlock(card: IntelligenceCard, difficulty: Dificuldad
     subKey:     'inicial',
     subLabel:   'Análise inicial',
     endpoint:   null,
-    result: {
-      o_que_aconteceu,
-      por_que_importa,
-      onde_afeta,
-      risco,
-      oportunidade,
-      dominio: dom,
-      acao_recomendada,
-      proximo_passo,
-    },
+    result:     buildInitialContextFields(card),
     difficulty,
     pinned:     false,
     createdAt:  new Date().toISOString(),
@@ -184,7 +185,7 @@ export function buildShareBlock(card: IntelligenceCard, difficulty: Dificuldade)
     subKey:     'compartilhar',
     subLabel:   'Compartilhar',
     endpoint:   null,
-    result:     { share: true, titulo: card.titulo, resumo: card.resumo },
+    result:     { share: true, titulo: card.titulo, resumo: card.resumo, _ctx: buildInitialContextFields(card) },
     difficulty,
     pinned:     false,
     createdAt:  new Date().toISOString(),
@@ -405,7 +406,7 @@ export function buildModeBlock(card: IntelligenceCard, mode: MainKey, difficulty
     subKey:     'mode',
     subLabel:   MODE_TITLES[mode],
     endpoint:   null,
-    result,
+    result:     { ...result, _ctx: buildInitialContextFields(card) },
     difficulty,
     pinned:     false,
     createdAt:  new Date().toISOString(),

@@ -90,10 +90,10 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
       photoUrl: '/os1-profile.png',
     },
     swipeOptions: [
-      { id: 'demos',     label: 'Demos' },
-      { id: 'empresas',  label: 'Empresas' },
-      { id: 'afiliados', label: 'Afiliados' },
-      { id: 'parceiros', label: 'Parceiros' },
+      // { id: 'demos',     label: 'Demos' },     // oculto — reativar se necessário
+      // { id: 'empresas',  label: 'Empresas' },  // oculto
+      // { id: 'afiliados', label: 'Afiliados' }, // oculto
+      // { id: 'parceiros', label: 'Parceiros' }, // oculto
     ],
     feedCards: [
       { id: 'cod-1', titulo: 'Resumo semanal', resumo: '3 empresas ativas, 2 afiliados vendendo, 1 parceiro conectado. Nenhuma empresa em risco essa semana.', tipo: 'informacao', urgencia: 'baixa', tags: ['overview'] },

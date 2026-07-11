@@ -161,7 +161,7 @@ export interface RemoteShortcut {
 }
 
 // ── Bloco gerado por uma ação ───────────────────────────────────────
-export type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico' | 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher';
+export type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico' | 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher' | 'settingsLauncher' | 'profileSwitcher';
 
 // Metadados de proveniência do LLM, ecoados pelo backend (agents/base_agent.py)
 // em cada resposta de /api/workspace/*. Ausente quando o bloco veio de

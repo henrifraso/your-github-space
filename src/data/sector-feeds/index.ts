@@ -22,7 +22,7 @@ import { PACHECO_LOJA1_SECTOR_FEEDS } from './pacheco-loja1';
 export const PROFILE_SECTOR_FEEDS: Record<string, CompanySectorFeeds> = {
   os1:       OS1_SECTOR_FEEDS,
   mcdonalds: MCDONALDS_SECTOR_FEEDS,
-  nike:      NIKE_SECTOR_FEEDS,
+  nike:      OSCAR_LOJA1_SECTOR_FEEDS,
   nubank:    NUBANK_SECTOR_FEEDS,
   'oscar-piloto-01': OSCAR_LOJA1_SECTOR_FEEDS,
   'pacheco-loja-01': PACHECO_LOJA1_SECTOR_FEEDS,

@@ -389,6 +389,7 @@ function AuthenticatedApp() {
   const [destaqueOpen, setDestaqueOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatHistoryOpen, setChatHistoryOpen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
   const [statInfo, setStatInfo] = useState<{ label: string; value: any; description: string } | null>(null);
   // Sessões arquivadas — cada vez que o user clica em "Área de Trabalho" pra recolher, salva a sessão atual aqui.
   // Sessões arquivadas separadas POR SECTOR — cada perfil tem seu próprio histórico.
@@ -570,6 +571,8 @@ function AuthenticatedApp() {
   // Abre o WorkspacePanel a partir de um card real do feed.
   // Registra a interação correspondente (best-effort, não bloqueia abertura).
   const openWorkspaceFromCard = (card: IntelligenceCard, intent: WorkspaceIntent) => {
+    // Confirmação de deslogar tem prioridade — nada abre enquanto ela estiver pendente.
+    if (logoutPending) return;
     const INTERACTION_BY_INTENT: Record<WorkspaceIntent, string> = {
       utilizar:     'utilizou',
       perguntas:    'perguntou',
@@ -590,6 +593,7 @@ function AuthenticatedApp() {
       }).catch((err) => { console.warn('[workspace] interact falhou:', err); });
     }
     // Envia o card pro contêiner do chat (botão "Área de trabalho") em vez de fullscreen.
+    setChatHistoryOpen(false);
     workspaceSeqRef.current += 1;
     setWorkspaceContext({ card, intent, seq: workspaceSeqRef.current, arrowsUnlocked: activeProduct?.arrowsUnlocked ?? false });
     // Alinhamento automático: simula o "deslize manual" que divide a tela ao meio.
@@ -729,6 +733,24 @@ function AuthenticatedApp() {
     openWorkspaceFromCard(card, 'utilizar');
   };
 
+  const openSettingsInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-settings-launcher-${Date.now()}`,
+      titulo:          'Configuração da Empresa',
+      resumo:          'Calibre o radar de inteligência para o seu mercado.',
+      dominio:         'Configuração',
+      area:            'configuracao',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
   // Abre o Mapa como bloco lançador dentro da Área de Trabalho — não
   // renderiza o CompetitiveMap inteiro ali, só a escolha de raio. O
   // fullscreen continua existindo, só passa a abrir depois que o usuário
@@ -789,18 +811,37 @@ function AuthenticatedApp() {
     openWorkspaceFromCard(card, 'utilizar');
   };
 
+  // Abre a grade de seleção de perfis dentro da Área de Trabalho — substitui
+  // o SectorSwitcherModal fullscreen para o perfil central OS¹.
+  const openProfileSwitcherInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-profile-switcher-${Date.now()}`,
+      titulo:          'Perfis',
+      resumo:          'Escolha um perfil para mudar a leitura.',
+      dominio:         'Perfis',
+      area:            'perfis',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
   // Botão "+"/"Mais" (onSector) — o mesmo `sectorOpen` controla 3 modais
   // diferentes conforme activeSector/role (ver comentário "Sector Switcher"
-  // no render): OS¹ e cerveja-imperio abrem SectorSwitcherModal (troca
-  // empresa/unidade — recurso diferente, não mexido aqui); os demais casos
-  // (nike/nubank/mcdonalds e role=franchise) abriam DepartmentSwitcherModal
-  // fullscreen (troca departamento) — esse caso agora abre o bloco leve na
-  // Área de Trabalho em vez do modal fullscreen. Mesma condição usada no
-  // render para decidir qual dos 3 modais aparece.
+  // no render): OS¹ agora abre a grade de perfis dentro da Área de Trabalho;
+  // cerveja-imperio abre SectorSwitcherModal (troca unidade); os demais casos
+  // (nike/nubank/mcdonalds e role=franchise) abrem o bloco departamento na AT.
   const isDepartmentSwitchContext = (activeSector !== 'os1' && activeSector !== 'cerveja-imperio') || role === 'franchise';
   const handleSectorButtonClick = () => {
     if (isDepartmentSwitchContext) {
       openDepartmentLauncherInWorkspace();
+    } else if (activeSector === 'os1') {
+      openProfileSwitcherInWorkspace();
     } else {
       setSectorOpen(true);
     }
@@ -1181,6 +1222,8 @@ function AuthenticatedApp() {
     // via getRole()), distinguindo o master das contas de demo/loja real.
     if (role === 'codify' && activeSector !== 'os1') {
       setActiveSector('os1');
+      setLogoutPending(false);
+      setWorkspaceContext(null);
       return;
     }
     clearAuthState();
@@ -1328,7 +1371,7 @@ function AuthenticatedApp() {
           className="fixed top-[30px] right-12 z-[51] hidden lg:flex items-center gap-1"
           style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
           <button
-            onClick={handleLogout}
+            onClick={() => { setLogoutPending(true); setBioOpen(false); setScrolled(true); }}
             title="Sair"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}
             className="flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer hover:scale-105 active:scale-90"
@@ -1347,7 +1390,7 @@ function AuthenticatedApp() {
       />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 hover:scale-[1.01]"
+      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
         style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full px-2 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 20 } : undefined}>
@@ -1363,7 +1406,7 @@ function AuthenticatedApp() {
           <div className="flex items-center lg:hidden"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <button
-              onClick={handleLogout}
+              onClick={() => { setLogoutPending(true); setChatOpen(true); }}
               title="Sair"
               className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
             >
@@ -1609,9 +1652,9 @@ function AuthenticatedApp() {
                           </button>
                         ))}
                         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-                        <button onClick={() => setCompanySettingsOpen(true)} title="Configuração da Empresa"
-                          className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
-                          <Settings size={16} className="text-neutral-400 dark:text-white" />
+                        <button onClick={() => openSettingsInWorkspace()} title="Configuração da Empresa"
+                          className="inline-flex items-center justify-center p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                          <Settings size={22} className="text-neutral-400 dark:text-white" />
                         </button>
                         </div>
                       </div>
@@ -1663,7 +1706,7 @@ function AuthenticatedApp() {
                     </button>
                   ))}
                 <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => setCompanySettingsOpen(true)} title="Configuração da Empresa"
+                <button onClick={() => openSettingsInWorkspace()} title="Configuração da Empresa"
                   className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
                   <Settings size={16} className="text-neutral-400 dark:text-white" />
                 </button>
@@ -1716,7 +1759,14 @@ function AuthenticatedApp() {
                   {destaqueOpen && (
                     <div className="flex gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar md:justify-between">
                       {circleData.map((c, i) => (
-                        <CircleProgress key={c.label} pct={c.pct} label={c.label} color={c.color} delay={i * 0.08} onClick={() => openStatInWorkspace(c.label, `${c.pct}%`, `Destaque "${c.label}" — ${c.pct}% de cobertura/saturação. Análise consolidada da área "${c.label}" do perfil ${data.negocio.nome_fantasia}. Inclui indicadores, distribuição por fonte e recomendações operacionais.`)} />
+                        <CircleProgress
+                          key={c.label}
+                          pct={c.pct}
+                          label={c.label}
+                          color={c.color}
+                          delay={i * 0.08}
+                          onEmptyComplete={() => setTimeout(() => openStatInWorkspace(c.label, `${c.pct}%`, `Destaque "${c.label}" — ${c.pct}% de cobertura/saturação. Análise consolidada da área "${c.label}" do perfil ${data.negocio.nome_fantasia}. Inclui indicadores, distribuição por fonte e recomendações operacionais.`), 1000)}
+                        />
                       ))}
                     </div>
                   )}
@@ -2178,6 +2228,7 @@ function AuthenticatedApp() {
         onOpenMapWithRadius={openMapWithRadius}
         activeDepartment={activeDepartment}
         onSelectDepartment={setActiveDepartment}
+        onSelectSector={(id) => setActiveSector(id as SectorId)}
         activeSector={activeSector}
         userRole={role}
         workspaceContext={workspaceContext}
@@ -2197,6 +2248,10 @@ function AuthenticatedApp() {
           setBioOpen(true);
           setDestaqueOpen(true);
         }}
+        onAutoArchive={(cardTitle, sector, snapshot) => {
+          const newSession: ArchivedSession<any> = createArchivedSession(cardTitle, sector, snapshot);
+          setArchivedSessionsBySector(prev => appendSession(prev, newSession));
+        }}
         onWorkspaceCleared={() => {
           // Apagar (sem arquivar): reabre a bio igual ao fluxo de Salvar/Finalizar.
           setWorkspaceContext(null);
@@ -2204,6 +2259,13 @@ function AuthenticatedApp() {
           setBioOpen(true);
           setDestaqueOpen(true);
         }}
+        logoutPending={logoutPending}
+        onCancelLogout={() => setLogoutPending(false)}
+        onConfirmLogout={handleLogout}
+        onDeleteSessions={(ids) => setArchivedSessionsBySector(prev => {
+          const current = prev[activeSector] ?? [];
+          return { ...prev, [activeSector]: current.filter(s => !ids.includes(s.id)) };
+        })}
       />
       <ChatFAB onClick={() => setChatOpen(true)} />
       <ChatMobile
@@ -2221,6 +2283,7 @@ function AuthenticatedApp() {
         onOpenMapWithRadius={openMapWithRadius}
         activeDepartment={activeDepartment}
         onSelectDepartment={setActiveDepartment}
+        onSelectSector={(id) => setActiveSector(id as SectorId)}
         unreadCount={unreadCount}
         dark={dark}
         onToggleTheme={toggleTheme}
@@ -2236,6 +2299,17 @@ function AuthenticatedApp() {
           setBioOpen(true);
           setDestaqueOpen(true);
         }}
+        onAutoArchive={(cardTitle, sector, snapshot) => {
+          const newSession: ArchivedSession<any> = createArchivedSession(cardTitle, sector, snapshot);
+          setArchivedSessionsBySector(prev => appendSession(prev, newSession));
+        }}
+        logoutPending={logoutPending}
+        onCancelLogout={() => setLogoutPending(false)}
+        onConfirmLogout={handleLogout}
+        onDeleteSessions={(ids) => setArchivedSessionsBySector(prev => {
+          const current = prev[activeSector] ?? [];
+          return { ...prev, [activeSector]: current.filter(s => !ids.includes(s.id)) };
+        })}
       />
 
       {/* Fullscreen */}

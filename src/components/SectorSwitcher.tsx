@@ -343,7 +343,7 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
 
         {!showSubview && (profilesHeader || (roleSection && !hideDemoProfiles)) && (
           <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2.5">
-            {profilesHeader ?? 'Perfis demo'}
+            {profilesHeader ?? 'Perfis'}
           </p>
         )}
         {!showSubview && !hideDemoProfiles && (

@@ -15,7 +15,7 @@ import type { ToolSource } from '../../../core/types/workspace';
 // MainKey é interno do ChatPanel — replicado aqui pra que este componente
 // não dependa de exports privados. 3 valores literais, baratíssimo.
 type MainKey = 'pesquisar' | 'executar' | 'aprender';
-type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico' | 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher';
+type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico' | 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher' | 'settingsLauncher' | 'profileSwitcher';
 
 // MODE_LABEL idêntico ao original do ChatPanel (rótulo visível por modo).
 const MODE_LABEL: Record<MainKey, string> = {
@@ -63,9 +63,11 @@ export function WorkspaceBlockHeader({
   const isTool    = kind === 'tool';
   const isDiag    = kind === 'diagnostico';
   const isScore   = kind === 'score';
-  const isBrowserLauncher = kind === 'browserLauncher';
-  const isMapLauncher     = kind === 'mapLauncher';
-  const isDeptLauncher    = kind === 'departmentLauncher';
+  const isBrowserLauncher  = kind === 'browserLauncher';
+  const isMapLauncher      = kind === 'mapLauncher';
+  const isDeptLauncher     = kind === 'departmentLauncher';
+  const isSettingsLauncher       = kind === 'settingsLauncher';
+  const isProfileSwitcherLauncher = kind === 'profileSwitcher';
 
   const sourceLabel = source ? SOURCE_LABEL[source] : undefined;
   const sourcePill  = source ? SOURCE_PILL[source]  : undefined;
@@ -73,7 +75,7 @@ export function WorkspaceBlockHeader({
   return (
     <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
       <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: headerColor }}>
-        {isDiag ? 'Análise da empresa' : isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : isTool ? 'Ferramenta da Área de Trabalho' : isScore ? 'Score OS¹' : isBrowserLauncher ? 'Navegador' : isMapLauncher ? 'Mapa de mercado' : isDeptLauncher ? 'Feed por área' : isMode ? MODE_LABEL[mode] : MODE_LABEL[mode]}
+        {isDiag ? 'Análise da empresa' : isInitial ? 'Análise inicial' : isShare ? 'Compartilhar' : isTool ? 'Ferramenta da Área de Trabalho' : isScore ? 'Score OS¹' : isBrowserLauncher ? 'Navegador' : isMapLauncher ? 'Mapa de mercado' : isDeptLauncher ? 'Feed por área' : isSettingsLauncher ? 'Configuração' : isProfileSwitcherLauncher ? 'Perfis' : isMode ? MODE_LABEL[mode] : MODE_LABEL[mode]}
       </span>
       {(isMode || isTool || isDiag) && (
         <>
@@ -81,13 +83,13 @@ export function WorkspaceBlockHeader({
           <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{subLabel}</span>
         </>
       )}
-      {!isInitial && !isShare && !isMode && !isTool && !isDiag && !isScore && !isBrowserLauncher && !isMapLauncher && !isDeptLauncher && (
+      {!isInitial && !isShare && !isMode && !isTool && !isDiag && !isScore && !isBrowserLauncher && !isMapLauncher && !isDeptLauncher && !isSettingsLauncher && !isProfileSwitcherLauncher && (
         <>
           <span className="text-[10px] text-neutral-400">·</span>
           <span className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 flex-1 truncate">{subLabel}</span>
         </>
       )}
-      {(isInitial || isShare || isScore || isBrowserLauncher || isMapLauncher || isDeptLauncher) && <div className="flex-1" />}
+      {(isInitial || isShare || isScore || isBrowserLauncher || isMapLauncher || isDeptLauncher || isSettingsLauncher || isProfileSwitcherLauncher) && <div className="flex-1" />}
       {sourceLabel && sourcePill && (
         <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-medium tracking-wide ${sourcePill}`}>
           {sourceLabel}

@@ -24,7 +24,7 @@ const ALL_ANALYSIS_TYPES: AnalysisType[] = [
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
-interface SettingField {
+export interface SettingField {
   id: string;
   question: string;
   explanation: string;
@@ -32,7 +32,7 @@ interface SettingField {
   defaultActive: boolean;
 }
 
-interface SettingSection {
+export interface SettingSection {
   title: string;
   fields: SettingField[];
 }
@@ -42,7 +42,7 @@ type CompanyType =
   | 'rede_lojas' | 'loja' | 'restaurante' | 'farmacia'
   | 'servico' | 'marketplace' | 'outro';
 
-interface CompanySettings {
+export interface CompanySettings {
   companyType: CompanyType | '';
   toggles: Record<string, boolean>;
   values: Record<string, string>;
@@ -50,7 +50,7 @@ interface CompanySettings {
 
 // ── Configuração das seções ───────────────────────────────────────────────────
 
-const COMPANY_TYPES: { value: CompanyType; label: string }[] = [
+export const COMPANY_TYPES: { value: CompanyType; label: string }[] = [
   { value: 'marca',       label: 'Marca' },
   { value: 'industria',   label: 'Indústria' },
   { value: 'distribuidora', label: 'Distribuidora' },
@@ -64,7 +64,7 @@ const COMPANY_TYPES: { value: CompanyType; label: string }[] = [
   { value: 'outro',       label: 'Outro' },
 ];
 
-const SECTIONS: SettingSection[] = [
+export const SECTIONS: SettingSection[] = [
   {
     title: 'Perfil de mercado',
     fields: [
@@ -171,11 +171,11 @@ const SECTIONS: SettingSection[] = [
 
 // ── Helpers de persistência ───────────────────────────────────────────────────
 
-function getKey(profileId: string) {
+export function getKey(profileId: string) {
   return `os1_company_settings_${profileId}`;
 }
 
-function loadSettings(profileId: string): CompanySettings {
+export function loadSettings(profileId: string): CompanySettings {
   try {
     const raw = localStorage.getItem(getKey(profileId));
     if (raw) return JSON.parse(raw) as CompanySettings;
@@ -186,13 +186,13 @@ function loadSettings(profileId: string): CompanySettings {
   return { companyType: '', toggles: defaultToggles, values: {} };
 }
 
-function saveSettings(profileId: string, settings: CompanySettings) {
+export function saveSettings(profileId: string, settings: CompanySettings) {
   localStorage.setItem(getKey(profileId), JSON.stringify(settings));
 }
 
 // ── Toggle estilo Apple ───────────────────────────────────────────────────────
 
-function Toggle({ active, onChange }: { active: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ active, onChange }: { active: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       type="button"
