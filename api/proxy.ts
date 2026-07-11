@@ -1,5 +1,23 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// Camada 1 — SSRF: hostnames/ranges que nunca devem ser atingidos pelo proxy.
+const SSRF_HOSTNAME_RE = /^(localhost|.*\.local)$/i;
+const SSRF_IP_RE = /^(127\.|0\.0\.0\.0|10\.|192\.168\.|169\.254\.|::1$|fc00:|fd)/;
+// Faixas 172.16.0.0–172.31.255.255
+function isPrivate172(host: string): boolean {
+  const m = host.match(/^172\.(\d+)\./);
+  return !!m && +m[1] >= 16 && +m[1] <= 31;
+}
+function isBlockedHost(host: string): boolean {
+  return SSRF_HOSTNAME_RE.test(host) || SSRF_IP_RE.test(host) || isPrivate172(host);
+}
+
+// Camada 3 — Origin/Referer: domínios legítimos do app.
+const ALLOWED_ORIGINS = new Set([
+  'https://app.os1.space',
+  'https://os1-deploy.vercel.app',
+]);
+
 const STRIP_HEADERS = new Set([
   'x-frame-options',
   'content-security-policy',
@@ -93,6 +111,16 @@ function rewriteCss(css: string, pageUrl: string, origin: string): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Camada 3 — Origin/Referer check (se presente e não for do app, rejeita).
+  const originHeader = (req.headers['origin'] || req.headers['referer'] || '') as string;
+  if (originHeader) {
+    let requestOrigin = '';
+    try { requestOrigin = new URL(originHeader).origin; } catch { requestOrigin = originHeader; }
+    if (!ALLOWED_ORIGINS.has(requestOrigin)) {
+      return res.status(403).send('Forbidden');
+    }
+  }
+
   const rawUrl = req.query.url as string | undefined;
   if (!rawUrl) return res.status(400).send('Missing ?url=');
 
@@ -100,7 +128,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try { targetUrl = new URL(rawUrl); } catch {
     return res.status(400).send('Invalid URL');
   }
-  void targetUrl;
+
+  // Camada 2 — Protocol enforcement: só http/https.
+  if (targetUrl.protocol !== 'http:' && targetUrl.protocol !== 'https:') {
+    return res.status(400).send('Invalid protocol');
+  }
+
+  // Camada 1 — SSRF: bloquear IPs e hostnames privados/internos.
+  if (isBlockedHost(targetUrl.hostname)) {
+    return res.status(400).send('Blocked host');
+  }
 
   const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
   const origin = `${proto}://${req.headers.host}`;
