@@ -1196,6 +1196,19 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
       { nome: 'Drogal Copacabana', nota_google: 4.0, endereco: 'Rua Barata Ribeiro, 360 — Copacabana', cidade: 'Rio de Janeiro', estado: 'RJ', faixa_preco: '$$', categoria: 'indireto', proposta_principal: 'Drogaria independente local com forte presença em Copacabana', diferencial: 'Atendimento de bairro + conhece os clientes pelo nome — fidelização emocional', faz_bem: ['Atendimento pessoal', 'Confiança local', 'Crônicos'], nao_oferece: ['Dermocosmético premium', 'App', 'Entrega rápida'], mudancas_recentes: ['Reforma interna 2025', 'Horário estendido até 23h'], notas_digitais: [{ plataforma: 'Google', nota: 4.0 }] },
     ],
   },
+  // Combrasil — indústria de alimentos (SJC/SP). Base temporária enquanto os dados
+  // reais não chegam; spread de MCDONALDS_DATA só pra estrutura, negocio sobrescrito.
+  'combrasil': {
+    ...MCDONALDS_DATA,
+    negocio: {
+      ...MCDONALDS_DATA.negocio,
+      nome_fantasia: 'Combrasil Alimentos',
+      segmento: 'Indústria de Alimentos & Grãos',
+      cidade: 'São José dos Campos',
+      estado: 'SP',
+      telefone: '(12) 3900-0000',
+    },
+  },
   ifood:     IFOOD_DATA,
   ambev:     AMBEV_DATA,
   magalu:    MAGALU_DATA,

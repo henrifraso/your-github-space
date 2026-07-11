@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { X, Check, ChevronRight, ChevronLeft, Globe, Megaphone, TrendingUp, Banknote, Users, Settings2, Package, Scale, Briefcase, Handshake, ShoppingCart, Monitor, HeadphonesIcon } from 'lucide-react';
 import type { DepartmentId } from '../types';
 
-export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'cerveja-imperio' | 'cerveja-imperio-distribuidora-01' | 'pacheco-loja-01' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
+export type SectorId = 'os1' | 'mcdonalds' | 'nike' | 'nubank' | 'oscar-piloto-01' | 'cerveja-imperio' | 'cerveja-imperio-distribuidora-01' | 'pacheco-loja-01' | 'combrasil' | 'ifood' | 'ambev' | 'magalu' | 'embraer' | 'tesla' | 'netflix' | 'spotify' | 'airbnb' | 'uber' | 'apple' | 'amazon' | 'natura';
 
 export type ProfileConfig = {
   id: SectorId;
@@ -86,6 +86,15 @@ export const SECTORS: ProfileConfig[] = [
     desc: 'Unidade Pacheco com leitura focada em concorrência local, atendimento farmacêutico, dermocosmético e operação de loja.',
     color: '#e11d48',
     logo: 'PL',
+    active: false,
+  },
+  {
+    id: 'combrasil',
+    label: 'Combrasil Alimentos',
+    niche: 'Indústria de Alimentos & Grãos',
+    desc: 'Indústria de alimentos com portfólio em arroz, feijão, grãos, conservas (palmito e azeitona), batatas, farináceos, farofas, lámen e popcorn. São José dos Campos (SP).',
+    color: '#16a34a',
+    logo: 'CB',
     active: false,
   },
   {

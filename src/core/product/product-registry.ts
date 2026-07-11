@@ -72,6 +72,19 @@ export const PRODUCT_VERSION_REGISTRY: ProductVersion[] = [
     blocksStoreSwitcher: true,
     versionLabel:        'Análise de Produtos Mais Vendidos',
   },
+  {
+    id:                  'combrasil',
+    sectorId:            'combrasil',
+    feedKey:             'combrasil',
+    arrowsUnlocked:      false,
+    name:                'OS¹ Alimentos — Inteligência de Mercado para Indústria',
+    badge:               'Vertical Segmentado',
+    format:              'vertical',
+    analysisTypes:       ['descritiva', 'comparativa', 'tendencias'],
+    sourceIds:           [],
+    blocksStoreSwitcher: true,
+    versionLabel:        'Inteligência de Mercado para Indústria',
+  },
 ];
 
 /** Busca um ProductVersion pelo sectorId legado (ex: 'nubank' → Pacheco). */

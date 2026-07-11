@@ -15,7 +15,7 @@ import type { ToolSource } from '../../../core/types/workspace';
 // MainKey é interno do ChatPanel — replicado aqui pra que este componente
 // não dependa de exports privados. 3 valores literais, baratíssimo.
 type MainKey = 'pesquisar' | 'executar' | 'aprender';
-type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico' | 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher' | 'settingsLauncher' | 'profileSwitcher';
+type BlockKind = 'standard' | 'initial' | 'share' | 'mode' | 'tool' | 'diagnostico' | 'score' | 'browserLauncher' | 'mapLauncher' | 'departmentLauncher' | 'settingsLauncher' | 'profileSwitcher' | 'franchiseSwitcher';
 
 // MODE_LABEL idêntico ao original do ChatPanel (rótulo visível por modo).
 const MODE_LABEL: Record<MainKey, string> = {

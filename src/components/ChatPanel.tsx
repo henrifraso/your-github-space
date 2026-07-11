@@ -287,7 +287,8 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     const isDeptLauncherCard       = card.dominio === 'Feed';
     const isSettingsCard           = card.dominio === 'Configuração';
     const isProfileSwitcherCard    = card.dominio === 'Perfis';
-    const isLauncherCard           = isScoreCard || isBrowserLauncherCard || isMapLauncherCard || isDeptLauncherCard || isSettingsCard || isProfileSwitcherCard;
+    const isFranchiseSwitcherCard  = card.dominio === 'Franquia';
+    const isLauncherCard           = isScoreCard || isBrowserLauncherCard || isMapLauncherCard || isDeptLauncherCard || isSettingsCard || isProfileSwitcherCard || isFranchiseSwitcherCard;
 
     // Antes de trocar: arquiva o conteúdo atual sem navegar de volta à bio.
     // Só arquiva se há algo real aberto (card + mensagens).
@@ -410,6 +411,20 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     pinned: false,
                     createdAt: new Date().toISOString(),
                     kind: 'profileSwitcher' as const,
+                  }
+              : isFranchiseSwitcherCard
+                ? {
+                    id: `blk-franchise-switcher-${Date.now()}`,
+                    cardId: card.id,
+                    mode: 'pesquisar',
+                    subKey: 'franchiseSwitcher',
+                    subLabel: 'Lojas da rede',
+                    endpoint: null,
+                    result: {},
+                    difficulty: dificuldade,
+                    pinned: false,
+                    createdAt: new Date().toISOString(),
+                    kind: 'franchiseSwitcher' as const,
                   }
               : workspaceContext.diagnostic
               ? buildDiagnosticBlock(card, workspaceContext.diagnostic, dificuldade)
@@ -1107,10 +1122,11 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
             const isDeptLauncher          = b.kind === 'departmentLauncher';
             const isSettingsLauncher      = b.kind === 'settingsLauncher';
             const isProfileSwitcherLauncher = b.kind === 'profileSwitcher';
-            const headerColor = isDiag ? '#0ea5e9' : isInitial ? '#10b981' : isShare ? '#f59e0b' : isTool ? '#8b5cf6' : isScore ? '#6366f1' : isBrowserLauncher ? '#0891b2' : isMapLauncher ? '#059669' : isDeptLauncher ? '#d946ef' : isSettingsLauncher ? '#7c3aed' : isProfileSwitcherLauncher ? '#3b82f6' : isMode ? '#3b82f6' : '#3b82f6';
+            const isFranchiseSwitcherLauncher = b.kind === 'franchiseSwitcher';
+            const headerColor = isDiag ? '#0ea5e9' : isInitial ? '#10b981' : isShare ? '#f59e0b' : isTool ? '#8b5cf6' : isScore ? '#6366f1' : isBrowserLauncher ? '#0891b2' : isMapLauncher ? '#059669' : isDeptLauncher ? '#d946ef' : isSettingsLauncher ? '#7c3aed' : isProfileSwitcherLauncher ? '#3b82f6' : isFranchiseSwitcherLauncher ? '#b8860b' : isMode ? '#3b82f6' : '#3b82f6';
             // Tools aparecem em blocos com conteúdo gerado (mode, standard, diagnostico).
-            // Initial / share / tool / score / browserLauncher / mapLauncher / departmentLauncher / settingsLauncher / profileSwitcher não geram contêiner.
-            const toolCtx = !isShare && !isTool && !isInitial && !isScore && !isBrowserLauncher && !isMapLauncher && !isDeptLauncher && !isSettingsLauncher && !isProfileSwitcherLauncher ? buildToolCtx(activeCard, b) : null;
+            // Initial / share / tool / score / browserLauncher / mapLauncher / departmentLauncher / settingsLauncher / profileSwitcher / franchiseSwitcher não geram contêiner.
+            const toolCtx = !isShare && !isTool && !isInitial && !isScore && !isBrowserLauncher && !isMapLauncher && !isDeptLauncher && !isSettingsLauncher && !isProfileSwitcherLauncher && !isFranchiseSwitcherLauncher ? buildToolCtx(activeCard, b) : null;
             return (
               <motion.div
                 key={msg.id}
@@ -1155,11 +1171,20 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     ) : isMapLauncher ? (
                       <WorkspaceMapLauncherBlock onOpen={(radiusKm) => onOpenMapWithRadius?.(radiusKm)} />
                     ) : isDeptLauncher ? (
-                      <WorkspaceDepartmentLauncherBlock active={activeDepartment} onSelect={(id) => onSelectDepartment?.(id)} />
+                      <WorkspaceDepartmentLauncherBlock active={activeDepartment} onSelect={(id) => { onSelectDepartment?.(id); handleApagar(); }} />
                     ) : isSettingsLauncher ? (
                       <WorkspaceSettingsBlock profileId={activeSector} />
                     ) : isProfileSwitcherLauncher ? (
                       <WorkspaceProfileSwitcherBlock active={activeSector} onSelect={(id) => onSelectSector?.(id)} />
+                    ) : isFranchiseSwitcherLauncher ? (
+                      <WorkspaceProfileSwitcherBlock
+                        active={activeSector}
+                        onSelect={(id) => onSelectSector?.(id)}
+                        filterIds={['cerveja-imperio', 'cerveja-imperio-distribuidora-01']}
+                        header="Lojas da rede"
+                        contextBefore="Alterne entre as unidades da rede Império para comparar leituras de mercado, fornecedores e operação entre a central e as distribuidoras. Cada unidade tem seu próprio feed de sinais e análise de contexto independente."
+                        contextAfter="Ao escolher uma unidade, o feed atualiza e a área de trabalho fecha automaticamente, mostrando o perfil selecionado. Para voltar à central, escolha Cerveja Império na lista acima."
+                      />
                     ) : isMode ? (
                       <ModeBlockContent result={b.result} mode={b.mode} />
                     ) : (
@@ -1205,7 +1230,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                       <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
                     </div>
-                  ) : isScore || isBrowserLauncher || isMapLauncher || isDeptLauncher || isProfileSwitcherLauncher ? null : isDiag ? (
+                  ) : isScore || isBrowserLauncher || isMapLauncher || isDeptLauncher || isProfileSwitcherLauncher || isFranchiseSwitcherLauncher ? null : isDiag ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex items-center gap-1 flex-wrap">
                       <BlockCtrl Icon={Pin}  label={b.pinned ? 'Fixado' : 'Fixar'} active={b.pinned} onClick={() => togglePinBlock(b.id)} />
                       <BlockCtrl Icon={Copy} label="Copiar"      onClick={() => copyBlock(b)} />
@@ -1498,8 +1523,13 @@ const DEPARTMENT_LAUNCHER_OPTIONS: { id: DepartmentId; label: string; color: str
 
 function WorkspaceDepartmentLauncherBlock({ active, onSelect }: { active?: DepartmentId; onSelect: (id: DepartmentId) => void }) {
   return (
-    <div className="space-y-2.5">
-      <p className="text-neutral-500 dark:text-neutral-400">Escolha uma área para mudar a leitura do feed.</p>
+    <div className="space-y-3">
+      <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
+        Cada área filtra o feed de mercado por uma lente específica — Financeiro traz sinais de crédito, margem e custos; Comercial traz concorrência, preços e demanda; RH traz mercado de trabalho e salários do setor. A leitura muda, os dados do perfil continuam os mesmos.
+      </p>
+      <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
+        Escolha a área abaixo para trocar o feed. O perfil ativo é mantido — só a lente de leitura muda, permitindo alternar rapidamente entre perspectivas sem perder o contexto da sessão.
+      </p>
       <div className="flex flex-wrap gap-1.5">
         {DEPARTMENT_LAUNCHER_OPTIONS.map((opt) => {
           const isActive = active === opt.id;
@@ -1518,6 +1548,12 @@ function WorkspaceDepartmentLauncherBlock({ active, onSelect }: { active?: Depar
           );
         })}
       </div>
+      <p className="text-[11px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
+        Ao selecionar uma área, o feed atualiza e a área de trabalho fecha automaticamente, mostrando o perfil com a leitura nova. Para voltar à visão geral, escolha a opção Geral.
+      </p>
+      <p className="text-[11px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
+        Placeholder de formato — este espaço será usado para exibir um resumo dos sinais mais recentes da área selecionada, com destaque para os cards de maior urgência dentro da lente escolhida. Funcionalidade prevista para a Fase 2 do produto.
+      </p>
     </div>
   );
 }
@@ -1812,13 +1848,23 @@ function DifficultyRow({ value, onChange }: { value: Dificuldade; onChange: (d: 
   );
 }
 
-const PROFILE_SWITCHER_IDS = ['os1', 'mcdonalds', 'nike', 'nubank', 'cerveja-imperio'];
+const PROFILE_SWITCHER_IDS = ['os1', 'mcdonalds', 'nike', 'nubank', 'cerveja-imperio', 'combrasil'];
 
-function WorkspaceProfileSwitcherBlock({ active, onSelect }: { active?: string; onSelect: (id: string) => void }) {
-  const profiles = SECTORS.filter(p => PROFILE_SWITCHER_IDS.includes(p.id));
+function WorkspaceProfileSwitcherBlock({ active, onSelect, filterIds, header, contextBefore, contextAfter }: {
+  active?: string; onSelect: (id: string) => void;
+  filterIds?: string[]; header?: string; contextBefore?: string; contextAfter?: string;
+}) {
+  const profiles = SECTORS.filter(p => (filterIds ?? PROFILE_SWITCHER_IDS).includes(p.id));
   return (
-    <div className="space-y-2.5">
-      <p className="text-neutral-500 dark:text-neutral-400">Escolha um perfil para mudar a leitura.</p>
+    <div className="space-y-3">
+      {contextBefore ? (
+        <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">{contextBefore}</p>
+      ) : (
+        <p className="text-neutral-500 dark:text-neutral-400 leading-relaxed">
+          Escolha um perfil para mudar a leitura do feed. Cada perfil tem seu próprio conjunto de dados, feed de mercado e área de trabalho independente. Ao trocar, o conteúdo atual é arquivado automaticamente.
+        </p>
+      )}
+      {header && <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">{header}</p>}
       <div className="flex flex-col gap-2">
         {profiles.map((profile) => {
           const isActive = active === profile.id;
@@ -1847,6 +1893,13 @@ function WorkspaceProfileSwitcherBlock({ active, onSelect }: { active?: string; 
           );
         })}
       </div>
+      {contextAfter ? (
+        <p className="text-[11px] text-neutral-400 dark:text-neutral-500 leading-relaxed">{contextAfter}</p>
+      ) : (
+        <p className="text-[11px] text-neutral-400 dark:text-neutral-500 leading-relaxed">
+          Ao escolher um perfil, o feed e a área de trabalho atualizam automaticamente. O conteúdo em andamento é salvo no histórico e pode ser retomado a qualquer momento.
+        </p>
+      )}
     </div>
   );
 }

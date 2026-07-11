@@ -32,6 +32,8 @@ const SCOPE_MAP: Record<SectorId, CodifyScope | null> = {
   'cerveja-imperio-distribuidora-01': null,
   // Pacheco Loja — feed usa DEMO cards específicos de loja; sem org real
   'pacheco-loja-01': null,
+  // Combrasil — sem org real ainda; não dispara fetch
+  'combrasil': null,
   // Demais sectors permanecem sem org real — não disparam fetch
   ifood:   null,
   ambev:   null,

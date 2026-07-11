@@ -811,6 +811,29 @@ function AuthenticatedApp() {
     openWorkspaceFromCard(card, 'utilizar');
   };
 
+  // Abre o seletor de lojas da franquia Império dentro da Área de Trabalho.
+  // Segue o mesmo padrão de openProfileSwitcherInWorkspace (card sintético
+  // dominio:'Franquia' → kind:'franchiseSwitcher' → WorkspaceProfileSwitcherBlock
+  // com filterIds das lojas Império). onSelect chama setActiveSector → useEffect
+  // limpa a área de trabalho automaticamente.
+  const openFranchiseSwitcherInWorkspace = () => {
+    const card: IntelligenceCard = {
+      id:              `synthetic-franchise-switcher-${Date.now()}`,
+      titulo:          'Lojas da rede',
+      resumo:          'Escolha uma unidade da rede Império para mudar a leitura.',
+      dominio:         'Franquia',
+      area:            'franquia',
+      urgencia:        'media',
+      tipo_card:       'informacao',
+      confianca:       'media',
+      confianca_score: 0.5,
+      impacto:         '',
+      risco_erro:      0.3,
+      _synthetic:      true,
+    };
+    openWorkspaceFromCard(card, 'utilizar');
+  };
+
   // Abre a grade de seleção de perfis dentro da Área de Trabalho — substitui
   // o SectorSwitcherModal fullscreen para o perfil central OS¹.
   const openProfileSwitcherInWorkspace = () => {
@@ -842,6 +865,8 @@ function AuthenticatedApp() {
       openDepartmentLauncherInWorkspace();
     } else if (activeSector === 'os1') {
       openProfileSwitcherInWorkspace();
+    } else if (activeSector === 'cerveja-imperio') {
+      openFranchiseSwitcherInWorkspace();
     } else {
       setSectorOpen(true);
     }
@@ -1398,7 +1423,7 @@ function AuthenticatedApp() {
             className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
-              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : data.negocio.nome_fantasia}
+              {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : (SECTORS.find(s => s.id === activeSector)?.label ?? data.negocio.nome_fantasia)}
             </h1>
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
@@ -2482,7 +2507,8 @@ function AuthenticatedApp() {
             }
           />
         )}
-        {/* nike (Oscar horizontal): seletor de lojas desabilitado — oscar-piloto-01 contém conteúdo operacional incompatível com a demo horizontal */}
+        {/* cerveja-imperio: migrado para a área de trabalho (openFranchiseSwitcherInWorkspace).
+            SectorSwitcherModal comentado — manter para rollback se necessário.
         {sectorOpen && activeSector === 'cerveja-imperio' && role !== 'franchise' && (
           <SectorSwitcherModal
             active={activeSector}
@@ -2491,7 +2517,7 @@ function AuthenticatedApp() {
             filterProfileIds={['cerveja-imperio-distribuidora-01']}
             profilesHeader="Distribuidoras Império"
           />
-        )}
+        )} */}
         {/* nubank (Pacheco vertical): seletor de lojas desabilitado — pacheco-loja-01 contém conteúdo operacional incompatível com a demo vertical */}
         {sectorOpen && (activeSector !== 'os1' && activeSector !== 'cerveja-imperio' || role === 'franchise') && (
           <DepartmentSwitcherModal
