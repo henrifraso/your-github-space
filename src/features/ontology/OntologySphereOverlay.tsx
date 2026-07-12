@@ -34,6 +34,8 @@ interface OntologySphereOverlayProps {
   activeDepartment?: string;
   /** Disparado ao clicar em um setor da sidebar. */
   onSelectDepartment?: (id: string) => void;
+  /** Quando true, esconde sidebar e botões sobrepostos — só a esfera, ESC fecha. */
+  minimal?: boolean;
 }
 
 export function OntologySphereOverlay({
@@ -43,6 +45,7 @@ export function OntologySphereOverlay({
   departments,
   activeDepartment,
   onSelectDepartment,
+  minimal = false,
 }: OntologySphereOverlayProps) {
   // ESC fecha a esfera (substitui o botão X removido).
   useEffect(() => {
@@ -88,8 +91,8 @@ export function OntologySphereOverlay({
           })}
         </div>
       )}
-      {/* Botões sobrepostos: análise contextual + Fechar. */}
-      <div className="fixed top-4 right-4 z-[310] flex items-center gap-2">
+      {/* Botões sobrepostos: análise contextual + Fechar. Ocultos no modo minimal. */}
+      {!minimal && <div className="fixed top-4 right-4 z-[310] flex items-center gap-2">
         <button
           onClick={onAnalyze}
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[rgba(184,145,58,0.16)] hover:bg-[rgba(184,145,58,0.28)] border border-[rgba(184,145,58,0.45)] text-white text-[12px] font-semibold shadow-2xl backdrop-blur transition-colors"
@@ -104,7 +107,7 @@ export function OntologySphereOverlay({
         >
           <X size={14} />
         </button>
-      </div>
+      </div>}
     </div>
   );
 }

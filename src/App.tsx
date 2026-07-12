@@ -459,7 +459,7 @@ function AuthenticatedApp() {
   const [esferaOpen, setEsferaOpen] = useState(false);
   const ESFERA_URL = '/esfera-ontologica.html';
   // Ontologia desativada — Score/Análise é a tela visível ao cliente nesta versão.
-  const ONTOLOGY_HIDDEN = true;
+  const ONTOLOGY_HIDDEN = role !== 'codify';
   const [scoreOpen, setScoreOpen] = useState(false);
   const [companySettingsOpen, setCompanySettingsOpen] = useState(false);
   const [sectorOpen, setSectorOpen] = useState(false);
@@ -1419,7 +1419,7 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full px-2 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 20 } : undefined}>
-          <button onClick={openEmpresaInWorkspace}
+          <button onClick={role === 'codify' ? () => setEsferaOpen(true) : openEmpresaInWorkspace}
             className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
@@ -2544,24 +2544,8 @@ function AuthenticatedApp() {
         url={ESFERA_URL}
         onClose={() => setEsferaOpen(false)}
         onAnalyze={() => { void openDiagnosisInWorkspace(); }}
-        analyzeLabel={computeAnalyzeLabel(role, activeDepartment)}
         title={companyVisionLabel(role, activeDepartment)}
-        departments={activeDepartment === 'geral' ? [
-          { id: 'administrativo', label: 'Administrativo' },
-          { id: 'comercial',      label: 'Comercial' },
-          { id: 'vendas',         label: 'Vendas' },
-          { id: 'marketing',      label: 'Marketing' },
-          { id: 'financeiro',     label: 'Financeiro' },
-          { id: 'rh',             label: 'RH' },
-          { id: 'operacoes',      label: 'Operações' },
-          { id: 'compras',        label: 'Compras' },
-          { id: 'estoque',        label: 'Logística & Estoque' },
-          { id: 'ti',             label: 'TI' },
-          { id: 'juridico',       label: 'Jurídico' },
-          { id: 'atendimento',    label: 'Atendimento' },
-        ] : undefined}
-        activeDepartment={activeDepartment}
-        onSelectDepartment={(id) => setActiveDepartment(id as DepartmentId)}
+        minimal={true}
       />}
 
       {/* Diagnóstico da empresa agora entra na Área de Trabalho via
