@@ -18,7 +18,6 @@
     "electron:build": "ELECTRON=true vite build && electron-builder"
   },
   "dependencies": {
-    "@google/genai": "^1.29.0",
     "@mercuryworkshop/epoxy-transport": "^3.0.1",
     "@mercuryworkshop/scramjet-controller": "^0.0.9",
     "@react-google-maps/api": "^2.20.8",

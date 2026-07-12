@@ -76,24 +76,45 @@ processamento e relevância varia por setor.
 
 ---
 
-## Estado do motor (12/jul/2026)
+## Estado do motor — v0.1 (12/jul/2026)
 
-**O motor de coleta automática NÃO existe ainda.**
+O motor de coleta + geração de card foi construído e **provado em miniatura**,
+no backend Python (repo `omni`, branch `motor-v0.1-intelligence-engine`, commit `d0a60af`).
 
-O que existe:
-- Canalização técnica: `codify-sector-scope.ts` → `codify-feed-client.ts` → `App.tsx`
-- 3 perfis com dado real inserido manualmente (Oscar/Nike, Pacheco/Nubank, McDonald's)
-- Conectores como molde (`CMED_CONNECTOR`) mas usando fixture (10 linhas hardcoded)
-- 15 fontes testadas e documentadas neste portfólio
+**O que funciona hoje:**
 
-O que falta:
-- Job no backend que dado `organizationId + sourceIds` busca fonte real, transforma
-  com `toIntelligenceCards()` e publica via API
-- Configuração do cliente conectada ao feed (hoje o fio está cortado)
+- **COLETA:** busca notícias dos concorrentes da Combrasil via Google News RSS.
+  Regra aprendida: sempre incluir o setor no termo de busca
+  (ex: `"Broto Legal feijão"`) para cortar ruído de nome de marca genérico.
 
-**Primeiro tijolo recomendado:** job Python no Railway que, periodicamente, puxa
-Índice Stone (CSV direto) + CEPEA via agrobr e gera cards para o perfil Combrasil.
-Modelo de conector já existe. Fontes já testadas. Só falta o motor que as chama.
+- **CONCORRENTES DA COMBRASIL** (definidos por pesquisa de mercado —
+  feijão/arroz/pipoca): Camil, Urbano Alimentos, Josapar (Tio João),
+  Kicaldo, Broto Legal, Yoki.
+
+- **CHEF (geração de card):** a LLM (Mistral Small, via infra PragmaLab do omni)
+  transforma a notícia em card seguindo a Regra de Visão
+  (movimento → causa → insight → direção). Testado: gerou cards reais e válidos
+  para os 6 concorrentes.
+
+- **ANTI-ALUCINAÇÃO:** instrução no prompt do chef proíbe inventar número.
+  Funcionou — parou de fabricar cifra. Há também uma trava de código, mas está
+  dura demais (reprova cards bons por confundir mês numérico com número inventado).
+  **Pendente:** decidir se ajusta (elevar limiar para 3 dígitos) ou remove a trava.
+
+**O que ainda falta:**
+
+- **Trava de código:** ajustar ou remover (pendente — ver nota acima).
+- **Integração com o banco:** os scripts de teste geram os cards mas não os
+  publicam no banco Railway. Falta o job que chama o motor e publica via
+  `/api/feed/codify` (modelo de conector já existe, `CMED_CONNECTOR`).
+- **Job periódico:** nada roda automaticamente ainda. Execução é manual
+  (`python3 scripts/teste_lote_cards.py --lote N`).
+- **Configuração do cliente conectada ao feed:** dados de `CompanySettings`
+  salvos em localStorage mas não consumidos pelo motor — o fio ainda está cortado.
+
+**Referências:**
+- Scripts: `scripts/teste_coleta_google_news.py` · `scripts/teste_card_chef.py` · `scripts/teste_lote_cards.py`
+- Portfólio de fontes: `docs/portfolio-fontes/PORTFOLIO_FONTES.md`
 
 ---
 
