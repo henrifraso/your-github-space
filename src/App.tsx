@@ -202,6 +202,17 @@ const FEED_HIGHLIGHTS: Record<string, string[]> = {
   atendimento: ['Espera', 'Reclamação', 'Canal', 'Satisfação', 'Resposta', 'Chatbot', 'Presencial', 'Digital', 'Experiência'],
 };
 
+const SCORE_BY_SECTOR: Partial<Record<string, number>> = {
+  nike:                              72,
+  'oscar-piloto-01':                 74,
+  nubank:                            79,
+  'pacheco-loja-01':                 74,
+  mcdonalds:                         74,
+  combrasil:                         68,
+  'cerveja-imperio':                 71,
+  'cerveja-imperio-distribuidora-01': 67,
+};
+
 function FeedSkeleton() {
   return (
     <>
@@ -511,6 +522,7 @@ function AuthenticatedApp() {
   //   - mcdonalds/nike/nubank → orgs reais criadas na Sub-fase 4.3.b
   //   - os1 e demais sectors  → null (sem fetch real, demos seguem)
   const codifyScope = getCodifyScopeForSector(activeSector);
+  const topScore = codifyScope !== null ? (SCORE_BY_SECTOR[activeSector] ?? 68) : null;
   const activeProduct = getProductBySector(activeSector);
   const feedKey = activeProduct?.feedKey ?? activeSector;
   const { cards: apiFeedCards, loading: codifyLoading } = useCodifyFeed({
@@ -1439,11 +1451,17 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full px-2 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 20 } : undefined}>
-          <button onClick={role === 'codify' ? () => setEsferaOpen(true) : openEmpresaInWorkspace}
+          <button onClick={openScoreInWorkspace}
             className="inline-flex items-center px-3 py-1.5 bg-[#EFEFF1] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
-            <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
+            <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 flex items-center gap-1.5">
               {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : (SECTORS.find(s => s.id === activeSector)?.label ?? data.negocio.nome_fantasia)}
+              {topScore !== null && (
+                <>
+                  <span className="text-neutral-300 dark:text-neutral-600 font-light">·</span>
+                  <span className="text-xs font-medium text-neutral-400 dark:text-neutral-500">{topScore}</span>
+                </>
+              )}
             </h1>
           </button>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
