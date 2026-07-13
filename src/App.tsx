@@ -119,6 +119,7 @@ const DEMO_LOGOS: Record<string, { src: string; bg: string; pad?: string }> = {
   natura:    { src: '/logos/natura.png',    bg: '#ffffff', pad: '18%' },
   // 'nike' agora é Oscar Calçados — sem logo PNG. Fallback usa o texto "Os" do ProfileLogo.
   // 'nubank' agora é Drogarias Pacheco — sem logo PNG. Fallback usa o texto "DP" do ProfileLogo.
+  'combrasil':                          { src: '/profile-photos/combrasil.jpeg',      bg: '#ffffff', pad: '5%' },
   'cerveja-imperio':                    { src: '/profile-photos/cerveja-imperio.png', bg: '#0a0a0a', pad: '12%' },
   'cerveja-imperio-distribuidora-01':   { src: '/profile-photos/cerveja-imperio.png', bg: '#0a0a0a', pad: '12%' },
   ifood:     { src: '/logos/ifood.svg',     bg: '#ffffff', pad: '22%' },
