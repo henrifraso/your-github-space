@@ -12,11 +12,12 @@ DIRECIONAMENTO.
 **REGRA DO MOTOR:** nenhuma fonte gera card sozinha. Toda fonte é INGREDIENTE que
 alimenta a costura:
 
-> movimento do concorrente → causa de mercado → insight → o que fazer
+> movimento do concorrente → causa de mercado → insight → direcionamento (apontamento)
 
-Dado que não vira direção **NÃO vira card.** A mesma fonte pode ser usada como
+Dado que não vira direcionamento **NÃO vira card.** A mesma fonte pode ser usada como
 mineradora (dado cru — proibido) ou como OS¹ (insight costurado — correto). A
-diferença é sempre terminar em direcionamento.
+diferença é sempre terminar em direcionamento — e direcionamento é apontamento,
+nunca ordem. (Ver seção abaixo.)
 
 **Exemplos:**
 
@@ -27,6 +28,78 @@ diferença é sempre terminar em direcionamento.
 | CEPEA via agrobr | "Milho: R$ 64,51/sc" | "Milho sobe 3º mês seguido → pressão no custo do concorrente → janela de preço" |
 | CONAB safra | "Milho 25/26: 140,4 Mt" | "Supersafra pressiona preço → margem do concorrente melhora → risco de guerra de preço em Q3" |
 | Comex Stat | Tabela de exportações por NCM | "BR exporta 41 Mt de milho e importa 1,8 Mt do sul → arbitragem regional → sinal de custo diferente por praça" |
+
+---
+
+## As duas camadas e a Regra do Apontamento
+
+### Por que duas camadas?
+
+O card de feed e o conteúdo por trás do clique servem propósitos diferentes.
+Confundi-los é o principal jeito de cruzar a linha entre análise e consultoria.
+
+| Camada | Onde aparece | Função | Voz |
+|--------|-------------|--------|-----|
+| **Camada 1 — Leitura** | Card no feed (visível sempre) | Diz o que está acontecendo no mercado e por quê | Descritiva, factual |
+| **Camada 2 — Direcionamento** | Por trás do clique ("destrinchar") | Aponta o que o contexto sugere para o cliente | Condicional, de tendência |
+
+A Camada 1 existe sem o clique. A Camada 2 só aparece quando o cliente quis aprofundar.
+
+**Essa distinção não é só de interface — é de valor:**
+
+- **Camada 1 é a isca.** Faz o dono enxergar o que está acontecendo no mercado. Mas ver o mercado é commodity: qualquer ferramenta mostra o que o concorrente fez.
+- **Camada 2 é o produto.** O que o cliente paga não é ver o mercado — é a ideia do que fazer. O apontamento enriquecido com melhores práticas é onde está o valor que justifica a cobrança.
+
+### A cadeia completa
+
+```
+movimento → causa → insight → direcionamento (apontamento)
+```
+
+- **Movimento:** o que aconteceu (dado verificado de fonte)
+- **Causa:** por que aconteceu (leitura do contexto de mercado)
+- **Insight:** o que isso significa para o setor do cliente
+- **Direcionamento:** o que o contexto *tende a sugerir* — nunca o que o cliente *deve fazer*
+
+### Apontamento vs. Ordem — a distinção crítica
+
+O OS¹ é uma plataforma de análise, não de consultoria. A diferença concreta:
+
+| ❌ Ordem (proibido) | ✅ Apontamento (correto) |
+|--------------------|------------------------|
+| "Negocie gôndola agora" | "Transições de comando costumam abrir uma janela curta antes das coisas se reorganizarem" |
+| "Ligue para o distribuidor X" | "Vale pensar onde vocês se cruzam com a Yoki hoje" |
+| "Faça campanha nesta região" | "É aí que o momento tende a pesar mais" |
+| Resultado prometido | Possibilidade identificada |
+
+**Regras do apontamento:**
+1. Usar linguagem de tendência: *"costuma"*, *"tende a"*, *"vale pensar"*, *"é comum que"*
+2. Nunca nomear a jogada específica do cliente (*"ligue", "negocie", "contrate"*)
+3. Nunca prometer resultado (*"isso vai gerar"*, *"você vai ganhar"*)
+4. O direcionamento pertence ao conteúdo do card — não vira card solto
+
+### Gabarito de Camada 2
+
+Exemplo correto de direcionamento (Combrasil / Yoki):
+
+> *"Transições de comando costumam abrir uma janela curta antes das coisas se
+> reorganizarem. Vale pensar onde vocês se cruzam com a Yoki hoje — porque é aí
+> que o momento tende a pesar mais."*
+
+O que esse exemplo faz certo: (a) linguagem de tendência em todo lugar, (b) aponta
+o CONTEXTO, não a jogada, (c) o cliente decide o que fazer com isso.
+
+### Sinais de que o card cruzou a linha
+
+Revisar (e possivelmente reprovar) qualquer card que contenha:
+
+- Verbos no imperativo dirigidos ao dono: *"negocie", "ligue", "faça", "acione", "contrate"*
+- Jogada nomeada: *"aborde o distribuidor X"*, *"entre no segmento Y agora"*
+- Resultado prometido: *"isso vai gerar margem"*, *"você vai ganhar participação"*
+- Referência a dado interno do cliente (o OS¹ não acessa dado interno)
+
+**Trava futura sugerida:** sinalizar automaticamente cards de Camada 2 que contenham
+verbos imperativos para revisão antes de publicar.
 
 ---
 
@@ -50,7 +123,7 @@ Todo card precisa dos três elementos abaixo. Faltando qualquer um, não é card
 
 1. **FATO** — dado verificado de fonte (ex: Stone +7,4%, CNPJ holding 2021)
 2. **LEITURA** — o que esse fato significa no contexto do setor/concorrente
-3. **DIREÇÃO** — o que o cliente pode/deve fazer com essa informação
+3. **DIRECIONAMENTO (apontamento)** — uma direção que o contexto sugere, não uma ordem
 
 ### O que NÃO é card OS¹
 
