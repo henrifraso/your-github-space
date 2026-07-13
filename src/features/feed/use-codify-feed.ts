@@ -27,14 +27,28 @@ export interface UseCodifyFeedOptions {
   unitId?: string;
 }
 
+export interface UseCodifyFeedResult {
+  cards: RoleFeedCard[];
+  /**
+   * True desde o primeiro render com uma org nova até o fetch terminar.
+   * Derivado no render (não em estado) para eliminar o frame de gap onde
+   * loading=false antes do useEffect rodar — isso evitava demos piscarem.
+   */
+  loading: boolean;
+}
+
 /**
- * Retorna apiCards (RoleFeedCard[]) carregados do backend. [] enquanto
- * estiver carregando ou em qualquer falha. Caller passa em mergeFeedSources
- * como primeiro elemento da ordem.
+ * Retorna { cards, loading } do backend.
+ *
+ * loading é derivado de forma síncrona: compara a chave org::unit atual com
+ * a última chave cujo fetch já completou (fetchedKey). Assim, no primeiro
+ * render após trocar de sector, loading já é true — sem frame de gap.
  */
-export function useCodifyFeed(options: UseCodifyFeedOptions = {}): RoleFeedCard[] {
+export function useCodifyFeed(options: UseCodifyFeedOptions = {}): UseCodifyFeedResult {
   const enabled = options.enabled ?? true;
-  const [cards, setCards] = useState<RoleFeedCard[]>([]);
+  const [cardsState, setCardsState] = useState<RoleFeedCard[]>([]);
+  // Chave da última busca concluída. null = nenhuma busca completada ainda.
+  const [fetchedKey, setFetchedKey] = useState<string | null>(null);
 
   // Re-fetcha quando token/org/unit mudam. Lê do localStorage em cada render
   // pra detectar mudanças sem precisar de event system.
@@ -45,9 +59,21 @@ export function useCodifyFeed(options: UseCodifyFeedOptions = {}): RoleFeedCard[
   const effectiveOrg = options.organizationId ?? orgId ?? undefined;
   const effectiveUnit = options.unitId ?? buId ?? undefined;
 
+  // Chave da requisição atual. null quando não há nada para buscar.
+  const currentKey = (enabled && token) ? `${effectiveOrg}::${effectiveUnit}` : null;
+
+  // loading é DERIVADO: true quando currentKey difere do que já foi buscado.
+  // Calculado no render — sem depender de efeito — então já é true no
+  // primeiro render após troca de sector.
+  const loading = currentKey !== null && currentKey !== fetchedKey;
+
+  // Não expõe cards de um sector anterior enquanto o novo ainda carrega.
+  const cards = loading ? [] : cardsState;
+
   useEffect(() => {
     if (!enabled || !token) {
-      setCards([]);
+      setCardsState([]);
+      setFetchedKey(null);
       return;
     }
     let cancelled = false;
@@ -57,10 +83,11 @@ export function useCodifyFeed(options: UseCodifyFeedOptions = {}): RoleFeedCard[
         unitId: effectiveUnit,
       });
       if (cancelled) return;
-      setCards(items ? codifyCardsToRoleFeedCards(items) : []);
+      setCardsState(items ? codifyCardsToRoleFeedCards(items) : []);
+      setFetchedKey(`${effectiveOrg}::${effectiveUnit}`);
     })();
     return () => { cancelled = true; };
   }, [enabled, token, effectiveOrg, effectiveUnit]);
 
-  return cards;
+  return { cards, loading };
 }

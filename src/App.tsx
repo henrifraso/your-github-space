@@ -201,6 +201,25 @@ const FEED_HIGHLIGHTS: Record<string, string[]> = {
   atendimento: ['Espera', 'Reclamação', 'Canal', 'Satisfação', 'Resposta', 'Chatbot', 'Presencial', 'Digital', 'Experiência'],
 };
 
+function FeedSkeleton() {
+  return (
+    <>
+      {[0, 1, 2].map(i => (
+        <div
+          key={i}
+          className="rounded-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 p-5 space-y-3 overflow-hidden relative"
+        >
+          <div className="h-2.5 w-16 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+          <div className="h-4 w-3/4 rounded-full bg-neutral-200 dark:bg-neutral-700" />
+          <div className="h-3 w-full rounded-full bg-neutral-100 dark:bg-neutral-700/60" />
+          <div className="h-3 w-5/6 rounded-full bg-neutral-100 dark:bg-neutral-700/60" />
+          <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent" />
+        </div>
+      ))}
+    </>
+  );
+}
+
 function GoogleMapsPreloader() {
   useGoogleMaps();
   return null;
@@ -493,7 +512,7 @@ function AuthenticatedApp() {
   const codifyScope = getCodifyScopeForSector(activeSector);
   const activeProduct = getProductBySector(activeSector);
   const feedKey = activeProduct?.feedKey ?? activeSector;
-  const apiFeedCards = useCodifyFeed({
+  const { cards: apiFeedCards, loading: codifyLoading } = useCodifyFeed({
     enabled: codifyScope !== null,
     organizationId: codifyScope?.organizationId,
     unitId: codifyScope?.unitId,
@@ -1825,15 +1844,19 @@ function AuthenticatedApp() {
           return null;
         }
 
-        // Determina quais cards mostrar
+        // Determina quais cards mostrar.
+        // Enquanto codifyLoading=true (fetch em voo em setor com org real),
+        // os cards demo são suprimidos para evitar o flash de troca.
+        // Setores sem scope real (codifyScope=null) nunca entram nessa condição.
+        const suppressDemos = codifyScope !== null && codifyLoading;
         let cards: RoleFeedCard[] = [];
 
         // Cards do franchisor por aba (cards do navegador e do mapa entram em todas as abas).
         if (role === 'franchisor') {
           const relevantCards = filterFranchisorCardsByTab(roleConfig.feedCards, activeRoleTab);
-          cards = mergeFeedSources({ api: apiFeedCards, map: mapFeedCards, browser: browserFeedCards, role: relevantCards, dismissed: dismissedCards });
+          cards = mergeFeedSources({ api: apiFeedCards, map: mapFeedCards, browser: browserFeedCards, role: suppressDemos ? [] : relevantCards, dismissed: dismissedCards });
         } else {
-          cards = mergeFeedSources({ api: apiFeedCards, map: mapFeedCards, browser: browserFeedCards, role: roleConfig.feedCards, dismissed: dismissedCards });
+          cards = mergeFeedSources({ api: apiFeedCards, map: mapFeedCards, browser: browserFeedCards, role: suppressDemos ? [] : roleConfig.feedCards, dismissed: dismissedCards });
         }
 
         const urgenciaColor = (u: string) => u === 'alta' ? '#ef4444' : u === 'media' ? '#f59e0b' : '#6b7280';
@@ -1846,7 +1869,9 @@ function AuthenticatedApp() {
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } } }}
           >
             {cards.length === 0 && (
-              <div className="text-center text-neutral-400 py-12 text-sm">Nenhum item nesta aba.</div>
+              suppressDemos
+                ? <FeedSkeleton />
+                : <div className="text-center text-neutral-400 py-12 text-sm">Nenhum item nesta aba.</div>
             )}
             {cards.map(card => (
               <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>

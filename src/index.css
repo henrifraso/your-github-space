@@ -70,3 +70,6 @@ html:not(.dark) .border-\[0\.5px\].border-neutral-200 { border-color: #C0C5CF; }
   animation: skeleton-pulse 1.8s ease-in-out infinite;
   border-radius: 12px;
 }
+@keyframes shimmer {
+  100% { transform: translateX(200%); }
+}
