@@ -284,11 +284,11 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+      className="fixed inset-0 z-[190] bg-[#DCDDE0] dark:bg-[#181818] flex flex-col overflow-y-auto"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
+      <div className="sticky top-0 z-10 bg-[#DCDDE0]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
         {showSubview ? (
           <button
             onClick={() => setOpenTab(null)}
@@ -334,8 +334,8 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
                     }}
                     className={`flex items-center justify-between gap-2 px-4 py-3 rounded-2xl border transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] cursor-pointer
                       ${isActive
-                        ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
-                        : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                        ? 'bg-[#EDEEF0] dark:bg-[#323232] border-[#3b82f6]'
+                        : 'bg-[#EDEEF0] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]'
                       }`}
                   >
                     <span className="text-sm font-bold text-neutral-800 dark:text-neutral-100 leading-tight">{tab.label}</span>
@@ -368,8 +368,8 @@ export function SectorSwitcherModal({ active, onSelect, onClose, roleSection, hi
                 onClick={() => { onSelect(profile.id); onClose(); }}
                 className={`relative flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] cursor-pointer
                   ${isActive
-                    ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
-                    : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                    ? 'bg-[#EDEEF0] dark:bg-[#323232] border-[#3b82f6]'
+                    : 'bg-[#EDEEF0] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]'
                   }`}
               >
                 <ProfileLogo profile={profile} />
@@ -439,10 +439,10 @@ export function DepartmentSwitcherModal({ active, onSelect, onClose }: DeptProps
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+      className="fixed inset-0 z-[190] bg-[#DCDDE0] dark:bg-[#181818] flex flex-col overflow-y-auto"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
-      <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
+      <div className="sticky top-0 z-10 bg-[#DCDDE0]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
         <div>
           <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Feed por Área</h1>
           <p className="text-xs text-neutral-500 dark:text-neutral-400">Escolha uma área da empresa</p>
@@ -458,8 +458,8 @@ export function DepartmentSwitcherModal({ active, onSelect, onClose }: DeptProps
           onClick={() => { onSelect('geral'); onClose(); }}
           className={`flex items-center gap-4 px-5 py-4 mb-3 rounded-2xl border cursor-pointer transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]
             ${active === 'geral'
-              ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
-              : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+              ? 'bg-[#EDEEF0] dark:bg-[#323232] border-[#3b82f6]'
+              : 'bg-[#EDEEF0] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]'
             }`}
         >
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#3b82f618' }}>
@@ -484,8 +484,8 @@ export function DepartmentSwitcherModal({ active, onSelect, onClose }: DeptProps
                 onClick={() => { onSelect(dept.id); onClose(); }}
                 className={`flex items-center gap-4 px-5 py-4 rounded-2xl border cursor-pointer transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)]
                   ${isActive
-                    ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
-                    : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                    ? 'bg-[#EDEEF0] dark:bg-[#323232] border-[#3b82f6]'
+                    : 'bg-[#EDEEF0] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]'
                   }`}
               >
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: dept.color + '18' }}>

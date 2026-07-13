@@ -1031,7 +1031,7 @@ function AuthenticatedApp() {
 
   useEffect(() => {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
-    document.body.style.backgroundColor = dark ? '#181818' : '#dcdfe2';
+    document.body.style.backgroundColor = dark ? '#181818' : '#DCDDE0';
     // Sincroniza classe dark no html pra o CSS global (html.dark) responder
     if (dark) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
@@ -1265,7 +1265,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {CODIFY_TAB_DATA.empresas.map(emp => (
-              <div key={emp.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+              <div key={emp.id} className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{emp.nome}</p>
                   <p className="text-xs text-neutral-500 mt-0.5">{emp.segmento} · {emp.cidade}</p>
@@ -1282,7 +1282,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {CODIFY_TAB_DATA.afiliados.length > 0 ? CODIFY_TAB_DATA.afiliados.map(afl => (
-              <div key={afl.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+              <div key={afl.id} className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl px-5 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{afl.nome}</p>
                   <span className="text-sm font-bold text-[#3b82f6]">{afl.conversao}</span>
@@ -1297,7 +1297,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {CODIFY_TAB_DATA.parceiros.length > 0 ? CODIFY_TAB_DATA.parceiros.map(par => (
-              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+              <div key={par.id} className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl px-5 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
                   <span className="text-xs text-neutral-500">{par.oportunidades} oportunidade{par.oportunidades !== 1 ? 's' : ''}</span>
@@ -1314,7 +1314,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {AFFILIATE_TAB_DATA['meus-clientes'].map(cli => (
-              <div key={cli.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
+              <div key={cli.id} className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl px-5 py-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{cli.nome}</p>
                   <p className="text-xs text-neutral-500 mt-0.5">Último contato: {cli.ultimaInteracao}</p>
@@ -1331,7 +1331,7 @@ function AuthenticatedApp() {
         return (
           <div className="space-y-2.5">
             {AFFILIATE_TAB_DATA.parceiros.map(par => (
-              <div key={par.id} className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl px-5 py-4">
+              <div key={par.id} className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl px-5 py-4">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100">{par.nome}</p>
                   <span className="text-sm font-bold text-[#3b82f6]">{par.comissao}</span>
@@ -1353,7 +1353,7 @@ function AuthenticatedApp() {
           ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
           : 'bg-blue-500/15 text-blue-600 dark:text-blue-400';
       return (
-        <div className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl p-5 sm:p-6 space-y-4">
+        <div className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl p-5 sm:p-6 space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <p className="text-base sm:text-lg font-bold text-neutral-800 dark:text-neutral-100">{company.nome}</p>
@@ -1399,7 +1399,7 @@ function AuthenticatedApp() {
             onClick={() => { setLogoutPending(true); setBioOpen(false); setScrolled(true); }}
             title="Sair"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}
-            className="flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer hover:scale-105 active:scale-90"
+            className="flex items-center justify-center p-2 rounded-full text-neutral-500 dark:text-neutral-300 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 cursor-pointer hover:scale-105 active:scale-90"
           >
             <Power size={22} />
           </button>
@@ -1410,17 +1410,17 @@ function AuthenticatedApp() {
           laterais mx-4/5) pra o feed não atravessar visualmente quando scrolla.
           pointer-events-none mantém clique passando pra navbar. */}
       <div
-        className="fixed top-0 inset-x-0 z-[49] h-5 pointer-events-none bg-[#dcdfe2] dark:bg-[#181818]"
+        className="fixed top-0 inset-x-0 z-[49] h-5 pointer-events-none bg-[#DCDDE0] dark:bg-[#181818]"
         style={isElectron ? { WebkitAppRegion: 'drag' } as React.CSSProperties : undefined}
       />
 
       {/* Navbar — fora do container com padding para o border-b ser full width */}
-      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
+      <nav ref={navRef} className="sticky top-5 z-50 mx-5 mt-5 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] rounded-2xl py-3.5 sm:py-4 relative shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)]"
         style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full px-2 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 20 } : undefined}>
           <button onClick={role === 'codify' ? () => setEsferaOpen(true) : openEmpresaInWorkspace}
-            className="inline-flex items-center px-3 py-1.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
+            className="inline-flex items-center px-3 py-1.5 bg-[#EFEFF1] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100">
               {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : (SECTORS.find(s => s.id === activeSector)?.label ?? data.negocio.nome_fantasia)}
@@ -1433,14 +1433,14 @@ function AuthenticatedApp() {
             <button
               onClick={() => { setLogoutPending(true); setChatOpen(true); }}
               title="Sair"
-              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
             >
               <Power size={18} className="sm:hidden" />
               <Power size={20} className="hidden sm:block" />
             </button>
             <button
               onClick={() => setSectorOpen(true)}
-              className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
+              className="cursor-pointer p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90 relative"
               title={activeSector === 'os1' ? 'Trocar perfil de empresa' : 'Trocar área da empresa'}
             >
               {(() => {
@@ -1459,7 +1459,7 @@ function AuthenticatedApp() {
             {canAccessCompanyVision(role) && (
               <button
                 onClick={openScoreInWorkspace}
-                className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+                className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
                 title="Score OS¹"
               >
                 <Home size={18} className="sm:hidden" />
@@ -1469,7 +1469,7 @@ function AuthenticatedApp() {
             )}
             <button
               onClick={openMapLauncherInWorkspace}
-              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
               title="Mapa"
             >
               <MapPinned size={18} className="sm:hidden" />
@@ -1478,7 +1478,7 @@ function AuthenticatedApp() {
             </button>
             <button
               onClick={() => showToast('Notificações em breve', 'blue')}
-              className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+              className="relative cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
             >
               <Bell size={18} className="sm:hidden" />
               <Bell size={20} className="hidden sm:block lg:hidden" />
@@ -1490,7 +1490,7 @@ function AuthenticatedApp() {
 
     <div
       style={{ paddingRight: isSplitView ? '50vw' : undefined, transition: 'padding-right 500ms cubic-bezier(0.25,0.1,0.25,1)' }}
-      className="min-h-screen bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans"
+      className="min-h-screen bg-[#DCDDE0] dark:bg-[#181818] text-neutral-800 dark:text-neutral-100 font-sans"
     >
 
       <main
@@ -1503,7 +1503,7 @@ function AuthenticatedApp() {
             pequeno (ele flutua por cima quando visível, não comprime o
             feed). Em split, o mesmo mx alinha com o right-4/right-5 do
             ChatDesktop, pra feed e workspace terem o mesmo afastamento. */}
-        <div className={`ml-4 sm:ml-5 ${isSplitView ? 'mr-5' : 'mr-[380px]'} bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-100 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
+        <div className={`ml-4 sm:ml-5 ${isSplitView ? 'mr-5' : 'mr-[380px]'} bg-[#EDEEF0] dark:bg-[#323232] rounded-2xl border-[0.5px] border-neutral-300 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] relative`}
           style={{ clipPath: 'inset(0 round 1rem)' }}>
         {/* Perfil — colapsa ao rolar */}
         <motion.div
@@ -1657,7 +1657,7 @@ function AuthenticatedApp() {
                   </div>
                 </div>
               </div>
-              <div className="flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 justify-start min-h-[140px] md:min-h-[180px] bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pl-3 pr-3 py-3 sm:pl-4 sm:pr-4 sm:py-4 mr-2 sm:mr-4">
+              <div className="flex-1 flex-shrink-0 min-w-0 flex flex-col gap-2 sm:gap-3 justify-start min-h-[140px] md:min-h-[180px] bg-[#EFEFF1] dark:bg-[#2f2f2f] rounded-xl border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] pl-3 pr-3 py-3 sm:pl-4 sm:pr-4 sm:py-4 mr-2 sm:mr-4">
                 {isRoleView ? (
                   <>
                     {/* Barra de resumo — só codify */}
@@ -1669,8 +1669,8 @@ function AuthenticatedApp() {
                           { label: 'parceiros', value: roleConfig.summaryNumbers.parceiros, description: `${roleConfig.summaryNumbers.parceiros} parceiro(s) conectado(s). Lista de parceiros estratégicos — categoria, contratos ativos, datas de renovação, contatos comerciais e métricas conjuntas.` },
                         ].map(({ label, value, description }) => (
                           <button key={label} onClick={() => openStatInWorkspace(label, value, description)}
-                            className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
-                            <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
+                            className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                            <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                               <strong>{value}</strong>
                             </div>
                             {label}
@@ -1678,7 +1678,7 @@ function AuthenticatedApp() {
                         ))}
                         <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                         <button onClick={() => openSettingsInWorkspace()} title="Configuração da Empresa"
-                          className="inline-flex items-center justify-center p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                          className="inline-flex items-center justify-center p-2 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
                           <Settings size={22} className="text-neutral-400 dark:text-white" />
                         </button>
                         </div>
@@ -1693,7 +1693,7 @@ function AuthenticatedApp() {
                       </div>
                     )}
                     {roleConfig.bioLines && (
-                      <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
+                      <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                         {roleConfig.bioLines.map((line, i) => {
                           const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
                           const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
@@ -1723,8 +1723,8 @@ function AuthenticatedApp() {
                     { label: txt('stat_nivel'), value: data.negocio.nivel,         description: `${txt('stat_nivel')} ${data.negocio.nivel}. Progressão do negócio — métricas que compõem o nível atual, o que falta pra subir, comparativo com pares e ações recomendadas pra evolução.` },
                   ].map(({ label, value, description }) => (
                     <button key={String(label)} onClick={() => openStatInWorkspace(String(label), value, description)}
-                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
-                      <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
+                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                      <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                         <strong>{value}</strong>
                       </div>
                       {label}
@@ -1732,12 +1732,12 @@ function AuthenticatedApp() {
                   ))}
                 <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
                 <button onClick={() => openSettingsInWorkspace()} title="Configuração da Empresa"
-                  className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                  className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
                   <Settings size={16} className="text-neutral-400 dark:text-white" />
                 </button>
                 </div>
                 </div>
-                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
+                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
                     <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
                     <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
@@ -2078,7 +2078,7 @@ function AuthenticatedApp() {
 
         {/* Carregar mais */}
         <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] } } }}>
-          <button className="w-full py-4 flex items-center justify-between px-4 md:px-5 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] rounded-2xl text-sm font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer active:scale-[0.99]">
+          <button className="w-full py-4 flex items-center justify-between px-4 md:px-5 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-300 dark:border-[#414141] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-2xl text-sm font-semibold text-neutral-500 dark:text-neutral-400 transition-all duration-200 cursor-pointer active:scale-[0.99]">
             <ChevronDown size={14} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
             <span>Mais feed</span>
             <ChevronDown size={14} strokeWidth={1.8} className="text-neutral-300 dark:text-neutral-600" />
@@ -2381,7 +2381,7 @@ function AuthenticatedApp() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 24 }}
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
-              className="fixed inset-0 z-[190] bg-[#f0f2f4] dark:bg-[#323232] flex flex-col overflow-y-auto"
+              className="fixed inset-0 z-[190] bg-[#EDEEF0] dark:bg-[#323232] flex flex-col overflow-y-auto"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             >
               <div className="flex items-center justify-between px-6 sm:px-8 pt-6 sm:pt-8 pb-4 flex-shrink-0 border-b border-neutral-100 dark:border-[#414141]">
@@ -2449,12 +2449,12 @@ function AuthenticatedApp() {
         {selectedItem && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedItem(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl overflow-hidden shadow-2xl border-[0.5px] border-neutral-100 dark:border-[#414141]">
+            <motion.div layoutId={selectedItem.id} className="relative w-full max-w-[400px] bg-[#EDEEF0] dark:bg-[#323232] rounded-2xl overflow-hidden shadow-2xl border-[0.5px] border-neutral-300 dark:border-[#414141]">
               <div className="p-6 flex flex-col items-center text-center">
                 <div className="text-5xl mb-4">{gridItems.find(i => i.id === selectedItem.id)?.emoji}</div>
                 <h3 className="text-xl font-bold mb-1">{gridItems.find(i => i.id === selectedItem.id)?.title}</h3>
                 <p className="text-neutral-500 text-xs uppercase tracking-widest font-bold mb-8">{gridItems.find(i => i.id === selectedItem.id)?.subtitle}</p>
-                <div className="w-full space-y-5 text-left bg-neutral-50 dark:bg-[#323232] p-5 rounded-xl border-[0.5px] border-neutral-100 dark:border-[#414141]">
+                <div className="w-full space-y-5 text-left bg-neutral-50 dark:bg-[#323232] p-5 rounded-xl border-[0.5px] border-neutral-300 dark:border-[#414141]">
                   {selectedItem.type === 'competitor' && (<>
                     <div className="flex justify-between items-center"><span className="text-neutral-500 text-sm">Nota Google</span><span className="font-bold text-[#f9ce34]">⭐ {selectedItem.content.nota_google}</span></div>
                     <div className="flex justify-between items-center"><span className="text-neutral-500 text-sm">Faixa de Preço</span><span className="font-bold text-[#3b82f6]">{selectedItem.content.faixa_preco}</span></div>
@@ -2559,7 +2559,7 @@ function AuthenticatedApp() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
             className="w-full max-w-sm rounded-2xl p-6 space-y-5"
-            style={{ background: dark ? '#323232' : '#f0f2f4', border: `1px solid ${dark ? '#414141' : 'rgba(0,0,0,0.08)'}`, boxShadow: dark ? '0 2px 32px rgba(0,0,0,0.5)' : '0 2px 32px rgba(0,0,0,0.12)' }}
+            style={{ background: dark ? '#323232' : '#EDEEF0', border: `1px solid ${dark ? '#414141' : 'rgba(0,0,0,0.08)'}`, boxShadow: dark ? '0 2px 32px rgba(0,0,0,0.5)' : '0 2px 32px rgba(0,0,0,0.12)' }}
           >
             <div>
               <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: dark ? '#9ca3af' : '#6b7280' }}>Para continuar</p>

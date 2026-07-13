@@ -100,7 +100,7 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
   onFinish?: () => void;
 }) {
   const chipBase = "flex items-center justify-center gap-1.5 h-9 rounded-xl border-[0.5px] transition-all duration-150 hover:scale-105 active:scale-[0.97] cursor-pointer disabled:cursor-default disabled:opacity-100 shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]";
-  const sharedBg = "bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]";
+  const sharedBg = "bg-[#EFEFF1] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-neutral-200 dark:hover:bg-[#353535]";
   const labelCls = "text-[10px] lg:text-sm text-neutral-500 dark:text-white font-medium whitespace-nowrap";
   return (
     <div className="flex flex-col gap-1.5">
@@ -137,7 +137,7 @@ function WorkspaceToolbar({ activeMode, workspaceOpen, onModeClick, onWorkspaceC
       ) : (
         // Botão único: Área de Trabalho
         <button type="button" onClick={onWorkspaceClick} disabled={disabled}
-          className={`${chipBase} w-full !h-11 ${workspaceOpen ? 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d]' : sharedBg}`}>
+          className={`${chipBase} w-full !h-11 ${workspaceOpen ? 'bg-[#EFEFF1] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d]' : sharedBg}`}>
           <span className={labelCls}>Área de Trabalho</span>
         </button>
       )}
@@ -835,7 +835,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     return (
       <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 scroll-pt-6 space-y-3">
         <div className="flex flex-col items-start gap-2.5">
-          <div className="max-w-[94%] w-full mx-auto rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
+          <div className="max-w-[94%] w-full mx-auto rounded-2xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
             <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
               <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: '#ef4444' }}>Sair do OS¹</span>
               <div className="flex-1" />
@@ -923,7 +923,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       return (
         <div className="flex flex-col h-full">
           <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4">
-            <div className="max-w-[94%] w-full rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
+            <div className="max-w-[94%] w-full rounded-2xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
               <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-[#ef4444]">Confirmar exclusão</span>
                 <div className="flex-1" />
@@ -984,7 +984,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl border-[0.5px] transition-colors cursor-pointer ${
                       isSelected
                         ? 'bg-[#3b82f6]/5 dark:bg-[#3b82f6]/10 border-[#3b82f6]/40'
-                        : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                        : 'bg-[#EFEFF1] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]'
                     }`}
                   >
                     <div className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center flex-shrink-0 transition-colors ${
@@ -1006,7 +1006,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     if (s.snapshot) restoreSession(s.snapshot);
                     onSelectHistorySession?.(s.id);
                   }}
-                  className="text-left px-4 py-3 rounded-xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] transition-colors duration-150 cursor-pointer active:scale-[0.99]"
+                  className="text-left px-4 py-3 rounded-xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] transition-colors duration-150 cursor-pointer active:scale-[0.99]"
                 >
                   <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 truncate">{s.cardTitle}</p>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">{new Date(s.ts).toLocaleString('pt-BR')} · {s.sector}</p>
@@ -1078,7 +1078,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                   transition={{ duration: 0.2, ease: 'easeOut' }}
                   className="flex justify-start"
                 >
-                  <div className="max-w-[94%] w-full mx-auto p-3.5 rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+                  <div className="max-w-[94%] w-full mx-auto p-3.5 rounded-2xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
                     <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgColor }}>{c.dominio || c.area || 'Card'}</p>
                     <p className="text-[13px] font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{c.titulo}</p>
                     {c.resumo && (
@@ -1140,7 +1140,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     <History size={10} /> Último resultado salvo
                   </p>
                 )}
-                <div className="max-w-[94%] w-full mx-auto rounded-2xl bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
+                <div className="max-w-[94%] w-full mx-auto rounded-2xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
                   <WorkspaceBlockHeader
                     kind={b.kind}
                     mode={b.mode}
@@ -1307,7 +1307,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-start"
           >
-            <div className="bg-[#f7f8f9] dark:bg-[#2f2f2f] rounded-2xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] px-4 py-3 flex items-center gap-1">
+            <div className="bg-[#EFEFF1] dark:bg-[#2f2f2f] rounded-2xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] px-4 py-3 flex items-center gap-1">
               {[0, 1, 2].map(i => (
                 <motion.span
                   key={i}
@@ -1944,7 +1944,7 @@ interface ChatDesktopProps {
 }
 
 export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, onOpenBrowserUrl, onOpenMapWithRadius, activeDepartment, onSelectDepartment, onSelectSector, onDeleteSessions, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onAutoArchive, onWorkspaceCleared, logoutPending, onCancelLogout, onConfirmLogout, codifyScope, windowWidth }: ChatDesktopProps) {
-  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
+  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
   // "overflow" pro body é prevenido.
@@ -1983,11 +1983,11 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
         right: `${rightPx}px`,
         transition: 'right 500ms cubic-bezier(0.25,0.1,0.25,1), width 500ms cubic-bezier(0.25,0.1,0.25,1)',
       }}
-      className="fixed bottom-5 z-[40] hidden lg:flex flex-col bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
+      className="fixed bottom-5 z-[40] hidden lg:flex flex-col bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
       {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
       <div className="px-5 pt-5 flex-shrink-0">
-      <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.01]">
+      <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.01]">
         <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
           <Home size={22} />
         </button>
@@ -2094,7 +2094,7 @@ export function ChatMobile({
   onCancelLogout?: () => void;
   onConfirmLogout?: () => void;
 }) {
-  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
+  const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   return (
     <AnimatePresence>
       {open && (
@@ -2103,11 +2103,11 @@ export function ChatMobile({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed inset-0 z-[200] lg:hidden bg-[#f0f2f4] dark:bg-[#2b2b2b] flex flex-col"
+          className="fixed inset-0 z-[200] lg:hidden bg-[#EDEEF0] dark:bg-[#2b2b2b] flex flex-col"
         >
           {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell / X */}
           <div className="px-4 pt-4 pb-3 flex-shrink-0">
-          <div className="flex items-center justify-between gap-2 px-3 py-3 bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+          <div className="flex items-center justify-between gap-2 px-3 py-3 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
             <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
               <Home size={22} />
             </button>

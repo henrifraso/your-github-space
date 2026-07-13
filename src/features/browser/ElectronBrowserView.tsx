@@ -340,10 +340,10 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick, acti
   // background com elevação visual via shadow externa forte + inset highlight.
   const btnBase = isDark
     ? { background: '#2f2f2f', border: '0.5px solid #3d3d3d', color: '#a0a0a0', boxShadow: '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.04)' }
-    : { background: '#f7f8f9', border: '0.5px solid #e5e7eb', color: '#666',    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.6)' };
+    : { background: '#EFEFF1', border: '0.5px solid #e5e7eb', color: '#666',    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.6)' };
   const btnActive = isDark
     ? { background: '#353535', border: '0.5px solid #4a4a4a', color: '#d0d0d0', boxShadow: '0 10px 24px -4px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.04)' }
-    : { background: '#e4e7ea', border: '0.5px solid #d4d7da', color: '#333',    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.6)' };
+    : { background: '#E3E4E6', border: '0.5px solid #d4d7da', color: '#333',    boxShadow: '0 8px 20px -4px rgba(0,0,0,0.22), 0 2px 6px -2px rgba(0,0,0,0.12), inset 0 1px 2px rgba(255,255,255,0.6)' };
 
   return (
     <div className="flex flex-col w-full h-full select-none">
@@ -506,7 +506,7 @@ export function ElectronBrowser({ initialUrl, syncing = false, onSyncClick, acti
             key={id}
             onClick={() => runAction(id as any)}
             title={label}
-            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-medium cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97] bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]"
+            className="flex-1 min-w-0 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[12px] font-medium cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97] bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200 shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]"
           >
             <Icon size={13} strokeWidth={1.8} className="text-neutral-500 dark:text-neutral-400 flex-shrink-0" />
             <span className="overflow-hidden text-ellipsis whitespace-nowrap">{label}</span>

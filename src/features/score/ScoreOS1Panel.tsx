@@ -335,7 +335,7 @@ function Grafico({ pts }: { pts: { semana: string; score: number }[] }) {
 
 // ── Classes de container — igual ao feed ─────────────────────────────────────
 
-const cardCls = 'bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#414141] rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]';
+const cardCls = 'bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#414141] rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]';
 const innerCls = 'bg-neutral-50 dark:bg-[#2a2a2a] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]';
 
 function SecaoHeader({ icon: Icon, titulo, badge }: { icon: React.ElementType; titulo: string; badge?: string | number }) {
@@ -352,7 +352,7 @@ function SecaoHeader({ icon: Icon, titulo, badge }: { icon: React.ElementType; t
 
 function InfoChip({ label, icon: Icon }: { label: string; icon: React.ElementType }) {
   return (
-    <div className="flex flex-col items-center text-center gap-1.5 px-2 py-3 rounded-xl border-[0.5px] bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.04)] select-none">
+    <div className="flex flex-col items-center text-center gap-1.5 px-2 py-3 rounded-xl border-[0.5px] bg-[#EFEFF1] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.04)] select-none">
       <Icon size={14} strokeWidth={1.6} className="text-neutral-400 dark:text-neutral-500 flex-shrink-0" />
       <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 leading-tight">{label}</span>
     </div>
@@ -419,7 +419,7 @@ function BigScoreCircle({ score }: { score: number }) {
           transition={{ duration: 2.8, ease: 'easeOut' }}
         />
       </svg>
-      <div className="absolute inset-[20%] rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]" />
+      <div className="absolute inset-[20%] rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)]" />
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-6xl font-black tabular-nums text-neutral-800 dark:text-neutral-100">
           {display}
@@ -554,11 +554,11 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
   }, [completeness]);
 
   return (
-    <div className="flex flex-col h-full bg-[#dcdfe2] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
+    <div className="flex flex-col h-full bg-[#DCDDE0] dark:bg-[#181818] text-neutral-800 dark:text-neutral-200 overflow-hidden">
 
       {/* Barra própria — standalone usa breadcrumb; dentro do BrowserView usa pill com barra de conteúdo */}
       {standalone ? (
-        <div className="flex items-center gap-2 px-4 pt-10 pb-3 bg-[#f0f2f4] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] flex-shrink-0">
+        <div className="flex items-center gap-2 px-4 pt-10 pb-3 bg-[#EDEEF0] dark:bg-[#323232] border-b border-neutral-200 dark:border-[#414141] shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] flex-shrink-0">
           <span className="text-[11px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">OS¹</span>
           <span className="text-neutral-300 dark:text-neutral-600">/</span>
           <span className="text-[12px] font-medium text-neutral-600 dark:text-neutral-300">Score OS¹</span>
@@ -570,7 +570,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
         </div>
       ) : (
         <div className="flex-shrink-0 px-5 pt-8 pb-2">
-          <div className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] px-4 py-3 flex flex-col gap-2">
+          <div className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] px-4 py-3 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-4">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Conteúdo</p>
               <span className="text-[10px] font-bold tabular-nums text-neutral-700 dark:text-neutral-200">
@@ -728,7 +728,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
               <div className="bg-neutral-50 dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3a3a3a] rounded-xl p-1.5 space-y-1 shadow-[inset_0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_4px_rgba(0,0,0,0.28),0_1px_2px_rgba(0,0,0,0.2)]">
                 {realInsights
                   ? realInsights.map((ins, i) => (
-                      <div key={i} className="flex items-start gap-3 px-3 py-2.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
+                      <div key={i} className="flex items-start gap-3 px-3 py-2.5 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
                         <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500 flex-shrink-0 mt-1" />
                         <div className="flex-1 min-w-0">
                           <p className="text-[12px] text-neutral-700 dark:text-neutral-300 leading-snug">{ins.titulo}</p>
@@ -738,7 +738,7 @@ export function ScoreOS1Panel({ onClose, activeSector, role: _role, standalone =
                       </div>
                     ))
                   : mock.cardsRelacionados.map((c, i) => (
-                      <div key={i} className="flex items-center gap-3 px-3 py-2.5 bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
+                      <div key={i} className="flex items-center gap-3 px-3 py-2.5 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-lg shadow-[0_2px_6px_-1px_rgba(0,0,0,0.1),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_2px_6px_-1px_rgba(0,0,0,0.35),0_1px_2px_rgba(0,0,0,0.2)]">
                         <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 dark:bg-neutral-500 flex-shrink-0" />
                         <span className="text-[12px] text-neutral-700 dark:text-neutral-300 flex-1 leading-snug">{c}</span>
                         <ArrowRight size={11} className="text-neutral-400 flex-shrink-0" />

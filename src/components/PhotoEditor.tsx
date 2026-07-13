@@ -147,12 +147,12 @@ export function PhotoEditor({ defaultSrc, initial, onSave, onClose }: Props) {
           {/* Escolha de formato da moldura */}
           <div className="flex items-center gap-2 w-full">
             <button onClick={() => setShape('round')}
-              className={`flex-1 h-10 rounded-xl border-[0.5px] flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-150 cursor-pointer ${shape === 'round' ? 'bg-[#3b82f6] border-[#3b82f6] text-white' : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200'}`}>
+              className={`flex-1 h-10 rounded-xl border-[0.5px] flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-150 cursor-pointer ${shape === 'round' ? 'bg-[#3b82f6] border-[#3b82f6] text-white' : 'bg-[#EFEFF1] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200'}`}>
               <Circle size={14} />
               Redonda
             </button>
             <button onClick={() => setShape('square')}
-              className={`flex-1 h-10 rounded-xl border-[0.5px] flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-150 cursor-pointer ${shape === 'square' ? 'bg-[#3b82f6] border-[#3b82f6] text-white' : 'bg-[#f7f8f9] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200'}`}>
+              className={`flex-1 h-10 rounded-xl border-[0.5px] flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-150 cursor-pointer ${shape === 'square' ? 'bg-[#3b82f6] border-[#3b82f6] text-white' : 'bg-[#EFEFF1] dark:bg-[#2f2f2f] border-neutral-200 dark:border-[#3d3d3d] text-neutral-700 dark:text-neutral-200'}`}>
               <Square size={14} />
               Quadrada
             </button>

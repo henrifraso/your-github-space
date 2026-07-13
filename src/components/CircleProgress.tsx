@@ -93,10 +93,10 @@ export function CircleProgress({ pct, label, color, delay = 0, onEmptyComplete, 
       onClick={handleClick}
     >
       <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20">
-        <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.22),0_2px_4px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
-        <div className="absolute inset-0 rounded-2xl border-[0.5px] border-neutral-200 dark:border-[#4a4a4a] pointer-events-none z-[2]" />
+        <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.18),0_2px_4px_rgba(0,0,0,0.10),0_-1px_3px_rgba(255,255,255,0.75)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />
+        <div className="absolute inset-0 rounded-2xl border-[0.5px] border-neutral-300 dark:border-[#4a4a4a] pointer-events-none z-[2]" />
         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64" style={{ filter: `drop-shadow(0 0 1.5px ${color}55)` }}>
-          <rect x="6" y="6" width="52" height="52" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" className="text-neutral-400 dark:text-[#4a4a4a]" />
+          <rect x="6" y="6" width="52" height="52" rx="16" ry="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" className="text-neutral-300 dark:text-[#4a4a4a]" />
           <motion.rect
             x="6" y="6" width="52" height="52" rx="16" ry="16"
             fill="none" stroke={color} strokeWidth="2.5"
@@ -114,7 +114,7 @@ export function CircleProgress({ pct, label, color, delay = 0, onEmptyComplete, 
             }}
           />
         </svg>
-        <div className="absolute inset-[20%] rounded-full bg-[#f7f8f9] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] pointer-events-none" />
+        <div className="absolute inset-[20%] rounded-full bg-[#E6E6E8] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[inset_0_2px_7px_rgba(0,0,0,0.18),inset_0_1px_3px_rgba(0,0,0,0.12),0_1px_2px_rgba(255,255,255,0.9)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] pointer-events-none" />
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.span
             className="text-[9px] sm:text-[11px] md:text-sm font-bold text-neutral-800 dark:text-neutral-100"

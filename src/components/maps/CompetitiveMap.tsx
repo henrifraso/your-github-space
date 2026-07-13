@@ -34,7 +34,7 @@ function getCoordsForSector(sector: string | undefined): google.maps.LatLngLiter
 
 // Feed navbar pill — exatamente o mesmo estilo do nav do Feed
 const PILL = [
-  'bg-[#f0f2f4] dark:bg-[#323232]',
+  'bg-[#EDEEF0] dark:bg-[#323232]',
   'border-[0.5px] border-neutral-100 dark:border-[#414141]',
   'rounded-2xl',
   'shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)]',
@@ -85,7 +85,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
 
   return (
     <div
-      className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col select-none"
+      className="fixed inset-0 z-[190] bg-[#DCDDE0] dark:bg-[#181818] flex flex-col select-none"
       style={{ WebkitAppRegion: 'no-drag', WebkitUserSelect: 'none' } as React.CSSProperties}
     >
       {/* Header pill — nome da empresa + fechar */}
@@ -153,7 +153,7 @@ export function CompetitiveMap({ competitors, onClose, clientPosition, sector, b
         </div>
 
         {/* Painel lateral — mesmo padrão dos cards/containers do sistema */}
-        <div className="w-[340px] flex-shrink-0 h-full bg-[#f0f2f4] dark:bg-[#323232] rounded-2xl overflow-hidden border-[0.5px] border-neutral-200 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
+        <div className="w-[340px] flex-shrink-0 h-full bg-[#EDEEF0] dark:bg-[#323232] rounded-2xl overflow-hidden border-[0.5px] border-neutral-200 dark:border-[#414141] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
           <AnimatePresence mode="wait" initial={false}>
             {selected ? (
               <CompetitorSidePanel

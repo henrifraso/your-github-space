@@ -196,7 +196,7 @@ export function WorkspacePanel({ card, onClose, initialIntent }: { card: Intelli
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.26, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed inset-0 z-[190] bg-[#f0f2f4] dark:bg-[#181818] flex flex-col overflow-hidden"
+      className="fixed inset-0 z-[190] bg-[#EDEEF0] dark:bg-[#181818] flex flex-col overflow-hidden"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
     >
       {/* ── Cabeçalho ─────────────────────────────────────────────── */}

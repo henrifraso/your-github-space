@@ -3,13 +3,31 @@
 }
 
 html, body {
-  background-color: #dcdfe2;
+  background-color: #DCDDE0;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
 }
 html.dark, html.dark body {
   background-color: #181818;
 }
+
+/* ── Light mode neomorphism fixes ────────────────────────────────────────── */
+/* 1. Tipografia mais escura — neutral-800/500 ganham mais contraste no fundo pérola */
+html:not(.dark) .text-neutral-800 { color: #2A2A2E; }
+html:not(.dark) .text-neutral-500 { color: #52525B; }
+html:not(.dark) .text-neutral-400 { color: #71717A; }
+html:not(.dark) .text-neutral-600 { color: #3F3F46; }
+
+/* 2. Acentos mais saturados — azul-500 some no fundo claro, azul-600 crava */
+html:not(.dark) .text-\[\#3b82f6\] { color: #1d4ed8; }
+html:not(.dark) .bg-\[\#3b82f6\]   { background-color: #1d4ed8; }
+html:not(.dark) .border-\[\#3b82f6\] { border-color: #1d4ed8; }
+
+/* 3. Borda dos cards mais visível — faz o trabalho que a sombra fazia no dark */
+html:not(.dark) .border-neutral-100 { border-color: #D1D5DB; }
+html:not(.dark) .border-neutral-200 { border-color: #C4C8D0; }
+html:not(.dark) .border-\[0\.5px\].border-neutral-100 { border-color: #CBD0D8; }
+html:not(.dark) .border-\[0\.5px\].border-neutral-200 { border-color: #C0C5CF; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

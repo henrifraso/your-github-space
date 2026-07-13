@@ -37,10 +37,10 @@ export function SettingsModal({ open, onClose, current, onChange, order, meta }:
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="fixed inset-0 z-[190] bg-[#dcdfe2] dark:bg-[#181818] flex flex-col overflow-y-auto"
+          className="fixed inset-0 z-[190] bg-[#DCDDE0] dark:bg-[#181818] flex flex-col overflow-y-auto"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         >
-          <div className="sticky top-0 z-10 bg-[#dcdfe2]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
+          <div className="sticky top-0 z-10 bg-[#DCDDE0]/80 dark:bg-[#181818]/80 backdrop-blur-xl border-b border-neutral-200 dark:border-[#414141] px-5 py-4 flex items-center justify-between max-w-[935px] w-full mx-auto">
             <div>
               <h1 className="text-base font-bold text-neutral-800 dark:text-neutral-100">Nível de Linguagem</h1>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">Ajuste como as informações são apresentadas</p>
@@ -66,8 +66,8 @@ export function SettingsModal({ open, onClose, current, onChange, order, meta }:
                     onClick={() => { onChange(d); onClose(); }}
                     className={`flex items-center gap-4 px-5 py-4 rounded-2xl border cursor-pointer text-left transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.3)] ${
                       isSelected
-                        ? 'bg-[#f0f2f4] dark:bg-[#323232] border-[#3b82f6]'
-                        : 'bg-[#f0f2f4] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#e4e7ea] dark:hover:bg-[#353535]'
+                        ? 'bg-[#EDEEF0] dark:bg-[#323232] border-[#3b82f6]'
+                        : 'bg-[#EDEEF0] dark:bg-[#323232] border-neutral-100 dark:border-[#414141] hover:bg-[#E3E4E6] dark:hover:bg-[#353535]'
                     }`}
                   >
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-lg ${isSelected ? 'bg-[#3b82f6]/10' : 'bg-neutral-100 dark:bg-[#404040]'}`}>

@@ -50,8 +50,8 @@ const SECTOR_DISPLAY_URL: Record<string, string> = {
 // Topo do Score OS¹ — pill flutuante igual ao nav da bio e ao header do mapa
 function InternalPageBar({ onClose }: { activeSector?: string; onClose?: () => void }) {
   return (
-    <div className="flex-shrink-0 px-5 pt-8 pb-2 bg-[#dcdfe2] dark:bg-[#181818]">
-      <div className="bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] px-4 py-3 flex items-center justify-between gap-4">
+    <div className="flex-shrink-0 px-5 pt-8 pb-2 bg-[#DCDDE0] dark:bg-[#181818]">
+      <div className="bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.18),0_1px_3px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.5),0_1px_3px_rgba(0,0,0,0.3)] px-4 py-3 flex items-center justify-between gap-4">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">Score OS¹</p>
         </div>

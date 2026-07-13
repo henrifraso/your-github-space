@@ -254,7 +254,7 @@ export function CompanySettingsModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.97 }}
             transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-            className="w-full max-w-[1480px] max-h-[calc(100vh-48px)] bg-[#f0f2f4] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.14),0_2px_6px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden"
+            className="w-full max-w-[1480px] max-h-[calc(100vh-48px)] bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.14),0_2px_6px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] flex flex-col overflow-hidden"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
             {/* Header */}
@@ -385,7 +385,7 @@ export function CompanySettingsModal({
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {VERTICAL_API_INPUTS.map(i => (
-                        <span key={i.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#dcdfe2] dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] text-[10px] text-neutral-400 dark:text-neutral-600">
+                        <span key={i.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#DCDDE0] dark:bg-[#252525] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] text-[10px] text-neutral-400 dark:text-neutral-600">
                           <Clock size={8} />
                           {i.label}
                         </span>

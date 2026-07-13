@@ -9,7 +9,7 @@ interface Props {
 }
 
 const CARD = [
-  'bg-[#f7f8f9] dark:bg-[#2f2f2f]',
+  'bg-[#EFEFF1] dark:bg-[#2f2f2f]',
   'border-[0.5px] border-neutral-200 dark:border-[#3d3d3d]',
   'rounded-2xl',
   'shadow-[0_2px_6px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_10px_-2px_rgba(0,0,0,0.4)]',
