@@ -1173,7 +1173,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     ) : isDeptLauncher ? (
                       <WorkspaceDepartmentLauncherBlock active={activeDepartment} onSelect={(id) => { onSelectDepartment?.(id); handleApagar(); }} />
                     ) : isSettingsLauncher ? (
-                      <WorkspaceSettingsBlock profileId={activeSector} />
+                      <WorkspaceSettingsBlock profileId={activeSector} onOpenBrowserUrl={(url) => { onOpenBrowserUrl?.(url); handleApagar(); }} />
                     ) : isProfileSwitcherLauncher ? (
                       <WorkspaceProfileSwitcherBlock active={activeSector} onSelect={(id) => onSelectSector?.(id)} />
                     ) : isFranchiseSwitcherLauncher ? (
@@ -1561,7 +1561,7 @@ function WorkspaceDepartmentLauncherBlock({ active, onSelect }: { active?: Depar
 // Bloco de configuração da empresa — mesma experiência do modal CompanySettingsModal,
 // mas renderizado diretamente na Área de Trabalho (padrão launcher). Persiste via
 // loadSettings/saveSettings (localStorage), sem backend, sem prop de callback.
-function WorkspaceSettingsBlock({ profileId }: { profileId?: string }) {
+function WorkspaceSettingsBlock({ profileId, onOpenBrowserUrl }: { profileId?: string; onOpenBrowserUrl?: (url: string) => void }) {
   const id = profileId ?? 'os1';
   const [settings, setSettings] = useState<CompanySettings>(() => loadSettings(id));
 
@@ -1644,6 +1644,13 @@ function WorkspaceSettingsBlock({ profileId }: { profileId?: string }) {
       <p className="text-[10px] text-neutral-400 dark:text-neutral-500">
         As informações são salvas automaticamente e usadas para afinar a análise.
       </p>
+
+      {onOpenBrowserUrl && (
+        <div className="pt-3 border-t border-neutral-100 dark:border-[#333]">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-2">Navegador</p>
+          <WorkspaceBrowserLauncherBlock onOpen={onOpenBrowserUrl} />
+        </div>
+      )}
     </div>
   );
 }
