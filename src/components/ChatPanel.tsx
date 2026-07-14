@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
-  Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, GitCompare,
+  Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, GitCompare, Settings,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
   Sparkles, Loader2, History, MapPin, ChevronDown, ArrowRight,
 } from 'lucide-react';
@@ -1995,8 +1995,8 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
       {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
       <div className="px-5 pt-5 flex-shrink-0">
       <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.01]">
-        <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
-          <Home size={22} />
+        <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Configuração da Empresa'}>
+          <Settings size={22} />
         </button>
         <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
           <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />
@@ -2115,8 +2115,8 @@ export function ChatMobile({
           {/* Header com ícones — ordem: Plus / Globe / Settings / Sun-Moon / Bell / X */}
           <div className="px-4 pt-4 pb-3 flex-shrink-0">
           <div className="flex items-center justify-between gap-2 px-3 py-3 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]">
-            <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Visão da empresa'}>
-              <Home size={22} />
+            <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Configuração da Empresa'}>
+              <Settings size={22} />
             </button>
             <button onClick={onSector} className={`${btnCls} relative`} title="Trocar feed por área">
               <Plus size={22} className={activeSector && activeSector !== 'geral' ? 'text-[#3b82f6]' : ''} />

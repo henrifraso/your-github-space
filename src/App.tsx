@@ -1494,17 +1494,6 @@ function AuthenticatedApp() {
                 <span className="absolute top-1.5 right-1.5 lg:top-2.5 lg:right-2.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
             </button>
-            {canAccessCompanyVision(role) && (
-              <button
-                onClick={openScoreInWorkspace}
-                className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
-                title="Score OS¹"
-              >
-                <Home size={18} className="sm:hidden" />
-                <Home size={20} className="hidden sm:block lg:hidden" />
-                <Home size={24} className="hidden lg:block" />
-              </button>
-            )}
             <button
               onClick={openMapLauncherInWorkspace}
               className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
@@ -1714,12 +1703,6 @@ function AuthenticatedApp() {
                             {label}
                           </button>
                         ))}
-                        <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-                        <button onClick={() => openSettingsInWorkspace()} title="Configuração da Empresa"
-                          className="inline-flex items-center justify-center p-2 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
-                          <Settings size={22} className="text-neutral-400 dark:text-white" />
-                        </button>
-                        </div>
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1768,12 +1751,6 @@ function AuthenticatedApp() {
                       {label}
                     </button>
                   ))}
-                <div className="hidden lg:flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => openSettingsInWorkspace()} title="Configuração da Empresa"
-                  className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
-                  <Settings size={16} className="text-neutral-400 dark:text-white" />
-                </button>
-                </div>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
@@ -2288,7 +2265,7 @@ function AuthenticatedApp() {
       {/* Chat */}
       <ChatDesktop
         wide={isSplitView}
-        onHome={openScoreInWorkspace}
+        onHome={openSettingsInWorkspace}
         homeTitle={companyVisionLabel(role, activeDepartment)}
         onSector={handleSectorButtonClick}
         onBrowser={openBrowserLauncherInWorkspace}
@@ -2344,7 +2321,7 @@ function AuthenticatedApp() {
         codifyScope={codifyScope}
         activeSector={activeSector}
         userRole={role}
-        onHome={openScoreInWorkspace}
+        onHome={openSettingsInWorkspace}
         homeTitle={companyVisionLabel(role, activeDepartment)}
         onSector={handleSectorButtonClick}
         onBrowser={openBrowserLauncherInWorkspace}
