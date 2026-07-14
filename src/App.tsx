@@ -1703,6 +1703,13 @@ function AuthenticatedApp() {
                             {label}
                           </button>
                         ))}
+                        <button
+                          onClick={openMapLauncherInWorkspace}
+                          title="Mapa"
+                          className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]"
+                        >
+                          <MapPinned size={16} className="text-neutral-400 dark:text-white" />
+                        </button>
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1751,6 +1758,13 @@ function AuthenticatedApp() {
                       {label}
                     </button>
                   ))}
+                  <button
+                    onClick={openMapLauncherInWorkspace}
+                    title="Mapa"
+                    className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]"
+                  >
+                    <MapPinned size={16} className="text-neutral-400 dark:text-white" />
+                  </button>
                 </div>
                 <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
