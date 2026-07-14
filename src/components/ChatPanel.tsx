@@ -2004,12 +2004,6 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
           )}
         </button>
-        <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-          <Search size={22} />
-        </button>
-        <button onClick={() => onMapOpen?.()} className={btnCls} title="Mapa">
-          <MapPin size={22} />
-        </button>
         <button onClick={() => onShowHistory?.()} className={btnCls} title="Conversas anteriores">
           <History size={22} />
         </button>
@@ -2123,9 +2117,6 @@ export function ChatMobile({
               {activeSector && activeSector !== 'geral' && (
                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#3b82f6]" />
               )}
-            </button>
-            <button onClick={onBrowser} className={btnCls} title="Sincronizar">
-              <Search size={22} />
             </button>
             <label className={`${btnCls} relative`} title="Enviar arquivo">
               <Upload size={22} />
