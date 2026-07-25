@@ -183,7 +183,7 @@ import { getConnector, FIXTURE_MAP } from './core/adapters/source-registry';
 // internas. Lista estática por enquanto; a mineradora poderá substituir
 // dinamicamente depois. Sempre 9 palavras únicas por chave.
 const FEED_HIGHLIGHTS: Record<string, string[]> = {
-  geral: ['Mercado', 'Concorrência', 'Reputação', 'Preços', 'Eventos', 'Consumo', 'Risco', 'Demanda', 'Região'],
+  geral: ['Mercado', 'Concorrência', 'Demanda', 'Economia', 'Suprimento', 'Distribuição', 'Regulação', 'Reputação', 'Território'],
   marketing: ['Consumo', 'Tendência', 'Viral', 'Marca', 'Canal', 'Busca', 'Sazonal', 'Público', 'Narrativa'],
   vendas: ['Demanda', 'Preço', 'Ticket', 'Procura', 'Promoção', 'Conversão', 'Categoria', 'Sazonalidade', 'Oferta'],
   financeiro: ['Margem', 'Juros', 'Crédito', 'Câmbio', 'Inflação', 'Custo', 'Receita', 'Inadimplência', 'Tributos'],
@@ -265,7 +265,8 @@ export default function App() {
 
   // Bloqueio do acesso via browser DESKTOP. O OS¹ desktop só funciona via Electron
   // (.dmg/.exe). Mobile browser passa direto — não tem como instalar Electron no celular.
-  if (!isElectron && !isMobileBrowser) {
+  // TEMP: bloqueio desativado a pedido do Henri, só pra teste local no Safari — REVERTER DEPOIS.
+  if (false && !isElectron && !isMobileBrowser) {
     return <NoBrowserAccess />;
   }
 
@@ -1216,7 +1217,7 @@ function AuthenticatedApp() {
     const p_rep   = data.progresso_pct;
     // Destaques são lentes de leitura do feed/área atual (activeDepartment),
     // não setores fixos universais — rótulos vêm de FEED_HIGHLIGHTS.
-    const highlightLabels = FEED_HIGHLIGHTS[activeDepartment] ?? FEED_HIGHLIGHTS.geral;
+    const highlightLabels = FEED_HIGHLIGHTS.geral;
     const pctByIndex = [p_mkt, p_vds, p_fin, p_jur, p_est, p_ops, p_rh, p_evt, p_rep];
     const circles = highlightLabels.map((label, i) => ({ label, pct: pctByIndex[i], color: urg(pctByIndex[i]) }));
     const allSlices = [
@@ -1496,7 +1497,7 @@ function AuthenticatedApp() {
             </button>
             <button
               onClick={openMapLauncherInWorkspace}
-              className="cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
+              className="hidden cursor-pointer text-neutral-800 dark:text-neutral-100 p-2 sm:p-2.5 lg:p-3.5 rounded-full bg-[#EFEFF1] dark:bg-transparent shadow-[inset_0_2px_5px_rgba(0,0,0,0.16),inset_0_1px_2px_rgba(0,0,0,0.10)] dark:shadow-none hover:bg-[#E3E3E5] dark:hover:bg-white/5 transition-all duration-200 active:scale-90"
               title="Mapa"
             >
               <MapPinned size={18} className="sm:hidden" />
@@ -1703,13 +1704,6 @@ function AuthenticatedApp() {
                             {label}
                           </button>
                         ))}
-                        <button
-                          onClick={openMapLauncherInWorkspace}
-                          title="Mapa"
-                          className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]"
-                        >
-                          <MapPinned size={16} className="text-neutral-400 dark:text-white" />
-                        </button>
                       </div>
                     )}
                     {/* Stats inline + 3 linhas com ícones — franqueador/franquia/afiliado/parceiro */}
@@ -1721,18 +1715,27 @@ function AuthenticatedApp() {
                       </div>
                     )}
                     {roleConfig.bioLines && (
-                      <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
-                        {roleConfig.bioLines.map((line, i) => {
-                          const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
-                          const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
-                          return (
-                            <div key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
-                              <Icon size={13} className="sm:hidden flex-shrink-0" style={{ color }} strokeWidth={2.2} />
-                              <Icon size={15} className="hidden sm:block flex-shrink-0" style={{ color }} strokeWidth={2.2} />
-                              <span className="text-neutral-800 dark:text-neutral-200 truncate">{line.text}</span>
-                            </div>
-                          );
-                        })}
+                      <div className="flex items-center gap-2 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
+                        <div className="flex-1 space-y-0.5 sm:space-y-1">
+                          {roleConfig.bioLines.map((line, i) => {
+                            const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
+                            const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
+                            return (
+                              <div key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                                <Icon size={13} className="sm:hidden flex-shrink-0" style={{ color }} strokeWidth={2.2} />
+                                <Icon size={15} className="hidden sm:block flex-shrink-0" style={{ color }} strokeWidth={2.2} />
+                                <span className="text-neutral-800 dark:text-neutral-200 truncate">{line.text}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <button
+                          onClick={openMapLauncherInWorkspace}
+                          title="Mapa"
+                          className="hidden flex-shrink-0 inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]"
+                        >
+                          <MapPinned size={16} className="text-neutral-400 dark:text-white" />
+                        </button>
                       </div>
                     )}
                     {bio.bioText && (
@@ -1758,37 +1761,39 @@ function AuthenticatedApp() {
                       {label}
                     </button>
                   ))}
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
+                  <div className="flex-1 space-y-0.5 sm:space-y-1">
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
+                      <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
+                      <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
+                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_mercado')} · {data.mercado_nome ?? 'Beleza & Estética'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                      <MapPin size={13} className="sm:hidden text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
+                      <MapPin size={15} className="hidden sm:block text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
+                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_posicao')} · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                      <Zap size={13} className="sm:hidden text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
+                      <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
+                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
+                    </div>
+                    {activeProduct && (
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
+                        <Layers size={13} className="sm:hidden text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
+                        <Layers size={15} className="hidden sm:block text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
+                        <span className="text-neutral-800 dark:text-neutral-200 truncate">Versão · {activeProduct.versionLabel}</span>
+                      </div>
+                    )}
+                  </div>
                   <button
                     onClick={openMapLauncherInWorkspace}
                     title="Mapa"
-                    className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]"
+                    className="hidden flex-shrink-0 inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]"
                   >
                     <MapPinned size={16} className="text-neutral-400 dark:text-white" />
                   </button>
-                </div>
-                <div className="space-y-0.5 sm:space-y-1 mr-8 sm:mr-12 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm mt-0.5 sm:mt-1">
-                    <Store size={13} className="sm:hidden text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
-                    <Store size={15} className="hidden sm:block text-[#0891b2] flex-shrink-0" strokeWidth={2.2} />
-                    <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_mercado')} · {data.mercado_nome ?? 'Beleza & Estética'}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
-                    <MapPin size={13} className="sm:hidden text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
-                    <MapPin size={15} className="hidden sm:block text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
-                    <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_posicao')} · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
-                    <Zap size={13} className="sm:hidden text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
-                    <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
-                    <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
-                  </div>
-                  {activeProduct && (
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
-                      <Layers size={13} className="sm:hidden text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
-                      <Layers size={15} className="hidden sm:block text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
-                      <span className="text-neutral-800 dark:text-neutral-200 truncate">Versão · {activeProduct.versionLabel}</span>
-                    </div>
-                  )}
                 </div>
                   </>
                 )}

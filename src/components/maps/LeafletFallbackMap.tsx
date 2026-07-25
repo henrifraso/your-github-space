@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import type { Competitor } from '../../types';
 
 // Fallback automático quando Google Maps não carrega (Safari ITP, AdBlock, rede).
-// Usa OpenStreetMap via CartoDB Dark Matter (tile dark coerente com o tema OS¹).
+// Usa OpenStreetMap via CartoDB — dark_all (escuro) ou light_all (claro) conforme tema.
 // Não envia tráfego pra maps.googleapis.com — passa por qualquer browser.
 
 interface MarkerInput {
@@ -28,8 +28,9 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
   const mapRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
 
-  // Inicializa o mapa uma vez
+  // Inicializa o mapa uma vez (sem tiles — o efeito [isDark] abaixo os adiciona)
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, {
@@ -38,20 +39,10 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
       zoomControl: false,
       attributionControl: true,
     });
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    L.tileLayer(tileUrl, {
-      attribution: '© OpenStreetMap · CARTO',
-      maxZoom: 19,
-      subdomains: 'abcd',
-    }).addTo(map);
     mapRef.current = map;
     layerGroupRef.current = L.layerGroup().addTo(map);
 
     // Fix: container pode estar com altura 0 durante animação de entrada do CompetitiveMap.
-    // Força recálculo de tiles em vários momentos cobrindo possibilidades de timing.
-    // `cancelled` evita chamar invalidateSize() após desmontagem (crash _leaflet_pos).
     let cancelled = false;
     const raf = requestAnimationFrame(() => {
       if (!cancelled && mapRef.current) map.invalidateSize();
@@ -60,7 +51,6 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
       window.setTimeout(() => { if (!cancelled && mapRef.current) map.invalidateSize(); }, ms)
     );
 
-    // ResizeObserver pega qualquer mudança subsequente (ex.: split view do ChatPanel)
     const ro = new ResizeObserver(() => {
       if (!cancelled && mapRef.current) mapRef.current.invalidateSize();
     });
@@ -75,9 +65,30 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
       mapRef.current = null;
       layerGroupRef.current = null;
       circleRef.current = null;
+      tileLayerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Troca tiles quando isDark muda (e na inicialização, logo após o map estar pronto)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
+    }
+    const tileUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    const layer = L.tileLayer(tileUrl, {
+      attribution: '© OpenStreetMap · CARTO',
+      maxZoom: 19,
+      subdomains: 'abcd',
+    });
+    layer.addTo(map);
+    tileLayerRef.current = layer;
+  }, [isDark]);
 
   // Re-centra quando center/zoom mudam
   useEffect(() => {
@@ -136,25 +147,45 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
     }
   }, [markers, clientPosition.lat, clientPosition.lng, radius, center.lat, center.lng]);
 
+  const darkCss = `
+    .os1-leaflet-tooltip {
+      background: rgba(20,20,22,0.94) !important;
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      font-size: 11px !important;
+      padding: 4px 8px !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    }
+    .os1-leaflet-tooltip::before { display: none !important; }
+    .leaflet-container { background: #1a1a1a !important; }
+    .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: rgba(255,255,255,0.4) !important; font-size: 9px !important; }
+    .leaflet-control-attribution a { color: rgba(255,255,255,0.55) !important; }
+    .leaflet-control-zoom a { background: rgba(20,20,22,0.85) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+    .leaflet-control-zoom a:hover { background: rgba(40,40,45,0.95) !important; }
+  `;
+
+  const lightCss = `
+    .os1-leaflet-tooltip {
+      background: rgba(255,255,255,0.96) !important;
+      color: #222 !important;
+      border: 1px solid rgba(0,0,0,0.1) !important;
+      font-size: 11px !important;
+      padding: 4px 8px !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+    }
+    .os1-leaflet-tooltip::before { display: none !important; }
+    .leaflet-container { background: #f0f0f0 !important; }
+    .leaflet-control-attribution { background: rgba(255,255,255,0.75) !important; color: rgba(0,0,0,0.45) !important; font-size: 9px !important; }
+    .leaflet-control-attribution a { color: rgba(0,0,0,0.6) !important; }
+    .leaflet-control-zoom a { background: rgba(255,255,255,0.9) !important; color: #333 !important; border: 1px solid rgba(0,0,0,0.15) !important; }
+    .leaflet-control-zoom a:hover { background: rgba(240,240,240,0.95) !important; }
+  `;
+
   return (
     <>
-      <style>{`
-        .os1-leaflet-tooltip {
-          background: rgba(20,20,22,0.94) !important;
-          color: #fff !important;
-          border: 1px solid rgba(255,255,255,0.1) !important;
-          font-size: 11px !important;
-          padding: 4px 8px !important;
-          border-radius: 8px !important;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-        }
-        .os1-leaflet-tooltip::before { display: none !important; }
-        .leaflet-container { background: #1a1a1a !important; }
-        .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: rgba(255,255,255,0.4) !important; font-size: 9px !important; }
-        .leaflet-control-attribution a { color: rgba(255,255,255,0.55) !important; }
-        .leaflet-control-zoom a { background: rgba(20,20,22,0.85) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important; }
-        .leaflet-control-zoom a:hover { background: rgba(40,40,45,0.95) !important; }
-      `}</style>
+      <style>{isDark ? darkCss : lightCss}</style>
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
     </>
   );

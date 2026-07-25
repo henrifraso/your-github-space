@@ -4,6 +4,32 @@ Plataforma de inteligência de mercado. O lugar onde as empresas existem.
 
 Transforma dado de mercado em direção acionável para o dono do negócio — via app desktop (Electron) e web.
 
+Este repositório é o **frontend** (interface). O backend (API, banco, autenticação) fica no repositório separado `henrifraso/omni`, normalmente clonado em `~/codify/omni`.
+
+---
+
+## Estado atual (visão rápida)
+
+**Já pronto (interface — Fase 1 completa):**
+- Feed de cards por empresa/setor, Área de Trabalho, Mapa competitivo, Navegador embutido (Electron)
+- Bio da empresa com destaques/medidores, dark mode, múltiplos perfis de demonstração
+- Login/autenticação, configuração da empresa, 8 botões de "destrinchar" card
+- App desktop empacotável (Electron) além da versão web
+
+**O que falta (o "motor"):**
+- A coleta de dados externos ainda é manual/assistida por perfil — não existe ainda um motor automático que busca dado real e gera cards sozinho para qualquer empresa nova
+- Alguns blocos (ex. botões de destrinchar, InsightsCard) usam templates locais fixos, não LLM/backend real, em parte dos perfis
+- Detalhes de prioridade e status honesto ficam em `QUALIDADE.md` na raiz
+
+**Onde estão as partes principais:**
+- `src/App.tsx` — arquivo central da aplicação (tela principal, estado, navegação)
+- `src/components/` — componentes de UI reutilizáveis
+- `src/features/` — funcionalidades por domínio (feed, workspace, navegador, score...)
+- `src/core/` — motor de análise, conectores de fonte, registro de produto/versão
+- `src/data/sector-feeds/` — dados de feed por empresa/perfil (McDonald's, Oscar, Pacheco, Combrasil, Cerveja Império...)
+- `electron/` — processo principal do app desktop (Electron)
+- `COMO_CRIAR_PERFIL.md` — receita passo a passo pra criar um novo perfil de empresa demo
+
 ---
 
 ## Stack

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
@@ -22,6 +22,7 @@ import { WorkspaceBlockHeader } from '../features/workspace/blocks/WorkspaceBloc
 import { BlockCtrl } from '../features/workspace/blocks/WorkspaceBlockActions';
 import { CardGovernanceActions } from './CardGovernanceActions';
 import { normalizeUrl } from '../features/browser/browser-url-utils';
+import { LeafletFallbackMap } from './maps/LeafletFallbackMap';
 import { DEPARTMENTS, VISIBLE_DEPARTMENT_IDS, SECTORS } from './SectorSwitcher';
 import {
   SECTIONS as SETTINGS_SECTIONS,
@@ -833,7 +834,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
   // Cancelar restaura o conteúdo (messages intactas); Sair chama handleLogout.
   if (logoutPending) {
     return (
-      <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 scroll-pt-6 space-y-3">
+      <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 scroll-pt-6 space-y-3 pointer-events-auto">
         <div className="flex flex-col items-start gap-2.5">
           <div className="max-w-[94%] w-full mx-auto rounded-2xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
             <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
@@ -921,7 +922,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     // Confirmação de exclusão
     if (histConfirmPending) {
       return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full pointer-events-auto">
           <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4">
             <div className="max-w-[94%] w-full rounded-2xl bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] overflow-hidden">
               <div className="px-3.5 py-2 border-b border-neutral-100 dark:border-[#414141] flex items-center gap-2">
@@ -947,7 +948,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     }
 
     return (
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full pointer-events-auto">
         {/* Cabeçalho do modo seleção */}
         {histSelectionMode && (
           <div className="px-4 pt-3 pb-2.5 flex items-center gap-2.5 border-b border-neutral-100 dark:border-[#414141] flex-shrink-0">
@@ -1064,7 +1065,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-6 scroll-pt-6 space-y-3">
+      <div className={`flex-1 overflow-y-auto overscroll-contain px-5 py-6 scroll-pt-6 space-y-3${messages.length > 0 ? ' pointer-events-auto' : ' pointer-events-none'}`}>
         {messages.map((msg) => {
           if (msg.role === 'card' && msg.card) {
             const c = msg.card;
@@ -1324,7 +1325,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       </div>
 
       {/* Input */}
-      <div className="px-4 pb-4 flex-shrink-0">
+      <div className="px-4 pb-4 flex-shrink-0 pointer-events-auto">
         <AnimatePresence mode="wait">
           {!started ? (
             <motion.div
@@ -1979,6 +1980,50 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
     el.addEventListener('wheel', handler, { passive: false });
     return () => el.removeEventListener('wheel', handler);
   }, []);
+
+  // ── Película do mapa vazio ─────────────────────────────────────────────────
+  const [mapFilmActive, setMapFilmActive] = useState(true);
+  const filmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapWrapperRef = useRef<HTMLDivElement>(null);
+
+  const clearFilmTimer = useCallback(() => {
+    if (filmTimerRef.current) { clearTimeout(filmTimerRef.current); filmTimerRef.current = null; }
+  }, []);
+
+  const startFilmTimer = useCallback(() => {
+    if (filmTimerRef.current) clearTimeout(filmTimerRef.current);
+    filmTimerRef.current = setTimeout(() => setMapFilmActive(true), 5000);
+  }, []);
+
+  const handleFilmClick = useCallback(() => {
+    setMapFilmActive(false);
+    startFilmTimer();
+  }, [startFilmTimer]);
+
+  // Ouve gestos no container do mapa (capture) para reiniciar o timer de inatividade
+  useEffect(() => {
+    if (mapFilmActive || !mapWrapperRef.current) return;
+    const el = mapWrapperRef.current;
+    const reset = () => startFilmTimer();
+    el.addEventListener('pointermove', reset, { capture: true, passive: true });
+    el.addEventListener('pointerdown', reset, { capture: true, passive: true });
+    el.addEventListener('wheel', reset, { capture: true, passive: true });
+    return () => {
+      el.removeEventListener('pointermove', reset, { capture: true });
+      el.removeEventListener('pointerdown', reset, { capture: true });
+      el.removeEventListener('wheel', reset, { capture: true });
+    };
+  }, [mapFilmActive, startFilmTimer]);
+
+  // Restaura película quando um card é aberto (workspace ocupado)
+  useEffect(() => {
+    if (workspaceContext) { clearFilmTimer(); setMapFilmActive(true); }
+  }, [workspaceContext, clearFilmTimer]);
+
+  // Limpa timer no unmount
+  useEffect(() => () => { clearFilmTimer(); }, [clearFilmTimer]);
+  // ──────────────────────────────────────────────────────────────────────────
+
   const ww = windowWidth ?? window.innerWidth;
   const { rightPx, widthPx } = getDesktopChatLayout(ww, !!wide);
   return (
@@ -1992,8 +2037,46 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
       }}
       className="fixed bottom-5 z-[40] hidden lg:flex flex-col bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
-      {/* Header com ícones — ordem: Home / Plus / Search / Upload / History / Bell */}
-      <div className="px-5 pt-5 flex-shrink-0">
+      {/* Mapa de fundo quando workspace está vazio */}
+      {!workspaceContext && (
+        <div ref={mapWrapperRef} className="absolute inset-0 z-[1] overflow-hidden">
+          <LeafletFallbackMap
+            center={{ lat: -23.1896, lng: -45.8841 }}
+            zoom={12}
+            radius={Infinity}
+            clientPosition={{ lat: -23.1896, lng: -45.8841 }}
+            markers={[]}
+            isDark={dark ?? true}
+          />
+
+          {/* Película — ativa: bloqueia gestos no mapa / inativa: mapa livre */}
+          <div
+            onClick={handleFilmClick}
+            className={`absolute inset-0 z-[10] flex items-center justify-center transition-opacity duration-500${mapFilmActive ? '' : ' opacity-0'}`}
+            style={{ pointerEvents: mapFilmActive ? 'auto' : 'none' }}
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); onMapOpen?.(); }}
+              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full shadow-lg select-none transition-colors duration-150 cursor-pointer backdrop-blur-sm ${dark ? 'bg-black/55 text-white hover:bg-black/75' : 'bg-white/85 text-neutral-700 border border-neutral-200 hover:bg-white/95'}`}
+            >
+              <MapPin size={12} />
+              abrir mapa
+            </button>
+          </div>
+
+          {/* Indicador discreto "mapa ativo" — aparece quando película está fora */}
+          <div
+            className={`absolute top-2 right-2 z-[11] pointer-events-none transition-opacity duration-300${mapFilmActive ? ' opacity-0' : ' opacity-100'}`}
+          >
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full backdrop-blur-sm ${dark ? 'bg-black/40' : 'bg-white/75 border border-neutral-200'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <span className={`text-[9px] font-medium ${dark ? 'text-white/70' : 'text-neutral-500'}`}>ativo</span>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Header com ícones — z-[2] para aparecer acima do mapa de fundo */}
+      <div className="px-5 pt-5 flex-shrink-0 relative z-[2]">
       <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.01]">
         <button onClick={onHome} className={btnCls} title={homeTitle ?? 'Configuração da Empresa'}>
           <Settings size={22} />
@@ -2012,7 +2095,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
         </button>
       </div>
       </div>
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 relative z-[3] pointer-events-none">
         <ChatBody workspaceContext={workspaceContext} activeSector={activeSector} userRole={userRole} onArchive={onArchive} onAutoArchive={onAutoArchive} onWorkspaceCleared={onWorkspaceCleared} chatHistoryOpen={chatHistoryOpen} archivedSessions={archivedSessions} onSelectHistorySession={onSelectHistorySession} onCloseHistory={onShowHistory} onDeleteSessions={onDeleteSessions} codifyScope={codifyScope} onOpenBrowserUrl={onOpenBrowserUrl} onOpenMapWithRadius={onOpenMapWithRadius} activeDepartment={activeDepartment} onSelectDepartment={onSelectDepartment} onSelectSector={onSelectSector} logoutPending={logoutPending} onCancelLogout={onCancelLogout} onConfirmLogout={onConfirmLogout} />
       </div>
     </div>

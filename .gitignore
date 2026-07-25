@@ -7,6 +7,7 @@ dist/
 .DS_Store
 .vercel
 dist-electron/
+dist-installer/
 .env.local
 
 # Native module artifacts (rebuild local com node-gyp / @electron/rebuild)
