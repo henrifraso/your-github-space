@@ -13,11 +13,6 @@ import {
 } from 'lucide-react';
 
 const isElectron = typeof window !== 'undefined' && !!(window as any).electron?.isElectron;
-// Mobile não pode rodar Electron — então browser mobile entra direto no app web.
-// Só desktop browser cai no NoBrowserAccess.
-const isMobileBrowser = typeof window !== 'undefined' && (
-  window.innerWidth < 1024 || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-);
 
 // ─── Sistema de Dificuldade ───────────────────────────────────────────────────
 type Difficulty = 'muito_facil' | 'facil' | 'normal' | 'dificil' | 'muito_dificil';
@@ -81,7 +76,6 @@ const TEXTS: Record<TextKey, Record<Difficulty, string>> = {
 import { motion, AnimatePresence } from 'motion/react';
 
 import LoginScreen from './components/LoginScreen';
-import { NoBrowserAccess } from './components/NoBrowserAccess';
 import { getAuthState, setAuthState, clearAuthState, getRole, setRole } from './hooks/useAuth';
 import { apiFetch, getOrgContext } from './api';
 import type { OmniData, Competitor, TimelineEvent } from './types';
@@ -262,13 +256,6 @@ export default function App() {
   });
 
   const [auth, setAuth] = useState(() => getAuthState());
-
-  // Bloqueio do acesso via browser DESKTOP. O OS¹ desktop só funciona via Electron
-  // (.dmg/.exe). Mobile browser passa direto — não tem como instalar Electron no celular.
-  // TEMP: bloqueio desativado a pedido do Henri, só pra teste local no Safari — REVERTER DEPOIS.
-  if (false && !isElectron && !isMobileBrowser) {
-    return <NoBrowserAccess />;
-  }
 
   if (!auth.isAuthenticated) {
     return (
@@ -1285,6 +1272,13 @@ function AuthenticatedApp() {
       return;
     }
     clearAuthState();
+    if (role === 'codify') {
+      // Sair do perfil principal (Codify/OS¹) volta pra landing pública
+      // (botão "Be different"), não pra LoginScreen interna do app.
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      window.location.href = isLocal ? 'http://localhost:8010' : 'https://os1.space';
+      return;
+    }
     // reload() força o App() a re-inicializar com auth=não-autenticado,
     // mostrando a LoginScreen com a mesma transição do login inicial.
     // Sem reload, o setAuth do componente pai não está no escopo daqui.

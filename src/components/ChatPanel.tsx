@@ -21,7 +21,7 @@ import {
 import { WorkspaceBlockHeader } from '../features/workspace/blocks/WorkspaceBlockHeader';
 import { BlockCtrl } from '../features/workspace/blocks/WorkspaceBlockActions';
 import { CardGovernanceActions } from './CardGovernanceActions';
-import { normalizeUrl } from '../features/browser/browser-url-utils';
+import { normalizeUrl, isElectron } from '../features/browser/browser-url-utils';
 import { LeafletFallbackMap } from './maps/LeafletFallbackMap';
 import { DEPARTMENTS, VISIBLE_DEPARTMENT_IDS, SECTORS } from './SectorSwitcher';
 import {
@@ -1174,7 +1174,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     ) : isDeptLauncher ? (
                       <WorkspaceDepartmentLauncherBlock active={activeDepartment} onSelect={(id) => { onSelectDepartment?.(id); handleApagar(); }} />
                     ) : isSettingsLauncher ? (
-                      <WorkspaceSettingsBlock profileId={activeSector} onOpenBrowserUrl={(url) => { onOpenBrowserUrl?.(url); handleApagar(); }} />
+                      <WorkspaceSettingsBlock profileId={activeSector} onOpenBrowserUrl={isElectron ? (url) => { onOpenBrowserUrl?.(url); handleApagar(); } : undefined} />
                     ) : isProfileSwitcherLauncher ? (
                       <WorkspaceProfileSwitcherBlock active={activeSector} onSelect={(id) => onSelectSector?.(id)} />
                     ) : isFranchiseSwitcherLauncher ? (
@@ -2037,9 +2037,8 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
       }}
       className="fixed bottom-5 z-[40] hidden lg:flex flex-col bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-100 dark:border-[#414141] rounded-2xl overflow-hidden shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)]"
     >
-      {/* Mapa de fundo quando workspace está vazio */}
-      {!workspaceContext && (
-        <div ref={mapWrapperRef} className="absolute inset-0 z-[1] overflow-hidden">
+      {/* Mapa de fundo — permanece montado mesmo com workspace aberto */}
+      <div ref={mapWrapperRef} className="absolute inset-0 z-[1] overflow-hidden">
           <LeafletFallbackMap
             center={{ lat: -23.1896, lng: -45.8841 }}
             zoom={12}
@@ -2073,8 +2072,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
               <span className={`text-[9px] font-medium ${dark ? 'text-white/70' : 'text-neutral-500'}`}>ativo</span>
             </div>
           </div>
-        </div>
-      )}
+      </div>
       {/* Header com ícones — z-[2] para aparecer acima do mapa de fundo */}
       <div className="px-5 pt-5 flex-shrink-0 relative z-[2]">
       <div className="flex items-center justify-between gap-2 px-2 py-3 bg-[#EDEEF0] dark:bg-[#323232] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] rounded-xl shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] transition-transform duration-200 hover:scale-[1.01]">
