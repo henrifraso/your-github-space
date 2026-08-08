@@ -2,6 +2,78 @@
 
 ---
 
+## FUNDAMENTO CONCEITUAL — por que o produto é sobre diferencial (08/ago/2026)
+
+Esta seção é a base que sustenta a REGRA DE VISÃO e a Régua de escrita do card,
+abaixo. Se um card ou um texto-template não se encaixa aqui, ele não é OS¹ —
+é mineradora com rótulo bonito.
+
+### A promessa, em linguagem de dono de negócio
+
+> Todo negócio tem um motivo pelo qual o cliente escolhe ele e não o vizinho.
+> Às vezes é preço, às vezes é qualidade, localização, atendimento, prazo. O
+> dono geralmente sabe qual é o dele — mas quase ninguém repara que esse
+> motivo muda de valor com o tempo. O que te fazia ser escolhido há três anos
+> pode ser o mínimo que todo mundo faz hoje. O OS¹ olha pra fora —
+> concorrentes, mercado, o que está mudando — e avisa quando algo mexe nesse
+> motivo. Você continua decidindo o que fazer. A gente só não deixa você ser
+> o último a saber.
+
+### O embasamento — três teses que sustentam o produto
+
+1. **Porter** (*Estratégia Competitiva*, 1980/1985) — toda vantagem
+   competitiva se dá por um de três caminhos: **custo**, **diferenciação** ou
+   **foco**. Importa porque garante que nenhum fato de mercado fica de fora:
+   todo movimento toca custo, diferenciação ou foco. Serve como tipologia de
+   leitura — é o filtro que classifica o que chega.
+
+2. **Christensen** (*O Dilema da Inovação*) — empresas bem gerenciadas falham
+   precisamente porque são bem gerenciadas: são deslocadas por concorrentes
+   menores, com menos recursos, que entram por mercados que a empresa
+   dominante considera pouco atraentes. Sustenta o valor central do produto:
+   o dono não vê chegando porque está olhando os indicadores certos e o lugar
+   errado. O OS¹ existe pra cobrir o ponto cego.
+
+3. **Blue Ocean** (Kim & Mauborgne, 2005) — olhar demais pro concorrente
+   também cega: as empresas prestam atenção excessiva no que os rivais têm e
+   nos parâmetros dados da indústria, e deixam de ver espaços não ocupados.
+   Sustenta os cards de abertura de espaço, não só de ameaça.
+
+### Os três tipos de leitura que aparecem no card
+
+- **Posição** (Porter) — alguém encostou no que era só seu, ou você abriu
+  distância.
+- **Ponto cego** (Christensen) — alguém entrou por um canto que você não
+  olha — o movimento que parece pequeno demais para importar.
+- **Espaço vazio** (Blue Ocean) — abriu um lugar onde ninguém está.
+
+Um card que não se encaixa em nenhum dos três não tem eixo — é notícia, não
+leitura (ver "O teste", na Régua de escrita do card, abaixo).
+
+### A relação entre diferencial e KIT/KIQ — resolve uma contradição aparente
+
+- No método KIT/KIQ clássico, o **dono** define o que é relevante — ele faz
+  as perguntas, o analista busca. Problema: o dono só pergunta sobre o que já
+  sabe que existe, e o que mata é justamente o que ele não sabe que existe.
+- No OS¹, o **diferencial** define o que é relevante — o filtro é "isso mexe
+  no motivo pelo qual te escolhem?". O dono não precisa saber o que
+  perguntar.
+- O KIT/KIQ continua valendo, mas para outra função: as perguntas da
+  configuração servem para o sistema descobrir **qual é** o diferencial
+  daquela empresa, onde ela compete e com quem — não para escolher as
+  notícias.
+- Resumo: **as perguntas alimentam o retrato; o diferencial filtra o que
+  chega.**
+
+### Por que a assinatura se sustenta
+
+Não é que todo card será revelador. É que o mercado não para de se mexer e
+ninguém sabe qual semana será a importante — funciona como cobertura, não
+como entretenimento. E o sistema fica mais preciso quanto mais a empresa o
+ensina: o retrato acumulado é o que ninguém copia.
+
+---
+
 ## REGRA DE VISÃO (o que o OS¹ É e NÃO é)
 
 O OS¹ **NÃO é uma mineradora.** Não entrega dado bruto, número solto ou cadastro.
@@ -100,6 +172,145 @@ Revisar (e possivelmente reprovar) qualquer card que contenha:
 
 **Trava futura sugerida:** sinalizar automaticamente cards de Camada 2 que contenham
 verbos imperativos para revisão antes de publicar.
+
+---
+
+## Régua de escrita do card (atualização 08/ago/2026)
+
+Complementa a Regra de Visão acima com o que faltava documentar: quem é o
+sujeito da frase, tamanho, e o que descartar antes de escrever. Aplicado pela
+primeira vez nos 10 cards de demonstração da Combrasil
+(`src/data/demo-feed-cards.ts`).
+
+### O que o card NÃO é / O que é
+
+**Não é notícia.** Não é recorte de imprensa, não é "o que saiu no jornal
+sobre o concorrente" — isso é mineradora (ver Regra de Visão acima).
+
+**É a leitura do que aquele movimento mexe no DIFERENCIAL da empresa** — no
+que faz ela ser escolhida, no que a separa dos outros.
+
+### A regra do sujeito (a mais importante)
+
+O sujeito da frase é a **empresa cliente**, não o concorrente. O concorrente
+entra como causa, depois do travessão — nunca como protagonista do título.
+
+| ❌ Notícia (concorrente é sujeito) | ✅ Leitura (cliente é sujeito) |
+|---|---|
+| "Kicaldo entra em arroz bem no momento em que a saca supera R$ 63" | "Sua vantagem em preço de arroz fica mais difícil de sustentar — entrou um concorrente novo justo quando a saca passou de R$ 63" |
+| "Yoki ganha dono com mais força de distribuição" | "O espaço que você tem em mercearia vai ficar mais disputado — a Yoki mudou de dono e ganhou distribuição maior" |
+| "Broto Legal lançou feijão pronto em 1 minuto de micro-ondas" | "Está nascendo uma ocasião de consumo onde você não está — feijão pronto disputa o cliente que não quer cozinhar" |
+
+### O eixo
+
+Toda leitura fala de diferença — o que separa o cliente dos concorrentes, o
+que está encurtando essa distância, onde abriu distância nova. Três formas:
+**ameaça**, **erosão** ou **abertura**.
+
+### O teste
+
+Se o título funcionaria igual para qualquer empresa da categoria, é notícia.
+Reescrever até que só faça sentido pra ESTA empresa.
+
+### CHECAGEM DE VOCABULÁRIO (obrigatória, 08/ago/2026)
+
+Achado em produção: um título pode passar no "O teste" acima e ainda assim
+falhar o eixo — falar de **território** (espaço ocupado) em vez de
+**diferencial** (motivo de escolha). Os dois soam parecidos mas não são a
+mesma coisa: "seu espaço de prateleira fica mais disputado" é sobre lugar;
+"o que te separa desse concorrente vai ser testado" é sobre diferença. Só o
+segundo é OS¹.
+
+Todo card, antes de ser aceito, precisa passar nas três:
+
+**(a) O título contém pelo menos uma expressão do campo de diferença** — "o
+que te separa", "o que te faz ser escolhido", "sua vantagem", "o que te
+distingue", "o que era só seu", "a distância entre você e X", "sua força em
+Y" (ou equivalente direto).
+
+**(b) O título NÃO usa "espaço", "lugar", "território" ou "prateleira" como
+eixo principal** — vocabulário de território, não de diferencial. Podem
+aparecer como detalhe secundário da frase, nunca como assunto do título.
+Atenção a sinônimos disfarçados do mesmo problema — "presença em X",
+"mercearia", "canal" também descrevem lugar ocupado, não motivo de escolha;
+mesmo cuidado se aplica a eles.
+
+**(c) Se o card não passar em (a), ele não está no eixo** — reescrever antes
+de aceitar, não publicar assim mesmo.
+
+Exemplo do erro (produção, 08/ago/2026):
+- ❌ Território: "Seu espaço de prateleira em arroz pode ficar mais disputado
+  — a Josapar recuperou fôlego financeiro"
+- ✅ Diferencial: "O que te separa da Josapar em arroz vai ser testado de
+  novo — ela recuperou fôlego financeiro e tende a voltar a investir em marca"
+
+### Faixas de tamanho
+
+- Título: 100–160 caracteres
+- Detalhe (`resumo`): 180–280 caracteres
+
+### Peneira — descartar antes de escrever
+
+- Notícia sem movimento de mercado (doação, selo, prêmio, ação social, RH)
+- Notícia anterior a 2025 (ou fora da janela de relevância vigente)
+- Acusação grave/criminal contra concorrente
+
+### O que não muda (já valia, ver seções acima)
+
+Linguagem de tendência ("costuma", "tende a", "vale pensar"), nunca
+imperativo dirigido ao dono, nunca jogada nomeada, nunca resultado prometido
+— ver "Apontamento vs. Ordem" acima. Número só se aparecer literalmente na
+fonte — nunca inventar ou estimar. Fonte e data sempre citadas no `detail`.
+
+Cruzar duas fontes costuma dizer mais que uma isolada quando fizer sentido —
+ex.: concorrente entrando numa categoria justo quando o insumo dela encarece
+diz mais que os dois fatos separados.
+
+---
+
+## Método de geração em lote (08/ago/2026)
+
+Contexto: preenchimento de 5 perfis × 10 cards × 5 campos densos (250 textos).
+Ninguém lê 250 textos um a um — o processo existe pra que a checagem
+aconteça ANTES do humano ler, não depois.
+
+### Processo por lote
+
+1. Gerar **5 cards por vez** — nem 10, nem 1.
+2. Antes de mostrar, rodar a checagem automática (abaixo) em **todos os
+   campos de todos os cards do lote** — não só no título.
+3. Mostrar o lote com o resultado da checagem visível: o que passou e o
+   que ficou marcado como duvidoso, com o motivo da marcação.
+4. Dono aprova o lote inteiro ou pede correção pontual. A leitura humana
+   é seletiva — o que foi marcado, mais amostragem do resto — não
+   integral.
+
+### Checagem automática — roda em TODOS os campos, não só no título
+
+1. **Número sem fonte** — todo número no texto precisa aparecer
+   literalmente na fonte citada. Nunca estimar, arredondar ou inventar.
+   Marcar se não bater.
+2. **Imperativo** — nenhum verbo de ordem dirigido ao dono (faça,
+   negocie, ligue, defina, marque, execute, meça, capture). Marcar se
+   achar.
+3. **Campo de diferença** — cada campo precisa conter pelo menos uma
+   expressão do eixo: o que te separa, o que te protegia, sua vantagem,
+   o que te distingue, o que era só seu, o motivo pelo qual te escolhem,
+   a distância entre você e X. Marcar se não tiver.
+4. **Vocabulário de território** — "espaço", "lugar", "prateleira",
+   "presença", "território" não podem ser o eixo da frase (podem
+   aparecer como detalhe). Marcar se forem o eixo.
+5. **Teste da substituição** — trocando o nome da empresa e do
+   concorrente, a frase continuaria fazendo sentido igual? Se sim, é
+   genérica. Marcar.
+6. **Promessa de resultado** — nada de "isso vai aumentar", "captura a
+   margem", "rende X". Marcar.
+7. **Prazo ou meta inventada** — nenhum prazo, KPI ou meta que não venha
+   da fonte. Marcar.
+
+**Regra de viés:** marcar em excesso, nunca deixar passar. Descartar uma
+marcação desnecessária é mais rápido do que achar um erro depois de 250
+textos escritos.
 
 ---
 

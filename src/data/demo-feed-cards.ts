@@ -1,5 +1,11 @@
 // Cards demonstrativos por empresa. Cada demo tem 5 cards realistas no domínio
 // próprio. Sintéticos (_synthetic:true) — fluem pelo workspace local sem chamar backend.
+//
+// PENDÊNCIA CONHECIDA: vários cards (ex.: mcdonalds 'rad-1'/'rad-2') têm números
+// específicos sem fonte real nos campos por_que_importa/onde_afeta (ex.: "1.400
+// PDVs num raio de 5km", "3,1%/mês com 2ª derivada positiva") — placeholder de
+// demo, viola a regra de "sem número inventado" da Área de Trabalho. Resolver
+// quando os cards forem regenerados com fonte real, não caso a caso agora.
 import type { IntelligenceCard } from '../components/WorkspacePanel';
 
 type U = 'alta' | 'media' | 'baixa';
@@ -671,7 +677,7 @@ DEMO_FEED_CARDS['oscar-piloto-01'] = [
 // ── Cerveja Império & Distribuidora Império — base demonstrativa ─────────────
 // Cards criados para demonstração comercial do OS¹. Dados simulados.
 function mkR(id: string, titulo: string, resumo: string, dominio: string,
-             urgencia: U, tipo: T, pq: string, onde: string, acao: string): IntelligenceCard {
+             urgencia: U, tipo: T, pq: string, onde: string, acao: string, tag?: string): IntelligenceCard {
   return {
     id: `demo-${id}`,
     titulo, resumo,
@@ -679,6 +685,7 @@ function mkR(id: string, titulo: string, resumo: string, dominio: string,
     onde_afeta: onde,
     o_que_fazer: acao,
     dominio, area: dominio,
+    ...(tag ? { tag } : {}),
     urgencia, tipo_card: tipo,
     confianca: 'media',
     confianca_score: urgencia === 'alta' ? 0.82 : urgencia === 'media' ? 0.74 : 0.68,
@@ -865,5 +872,92 @@ DEMO_FEED_CARDS['cerveja-imperio-distribuidora-01'] = [
 ];
 
 // ── Combrasil Alimentos — São José dos Campos (SP) ───────────────────────────
-// Combrasil tem dados reais no backend — sem demos para evitar flash de troca.
-DEMO_FEED_CARDS['combrasil'] = [];
+// org-combrasil-brasil tem 2 cards reais publicados no backend (verificado
+// 08/ago/2026, GET /api/codify/v0/cards) — entram primeiro no feed (App.tsx
+// mescla apiIntelligenceCards antes de DEMO_FEED_CARDS). Os 10 abaixo são
+// leitura sobre concorrentes reais (Camil, Josapar/Tio João, Urbano/Broto
+// Legal, Kicaldo, Yoki) via Google News RSS + mercado de grãos — 7 com fonte
+// e data citadas no detail, 3 EXEMPLO (prefixo no título) ilustrando o tipo
+// de leitura que o monitoramento direto (scraper) vai trazer.
+DEMO_FEED_CARDS['combrasil'] = [
+  mkR('combrasil-camil',
+    'A distância entre você e o líder do setor não deve encolher tão cedo — mesmo com resultado mais fraco, a Camil reforçou o caixa em R$ 1,39 bilhão',
+    'O líder do setor segue com fôlego financeiro firme mesmo com lucro 57,6% menor no 1º tri/26 e receita mais fraca no 4º tri/25 — a Camil ainda propôs aumento de capital de R$ 1,39 bilhão. Fonte: Investing.com Brasil, 5/ago; visaoagro.com.br, 17/jul; e InfoMoney, 1/jun/2026.',
+    'concorrencia', 'media', 'informacao',
+    'Quando o líder de categoria sofre no resultado mas não perde fôlego de caixa, costuma significar que ele segue com força pra sustentar o que te separa dele — a pressão sobre quem está atrás tende a continuar.',
+    'Sua distância em relação ao líder na categoria arroz tende a seguir difícil de fechar enquanto ele sustenta a posição financeira.',
+    'O sinal a observar do seu lado é se esse reforço de capital do líder vira campanha ou expansão de portfólio nos próximos meses — indicaria que ele pretende ampliar a distância, não reduzi-la.',
+    'LÍDER NÃO VAI RECUAR'),
+  mkR('combrasil-josapar',
+    'O que te separa da Josapar em arroz vai ser testado de novo — ela recuperou fôlego financeiro e tende a voltar a investir em marca',
+    'A recuperação financeira da marca Tio João, concorrente direta em arroz na mesma categoria, vem depois de período de dificuldade — e tende a testar de novo o que separa as duas marcas. Fonte: Globo Rural, 25/mar/2025.',
+    'concorrencia', 'baixa', 'informacao',
+    'Um concorrente que recupera fôlego financeiro costuma voltar a investir justo no que separa as marcas na cabeça do cliente — o argumento de escolha que parecia consolidado pode ser testado de novo.',
+    'É exatamente o motivo pelo qual escolhem sua linha de arroz e não a da Josapar/Tio João que volta a ser testado, cliente a cliente.',
+    'Vale observar, do seu lado, se a recuperação financeira da Josapar vem acompanhada de investimento em algo que mexa no motivo pelo qual o cliente escolhe uma marca ou outra, não só em distribuição.',
+    'RIVAL VOLTA COM FÔLEGO'),
+  mkR('combrasil-broto-feijao',
+    'O motivo pelo qual escolhem seu feijão não vale pra quem quer conveniência — a Broto Legal já entrou com feijão pronto em 1 minuto de micro-ondas',
+    'O movimento de conveniência já aparece em outras categorias de alimentos prontos — é uma ocasião de consumo que ainda não tem disputa forte, e a Broto Legal chegou primeiro nela. Fonte: IstoÉ Dinheiro, 24/jan/2025.',
+    'concorrencia', 'baixa', 'informacao',
+    'Quando ninguém disputa um motivo de escolha ainda, é mais barato virar a primeira opção — quem chega depois de consolidada a ocasião paga mais caro pra tentar ser escolhida também.',
+    'Sua linha de feijão tradicional não é o motivo de escolha nessa nova ocasião de consumo — ela existe à parte, com outro critério de decisão.',
+    'Vale pensar se cabe, no seu portfólio de grãos, uma leitura sobre essa ocasião de conveniência enquanto pouca gente disputa esse motivo de escolha.',
+    'CONVENIÊNCIA ABRE FRENTE NOVA'),
+  mkR('combrasil-broto-gluten',
+    'Sua força em grãos tradicionais não conta pra quem escolhe por restrição alimentar — a Broto Legal foi atrás desse público no segmento sem glúten',
+    'O movimento do concorrente acompanha tendência de nicho alimentar que já pressiona portfólios tradicionais de arroz e feijão, como o seu, a se diversificar por perfil de consumidor. Fonte: Giro News, 24/jun/2026.',
+    'concorrencia', 'baixa', 'informacao',
+    'Um concorrente que segmenta por dieta costuma abrir uma frente de disputa separada da briga de preço tradicional — outro público, outro critério de escolha, fora do seu radar atual.',
+    'O motivo pelo qual seu portfólio tradicional é escolhido não vale pra quem decide por restrição alimentar — um critério de escolha inteiro fora do seu radar.',
+    'Vale pensar se o seu portfólio de grãos precisa de um motivo de escolha próprio pra quem decide por restrição alimentar, não só uma variação da linha tradicional.',
+    'NICHO QUE NINGUÉM VIGIA'),
+  mkR('combrasil-kicaldo-preco',
+    'A distância que separava você da Kicaldo no arroz acabou de encolher — ela chegou com a marca Rosalito bem quando a saca passou de R$ 63',
+    'A Kicaldo entrou no mercado de arroz com a marca Rosalito, comprada em leilão por R$ 35,2 milhões, no mesmo período em que o preço da saca passou de R$ 63. Fonte: CNN Brasil (17/mai/2026) e MINUTO MT (18/jul/2026); compra em leilão segundo Agrofy News Brasil (14/abr/2025).',
+    'concorrencia', 'alta', 'alerta',
+    'Um concorrente que você nunca comparava em arroz passa a disputar o mesmo motivo de escolha do cliente — o que te distinguia da Kicaldo até agora era ela nem estar nessa categoria.',
+    'O que separava suas linhas de arroz e feijão de um único concorrente comum acabou de sumir — agora é a mesma Kicaldo nas duas.',
+    'Vale acompanhar se a Kicaldo tenta competir pelo mesmo motivo que faz o cliente te escolher hoje, ou se entra com um critério novo que ainda não estava em disputa.',
+    'CONCORRENTE INESPERADO NO ARROZ'),
+  mkR('combrasil-yoki',
+    'Sua vantagem sobre a Yoki fica mais difícil de sustentar — ela mudou de dono (3Corações, R$ 800 milhões) e ganhou distribuição maior',
+    'O negócio inclui as fábricas brasileiras da General Mills e a marca Kitano — a Yoki passa a competir, no seu mercado, com estrutura de distribuição bem maior que antes, o que tende a dificultar a vida de quem tem menos capilaridade. Fonte: Folha de S.Paulo, 17/mar/2026.',
+    'concorrencia', 'alta', 'alerta',
+    'Uma marca que muda de dono e ganha estrutura maior costuma tirar de você justamente a vantagem de ser a opção mais fácil de achar — isso tende a ficar mais disputado a partir de agora.',
+    'O que fazia suas linhas de farináceos, temperos e grãos serem mais fáceis de escolher do que as da Yoki tende a valer menos agora, com ela mais capilarizada.',
+    'Vale observar se a integração da Yoki com a 3Corações muda o motivo pelo qual o cliente ainda te escolhe no lugar dela nos próximos meses.',
+    'DONO NOVO, MÚSCULO MAIOR'),
+  mkR('combrasil-mercado-safra',
+    'O custo do arroz em alta separa quem trava contrato ou tem estoque de quem compra à vista — de que lado desse corte você está?',
+    'A exportação em alta reduz a oferta interna, na mesma safra em que a produção já veio menor — quem tem contrato travado ou estoque formado costuma sentir menos esse custo do que quem compra à vista. Fonte: portaldoagronegocio.com.br (16/jul/2026) e Planeta Arroz (14/nov/2025).',
+    'mercado', 'media', 'informacao',
+    'Custo de matéria-prima em alta separa quem tem escala de compra, contrato travado ou estoque formado de quem depende do mercado à vista — é exatamente esse tipo de diferença que decide quem sustenta preço e quem precisa repassar primeiro.',
+    'O que te distingue de quem compra à vista está em como a sua compra de insumo está estruturada hoje — não só no preço da saca em si.',
+    'Vale um teste simples: o que te distingue de quem compra à vista — contrato travado, estoque formado, ou dependência total do mercado à vista mês a mês? A resposta tende a dizer de que lado dessa alta você está.',
+    'TESTE DE QUEM AGUENTA CUSTO'),
+  mkR('combrasil-exemplo-preco',
+    'EXEMPLO — Preço monitorado: arroz tipo 1 5kg da Camil listado a R$ 24,90 em rede de varejo, alta de 6% na semana',
+    'Ilustra o tipo de leitura que o monitoramento direto de preço (scraper) vai trazer — Google News não informa preço praticado em ponto de venda, só resultado financeiro trimestral divulgado meses depois.',
+    'concorrencia', 'media', 'informacao',
+    'Preço de prateleira costuma mostrar antes de qualquer notícia se a sua vantagem de preço ainda existe ou já foi igualada — é o dado mais direto pra saber onde você está.',
+    'Sua linha de arroz — mostra se o que te distingue em preço continua valendo ou já foi alcançado.',
+    'Uma variação de preço costuma antecipar, meses antes de qualquer resultado trimestral, se a sua vantagem de preço está encolhendo ou se firmando — vale um acompanhamento mais frequente do que o noticiário permite.',
+    'EXEMPLO — PREÇO EM TEMPO REAL'),
+  mkR('combrasil-exemplo-oferta',
+    'EXEMPLO — Mudança de oferta: Tio João lança combo promocional de arroz + feijão detectado em ponto de venda físico',
+    'Ilustra o tipo de sinal que só a checagem direta de loja ou site do concorrente captura — promoção pontual raramente vira notícia de imprensa, mesmo quando muda o comportamento de compra na mesma semana.',
+    'concorrencia', 'media', 'informacao',
+    'Uma promoção pontual pode ser exatamente o que testa, por alguns dias, se o cliente troca de marca só por causa de preço — e isso quase nunca aparece em fonte pública indexada.',
+    'O momento exato em que o cliente decide entre a sua marca e a do concorrente — não dá pra ver isso de longe.',
+    'Vale observar se esse tipo de promoção se repete em datas específicas — um padrão assim pode estar corroendo aos poucos o motivo pelo qual o cliente te escolhia sem comparar preço.',
+    'EXEMPLO — OFERTA NA LOJA FÍSICA'),
+  mkR('combrasil-exemplo-site',
+    'EXEMPLO — Alteração no site: Broto Legal adiciona SKU novo ao catálogo digital, sinal de expansão de portfólio em curso',
+    'Ilustra o tipo de leitura que o rastreamento de site institucional traz — mudança de catálogo costuma anteceder o lançamento oficial em semanas, antes de qualquer campanha de mídia aparecer.',
+    'concorrencia', 'baixa', 'informacao',
+    'Site institucional costuma atualizar antes da campanha de lançamento — é a chance de ver o que pode te distinguir, ou te igualar, antes de virar notícia.',
+    'Seu portfólio de grãos — mostra com antecedência se um concorrente está mirando um motivo de escolha que hoje só você oferece.',
+    'Um SKU novo no catálogo antes do lançamento oficial costuma abrir uma janela de dias pra entender se o concorrente está copiando o que te distingue ou abrindo uma frente nova, antes que a campanha comece.',
+    'EXEMPLO — SINAL NO CATÁLOGO DIGITAL'),
+];

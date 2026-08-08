@@ -22,9 +22,9 @@ export function PieChart({ segments }: { segments: { label: string; value: numbe
   );
 }
 
-export function CircleProgress({ pct, label, color, delay = 0, onEmptyComplete, onClick }: {
+export function CircleProgress({ pct, label, color, delay = 0, onEmptyComplete, onClick, disableClick }: {
   pct: number; label: string; color: string; delay?: number;
-  onEmptyComplete?: () => void; onClick?: () => void;
+  onEmptyComplete?: () => void; onClick?: () => void; disableClick?: boolean;
 }) {
   const [displayPct, setDisplayPct] = React.useState(0);
   const [emptying, setEmptying] = React.useState(false);
@@ -89,8 +89,8 @@ export function CircleProgress({ pct, label, color, delay = 0, onEmptyComplete, 
 
   return (
     <div
-      className="flex flex-col items-center gap-1 sm:gap-1.5 flex-shrink-0 cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95"
-      onClick={handleClick}
+      className={`flex flex-col items-center gap-1 sm:gap-1.5 flex-shrink-0 transition-all duration-200 hover:scale-105${disableClick ? '' : ' cursor-pointer active:scale-95'}`}
+      onClick={disableClick ? undefined : handleClick}
     >
       <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-20 md:h-20">
         <div className="absolute inset-0 rounded-2xl shadow-[0_6px_16px_-3px_rgba(0,0,0,0.18),0_2px_4px_rgba(0,0,0,0.10),0_-1px_3px_rgba(255,255,255,0.75)] dark:shadow-[0_8px_20px_-3px_rgba(0,0,0,0.6),0_2px_6px_rgba(0,0,0,0.4)] pointer-events-none" />

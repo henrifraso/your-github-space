@@ -4,7 +4,7 @@ import {
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
   Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, GitCompare, Settings,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
-  Sparkles, Loader2, History, MapPin, ChevronDown, ArrowRight,
+  Sparkles, Loader2, History, MapPin, ChevronDown,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
@@ -174,8 +174,6 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
   const [histSelectedIds, setHistSelectedIds] = useState<Set<string>>(new Set());
   const [histConfirmPending, setHistConfirmPending] = useState(false);
   const [destrincharByBlock, setDestrincharByBlock] = useState<Record<string, { key: string; text: string } | null>>({});
-  type InsightPayload = { insights: string[]; decisoes: Array<{ titulo: string; texto: string }> };
-  const [insightsByBlock, setInsightsByBlock] = useState<Record<string, InsightPayload | null>>({});
   const [mappingBlocks, setMappingBlocks] = useState<Set<string>>(new Set());
   // Reseta ao fechar o histórico para que não persista entre aberturas
   useEffect(() => {
@@ -623,19 +621,22 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     }
   }
 
-  // 8 botões de destrinchar o bloco — resultado aparece dentro do bloco,
-  // substituindo o anterior ao clicar (ou recolhendo ao clicar no mesmo).
-  function ContentActionButtons({ blockId }: { blockId: string }) {
-    const DESTRINCHAR_ACTIONS: { key: string; label: string; Icon: React.ElementType }[] = [
-      { key: 'exemplos',     label: 'Exemplos',     Icon: Lightbulb },
-      { key: 'cases',        label: 'Cases',        Icon: BookOpen },
-      { key: 'perspectivas', label: 'Perspectivas', Icon: Eye },
-      { key: 'simplificar',  label: 'Simplificar',  Icon: AlignLeft },
-      { key: 'comparar',     label: 'Comparar',     Icon: GitCompare },
-      { key: 'aprofundar',   label: 'Aprofundar',   Icon: Search },
-      { key: 'resumir',      label: 'Resumir',      Icon: FileText },
-      { key: 'questionar',   label: 'Questionar',   Icon: MessageSquare },
-    ];
+  const DESTRINCHAR_ACTIONS: { key: string; label: string; Icon: React.ElementType }[] = [
+    { key: 'exemplos',     label: 'Exemplos',     Icon: Lightbulb },
+    { key: 'cases',        label: 'Cases',        Icon: BookOpen },
+    { key: 'perspectivas', label: 'Perspectivas', Icon: Eye },
+    { key: 'simplificar',  label: 'Simplificar',  Icon: AlignLeft },
+    { key: 'comparar',     label: 'Comparar',     Icon: GitCompare },
+    { key: 'aprofundar',   label: 'Aprofundar',   Icon: Search },
+    { key: 'resumir',      label: 'Resumir',      Icon: FileText },
+    { key: 'questionar',   label: 'Questionar',   Icon: MessageSquare },
+  ];
+
+  // 8 botões de destrinchar o bloco. Em blocos com Atalho (hasAtalho=true,
+  // ver InsightsCard/toolCtx) o resultado aparece no container Atalho logo
+  // abaixo, com uma animação curta de "mapeando"; nos demais blocos (onde o
+  // Atalho não existe) mantém a gaveta local de sempre, sem delay.
+  function ContentActionButtons({ blockId, hasAtalho }: { blockId: string; hasAtalho?: boolean }) {
     const current = destrincharByBlock[blockId];
     return (
       <div className="flex flex-col gap-2">
@@ -650,15 +651,27 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                 if (!activeCard) return;
                 if (current?.key === a.key) {
                   setDestrincharByBlock(prev => ({ ...prev, [blockId]: null }));
-                } else {
+                  setMappingBlocks(prev => { const n = new Set(prev); n.delete(blockId); return n; });
+                  return;
+                }
+                if (!hasAtalho) {
                   const text = buildDestrincharContent(a.key, activeCard);
                   setDestrincharByBlock(prev => ({ ...prev, [blockId]: { key: a.key, text } }));
+                  return;
                 }
+                const card = activeCard;
+                setDestrincharByBlock(prev => ({ ...prev, [blockId]: { key: a.key, text: '' } }));
+                setMappingBlocks(prev => new Set([...prev, blockId]));
+                setTimeout(() => {
+                  setMappingBlocks(prev => { const n = new Set(prev); n.delete(blockId); return n; });
+                  const text = buildDestrincharContent(a.key, card);
+                  setDestrincharByBlock(prev => prev[blockId]?.key === a.key ? { ...prev, [blockId]: { key: a.key, text } } : prev);
+                }, 700);
               }}
             />
           ))}
         </div>
-        {current?.text && (
+        {!hasAtalho && current?.text && (
           <div className="rounded-xl bg-white dark:bg-[#242424] border border-neutral-100 dark:border-[#3a3a3a] px-3 py-2.5">
             <p className="text-[11px] leading-relaxed text-neutral-700 dark:text-neutral-300 whitespace-pre-line">{current.text}</p>
           </div>
@@ -667,74 +680,24 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
     );
   }
 
-  // Template local de insights e direcionamentos — sem LLM nem backend.
-  // Template local de insights e direcionamentos — retorna dados estruturados
-  // para renderizar como linhas com pílulas (mesmo padrão visual do card original).
-  function buildInsightsData(_card: IntelligenceCard): InsightPayload {
-    return {
-      insights: [
-        'Insight de exemplo 1 — aqui aparecerá a leitura gerada pelo motor sobre o padrão identificado no sinal. Este bloco é um placeholder de formato para demonstrar como o conteúdo se acomoda no layout quando ocupa algumas linhas.',
-        'Insight de exemplo 2 — aqui o motor apresentará a análise de contexto e urgência relativa ao domínio do card. Placeholder de formato — o texto real terá esta extensão aproximada, podendo variar conforme o sinal recebido.',
-        'Insight de exemplo 3 — aqui aparecerá a comparação com padrões similares observados em empresas do setor. Placeholder de formato para testar como o card se comporta com múltiplos itens de texto moderadamente longo.',
-        'Insight de exemplo 4 — aqui o motor indicará os sinais secundários relacionados e o que sugerem em conjunto. Placeholder de formato — o conteúdo real será gerado dinamicamente pelo motor de análise na Fase 2.',
-        'Insight de exemplo 5 — aqui aparecerá a síntese dos padrões identificados e a leitura consolidada sobre o sinal. Placeholder de formato para validar o layout com cinco itens completos antes de conectar o motor real.',
-      ],
-      decisoes: [
-        { titulo: 'Direcionamento 1', texto: 'Placeholder de formato 1 — aqui o motor apresentará um caminho de decisão possível com base na leitura do sinal. Serve para testar como texto de algumas linhas se comporta dentro do card e se o layout aguenta sem quebrar.' },
-        { titulo: 'Direcionamento 2', texto: 'Placeholder de formato 2 — aqui aparecerá uma alternativa de ação com custo e prazo diferentes do primeiro caminho. O texto real terá esta extensão aproximada conforme a complexidade do sinal analisado.' },
-        { titulo: 'Direcionamento 3', texto: 'Placeholder de formato 3 — aqui o motor indicará uma opção de monitoramento antes de comprometer recursos. Demonstra como cinco itens de decisão ficam organizados no card expandido.' },
-        { titulo: 'Direcionamento 4', texto: 'Placeholder de formato 4 — aqui aparecerá uma opção de delegação com critério de revisão e responsável sugerido. Serve para testar espaçamento, legibilidade e scroll quando há bastante conteúdo.' },
-        { titulo: 'Direcionamento 5', texto: 'Placeholder de formato 5 — aqui o motor apresentará a opção de adiamento com justificativa e data de revisão sugerida. Completa os cinco direcionamentos e valida o layout com o conjunto inteiro.' },
-      ],
-    };
-  }
-
-  // Card de "Insights e direcionamentos" — visual igual ao WorkspaceShortcutsBlock
-  // (tall, composto, pílulas coloridas). 3 fases:
-  //   idle    → 3 preview rows com pílulas (Insight / Decisão / Direção)
-  //   mapping → título centralizado + barra de progresso ~1.8s
-  //   open    → linhas com pílulas mostrando insights + decisões gerados
+  // Container "Atalho" — recebe o conteúdo dos 8 botões de destrinchar do
+  // bloco acima (ver ContentActionButtons/destrincharByBlock). Não tem clique
+  // próprio — quem dispara é o botão clicado lá em cima. 3 fases:
+  //   idle    → texto fixo apontando pros botões acima
+  //   mapping → barra de progresso curta (~0,7s)
+  //   open    → texto gerado pelo botão de destrinchar clicado
   function InsightsCard({ blockId }: { blockId: string }) {
-    const payload   = insightsByBlock[blockId];
+    const current   = destrincharByBlock[blockId];
     const isMapping = mappingBlocks.has(blockId);
-    const isOpen    = !!payload && !isMapping;
-
-    const handleClick = () => {
-      const card = activeCard;
-      if (!card) return;
-      if (isOpen) { setInsightsByBlock(prev => ({ ...prev, [blockId]: null })); return; }
-      if (isMapping) return;
-      setMappingBlocks(prev => new Set([...prev, blockId]));
-      setTimeout(() => {
-        setMappingBlocks(prev => { const n = new Set(prev); n.delete(blockId); return n; });
-        setInsightsByBlock(prev => ({ ...prev, [blockId]: buildInsightsData(card) }));
-      }, 1800);
-    };
-
-    // Linha clicável — mesmo padrão visual do ShortcutRow do WorkspaceShortcutsBlock
-    const Row = ({ pill, pillCls, cta, ctaCls, children }: {
-      pill: string; pillCls: string; cta?: string; ctaCls?: string; children: React.ReactNode;
-    }) => (
-      <button
-        type="button"
-        onClick={handleClick}
-        className="group flex items-start gap-2 text-left text-[12px] leading-[1.55] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-[#363636] rounded-md px-1 -mx-1 py-0.5 transition-colors w-full cursor-pointer"
-      >
-        <span className={`shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide ${pillCls}`}>{pill}</span>
-        <span className="flex-1 text-neutral-600 dark:text-neutral-300">
-          {children}
-          {cta && <span className={`whitespace-nowrap font-medium ml-1 ${ctaCls}`}>{cta} →</span>}
-        </span>
-      </button>
-    );
 
     const outerCls = 'w-full rounded-xl border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] bg-[#fbfcfd] dark:bg-[#2a2a2a] shadow-[0_2px_6px_-2px_rgba(0,0,0,0.08)] dark:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)]';
 
     // Fase: mapeando
     if (isMapping) {
+      const label = DESTRINCHAR_ACTIONS.find(a => a.key === current?.key)?.label ?? 'Leitura';
       return (
         <div className={`${outerCls} px-3.5 py-4 flex flex-col items-center gap-2.5`}>
-          <span className="text-[12px] font-semibold text-neutral-700 dark:text-neutral-200">Insights e direcionamentos</span>
+          <span className="text-[12px] font-semibold text-neutral-700 dark:text-neutral-200">{label}</span>
           <div className="w-full flex flex-col items-center gap-1.5">
             <span className="text-[9px] font-bold tracking-widest text-neutral-400 dark:text-neutral-500 uppercase">mapeando</span>
             <div className="w-full h-[2px] bg-neutral-100 dark:bg-[#3a3a3a] rounded-full overflow-hidden">
@@ -742,7 +705,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                 className="h-full bg-neutral-500 dark:bg-neutral-400 rounded-full"
                 initial={{ width: '0%' }}
                 animate={{ width: '100%' }}
-                transition={{ duration: 1.8, ease: [0.4, 0, 0.6, 1] }}
+                transition={{ duration: 0.7, ease: [0.4, 0, 0.6, 1] }}
               />
             </div>
           </div>
@@ -750,60 +713,26 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
       );
     }
 
-    // Fase: idle — 1 linha com pílula [Atalho] emerald + tagline + CTA "Mapear →"
-    if (!isOpen) {
+    // Fase: idle — 1 linha com pílula [Atalho] emerald, sem CTA (nada pra clicar aqui)
+    if (!current?.text) {
       return (
         <div className={`${outerCls} px-3.5 py-3`}>
-          <button
-            type="button"
-            onClick={handleClick}
-            className="group flex items-start gap-2 text-left text-[12px] leading-[1.55] text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-[#363636] rounded-md px-1 -mx-1 py-0.5 transition-colors w-full cursor-pointer"
-          >
+          <div className="flex items-start gap-2 text-[12px] leading-[1.55] text-neutral-700 dark:text-neutral-200">
             <span className="shrink-0 mt-0.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold tracking-wide bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300">
               Atalho
             </span>
             <span className="flex-1 text-neutral-600 dark:text-neutral-300">
-              Transforme o sinal em insights concretos e caminhos de decisão — leitura do padrão, análise de urgência e opções de resposta calibradas.{' '}
-              <span className="whitespace-nowrap font-medium text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-0.5">
-                Mapear
-                <ArrowRight size={11} className="inline-block translate-y-[0.5px] group-hover:translate-x-0.5 transition-transform" />
-              </span>
+              Escolha um ângulo acima — exemplos, cases, comparações, perspectivas — e a leitura aparece aqui.
             </span>
-          </button>
+          </div>
         </div>
       );
     }
 
-    // Fase: open — insight rows + decision rows
-    const DECISION_PILLS = [
-      'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300',
-      'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-      'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
-      'bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300',
-      'bg-neutral-100 text-neutral-600 dark:bg-[#3a3a3a] dark:text-neutral-300',
-    ];
+    // Fase: open — texto do botão de destrinchar clicado
     return (
       <div className={`${outerCls} px-3.5 py-3`}>
-        <div className="flex flex-col gap-3">
-          {payload!.insights.map((txt, i) => (
-            <Row key={`ins-${i}`} pill="Insight" pillCls="bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300">
-              {txt}
-            </Row>
-          ))}
-          <div className="border-t border-neutral-100 dark:border-[#3a3a3a] -mx-1 my-0.5" />
-          {payload!.decisoes.map((d, i) => (
-            <Row key={`dec-${i}`} pill={d.titulo} pillCls={DECISION_PILLS[i] || DECISION_PILLS[3]}>
-              {d.texto}
-            </Row>
-          ))}
-          <button
-            type="button"
-            onClick={handleClick}
-            className="self-start text-[10px] text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
-          >
-            Fechar ×
-          </button>
-        </div>
+        <p className="text-[11px] leading-relaxed text-neutral-700 dark:text-neutral-300 whitespace-pre-line">{current.text}</p>
       </div>
     );
   }
@@ -1238,7 +1167,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     </div>
                   ) : isMode ? (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
-                      <ContentActionButtons blockId={b.id} />
+                      <ContentActionButtons blockId={b.id} hasAtalho={!!toolCtx} />
                       {SHOW_BLOCK_SHORTCUTS && (
                         <ModeShortcuts
                           mode={b.mode}
@@ -1251,7 +1180,7 @@ function ChatBody({ onClose, showClose, workspaceContext, activeSector, userRole
                     </div>
                   ) : (
                     <div className="px-2.5 py-2 border-t border-neutral-100 dark:border-[#414141] flex flex-col gap-2">
-                      <ContentActionButtons blockId={b.id} />
+                      <ContentActionButtons blockId={b.id} hasAtalho={!!toolCtx} />
                       {SHOW_BLOCK_SHORTCUTS && (
                         <BlockShortcutsRow shortcuts={buildBlockShortcuts(b)} onPick={(mode, subKey) => {
                           const sub = SUB_BTNS[mode].find(x => x.key === subKey);
@@ -1744,9 +1673,6 @@ const CTX_FIELDS: { label: string; key: string; emphasis?: boolean }[] = [
   { label: 'Onde afeta',            key: 'onde_afeta' },
   { label: 'Risco',                 key: 'risco' },
   { label: 'Oportunidade',          key: 'oportunidade' },
-  { label: 'Domínio',               key: 'dominio' },
-  { label: 'Contexto para análise', key: 'acao_recomendada', emphasis: true },
-  { label: 'Próximo passo',         key: 'proximo_passo' },
 ];
 
 function ContextSection({ ctx }: { ctx: Record<string, unknown> }) {

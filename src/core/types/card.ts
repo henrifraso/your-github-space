@@ -13,6 +13,10 @@ export interface IntelligenceCard {
   o_que_fazer?: string;
   dominio: string;
   area: string;
+  // Rótulo curto e único exibido acima do título no feed (o "gancho" visual).
+  // Opcional — sem ele, o render usa `dominio` (categoria) como fallback, o
+  // comportamento de sempre. Ver docs/MODELO_MOTOR_OS1.md, Régua de escrita.
+  tag?: string;
   dificuldade?: string;
   confianca: string;
   confianca_score: number;

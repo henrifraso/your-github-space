@@ -26,12 +26,14 @@ export function TimelineCard({ event, onOpen }: { event: TimelineEvent; onOpen: 
           {event.icone}
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide" style={{ color: TIPO_COLOR[event.tipo] }}>{event.tipo}</p>
+          <p className="text-sm font-bold uppercase tracking-wide" style={{ color: TIPO_COLOR[event.tipo] }}>{event.tipo}</p>
           <p className="text-xs text-neutral-500 mt-0.5">{event.data}</p>
         </div>
       </div>
-      <p className="text-base font-bold text-neutral-800 dark:text-neutral-100 leading-snug mb-3">{event.titulo}</p>
-      <p className="text-sm text-neutral-500 leading-relaxed line-clamp-3">{event.detalhe}</p>
+      <div className="min-h-[101.5px]">
+        <p className="text-base font-bold text-neutral-800 dark:text-neutral-100 leading-snug mb-3 line-clamp-2">{event.titulo}</p>
+        <p className="text-xs text-neutral-500 leading-relaxed line-clamp-2">{event.detalhe}</p>
+      </div>
       <p className="text-xs font-semibold mt-4" style={{ color: TIPO_COLOR[event.tipo] }}>Ver mais →</p>
     </motion.div>
   );

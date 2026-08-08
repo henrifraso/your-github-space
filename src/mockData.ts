@@ -1198,6 +1198,11 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
   },
   // Combrasil — indústria de alimentos (SJC/SP). Base temporária enquanto os dados
   // reais não chegam; spread de MCDONALDS_DATA só pra estrutura, negocio sobrescrito.
+  // mercado_nome, concorrentes, timeline, fornecedores, praticas e progresso_pct
+  // corrigidos pra Combrasil (08/ago/2026). mercado_tamanho, ranking_local,
+  // previsao_clima, gamificacao_log e pesquisa continuam do McDonald's por
+  // decisão — não são visíveis hoje ou não fazem diferença (ver auditoria de
+  // visibilidade na mesma data, e pendencias_modais_orfaos.md).
   'combrasil': {
     ...MCDONALDS_DATA,
     negocio: {
@@ -1208,6 +1213,22 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
       estado: 'SP',
       telefone: '(12) 3900-0000',
     },
+    mercado_nome: 'Indústria de Alimentos & Grãos',
+    concorrentes: [
+      { nome: 'Camil Alimentos', nota_google: '—', endereco: 'Sede corporativa — São Paulo (SP)', cidade: 'São Paulo', estado: 'SP', faixa_preco: '—', categoria: 'direto', proposta_principal: 'Maior processadora de arroz do Brasil, com portfólio também em feijão, açúcar e pescados — concorrente direto em escala nacional.' },
+      { nome: 'Josapar (Tio João)', nota_google: '—', endereco: 'Sede corporativa — Pelotas (RS)', cidade: 'Pelotas', estado: 'RS', faixa_preco: '—', categoria: 'direto', proposta_principal: 'Uma das maiores marcas de arroz do país, também com linha de feijão sob a marca Tio João.' },
+      { nome: 'Urbano Alimentos', nota_google: '—', endereco: 'Sede corporativa — Jaraguá do Sul (SC)', cidade: 'Jaraguá do Sul', estado: 'SC', faixa_preco: '—', categoria: 'direto', proposta_principal: 'Empresa catarinense de grãos e farináceos, dona da marca Broto Legal — presença forte no Sul e expansão nacional.' },
+      { nome: 'Kicaldo Alimentos', nota_google: '—', endereco: 'Sede corporativa — Barueri (SP)', cidade: 'Barueri', estado: 'SP', faixa_preco: '—', categoria: 'direto', proposta_principal: 'Tradicionalmente forte em feijão, ampliou para arroz após adquirir a marca Rosalito em leilão.' },
+      { nome: 'Broto Legal', nota_google: '—', endereco: 'Sede corporativa — Jaraguá do Sul (SC)', cidade: 'Jaraguá do Sul', estado: 'SC', faixa_preco: '—', categoria: 'direto', proposta_principal: 'Marca de grãos e feijão pronto da Urbano Alimentos, com investida recente em conveniência e produtos sem glúten.' },
+      { nome: 'Yoki', nota_google: '—', endereco: 'Sede corporativa — São Bernardo do Campo (SP)', cidade: 'São Bernardo do Campo', estado: 'SP', faixa_preco: '—', categoria: 'direto', proposta_principal: 'Marca de temperos, farináceos e grãos processados, adquirida pela 3Corações em 2026 após venda pela General Mills.' },
+    ],
+    timeline: [],
+    fornecedores: [],
+    praticas: [],
+    // Sem restrição técnica pra valor baixo — CircleProgress aceita qualquer
+    // 0-100. 15% reflete que a Combrasil ainda tem pouco dado coletado,
+    // ao contrário do McDonald's (96%, perfil maduro).
+    progresso_pct: 15,
   },
   ifood:     IFOOD_DATA,
   ambev:     AMBEV_DATA,

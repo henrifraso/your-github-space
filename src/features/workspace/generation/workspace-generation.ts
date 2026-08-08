@@ -50,20 +50,24 @@ export const MODE_FIELDS: Record<MainKey, { label: string; key: string }[]> = {
     { label: 'Sinais a observar',                key: 'observar_agora' },
     { label: 'Impacto no negócio',               key: 'impacto_negocio' },
     { label: 'Hipótese principal',               key: 'hipotese' },
-    { label: 'Próximo passo recomendado',        key: 'proximo_passo' },
   ],
   executar: [
-    { label: 'Objetivo',              key: 'objetivo' },
-    { label: 'Diagnóstico',           key: 'diagnostico' },
-    { label: 'Primeiro passo',        key: 'primeiro_passo' },
-    { label: 'Plano inicial',         key: 'plano_inicial' },
-    { label: 'Quem executa',          key: 'quem_executa' },
-    { label: 'Prazo',                 key: 'prazo' },
-    { label: 'Risco antes de agir',   key: 'risco_antes' },
-    { label: 'Critério de sucesso',   key: 'criterio_sucesso' },
-    { label: 'Plano B',               key: 'plano_b' },
-    { label: 'Próximo passo',         key: 'proximo_passo' },
+    { label: 'O que está em jogo',        key: 'o_que_esta_em_jogo' },
+    { label: 'Diagnóstico',               key: 'diagnostico' },
+    { label: 'Por onde costuma começar',  key: 'por_onde_costuma_comecar' },
+    { label: 'Caminhos possíveis',        key: 'caminhos_possiveis' },
+    { label: 'Quem costuma ser afetado',  key: 'quem_costuma_ser_afetado' },
+    { label: 'Janela de tempo',           key: 'janela_de_tempo' },
+    { label: 'Risco antes de agir',       key: 'risco_antes' },
+    { label: 'Como saber se mudou',       key: 'como_saber_se_mudou' },
+    { label: 'Cenários possíveis',        key: 'cenarios_possiveis' },
+    { label: 'O que observar a seguir',   key: 'o_que_observar_a_seguir' },
   ],
+  // Mantido com os 10 campos — conteúdo educacional, não plano de execução.
+  // Regra: cada campo deve ENSINAR, nunca RECOMENDAR ação ao dono do negócio
+  // (sem prazo, responsável, meta ou promessa de resultado). Como medir /
+  // Como aplicar no caso atual / Próximo nível ficam sob essa mesma régua —
+  // se o texto gerado for prescritivo, é o texto que está errado, não o campo.
   aprender: [
     { label: 'Conceito principal',               key: 'conceito' },
     { label: 'Explicação simples',               key: 'explicacao_simples' },

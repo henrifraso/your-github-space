@@ -35,6 +35,12 @@ Falta: dark mode só por gesto escondido (segurar foto 3s); sino não abre nada;
 configuração salva mas não dá retorno; sem teste com usuário real.
 Status: bom em forma, com pontas soltas de interação.
 
+**Código morto achado 08/ago/2026** (mesma classe do sino — UI que existe mas
+nunca abre, ver `pendencias_modais_orfaos.md`): modal "Evolução" (App.tsx:2186,
+`setEvolucaoOpen(true)` nunca chamado), "Modal Item Grid" (App.tsx:2512,
+`setSelectedItem` só recebe `null`) e `openEmpresaInWorkspace` (App.tsx:654,
+zero call sites). Vale limpar quando mexer nessas áreas — não é bloqueante.
+
 ## 5. Confiabilidade
 Temos: fallbacks (login offline, dados de reserva).
 Falta: ZERO testes automatizados — maior buraco desta dimensão; sem monitoramento

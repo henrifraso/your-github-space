@@ -207,6 +207,13 @@ const SCORE_BY_SECTOR: Partial<Record<string, number>> = {
   'cerveja-imperio-distribuidora-01': 67,
 };
 
+const POSICAO_POR_SETOR: Partial<Record<string, string>> = {
+  nike:      'Maior rede do Vale do Paraíba',
+  nubank:    'Maior rede do Rio de Janeiro',
+  mcdonalds: 'Líder em unidades na região',
+  combrasil: 'Presente em SP, MG e Centro-Oeste',
+};
+
 function FeedSkeleton() {
   return (
     <>
@@ -513,6 +520,20 @@ function AuthenticatedApp() {
   const topScore = codifyScope !== null ? (SCORE_BY_SECTOR[activeSector] ?? 68) : null;
   const activeProduct = getProductBySector(activeSector);
   const feedKey = activeProduct?.feedKey ?? activeSector;
+  const riscosCount = useMemo(
+    () => (DEMO_FEED_CARDS[feedKey] ?? []).filter(c => c.urgencia === 'alta').length,
+    [feedKey]
+  );
+  const [evolucaoStatus, setEvolucaoStatus] = useState<'atualizando' | 'atualizado'>('atualizando');
+  useEffect(() => {
+    setEvolucaoStatus('atualizando');
+    const toUpdated = window.setTimeout(() => setEvolucaoStatus('atualizado'), 3000);
+    const cycle = window.setInterval(() => {
+      setEvolucaoStatus('atualizando');
+      window.setTimeout(() => setEvolucaoStatus('atualizado'), 3000);
+    }, 120000);
+    return () => { clearTimeout(toUpdated); clearInterval(cycle); };
+  }, []);
   const { cards: apiFeedCards, loading: codifyLoading } = useCodifyFeed({
     enabled: codifyScope !== null,
     organizationId: codifyScope?.organizationId,
@@ -1446,8 +1467,8 @@ function AuthenticatedApp() {
         style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
         <div className="w-full px-2 flex items-center justify-between gap-3"
           style={isElectron ? { paddingLeft: 20 } : undefined}>
-          <button onClick={openScoreInWorkspace}
-            className="inline-flex items-center px-3 py-1.5 bg-[#EFEFF1] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-200 hover:scale-105 active:scale-[0.97]"
+          <div
+            className="inline-flex items-center px-3 py-1.5 bg-[#EFEFF1] dark:bg-[#2f2f2f] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] rounded-xl transition-transform duration-200 hover:scale-105"
             style={isElectron ? { WebkitAppRegion: 'no-drag' } as React.CSSProperties : undefined}>
             <h1 className="text-sm sm:text-base font-semibold tracking-tight text-neutral-800 dark:text-neutral-100 flex items-center gap-1.5">
               {isPersonalizedRole(role) && activeSector === 'os1' ? roleConfig.bio.displayName : (SECTORS.find(s => s.id === activeSector)?.label ?? data.negocio.nome_fantasia)}
@@ -1458,7 +1479,7 @@ function AuthenticatedApp() {
                 </>
               )}
             </h1>
-          </button>
+          </div>
           {/* Botões — mobile/tablet apenas; desktop fica no topo do chat.
               Modo escuro foi movido pro header da Área de Trabalho. */}
           <div className="flex items-center lg:hidden"
@@ -1745,15 +1766,15 @@ function AuthenticatedApp() {
                   {[
                     { label: txt('stat_opor'),  value: gridItems.length,           description: `${gridItems.length} ${txt('stat_opor')} no seu negócio. Cada uma tem prioridade, prazo, esforço estimado e impacto potencial. Aqui você vê o pipeline completo, status e próximos passos.` },
                     { label: 'Oponentes',       value: data.concorrentes.length,   description: `${data.concorrentes.length} Oponentes monitorados na região. Lista detalhada com posicionamento, faixa de preço, força de marca, atividade recente e nível de ameaça.` },
-                    { label: txt('stat_nivel'), value: data.negocio.nivel,         description: `${txt('stat_nivel')} ${data.negocio.nivel}. Progressão do negócio — métricas que compõem o nível atual, o que falta pra subir, comparativo com pares e ações recomendadas pra evolução.` },
+                    { label: 'Riscos',          value: riscosCount,                description: `${riscosCount} riscos identificados no seu negócio. Cards de urgência alta do feed — ameaças e sinais que pedem atenção prioritária.` },
                   ].map(({ label, value, description }) => (
-                    <button key={String(label)} onClick={() => openStatInWorkspace(String(label), value, description)}
-                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl cursor-pointer transition-all duration-150 hover:scale-105 active:scale-[0.97]">
+                    <div key={String(label)}
+                      className="inline-flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] rounded-xl transition-all duration-150 hover:scale-105">
                       <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] text-sm sm:text-base">
                         <strong>{value}</strong>
                       </div>
                       {label}
-                    </button>
+                    </div>
                   ))}
                 </div>
                 <div className="flex items-center gap-2 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
@@ -1766,18 +1787,18 @@ function AuthenticatedApp() {
                     <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
                       <MapPin size={13} className="sm:hidden text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
                       <MapPin size={15} className="hidden sm:block text-[#f59e0b] flex-shrink-0" strokeWidth={2.2} />
-                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_posicao')} · {data.ranking_local ?? '—'}° de {data.concorrentes.length + 1} na região</span>
+                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_posicao')} · {POSICAO_POR_SETOR[activeSector] ?? `${data.ranking_local ?? '—'}° de ${data.concorrentes.length + 1} na região`}</span>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
                       <Zap size={13} className="sm:hidden text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
                       <Zap size={15} className="hidden sm:block text-[#16a34a] flex-shrink-0" strokeWidth={2.2} />
-                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {data.progresso_pct}% para o próximo nível</span>
+                      <span className="text-neutral-800 dark:text-neutral-200 truncate">{txt('bio_evolucao')} · {evolucaoStatus}</span>
                     </div>
                     {activeProduct && (
                       <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
                         <Layers size={13} className="sm:hidden text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
                         <Layers size={15} className="hidden sm:block text-[#3b82f6] flex-shrink-0" strokeWidth={2.2} />
-                        <span className="text-neutral-800 dark:text-neutral-200 truncate">Versão · {activeProduct.versionLabel}</span>
+                        <span className="text-neutral-800 dark:text-neutral-200 truncate">Diferencial · em observação</span>
                       </div>
                     )}
                   </div>
@@ -1818,7 +1839,7 @@ function AuthenticatedApp() {
                           label={c.label}
                           color={c.color}
                           delay={i * 0.08}
-                          onEmptyComplete={() => setTimeout(() => openStatInWorkspace(c.label, `${c.pct}%`, `Destaque "${c.label}" — ${c.pct}% de cobertura/saturação. Análise consolidada da área "${c.label}" do perfil ${data.negocio.nome_fantasia}. Inclui indicadores, distribuição por fonte e recomendações operacionais.`), 1000)}
+                          disableClick
                         />
                       ))}
                     </div>
@@ -1893,9 +1914,11 @@ function AuthenticatedApp() {
                         {roleConfig.showPendingBadge && card.isPending && (
                           <span className="absolute -top-0.5 right-0 px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full">Pendente</span>
                         )}
-                        <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: urgenciaColor(card.urgencia) }}>{card.tags[0]}</p>
-                        <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug pr-16">{card.titulo}</p>
-                        <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
+                        <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: urgenciaColor(card.urgencia) }}>{card.tags[0]}</p>
+                        <div className="min-h-[81.5px]">
+                          <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug pr-16 line-clamp-2">{card.titulo}</p>
+                          <p className="text-[11px] text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
+                        </div>
                         {roleConfig.showApproveButtons && card.isPending && (
                           <div className="flex gap-2 mt-3">
                             <button onClick={() => { setDismissedCards(s => new Set(s).add(card.id)); showToast('Aprovado', 'green'); }} className="flex-1 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white text-xs font-bold rounded-xl transition-all cursor-pointer">Aprovar</button>
@@ -1986,9 +2009,11 @@ function AuthenticatedApp() {
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.tags[0]}</p>
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{card.titulo}</p>
-                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{card.resumo}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.tags[0]}</p>
+                  <div className="min-h-[81.5px]">
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug line-clamp-2">{card.titulo}</p>
+                    <p className="text-[11px] text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
+                  </div>
                 </div>
               </div>
             </FeedCard>
@@ -2017,9 +2042,11 @@ function AuthenticatedApp() {
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.dominio}</p>
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{card.titulo}</p>
-                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: card.urgencia === 'alta' ? '#ef4444' : card.urgencia === 'media' ? '#f59e0b' : '#6b7280' }}>{card.tag ?? card.dominio}</p>
+                  <div className="min-h-[81.5px]">
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug line-clamp-2">{card.titulo}</p>
+                    <p className="text-[11px] text-neutral-500 mt-1 leading-relaxed line-clamp-2">{card.resumo}</p>
+                  </div>
                 </div>
               </div>
             </FeedCard>
@@ -2040,9 +2067,11 @@ function AuthenticatedApp() {
             <FeedCard locked>
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{color: item.color}}>{item.label}</p>
-                  <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug">{item.titulo}</p>
-                  <p className="text-xs text-neutral-500 mt-1 line-clamp-2">{item.detalhe}</p>
+                  <p className="text-[13px] font-bold uppercase tracking-wide mb-1" style={{color: item.color}}>{item.label}</p>
+                  <div className="min-h-[74.5px]">
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-100 leading-snug line-clamp-2">{item.titulo}</p>
+                    <p className="text-[11px] text-neutral-500 mt-1 line-clamp-2">{item.detalhe}</p>
+                  </div>
                 </div>
                 <ChevronRight size={16} className="text-neutral-300 dark:text-neutral-600 flex-shrink-0 mt-1" />
               </div>

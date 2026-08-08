@@ -19,7 +19,7 @@ import type { CompanyDiagnosticPayload } from '../../../core/types/workspace';
 
 // ─────────────────────────────────────────────────────────────────────
 // Bloco INITIAL — "Análise inicial"
-// 8 campos canônicos do resultado, exibidos quando presentes.
+// 5 campos de leitura do resultado, exibidos quando presentes.
 // ─────────────────────────────────────────────────────────────────────
 export function InitialBlockContent({ result }: { result: Record<string, unknown> }) {
   const fields: { label: string; key: string; emphasis?: boolean }[] = [
@@ -28,9 +28,6 @@ export function InitialBlockContent({ result }: { result: Record<string, unknown
     { label: 'Onde afeta',        key: 'onde_afeta' },
     { label: 'Risco',             key: 'risco' },
     { label: 'Oportunidade',      key: 'oportunidade' },
-    { label: 'Domínio',           key: 'dominio' },
-    { label: 'Contexto para análise', key: 'acao_recomendada', emphasis: true },
-    { label: 'Próximo passo',     key: 'proximo_passo' },
   ];
   return (
     <div className="space-y-2.5">
