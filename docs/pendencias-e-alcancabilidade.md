@@ -15,8 +15,8 @@ Perfis encontrados cruzando `src/data/demo-feed-cards.ts`,
 |---|---|---|---|---|---|---|---|
 | **mcdonalds** | 14 (10 reais + 4 legado a confirmar contagem pós-limpeza) | reais: 10/10 | reais: 10/10 | reais: 10/10 | preenchido | concorrentes/praticas/timeline limpos; **fornecedores não tocado** | Real |
 | **combrasil** | 10 | 10/10 | 10/10 | 7/10 (3 EXEMPLO, sem fonte por design) | preenchido | concorrentes/praticas/timeline/fornecedores limpos | Real |
-| **nubank (Pacheco)** | 16 (12 legado `pch-*` + 4 reais novos) | reais: 4/4 | reais: 4/4 | reais: 4/4 | preenchido | mockData limpo (concorrentes/praticas/timeline); fornecedores não tocado; **`pch-1..12` no feed ainda são fictícios, mesmo padrão do McDonald's antes da limpeza** | Real |
-| nike (Oscar) | 5 | 0/5 | 0/5 | 0/5 | preenchido | mockData limpo, mas fornecedores ainda tem "186 lojas"; card `osc-4` no feed ainda cita a bandeira "Carioca" (confirmada inexistente) | Real |
+| **nubank (Pacheco)** | 4 (só reais — `pch-1..12` fictícios removidos do feed em 09/ago/2026) | reais: 4/4 | reais: 4/4 | reais: 4/4 | preenchido | mockData limpo (concorrentes/praticas/timeline); fornecedores não tocado | Real |
+| nike (Oscar) | 0 (osc-1/2/3/4/5 removidos em 09/ago/2026 — nenhum passou nas 7 checagens da régua: regra do sujeito violada, eixo de território, número/prazo sem fonte, e dois com dado interno inventado — osc-5 NPS/conversão, osc-3 plano de expansão via Diadora SpA não verificado. Perfil fica sem card demo até o motor trazer dado real) | — | — | — | preenchido | mockData limpo, mas fornecedores ainda tem "186 lojas" | Real |
 | pacheco-loja-01 | 12 | 0/12 | 0/12 | 0/12 | null (proposital) | array de concorrentes PRÓPRIO, nunca tocado — nota numérica, endereço exato, notas_digitais fabricadas | Real |
 | oscar-piloto-01 | 12 | 0/12 | 0/12 | 0/12 | null (proposital) | herda de NIKE_DATA (limpo) via spread | Real |
 | cerveja-imperio | 12 | 0/12 | 0/12 | 0/12 | null | não limpo, mas autodeclarado "Sinal demonstrativo · Base demo OS¹" em todo card | Fictícia |
