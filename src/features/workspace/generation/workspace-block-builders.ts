@@ -415,6 +415,82 @@ const DENSE_TEST_CTX: Record<string, DenseCtx> = {
     risco: `O risco de não acompanhar esse tipo de sinal é descobrir o novo produto do concorrente só quando a campanha de lançamento já está no ar — nesse ponto, o que te distinguia já não é mais verdade, mesmo que você reaja rápido a partir daí.\n\nHá também o risco de tratar catálogo digital como informação neutra, sem conectar ao que ele revela sobre a direção estratégica do concorrente — um SKU novo isolado pode não significar nada; um padrão de SKUs novos na mesma direção costuma significar bastante.`,
     oportunidade: `A janela entre a mudança de catálogo e o lançamento oficial é a oportunidade em si: dá tempo de decidir se vale correr na frente com algo parecido, reforçar o que já te distingue nesse mesmo ponto de decisão do cliente, ou ignorar por não ser relevante — mas a decisão é tomada com antecedência, não em cima da hora.\n\nEsse tipo de leitura também ensina o padrão de lançamento do concorrente ao longo do tempo — quantas semanas ele costuma levar entre catálogo e campanha — o que tende a tornar o próximo lançamento dele ainda mais previsível.`,
   },
+  // McDonald's — Lote 1 (ago/2026), Google News RSS: Burger King, KFC,
+  // Giraffas, Habib's, Keeta. Ver docs/MODELO_MOTOR_OS1.md, "Método de
+  // geração em lote". Feed card correspondente em demo-feed-cards.ts.
+  'demo-mcdonalds-burgerking': {
+    o_que_aconteceu: `Depois de 20 anos de parceria, o Burger King deixou a Pepsi e passou a servir Coca-Cola no Brasil (Valor Econômico, Meio&Mensagem e outros, 14/mai/2026). A cobertura não especifica se a troca já vale pra todas as unidades ou é gradual.`,
+    por_que_importa: `Ter Coca-Cola no balcão sempre foi um dos pontos de comparação mais simples entre redes de fast food — é o tipo de detalhe que o cliente nota sem pensar. O que te distinguia do Burger King nesse ponto específico deixou de existir: os dois agora servem a mesma marca.`,
+    onde_afeta: `Afeta o momento exato da comparação de cardápio — não o produto principal (hambúrguer), mas o combo como um todo, onde a bebida historicamente pesava a favor de quem tinha Coca-Cola.`,
+    risco: `O risco não é perder cliente por causa da bebida isoladamente — é presumir que esse pequeno diferencial ainda existe quando ele já não existe mais, e continuar comunicando como se fosse exclusivo.`,
+    oportunidade: `Como a mudança é recente, o Burger King ainda não teve tempo de comunicar isso como vantagem própria — existe uma janela pra reforçar outros pontos do combo (qualidade, velocidade, McCafé) antes que ele capitalize a paridade recém-criada.`,
+  },
+  'demo-mcdonalds-kfc': {
+    o_que_aconteceu: `A IMC vendeu sua participação total no KFC Brasil pra Kentucky Foods Chile por R$137 milhões (VEJA, 30/dez/2025). Dias antes, o KFC já havia anunciado plano de abrir até 60 lojas em 2026 com foco em drive-thru (Estadão, 22/dez/2025), com meta de chegar a 500 lojas até 2030 (dcomercio.com.br, 26/dez/2025).`,
+    por_que_importa: `Drive-thru é um dos motivos clássicos pelos quais o cliente te escolhe em vez de uma opção sem esse formato. Um concorrente trocando de dono às vésperas de expandir justamente nesse formato muda o ritmo em que essa vantagem específica pode ser copiada.`,
+    onde_afeta: `Afeta a comparação direta em qualquer praça onde McDonald's e KFC disputam o mesmo fluxo de carro — hoje uma vantagem menos discutida, porque o KFC historicamente não competia forte nesse formato no Brasil.`,
+    risco: `O risco é tratar essa venda como ruído societário e não notar que ela veio empacotada com um plano de expansão específico — dono novo com capital costuma acelerar o que o dono anterior projetava devagar.`,
+    oportunidade: `Enquanto a nova gestão ainda está estruturando as primeiras unidades, existe uma janela pra reforçar o que já sustenta a preferência por drive-thru hoje — tempo de espera, ticket, fila — antes que o KFC tenha escala nesse formato.`,
+  },
+  'demo-mcdonalds-giraffas': {
+    o_que_aconteceu: `O Giraffas projeta crescimento de 8,5% pra 2026 (DComercio, 7/mar/2025) e mira R$1,1 bilhão de faturamento no ano, apostando em "picanha no prato-feito" como carro-chefe (NeoFeed, 29/mai/2026).`,
+    por_que_importa: `O prato-feito não compete pelo mesmo motivo de escolha que o hambúrguer — é uma ocasião de consumo diferente (refeição "de verdade" x lanche rápido). Esse motivo de escolha nunca foi seu nem do Giraffas historicamente, mas agora ganhou investimento e meta pública por trás.`,
+    onde_afeta: `Afeta o cliente que hoje evita hambúrguer no almoço por achar que "não é refeição de verdade" — um público que McDonald's não disputa ativamente hoje, mas que o Giraffas está tentando consolidar como hábito.`,
+    risco: `O risco é tratar isso como fora da categoria e por isso irrelevante — ocasião de consumo nova raramente aparece grande de início, ela cresce enquanto ninguém do lado do hambúrguer está prestando atenção.`,
+    oportunidade: `Como esse motivo de escolha ainda não tem dono consolidado, existe espaço pra decidir conscientemente se vale disputar esse público (ex.: opções de refeição mais completa) ou reforçar o que já distingue o hambúrguer como escolha própria, sem tentar competir na frente do concorrente.`,
+  },
+  'demo-mcdonalds-habibs': {
+    o_que_aconteceu: `O Habib's investe R$6 milhões pra dobrar o número de lojas compartilhadas com a marca Ragazzo (Pequenas Empresas & Grandes Negócios, 7/jan/2025). O modelo reduz o custo de abrir cada ponto novo, já que duas marcas dividem a mesma estrutura.`,
+    por_que_importa: `O que te distingue por ter loja própria, com formato e experiência mais robustos, pode contar menos como vantagem se o concorrente consegue multiplicar pontos de venda a um custo bem menor por unidade — é uma disputa de eficiência, não de qualidade.`,
+    onde_afeta: `Afeta praças menores ou de segunda linha, onde o custo de abrir uma loja no formato tradicional é o que hoje freia a expansão de qualquer rede — inclusive a sua.`,
+    risco: `O risco é medir esse concorrente pelo número de lojas "de verdade" e não notar o modelo híbrido crescendo em paralelo, justamente por parecer pequeno demais pra entrar no radar de comparação direta.`,
+    oportunidade: `Enquanto o modelo compartilhado ainda está em expansão, dá pra observar quais praças ele está ocupando primeiro — geralmente aponta pra onde a demanda de fast food já existe mas ainda não tem oferta suficiente.`,
+  },
+  'demo-mcdonalds-keeta': {
+    o_que_aconteceu: `O Keeta, app de delivery chinês, chegou a São Paulo em 26/nov/2025 (O Globo, Mobile Time, Folha, UOL) com cerca de 27 mil restaurantes parceiros já no lançamento, R$1 bilhão investido na operação e cupons de até R$200 pra novos usuários (TecMundo).`,
+    por_que_importa: `Sua vantagem de preço no delivery — a diferença entre o que o cliente paga pelo mesmo pedido em canais distintos — fica mais difícil de sustentar quando um concorrente entra subsidiando pesado desde o primeiro dia, ainda que o subsídio não seja permanente.`,
+    onde_afeta: `Afeta diretamente o pedido feito por delivery, onde cupom e taxa pesam mais na decisão do que marca — é o ponto de venda onde o cliente compara preço final, não experiência de loja.`,
+    risco: `O risco é ler isso só como "mais um app" e não perceber que subsídio agressivo de entrada costuma alterar hábito de comparação de preço do cliente enquanto dura, mesmo que depois se normalize.`,
+    oportunidade: `Enquanto o Keeta ainda está em fase de aquisição de usuário via cupom, a disputa é dele contra o iFood, não necessariamente contra sua marca — abre uma janela pra observar como a guerra entre apps se resolve antes de decidir se vale ajustar presença em algum canal específico.`,
+  },
+  // McDonald's — Lote 2 (ago/2026): Subway, Madero, Burger King (expansão),
+  // Bob's, 99Food. Substitui o card de Popeyes (disputa entre terceiros, sem
+  // McDonald's no meio) por um segundo ângulo do Burger King.
+  'demo-mcdonalds-subway': {
+    o_que_aconteceu: `Depois da recuperação judicial de 2024, o Subway foi comprado pela Zamp — mesma controladora do Burger King no Brasil — e já mostra vendas 30% maiores (Exame, 14/ago/2025), além de reconstruir relação com franqueados um ano após a aquisição (PEGN, 24/out/2025).`,
+    por_que_importa: `A distância que se abriu com o Subway em crise não era permanente — era efeito de um momento financeiro específico. Um concorrente recuperado, sob dono com capital e experiência em fast food, tende a voltar a disputar o mesmo motivo de escolha que ficou mais fácil de vencer enquanto ele estava fragilizado.`,
+    onde_afeta: `Afeta o público que busca opção percebida como mais saudável ou mais rápida pro almoço — motivo de escolha que o Subway disputava com força antes da crise e volta a disputar agora.`,
+    risco: `O risco é continuar lendo o Subway pela imagem de crise de 2024, quando o dado mais recente já mostra recuperação de vendas e reaproximação com quem opera as lojas — realidade desatualizada custa reação atrasada.`,
+    oportunidade: `Enquanto a recuperação ainda está em curso, existe uma janela pra observar se a Zamp está injetando cruzamento (marketing, insumo, real estate) entre BK e Subway — dois ativos da mesma controladora tendem a aprender rápido um com o outro.`,
+  },
+  'demo-mcdonalds-madero': {
+    o_que_aconteceu: `O Madero lucrou R$103 milhões em 2025 sobre receita bruta de R$2,3 bilhões, encerrando o ano com 355 restaurantes (InfoMoney, 29/jan/2026; Giro News, 30/jan/2026) — e passou a testar dark kitchens e operação de empanada focada em delivery, formato de ticket mais baixo do que o hambúrguer de balcão da marca.`,
+    por_que_importa: `O Madero sempre disputou um motivo de escolha diferente do seu — ticket alto, experiência de restaurante. Um movimento de teste em formato de baixo ticket via delivery é um concorrente premium entrando, mesmo que discretamente, num motivo de escolha que costumava ser mais seu do que dele.`,
+    onde_afeta: `Afeta o pedido de delivery de ticket médio-baixo — não o hambúrguer artesanal em si, mas a ocasião de "comida rápida entregue em casa", onde o Madero historicamente não competia.`,
+    risco: `O risco é ignorar esse teste por parecer pequeno e fora do core do Madero — movimento que nasce como piloto discreto tende a ser exatamente o tipo de entrada que passa despercebida até já ter escala.`,
+    oportunidade: `Como ainda é fase de teste, dá pra observar se o formato de baixo ticket do Madero repete a qualidade premium da marca ou se é uma versão simplificada — a resposta tende a dizer se vale mesmo como ameaça ao seu ticket médio de delivery.`,
+  },
+  'demo-mcdonalds-burgerking-expansao': {
+    o_que_aconteceu: `O Burger King abriu 19 novas lojas em janeiro de 2025, sinalizando expansão por todo o Brasil (Promoview, 15/jan/2025), e fechou 2025 acelerando ainda mais — 25 inaugurações só em dezembro (Portal Mie, 8/dez/2025), com plano de continuar em 2026.`,
+    por_que_importa: `Ser a opção mais fácil de encontrar é um motivo de escolha tão relevante quanto sabor ou preço, principalmente pra quem decide por fast food no impulso, sem planejamento. Um concorrente acelerando abertura de loja nesse ritmo está disputando ativamente esse motivo específico, loja por loja.`,
+    onde_afeta: `Afeta o cliente que escolhe fast food por estar mais perto no momento da fome — decisão de conveniência, não de preferência de marca. Cada loja nova do concorrente nessa categoria de decisão é uma chance a menos de ser a opção mais próxima.`,
+    risco: `O risco é medir esse concorrente pelo total de lojas que ele já tem hoje, sem acompanhar o ritmo de abertura — 25 lojas num mês só é sinal de aceleração, não de manutenção do passo normal, e ritmo acelerado tende a continuar até encontrar algum limite.`,
+    oportunidade: `Enquanto o ritmo de abertura do concorrente ainda está concentrado em praças específicas, existe uma janela pra mapear onde ele está mirando primeiro — histórico de expansão costuma seguir um padrão (shopping, avenida principal, bairro novo) que se repete loja após loja.`,
+  },
+  'demo-mcdonalds-bobs': {
+    o_que_aconteceu: `O Bob's inaugurou, após reforma de R$800 mil, uma loja no Rio de Janeiro com robô que prepara milkshakes (InfoMoney, 19/jul/2025) — piloto de automação numa única unidade.`,
+    por_que_importa: `Automação de preparo costuma prometer duas coisas ao mesmo tempo: consistência de produto e redução de custo de mão de obra — dois pontos que, se comprovados nesse piloto, tendem a se espalhar rápido pra outras unidades da rede, inclusive fora do Rio.`,
+    onde_afeta: `Afeta diretamente a categoria de bebidas/sobremesas do cardápio, onde consistência de preparo (mesmo sabor, mesma textura, toda vez) costuma pesar na percepção de qualidade do cliente.`,
+    risco: `O risco é tratar isso como curiosidade de uma loja só e não como piloto — testes de automação em fast food raramente ficam restritos à unidade onde nasceram quando comprovam ganho de custo.`,
+    oportunidade: `Como é só uma unidade até agora, existe tempo pra acompanhar se o piloto expande antes de qualquer decisão precisar ser tomada — automação copiada tarde tende a custar mais do que automação testada a tempo.`,
+  },
+  'demo-mcdonalds-99food': {
+    o_que_aconteceu: `O 99Food voltou a operar em São Paulo com R$500 milhões investidos (Mercado&Consumo, 12/ago/2025) e zerou taxas de restaurantes por 2 anos "contra o monopólio do delivery" (UOL Economia, 29/abr/2025) — já expandindo pra Recife e Belo Horizonte com mais R$100 milhões cada (Canaltech, 28/nov/2025; 14/nov/2025).`,
+    por_que_importa: `Comissão de delivery é custo direto sobre cada pedido — não é benefício pro cliente, é estrutura de custo sua. Um concorrente de peso zerando essa taxa por 2 anos muda o que "custa competir" nesse canal, mesmo sem mexer em preço nenhum do seu cardápio.`,
+    onde_afeta: `Afeta diretamente a margem de cada pedido feito por delivery — o efeito não aparece no preço que o cliente vê, aparece no que sobra depois da comissão — e também pressiona a decisão de qual app priorizar, já que um canal com comissão zero tende a virar mais atrativo pra operar do que os termos negociados hoje com iFood e outros.`,
+    risco: `O risco é comparar apps só pelo volume de pedido que trazem hoje, sem notar que "comissão zero por 2 anos" tem prazo — quando o prazo acabar, o app que capturou volume nesse período tende a negociar de posição mais forte, não mais fraca.`,
+    oportunidade: `Enquanto durar a comissão zero, existe uma janela real pra operar nesse canal com margem melhor do que a negociada hoje em outros apps — vale considerar se faz sentido priorizar volume ali enquanto a condição estiver ativa.`,
+  },
 };
 
 function buildDenseTestBlock(card: IntelligenceCard, mode: MainKey, difficulty: Dificuldade): WorkspaceBlock {

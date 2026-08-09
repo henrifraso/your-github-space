@@ -12,6 +12,7 @@
 
 import { Sparkles, X } from 'lucide-react';
 import type { MapAnalysisResult } from './useMapAnalysis';
+import { formatNota } from './map-ui-utils';
 
 // ── Toast de feedback ───────────────────────────────────────────────
 export function MapActionToast({ message }: { message: string }) {
@@ -45,7 +46,7 @@ export function MapAnalysisPanel({ analysis, onClose }: MapAnalysisPanelProps) {
         </div>
         <div className="bg-white/5 rounded-xl p-2.5">
           <p className="text-white/40 text-[10px]">Nota média</p>
-          <p className="text-white font-bold text-lg">★ {analysis.avg.toFixed(1)}</p>
+          <p className="text-white font-bold text-lg">{analysis.avg === null ? '—' : `★ ${analysis.avg.toFixed(1)}`}</p>
         </div>
       </div>
 
@@ -64,6 +65,10 @@ export function MapAnalysisPanel({ analysis, onClose }: MapAnalysisPanelProps) {
         </div>
       </div>
 
+      {analysis.semAvaliacao > 0 && (
+        <p className="text-white/30 text-[9px] text-center -mt-1">{analysis.semAvaliacao} sem avaliação confirmada</p>
+      )}
+
       <div className="flex gap-2">
         <div className="flex-1 bg-white/5 rounded-xl p-2 text-center">
           <p className="text-white font-bold text-sm">{analysis.diretos}</p>
@@ -75,16 +80,20 @@ export function MapAnalysisPanel({ analysis, onClose }: MapAnalysisPanelProps) {
         </div>
       </div>
 
-      <div className="bg-white/5 rounded-xl p-2.5">
-        <p className="text-white/40 text-[10px] mb-0.5">Mais forte</p>
-        <p className="text-white text-xs font-medium">{analysis.strongest.nome}</p>
-        <p className="text-white/40 text-[10px]">★ {Number(analysis.strongest.nota_google).toFixed(1)}</p>
-      </div>
-      <div className="bg-white/5 rounded-xl p-2.5">
-        <p className="text-white/40 text-[10px] mb-0.5">Mais fraco</p>
-        <p className="text-white text-xs font-medium">{analysis.weakest.nome}</p>
-        <p className="text-white/40 text-[10px]">★ {Number(analysis.weakest.nota_google).toFixed(1)}</p>
-      </div>
+      {analysis.strongest && (
+        <div className="bg-white/5 rounded-xl p-2.5">
+          <p className="text-white/40 text-[10px] mb-0.5">Mais forte</p>
+          <p className="text-white text-xs font-medium">{analysis.strongest.nome}</p>
+          <p className="text-white/40 text-[10px]">★ {formatNota(analysis.strongest.nota_google)}</p>
+        </div>
+      )}
+      {analysis.weakest && (
+        <div className="bg-white/5 rounded-xl p-2.5">
+          <p className="text-white/40 text-[10px] mb-0.5">Mais fraco</p>
+          <p className="text-white text-xs font-medium">{analysis.weakest.nome}</p>
+          <p className="text-white/40 text-[10px]">★ {formatNota(analysis.weakest.nota_google)}</p>
+        </div>
+      )}
     </div>
   );
 }

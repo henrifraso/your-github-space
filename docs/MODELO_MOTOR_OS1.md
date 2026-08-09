@@ -312,6 +312,46 @@ aconteça ANTES do humano ler, não depois.
 marcação desnecessária é mais rápido do que achar um erro depois de 250
 textos escritos.
 
+### Decisão de arquitetura — metadados de medição (09/ago/2026)
+
+**Contexto:** o objetivo de médio prazo é tornar o diferencial acompanhável —
+poder dizer "este atributo te distinguia e hoje 8 de 10 concorrentes já
+oferecem". Isso exige uma tabela histórica que não existe hoje. A tabela não
+precisa ser construída agora, mas o dado precisa ser guardado desde já — senão,
+daqui a alguns meses, existem centenas de textos e nenhuma base pra medir.
+
+**O que registrar por card, além do texto:**
+- **Atributo tocado** — qual característica do negócio está em jogo (preço,
+  conveniência, distribuição, qualidade do produto, marca, restrição
+  alimentar, prazo, atendimento, etc.)
+- **Concorrente(s) envolvido(s)** — nome, quando houver (vazio se for fato de
+  mercado sem concorrente nomeado, como um card de safra/exportação)
+- **Movimento** — o concorrente passou a oferecer, ampliou, saiu, ou é fato de
+  mercado sem concorrente nomeado
+- **Eixo** — posição, ponto cego ou espaço vazio (a mesma classificação já
+  usada pra escrever o título)
+- **Data da fonte** — a data que ancora o movimento descrito no título, não
+  necessariamente todas as datas citadas no `detail` (ex.: card da Kicaldo
+  cita a compra em leilão de 2025 como antecedente, mas a data que ancora o
+  título é a entrada no mercado, 2026 — é essa que entra aqui)
+
+**Onde guardar:** arquivo novo, `src/data/card-metadata.ts` — um registro
+`Record<string, CardMetadata>` indexado pelo `id` do card (o mesmo id usado em
+`DENSE_TEST_CTX`), **separado de `IntelligenceCard`/`mkR()`**. Não vira campo
+novo no tipo do card porque `IntelligenceCard` é o shape de exibição, usado
+também por cards reais do backend que não passam por esse processo — colocar
+metadado editorial ali misturaria o que aparece na tela com o que a gente
+rastreia pra medir depois. Um arquivo à parte, no formato `id → atributos`, já
+nasce parecido com uma linha de tabela — fica mais fácil migrar pra uma tabela
+de verdade no backend (`omni`) quando a medição virar prioridade.
+
+### Processo por lote — atualizado
+
+Passo 2 do processo (checagem) passa a incluir, pra cada card do lote, o
+preenchimento dos 5 metadados acima — junto com a checagem de vocabulário, não
+depois dela. Um card só está pronto pra mostrar no lote quando os 5 campos
+densos passaram na checagem **e** os 5 metadados foram preenchidos.
+
 ---
 
 ## Arquitetura do motor

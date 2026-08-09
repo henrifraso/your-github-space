@@ -1,17 +1,11 @@
 import { MarkerF } from '@react-google-maps/api';
 import type { Competitor } from '../../types';
+import { ratingColor } from '../../features/map/map-ui-utils';
 
 interface Props {
   competitor: Competitor;
   position: google.maps.LatLngLiteral;
   onClick: (c: Competitor) => void;
-}
-
-function ratingColor(nota: number | string): string {
-  const n = Number(nota);
-  if (n >= 4.3) return '#22c55e';
-  if (n >= 4.0) return '#f59e0b';
-  return '#ef4444';
 }
 
 export function CompetitorMarker({ competitor, position, onClick }: Props) {

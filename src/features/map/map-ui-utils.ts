@@ -115,6 +115,27 @@ export const COORDS: google.maps.LatLngLiteral[] = [
   { lat: -27.5954, lng: -48.5480 }, // [27] Florianópolis — ~700km S
 ];
 
+// ── Nota do concorrente: número real ou '—' (sem avaliação verificada) ──
+// Fonte única de conversão — evita "NaN" na tela quando nota_google não é
+// um número confirmado (ver docs/MODELO_MOTOR_OS1.md, limpeza ago/2026).
+export function parseNota(nota: number | string | undefined | null): number | null {
+  const n = Number(nota);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function formatNota(nota: number | string | undefined | null): string {
+  const n = parseNota(nota);
+  return n === null ? '—' : n.toFixed(1);
+}
+
+export function ratingColor(nota: number | string | undefined | null): string {
+  const n = parseNota(nota);
+  if (n === null) return '#9ca3af'; // sem avaliação — cinza neutro, não vermelho
+  if (n >= 4.3) return '#22c55e';
+  if (n >= 4.0) return '#f59e0b';
+  return '#ef4444';
+}
+
 // ── Geometria: distância em metros entre dois pontos ────────────────
 // Mesma fórmula de Haversine que o componente original usava.
 export function haversineMeters(a: google.maps.LatLngLiteral, b: google.maps.LatLngLiteral): number {

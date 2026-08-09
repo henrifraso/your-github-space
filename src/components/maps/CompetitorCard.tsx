@@ -2,18 +2,12 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Competitor } from '../../types';
+import { ratingColor, formatNota } from '../../features/map/map-ui-utils';
 
 interface Props {
   competitor: Competitor;
   onClose: () => void;
   onDeepAnalysis?: (c: Competitor) => void;
-}
-
-function ratingColor(n: number | string) {
-  const v = Number(n);
-  if (v >= 4.3) return '#22c55e';
-  if (v >= 4.0) return '#f59e0b';
-  return '#ef4444';
 }
 
 export function CompetitorCard({ competitor: c, onClose, onDeepAnalysis }: Props) {
@@ -40,7 +34,7 @@ export function CompetitorCard({ competitor: c, onClose, onDeepAnalysis }: Props
       <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
         {/* Nota geral */}
         <div className="flex items-center gap-2">
-          <span className="text-lg font-bold" style={{ color }}>★ {Number(c.nota_google).toFixed(1)}</span>
+          <span className="text-lg font-bold" style={{ color }}>★ {formatNota(c.nota_google)}</span>
           <span className="text-white/40 text-xs">{c.faixa_preco}</span>
         </div>
 

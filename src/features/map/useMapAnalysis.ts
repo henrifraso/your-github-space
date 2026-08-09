@@ -10,7 +10,7 @@
 
 import { useMemo } from 'react';
 import type { Competitor } from '../../types';
-import { COORDS, haversineMeters } from './map-ui-utils';
+import { COORDS, haversineMeters, parseNota } from './map-ui-utils';
 
 export interface CompetitorWithPos {
   c: Competitor;
@@ -24,12 +24,15 @@ export interface CompetitorWithDistance {
 
 export interface MapAnalysisResult {
   total: number;
-  avg: number;
-  strongest: Competitor;
-  weakest: Competitor;
+  avg: number | null;
+  strongest: Competitor | null;
+  weakest: Competitor | null;
   green: number;
   orange: number;
   red: number;
+  // Concorrentes sem nota_google confirmada — não entram em avg/green/orange/red
+  // nem em strongest/weakest, pra não misturar dado real com "sem avaliação".
+  semAvaliacao: number;
   diretos: number;
   indiretos: number;
 }
@@ -61,15 +64,23 @@ export function useMapAnalysis(
 
   const analysis = useMemo<MapAnalysisResult | null>(() => {
     if (!filtered.length) return null;
-    const ratings = filtered.map(({ c }) => Number(c.nota_google));
-    const avg = ratings.reduce((s, r) => s + r, 0) / ratings.length;
-    const sorted = [...filtered].sort((a, b) => Number(b.c.nota_google) - Number(a.c.nota_google));
-    const green    = filtered.filter(({ c }) => Number(c.nota_google) >= 4.3).length;
-    const orange   = filtered.filter(({ c }) => Number(c.nota_google) >= 4.0 && Number(c.nota_google) < 4.3).length;
-    const red      = filtered.filter(({ c }) => Number(c.nota_google) < 4.0).length;
+    const rated = filtered
+      .map(({ c }) => ({ c, nota: parseNota(c.nota_google) }))
+      .filter((x): x is { c: Competitor; nota: number } => x.nota !== null);
+    const avg = rated.length ? rated.reduce((s, r) => s + r.nota, 0) / rated.length : null;
+    const sorted = [...rated].sort((a, b) => b.nota - a.nota);
+    const green    = rated.filter(r => r.nota >= 4.3).length;
+    const orange   = rated.filter(r => r.nota >= 4.0 && r.nota < 4.3).length;
+    const red      = rated.filter(r => r.nota < 4.0).length;
+    const semAvaliacao = filtered.length - rated.length;
     const diretos  = filtered.filter(({ c }) => (c.categoria ?? 'direto') === 'direto').length;
     const indiretos = filtered.filter(({ c }) => c.categoria === 'indireto').length;
-    return { total: filtered.length, avg, strongest: sorted[0].c, weakest: sorted[sorted.length - 1].c, green, orange, red, diretos, indiretos };
+    return {
+      total: filtered.length, avg,
+      strongest: sorted[0]?.c ?? null,
+      weakest: sorted.length ? sorted[sorted.length - 1].c : null,
+      green, orange, red, semAvaliacao, diretos, indiretos,
+    };
   }, [filtered]);
 
   // Pré-cálculo: todos os concorrentes com distância (usado pelo Comparar regiões).

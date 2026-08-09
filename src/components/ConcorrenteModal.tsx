@@ -2,14 +2,18 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { MapPin, TrendingUp, Zap, CheckCircle, XCircle, Clock } from 'lucide-react';
 import type { Competitor } from '../types';
+import { parseNota } from '../features/map/map-ui-utils';
 
-function notaPublica(c: Competitor): number {
-  if (!c.notas_digitais || c.notas_digitais.length === 0) return Number(c.nota_google) || 0;
-  const soma = c.notas_digitais.reduce((s, n) => s + n.nota, 0);
-  return soma / c.notas_digitais.length;
+function notaPublica(c: Competitor): number | null {
+  if (c.notas_digitais && c.notas_digitais.length > 0) {
+    const soma = c.notas_digitais.reduce((s, n) => s + n.nota, 0);
+    return soma / c.notas_digitais.length;
+  }
+  return parseNota(c.nota_google);
 }
 
-function notaColor(n: number) {
+function notaColor(n: number | null) {
+  if (n === null) return { bg: 'rgba(148,163,184,0.10)', border: 'rgba(148,163,184,0.25)', text: '#64748b' };
   if (n >= 4.3) return { bg: 'rgba(34,197,94,0.10)', border: 'rgba(34,197,94,0.25)', text: '#16a34a' };
   if (n >= 4.0) return { bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.25)', text: '#d97706' };
   return { bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.25)', text: '#dc2626' };
@@ -67,12 +71,16 @@ export function ConcorrenteModal({ concorrente, onClose }: { concorrente: Compet
         <div className="mx-6 mb-4 rounded-2xl px-5 py-4 border" style={{ background: bg, borderColor: border }}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold uppercase tracking-wider" style={{ color: text }}>Nota Pública Digital</span>
-            <span className="text-xs text-neutral-500">{concorrente.notas_digitais?.length ?? 1} plataforma{(concorrente.notas_digitais?.length ?? 1) > 1 ? 's' : ''}</span>
+            <span className="text-xs text-neutral-500">
+              {concorrente.notas_digitais && concorrente.notas_digitais.length > 0
+                ? `${concorrente.notas_digitais.length} plataforma${concorrente.notas_digitais.length > 1 ? 's' : ''}`
+                : notaMedia === null ? 'sem avaliação' : '1 plataforma'}
+            </span>
           </div>
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-4xl font-bold leading-none" style={{ color: text }}>{notaMedia.toFixed(1)}</span>
-            <span className="text-neutral-500 text-sm mb-1">/ 5.0</span>
-            <span className="text-[#f59e0b] text-base tracking-wide mb-0.5">{'★'.repeat(Math.round(notaMedia))}</span>
+            <span className="text-4xl font-bold leading-none" style={{ color: text }}>{notaMedia === null ? '—' : notaMedia.toFixed(1)}</span>
+            {notaMedia !== null && <span className="text-neutral-500 text-sm mb-1">/ 5.0</span>}
+            {notaMedia !== null && <span className="text-[#f59e0b] text-base tracking-wide mb-0.5">{'★'.repeat(Math.round(notaMedia))}</span>}
           </div>
           {concorrente.notas_digitais && concorrente.notas_digitais.length > 0 && (
             <div className="space-y-1.5">

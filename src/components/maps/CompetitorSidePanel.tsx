@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { Competitor } from '../../types';
+import { formatNota } from '../../features/map/map-ui-utils';
 
 interface Props {
   competitor: Competitor;
@@ -67,7 +68,7 @@ export function CompetitorSidePanel({ competitor: c, onClose }: Props) {
           <div className={`${CARD} px-3 py-2.5`}>
             <p className={`${LABEL} mb-1.5`}>Google</p>
             <p className="text-neutral-800 dark:text-neutral-100 text-2xl font-bold tabular-nums leading-none">
-              {Number(c.nota_google).toFixed(1)}
+              {formatNota(c.nota_google)}
             </p>
             <p className="text-neutral-400 dark:text-neutral-500 text-[9px] mt-1">★ avaliação</p>
           </div>
