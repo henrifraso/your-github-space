@@ -1,11 +1,5 @@
 // Cards demonstrativos por empresa. Cada demo tem 5 cards realistas no domínio
 // próprio. Sintéticos (_synthetic:true) — fluem pelo workspace local sem chamar backend.
-//
-// PENDÊNCIA CONHECIDA: vários cards (ex.: mcdonalds 'rad-1'/'rad-2') têm números
-// específicos sem fonte real nos campos por_que_importa/onde_afeta (ex.: "1.400
-// PDVs num raio de 5km", "3,1%/mês com 2ª derivada positiva") — placeholder de
-// demo, viola a regra de "sem número inventado" da Área de Trabalho. Resolver
-// quando os cards forem regenerados com fonte real, não caso a caso agora.
 import type { IntelligenceCard } from '../components/WorkspacePanel';
 
 type U = 'alta' | 'media' | 'baixa';
@@ -30,76 +24,6 @@ function mk(id: string, titulo: string, resumo: string, dominio: string, urgenci
 
 export const DEMO_FEED_CARDS: Record<string, IntelligenceCard[]> = {
   mcdonalds: [
-    mkR('rad-1',
-      'Categoria "lanche premium" deve crescer +14% na sua praça em 60 dias (faixa +9% a +19%)',
-      'Não é só vender mais — é a categoria de maior margem subindo enquanto a de entrada fica estável. O ganho está no mix, não no volume.',
-      'demanda', 'media', 'oportunidade',
-      'Crescimento concentrado em itens de alta margem significa que o mesmo número de clientes pode elevar o faturamento sem aumentar fluxo. Quem se posiciona antes da curva captura a margem; quem reage depois só acompanha.',
-      'Painel de transação de 1.400 PDVs de food service num raio de 5km; categoria acelerando 3,1%/mês com 2ª derivada positiva (inflexão detectada, não ruído).',
-      'Dar destaque ao premium no cardápio e no app antes da curva pegar; revisar margem da linha premium ainda esta semana.'),
-    mkR('rad-2',
-      'Quinta 11/jul, 18h–21h: delivery deve subir +31% e salão cair -19%',
-      'A demanda não some, ela troca de porta. Quem lê isso como "dia ruim" perde; quem lê como "dia de delivery" ganha o mesmo cliente em outro canal.',
-      'demanda', 'alta', 'alerta',
-      'A receita total da noite pode se manter ou crescer — desde que a operação esteja pronta no canal certo. O risco não é vender menos, é estar preparado para o salão enquanto a demanda vai pro delivery.',
-      'Chuva prevista de 14mm/h no pico noturno cruzada com elasticidade de canal medida no painel de transação; dia pós-pagamento amplifica o efeito.',
-      'Realocar capacidade de cozinha pro delivery até 14h; empurrar a oferta da noite pelo app, não pelo balcão.'),
-    mkR('rad-3',
-      'Bob\'s deve inaugurar a 800m em 5 a 7 semanas (janela 22/jul a 04/ago)',
-      'A perda não vem no dia da abertura — vem nas 3 semanas seguintes, quando o cliente experimenta o novo. A janela pra blindar é agora, antes; depois é reconquista, que custa mais.',
-      'concorrencia', 'alta', 'risco',
-      'Cliente recorrente que migra na novidade é o mais caro de trazer de volta. Agir antes da abertura protege a base; agir depois é competir pela reconquista.',
-      'Monitoramento estruturado de 9.000 pontos da concorrência; a listagem da unidade passou de "em breve" para cardápio publicado — sinal que antecedeu as últimas 6 aberturas da rede em 34 dias (±8).',
-      'Ativar fidelização na praça nas próximas 3 semanas; dar ao cliente recorrente um motivo pra não "ir ver como é".'),
-    mkR('rad-4',
-      'Migração para combos de menor ticket deve crescer +9% em 6 semanas',
-      'O cliente não vai sumir, vai gastar com mais cautela. O risco não é perder venda, é perder margem se o combo econômico não estiver desenhado pra proteger lucro.',
-      'demanda', 'media', 'alerta',
-      'Um deslocamento de cesta para itens mais baratos corrói margem silenciosamente se os combos de entrada não forem desenhados com engenharia de lucro. É uma perda que não aparece no fluxo, só no resultado.',
-      'Painel de consumo de 12.000 cestas/mês na região mostra queda de 4% no ticket médio de food service e troca de à la carte por combo — padrão de aperto de consumo.',
-      'Revisar a engenharia de margem dos combos de entrada antes do deslocamento; não deixar o combo barato ser o que mais sai sem margem.'),
-    mkR('rad-5',
-      'Linha gelada deve crescer +38% na 1ª onda de calor (provável 3ª semana de setembro)',
-      'É um pico previsível e datável. Quem prepara captura; quem reage perde a janela, porque a demanda some quando a onda de calor passa.',
-      'demanda', 'media', 'oportunidade',
-      'Picos sazonais de alta margem só são capturados por quem tem capacidade e estoque prontos antes. Reagir depois do primeiro dia quente significa perder as duas semanas mais fortes.',
-      'Série histórica de 3 anos do painel de PDV cruzada com previsão sazonal; correlação temperatura×categoria gelada de 0,79 (modelo de regressão sazonal).',
-      'Garantir capacidade de máquina de sorvete e insumo de linha gelada até o início de setembro; planejar destaque, não improviso.'),
-    mkR('rad-6',
-      'Sexta 12/jul, 21h–23h30: fluxo pós-evento deve subir +47% (faixa +38% a +58%)',
-      'É receita que aparece numa janela de 2h e some depois — não dá pra recuperar no dia seguinte. Capacidade insuficiente nessa faixa é dinheiro deixado na porta.',
-      'mercado', 'alta', 'oportunidade',
-      'Picos de fluxo concentrados premiam quem tem escala e estoque dimensionados. Subdimensionar essa janela específica significa atender mal justamente quando há mais clientes disponíveis.',
-      'Dados de mobilidade anônima indicam 43.000 dispositivos concentrados a 2,1km (padrão de grande evento); dispersão histórica passa pela quadra ~90 min após o término.',
-      'Definir escala e estoque de saída rápida até 16h de sexta; tratar essa faixa como pico planejado, não surpresa.'),
-    mkR('rad-7',
-      'Concorrência deve lançar combo abaixo de R$20 na 2ª quinzena de julho',
-      'Reagir no susto destrói sua margem; ignorar custa fluxo. A saída é ter resposta pronta antes, pra decidir com cabeça fria, não no desespero.',
-      'concorrencia', 'media', 'risco',
-      'Guerra de preço reativa é a que mais destrói margem, porque é decidida no pânico. Quem entra na quinzena com uma resposta de valor já pensada negocia de posição forte.',
-      'Monitoramento de preço dos concorrentes num raio de 3km; 2 redes já reduziram preço de entrada 6% em 10 dias — padrão que precede o combo agressivo em ~12 dias.',
-      'Deixar uma resposta de valor pré-aprovada engatilhada (pode ser combo de maior valor percebido, não preço) pronta pra acionar em 24h.'),
-    mkR('rad-8',
-      'Novo polo corporativo deve trazer +380 pessoas/dia ao almoço a partir de meados de setembro',
-      'É um público novo, fixo e recorrente chegando. Quem fincar a oferta primeiro vira o "lugar do almoço" deles antes que o hábito se forme em outro lugar.',
-      'territorio', 'media', 'oportunidade',
-      'Hábito de almoço corporativo se fixa rápido e dura. O primeiro a capturar esse público o mantém por meses; o segundo disputa um hábito já formado.',
-      'Dados de mobilidade já registram +18% de dispositivos novos em horário comercial na quadra (ocupação progressiva do edifício); taxa histórica de captura de almoço num raio de 300m é de 34% nos primeiros 45 dias.',
-      'Estruturar oferta de almoço executivo até o fim de agosto; estar pronto quando o prédio abrir, não depois.'),
-    mkR('rad-9',
-      'Categoria plant-based deve cruzar o limiar de demanda relevante na praça em ~8 semanas',
-      'Ainda é nicho hoje, mas a curva diz que vira item fixo de cardápio em ~2 meses. Entrar cedo é barato e vira diferencial; entrar tarde é correr atrás do concorrente que entrou.',
-      'demanda', 'baixa', 'informacao',
-      'Categorias emergentes recompensam quem entra na inflexão, não no pico. Testar cedo, em pequena escala, custa pouco e posiciona; esperar a categoria firmar significa competir com quem já se posicionou.',
-      'Painel de PDV mostra a categoria vegetal saindo de 1,2% para 2,1% das transações de food service local em 4 meses, com inclinação constante.',
-      'Avaliar um item plant-based fixo antes do limiar; testar agora, em pequena escala, pra estar pronto quando a demanda firmar.'),
-    mkR('rad-10',
-      'Concorrente mais próximo deve perder ~8% de volume nas próximas 4 semanas (faixa 5% a 11%)',
-      'Tem uma janela curta em que os clientes insatisfeitos dele estão "soltos" antes de escolher um novo lugar fixo. Quem aparecer pra eles nesse intervalo captura; depois o hábito fecha de novo.',
-      'concorrencia', 'media', 'oportunidade',
-      'Cliente insatisfeito só está disponível por algumas semanas antes de criar um novo hábito. Essa janela de captura é barata e some quando ele se acomoda em outro lugar.',
-      'Painel de transação da praça mostra o volume desse concorrente caindo 2,2%/semana há 3 semanas (perda real de transação, não percepção), sem sinal de recuperação.',
-      'Campanha de captação direcionada à área dele nas próximas 4 semanas, enquanto a janela está aberta.'),
     // ── Real, sourced (Lote 1, ago/2026) — Google News RSS: Burger King, KFC,
     // Giraffas, Habib's, Keeta. 5 campos densos correspondentes em
     // DENSE_TEST_CTX (workspace-block-builders.ts), mesmo padrão da Combrasil.
