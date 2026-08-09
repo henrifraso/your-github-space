@@ -491,6 +491,37 @@ const DENSE_TEST_CTX: Record<string, DenseCtx> = {
     risco: `O risco é comparar apps só pelo volume de pedido que trazem hoje, sem notar que "comissão zero por 2 anos" tem prazo — quando o prazo acabar, o app que capturou volume nesse período tende a negociar de posição mais forte, não mais fraca.`,
     oportunidade: `Enquanto durar a comissão zero, existe uma janela real pra operar nesse canal com margem melhor do que a negociada hoje em outros apps — vale considerar se faz sentido priorizar volume ali enquanto a condição estiver ativa.`,
   },
+  // Pacheco — ago/2026: CVM (ITR 2026), IBGE/SIDRA, CMED, OSM/Overpass.
+  // Ver docs/kiq-pacheco.md (KIQs + as duas passadas de pesquisa) e
+  // docs/pendencias-e-alcancabilidade.md (pch-1..12 seguem fictícios).
+  'demo-pacheco-paguemenos': {
+    o_que_aconteceu: `A Pague Menos, concorrente nacional de capital aberto, saiu de R$52,1 milhões de lucro líquido no 1º trimestre de 2026 para R$71,2 milhões no 2º — alta de 36,7% em três meses, segundo o balanço enviado à CVM (ITR 2026). A imprensa registrou o mesmo movimento ao longo do ano: lucro de R$286,6 milhões em 2025 (Visno Invest, 27/fev/2026), salto de 325,6% no 1T26 (MoneyTimes, 5/mai/2026) e redução de alavancagem no 2T26 (ADVFN, 4/ago/2026).`,
+    por_que_importa: `Antes desse movimento, a Pague Menos vinha de um período de dificuldade financeira que costuma tirar fôlego de investimento em preço, marketing e expansão — exatamente o tipo de disputa que sustenta ou corrói o motivo pelo qual um cliente te escolhe e não a vizinha. Concorrente recuperando fôlego tende a voltar a investir justo nesses pontos.`,
+    onde_afeta: `Afeta o motivo de escolha mais sensível a preço e disponibilidade — o cliente que hoje te escolhe em parte porque a alternativa parecia menos capaz de sustentar promoção ou ampliar cobertura. Esse argumento perde força na mesma medida em que o concorrente recupera capacidade financeira.`,
+    risco: `O risco não é a recuperação em si — é continuar lendo a Pague Menos pela imagem de fragilidade que ela tinha até pouco tempo atrás, quando o balanço mais recente já mostra outra realidade.`,
+    oportunidade: `Enquanto o reforço financeiro da Pague Menos ainda não virou investimento comercial visível, existe uma janela pra reforçar o que já te distingue hoje, antes que a resposta dela apareça no ponto de venda.`,
+  },
+  'demo-pacheco-rdsaude-escala': {
+    o_que_aconteceu: `Cruzando os balanços de RD Saúde e Pague Menos enviados à CVM pro 2º trimestre de 2026, a RD Saúde faturou R$11,06 bilhões — quase 3 vezes os R$3,99 bilhões da Pague Menos — com margem líquida em torno de 3,8%, quase o dobro dos ~1,8% da Pague Menos.`,
+    por_que_importa: `Nem todo concorrente que disputa cliente com você tem a mesma capacidade de sustentar essa disputa por muito tempo. Um concorrente com escala e margem muito maiores absorve período de preço agressivo ou investimento em marca sem comprometer o caixa — muda quanto tempo uma pressão competitiva dele tende a durar.`,
+    onde_afeta: `Afeta a leitura de qual concorrente pesa mais quando os dois competem pelo mesmo cliente ao mesmo tempo — presumir que todo concorrente nacional tem o mesmo fôlego financeiro pode levar a subestimar justamente o mais difícil de superar.`,
+    risco: `O risco é tratar RD Saúde e Pague Menos como ameaças equivalentes só por serem as duas redes nacionais de capital aberto — a diferença de escala e margem entre elas muda qual delas tende a sustentar uma disputa por mais tempo.`,
+    oportunidade: `Saber qual concorrente tem mais fôlego financeiro ajuda a calibrar onde vale disputar palmo a palmo e onde vale mais reforçar o que já te distingue sem entrar em guerra de preço.`,
+  },
+  'demo-pacheco-territorio-rj': {
+    o_que_aconteceu: `Um levantamento no OpenStreetMap, mapa colaborativo aberto, identificou 66 pontos com o nome Pacheco na cidade do Rio de Janeiro — contra 37 somando Droga Raia e Drogasil (RD Saúde) e 7 da Pague Menos. Panvel, Farmácias São João e Onofre não aparecem no mapeamento da cidade.`,
+    por_que_importa: `Ser a opção mais fácil de encontrar no momento em que o cliente precisa é um dos motivos de escolha mais simples e mais difíceis de copiar rápido — não se constrói em poucos meses. O número de pontos mapeados sugere que essa vantagem ainda está do seu lado, por uma margem grande.`,
+    onde_afeta: `Afeta a decisão do cliente que escolhe farmácia por estar mais perto no momento da necessidade — decisão de conveniência, não necessariamente de preferência de marca. É também o motivo de escolha mais visado por concorrente que queira crescer via abertura de loja.`,
+    risco: `O risco não é essa vantagem ser pequena — é presumir que ela é permanente. OpenStreetMap é mapa colaborativo, não censo oficial: o número real pode variar, e qualquer concorrente que acelere abertura de loja no Rio reduz essa distância com o tempo, não de uma vez.`,
+    oportunidade: `Enquanto a distância nesse ponto específico segue grande, vale reforçar ativamente esse motivo de escolha na comunicação — em vez de deixá-lo implícito — antes que algum concorrente feche parte dela com expansão própria.`,
+  },
+  'demo-pacheco-custo-setorial': {
+    o_que_aconteceu: `O grupo "Saúde e cuidados pessoais" do IPCA acumula alta de 4,07% no ano até junho de 2026 — acima dos 3,36% do índice geral (IBGE/SIDRA, tabela 7060). No mesmo período, a CMED autorizou reajuste máximo de 3,81% pra medicamentos, vigente desde 1º de abril de 2026 (G1, Folha, CBN, JOTA Info, 31/mar/2026).`,
+    por_que_importa: `Custo subindo mais rápido que a inflação geral não afeta toda farmácia do mesmo jeito — quem consegue absorver parte desse custo (escala de compra, marca própria, mix de categoria) sustenta preço final por mais tempo do que quem repassa de imediato.`,
+    onde_afeta: `Afeta toda a operação de precificação e compra de medicamento, mas o efeito real depende de como a compra de insumo está estruturada — contrato com fornecedor, prazo de reposição, mix entre genérico e marca — não só do teto de reajuste em si.`,
+    risco: `O risco é tratar esse reajuste como igual pra todo mundo e não perceber que ele testa, na prática, quem tem estrutura de compra mais eficiente — isso costuma aparecer só depois, na margem.`,
+    oportunidade: `Entender de que lado desse aumento de custo a sua operação está — mais perto de quem absorve ou de quem repassa — é mais barato de resolver agora do que depois que a margem já apertou.`,
+  },
 };
 
 function buildDenseTestBlock(card: IntelligenceCard, mode: MainKey, difficulty: Dificuldade): WorkspaceBlock {

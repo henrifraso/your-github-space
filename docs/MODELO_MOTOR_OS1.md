@@ -266,6 +266,31 @@ Cruzar duas fontes costuma dizer mais que uma isolada quando fizer sentido —
 ex.: concorrente entrando numa categoria justo quando o insumo dela encarece
 diz mais que os dois fatos separados.
 
+### Padrão de risco — vínculo societário inventado no mock (09/ago/2026)
+
+Não é caso isolado, é padrão. Dois casos confirmados nesta sessão, em dois
+perfis diferentes:
+
+- **Oscar** — o mock inventou a bandeira "Carioca" como parte de um trio
+  Oscar+Paquetá+Carioca. Não existe. O site real do grupo cita "Loja da
+  Águia" e "Haus Creators" como marcas ligadas, nenhuma delas é "Carioca".
+- **Pacheco** — o mock descrevia a Onofre como "adquirida pelo iFood".
+  Falso. A Onofre foi comprada pela Raia Drogasil (RD Saúde) da CVS Health
+  em 2019. Nunca foi do iFood.
+
+**Por que esse tipo de invenção é o mais perigoso:** um número errado
+("18 p.p. de margem", "NPS 58→72") soa arbitrário e convida checagem. Um
+**vínculo entre duas empresas reais** soa exatamente como o tipo de fato
+que faria parte de um dossiê de verdade — nome de marca real, relação
+plausível (aquisição, licenciamento, bandeira) — e por isso passa sem
+checagem com mais facilidade que um número solto.
+
+**Regra a partir de agora:** qualquer relação societária, de licenciamento,
+de aquisição ou de bandeira entre duas empresas que venha do mock — mesmo
+que as duas empresas envolvidas sejam reais — precisa de verificação
+externa antes de entrar em qualquer card ou leitura. Empresa real não
+significa relação real.
+
 ---
 
 ## Método de geração em lote (08/ago/2026)
@@ -396,7 +421,49 @@ processamento e relevância varia por setor.
 | Indústria de alimentos (ex: Combrasil) | CEPEA + CONAB + IBGE LSPA + Stone + Comex Stat + CVM (abertas) + CNPJ (fechadas) |
 | Varejo / distribuição | Stone + Mercado Livre + OSM + Google News |
 | Agronegócio exportador | Comex Stat + B3 Futuros + CONAB + BCB (câmbio) |
+| Varejo farmacêutico (ex: Pacheco) | CVM (concorrentes de capital aberto) + CMED (reajuste regulatório, via Google News — fixture do conector não cobre isso) + IBGE/SIDRA (IPCA por grupo) + OSM/Overpass (disputa territorial) + Google News (só pra achado pontual, ver aprendizado abaixo) |
 | Serviços / saúde | CVM + Google News + CNPJ + INPI |
+
+### Aprendizado — Google News não cobre todo setor igual (09/ago/2026)
+
+KIQ/KIT da Pacheco (varejo farmacêutico) rodado em duas passadas com o mesmo
+método, medindo o resultado de cada uma:
+
+- **1ª passada — só Google News RSS:** 8 KIQs formuladas, 7 viraram lacuna
+  ou achado só histórico/contextual. **1 card** dava pra escrever de
+  verdade (a virada financeira da Pague Menos, e mesmo essa só porque
+  farmácia de capital aberto publica resultado que vira notícia).
+- **2ª passada — mesmas 8 KIQs, acrescentando CVM (dados brutos, não
+  notícia sobre o resultado), CMED, OSM/Overpass e BCB SGS/IBGE:** **4
+  cards fortes** (2 deles nem existiriam sem CVM/OSM — a comparação de
+  escala financeira entre RD Saúde e Pague Menos, e a vantagem de
+  proximidade no Rio de Janeiro, não são coisa que vira manchete).
+
+**O que isso ensina pro motor:** Google News é bom pra captar *movimento
+anunciado* — lançamento, fusão, resultado divulgado como notícia. Ele não
+cobre *estado estrutural* — quanto uma rede fatura de verdade (só quem tem
+capital aberto publica, e só a CVM tem o número bruto e auditado), quanta
+loja cada concorrente realmente tem numa cidade (ninguém noticia isso, é
+geografia, não evento), ou custo regulatório específico do setor (CMED é
+percentual público, não "notícia" na maioria dos anos). Setor cuja
+concorrência não gera imprensa constante — como farmácia, que o mercado
+não trata como notícia com a mesma frequência que fast food ou varejo de
+moda — **precisa das fontes estruturadas desde o primeiro lote**, não como
+complemento posterior. A tabela "Fontes por perfil de cliente" acima já
+apontava isso em teoria (`| Serviços / saúde | CVM + ... |`); esse
+experimento é a primeira vez que ficou medido em número de cards antes/depois
+da mesma pergunta.
+
+**Consequência pro motor real:** a escolha de fonte não pode ser genérica
+por "tipo de perfil" (ex.: "todo perfil usa Google News primeiro, CVM se
+sobrar"). Precisa considerar o setor do cliente *antes* de decidir a ordem
+de busca — setor com concorrente de capital aberto vai à CVM cedo; setor
+com disputa geográfica declarada vai ao OSM cedo; setor regulado por teto
+de preço público (CMED, ANEEL, ANP etc.) vai à fonte regulatória cedo. Isso
+já está de certa forma implícito na arquitetura de conectores por fonte
+(`src/core/adapters/`), mas o roteamento por prioridade setorial ainda não
+existe — é trabalho futuro do motor real (backend `omni`), não deste
+frontend.
 
 ---
 
