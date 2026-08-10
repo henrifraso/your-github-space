@@ -133,12 +133,46 @@ export const DEMO_FEED_CARDS: Record<string, IntelligenceCard[]> = {
        'Lançar campanha de perfumaria com kit-mãe e treinar revendedoras em script de venda cruzada.'),
   ],
 
-  // Oscar (nike) sem cards demo — os 5 originais (osc-1..5) reprovaram a régua
-  // (regra do sujeito, eixo de território, número sem fonte, dado interno
-  // inventado) e foram removidos em 09/ago/2026. Ver docs/kiq-oscar.md e
-  // docs/pendencias-e-alcancabilidade.md. Cards reais publicados via backend
-  // (org-oscar/nike) continuam entrando normalmente pelo feed da API.
-  nike: [],
+  // Oscar (nike) — os 5 originais (osc-1..5) reprovaram a régua (regra do
+  // sujeito, eixo de território, número sem fonte, dado interno inventado)
+  // e foram removidos em 09/ago/2026. Os 4 abaixo são a reconstrução: real,
+  // sourced (ago/2026) — CVM (ITR 2026), IBGE/SIDRA (PMC e IPCA), FGV via
+  // imprensa. 5 campos densos + metadados de medição em card-metadata.ts.
+  // Ver docs/kiq-oscar.md e docs/pendencias-e-alcancabilidade.md.
+  nike: [
+    mkR('oscar-centauro-azzas-1t26',
+      'Sua força em marca esportiva pode valer mais do que parecia — a Centauro cresceu 14,9% no trimestre em que a Azzas (dona da Arezzo) perdeu 67% do lucro',
+      'No 1º trimestre de 2026, a Centauro (Grupo SBF) faturou 14,9% a mais que no ano anterior, puxada pela Copa — enquanto a Azzas 2154 (fusão Arezzo+Soma) teve receita 8% menor e lucro 67% menor no mesmo período. Fonte: CVM, ITR 2026 (DRE consolidada), dados extraídos em 09/ago/2026.',
+      'concorrencia', 'alta', 'alerta',
+      'Quando dois concorrentes do mesmo setor têm resultados opostos no mesmo trimestre, o motivo raramente é só o mercado em geral — costuma ser o que cada um vende. A força que separa quem tem marca esportiva forte de quem só tem moda ficou mais visível agora do que estava há um trimestre.',
+      'Afeta a leitura de qual metade do seu portfólio — a esportiva (Diadora, Nike, Olympikus) ou a de moda — está puxando resultado neste momento; não é uma leitura única pro mix inteiro.',
+      'Vale observar se as linhas esportivas estão puxando mais movimento nas suas lojas do que as de moda agora — a resposta tende a dizer de que lado dessa divisão o seu portfólio está lucrando mais.',
+      'ESPORTE CRESCE, MODA TRAVA'),
+    mkR('oscar-nike-lojas-proprias',
+      'Sua vantagem de ser o ponto de venda da Nike na região pode ficar mais disputada — a marca vai abrir 6 lojas próprias a partir de março',
+      'A Nike vai abrir seis lojas próprias no Brasil para "desafiar a líder do setor", segundo reportagem que não detalha em quais cidades — nem se o Vale do Paraíba está entre elas. Fonte: Estado de Minas, 17/mar/2026.',
+      'concorrencia', 'media', 'alerta',
+      'Loja própria da marca reduz o motivo de comprar Nike no revendedor multimarca em vez de na loja oficial — é exatamente o argumento de variedade e conveniência que hoje te distingue como ponto de venda dessas marcas.',
+      'Afeta o cliente que hoje escolhe a Oscar puramente pra comprar uma marca específica — não o cliente que vem pela variedade do multimarca.',
+      'Vale acompanhar se alguma dessas seis lojas mira o Vale do Paraíba — a reportagem não detalha as cidades, e é isso que decide se esse movimento chega perto de você ou fica só como tendência nacional.',
+      'FORNECEDOR VIRA CONCORRENTE'),
+    mkR('oscar-pmc-vestuario-virada',
+      'O motivo por resistir aos meses fracos sem descontar pode ser o que te distingue — o setor só voltou a crescer em maio, após 4 meses no vermelho',
+      'O volume de vendas de tecidos, vestuário e calçados no Brasil ficou negativo na comparação anual em 4 dos últimos 6 meses e só virou positivo em maio (+3,5%) — o acumulado no ano segue quase zerado, em 0,1%. Fonte: IBGE/SIDRA, PMC (tabela 8882), maio/2026.',
+      'mercado', 'baixa', 'informacao',
+      'Mercado que passa meses no vermelho tende a empurrar quem descontou moda agressivamente enquanto durou — comprometendo margem antes da virada. O que separa quem aguentou sem descontar tanto de quem descontou fundo é justamente o fôlego que sobra pra aproveitar o mês em que o volume finalmente virou.',
+      'Afeta a decisão de quanto desconto aplicar nos meses fracos do ano — decisão que hoje pode estar comprometendo a margem que sobraria pra aproveitar a retomada.',
+      'Vale um teste simples: o desconto que você aplicou nos meses fracos foi maior do que precisava? A resposta tende a dizer se sobrou fôlego de margem pra aproveitar a virada de maio, ou se ele já foi gasto antes dela chegar.',
+      'MERCADO VIRA EM MAIO'),
+    mkR('oscar-confianca-consumidor',
+      'Sua variedade de faixas de preço pode pesar mais agora — a confiança do consumidor caiu pelo 3º mês seguido, com piora no orçamento das famílias',
+      'O Índice de Confiança do Consumidor da FGV caiu para 88,3 pontos em julho — 3º mês seguido de queda. Fonte: FGV, via imprensa (CNN Brasil, ADVFN, Jornal de Brasília, 27/jul/2026) — não confirmado via API do BCB SGS; os códigos testados não bateram com o valor divulgado.',
+      'mercado', 'baixa', 'informacao',
+      'Consumidor mais preocupado com orçamento tende a segurar compra de ticket alto primeiro — o que separa quem tem opção de entrada de quem só vende linha premium pode pesar mais nos próximos meses do que pesava há um trimestre.',
+      'Afeta a decisão do cliente que hoje hesita entre repor o calçado ou esperar mais um pouco — decisão sensível a preço de entrada, não à marca em si.',
+      'Vale observar se o mix de entrada está segurando o fluxo de loja nesses meses de confiança mais baixa, ou se só as marcas de ticket mais alto estão sentindo a queda — a resposta tende a apontar onde vale reforçar variedade agora.',
+      'CONFIANÇA CAI, ENTRADA IMPORTA'),
+  ],
 
   nubank: [
     // ── Real, sourced (ago/2026) — CVM (ITR 2026), IBGE/SIDRA, CMED, OSM/Overpass.
