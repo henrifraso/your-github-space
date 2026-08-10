@@ -223,13 +223,10 @@ const MCDONALDS_DATA: OmniData = {
     { nome: "Churrascaria Búfalo Manaus", nota_google: '—', endereco: '—', cidade: "Manaus", faixa_preco: '—', categoria: "indireto" },
     { nome: "Madero Florianópolis", nota_google: '—', endereco: '—', cidade: "Florianópolis", faixa_preco: '—', categoria: "direto" },
   ],
-  fornecedores: [
-    { nome: "Martin-Brower Brasil", cidade: "São Paulo", estado: "SP", telefone: "(11) 3500-7700", email: "operacoes@martinbrower.com.br", preco_referencia: 0, produto_servico: "Distribuição logística exclusiva McDonald's — insumos e embalagens" },
-    { nome: "BRF S.A.", cidade: "Chapecó", estado: "SC", telefone: "(49) 3321-2200", email: "comercial@brf-br.com", preco_referencia: 18.90, produto_servico: "Carnes processadas, nuggets e proteínas de frango" },
-    { nome: "Coca-Cola Brasil", cidade: "São Paulo", estado: "SP", telefone: "(11) 5908-4800", email: "parceiros@cocacola.com.br", preco_referencia: 4.50, produto_servico: "Bebidas carbonatadas e linha McCafé" },
-    { nome: "Bunge Brasil", cidade: "São Paulo", estado: "SP", telefone: "(11) 2599-7000", email: "contato@bunge.com.br", preco_referencia: 12.80, produto_servico: "Óleos vegetais, farinhas e margarinas para pão" },
-    { nome: "Pepsico do Brasil", cidade: "São Paulo", estado: "SP", telefone: "(11) 3030-4400", email: "trade@pepsico.com.br", preco_referencia: 5.20, produto_servico: "Batata Lay's e snacks para combo / upsell" },
-  ],
+  // fornecedores removidos (09/ago/2026): empresas reais mas dado de contato
+  // e preço de referência não confirmado — mesmo critério das outras
+  // limpezas desta sessão. Ver docs/pendencias-e-alcancabilidade.md.
+  fornecedores: [],
   // praticas removidas (ago/2026): nenhuma tinha fonte confirmável — todas
   // citavam relatório de nome plausível ("McKinsey QSR Report 2025", "QSR
   // Magazine 2025" etc.) sem confirmação real. Ver docs/MODELO_MOTOR_OS1.md.
@@ -280,13 +277,11 @@ const NIKE_DATA: OmniData = {
     { nome: "Centauro Jacareí", nota_google: '—', endereco: '—', cidade: "Jacareí", faixa_preco: '—', categoria: "direto" },
     { nome: "Americanas Calçados Taubaté", nota_google: '—', endereco: '—', cidade: "Taubaté", faixa_preco: '—', categoria: "indireto" },
   ],
-  fornecedores: [
-    { nome: "Nike Brasil (distribuidor)", cidade: "São Paulo", estado: "SP", telefone: "(11) 3025-4800", email: "comercial@nike.com.br", preco_referencia: 0, produto_servico: "Fornecimento de tênis Nike para revenda nas 186 lojas Oscar — categoria mais vendida em esportivos" },
-    { nome: "Diadora Brasil (exclusivo Oscar)", cidade: "São José dos Campos", estado: "SP", telefone: "(12) 99171-5785", email: "diadora@oscarcalcados.com.br", preco_referencia: 0, produto_servico: "Licenciamento exclusivo Diadora no Brasil desde 2022 — marca italiana sob gestão Grupo Oscar" },
-    { nome: "Olympikus / Vulcabras", cidade: "Sapiranga", estado: "RS", telefone: "(51) 3022-2000", email: "atacado@vulcabras.com.br", preco_referencia: 0, produto_servico: "Fornecimento de Olympikus/Under Armour — categoria popular esportiva nacional, alta giro" },
-    { nome: "Infracommerce (e-commerce)", cidade: "São Paulo", estado: "SP", telefone: "(11) 3522-3000", email: "atendimento@infracommerce.com.br", preco_referencia: 0, produto_servico: "Operador logístico do e-commerce oscarcalcados.com.br — same-day/next-day em SP/RS/SC" },
-    { nome: "Cielo (adquirência)", cidade: "Barueri", estado: "SP", telefone: "(11) 2105-9000", email: "atendimento@cielo.com.br", preco_referencia: 0, produto_servico: "Adquirência das 186 lojas físicas + e-commerce — captura crédito/débito/PIX integrado ao ERP" },
-  ],
+  // fornecedores removidos (09/ago/2026): empresas reais mas contato,
+  // preço de referência e a alegação "186 lojas" não confirmados — mesmo
+  // critério das outras limpezas desta sessão ("186 lojas" já estava
+  // registrada como não confirmada em docs/kiq-oscar.md).
+  fornecedores: [],
   // praticas limpas (ago/2026): removidas as que citavam número/fonte não
   // confirmados (margem Diadora 18%, NPS same-day, bandeira "Carioca" — essa
   // última não existe no site real da Oscar, que cita "Loja da Águia" e "Haus
@@ -345,13 +340,10 @@ const NUBANK_DATA: OmniData = {
     { nome: "Farmácia Carioca (Catete)", nota_google: '—', endereco: '—', cidade: "Rio de Janeiro", estado: "RJ", faixa_preco: '—', categoria: "direto" },
     { nome: "Mais Saúde RJ (Tijuca)", nota_google: '—', endereco: '—', cidade: "Rio de Janeiro", estado: "RJ", faixa_preco: '—', categoria: "direto" },
   ],
-  fornecedores: [
-    { nome: "EMS Pharma", cidade: "Hortolândia", estado: "SP", telefone: "(19) 3887-9200", email: "comercial@ems.com.br", preco_referencia: 0, produto_servico: "Maior farmacêutica nacional — genéricos e similares representam 28% das vendas do varejo farmácia DPSP" },
-    { nome: "Eurofarma Laboratórios", cidade: "São Paulo", estado: "SP", telefone: "(11) 5908-5000", email: "atendimento@eurofarma.com.br", preco_referencia: 0, produto_servico: "Medicamentos de prescrição e populares — top 3 fornecedor por volume DPSP" },
-    { nome: "VTEX (e-commerce)", cidade: "São Paulo", estado: "SP", telefone: "(11) 4063-9180", email: "comercial@vtex.com", preco_referencia: 0, produto_servico: "Plataforma de e-commerce drogariaspacheco.com.br + apps mobile — gestão omnichannel" },
-    { nome: "Loggi (last-mile)", cidade: "São Paulo", estado: "SP", telefone: "(11) 3230-2801", email: "parceiros@loggi.com", preco_referencia: 0, produto_servico: "Logística de última milha — entregas same-day no RJ e SP com SLA de 2h em casos urgentes" },
-    { nome: "Hypera Pharma", cidade: "Anápolis", estado: "GO", telefone: "(62) 3389-9000", email: "comercial@hypera.com", preco_referencia: 0, produto_servico: "Maior farmacêutica brasileira em capitalização — fornecedor estratégico de OTC e MIPs" },
-  ],
+  // fornecedores removidos (09/ago/2026): empresas reais mas dado de contato
+  // e preço de referência não confirmado — mesmo critério das outras
+  // limpezas desta sessão. Ver docs/pendencias-e-alcancabilidade.md.
+  fornecedores: [],
   // praticas removidas (ago/2026): nenhuma tinha fonte confirmável nesta
   // sessão — todas citavam relatório de nome plausível ("Grupo DPSP 2025",
   // "Abrafarma Brand Tracker 2025" etc.) sem checagem real.

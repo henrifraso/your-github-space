@@ -134,3 +134,22 @@ número sem fonte, hardcoded direto no JSX:**
 
 Não corrigidos porque estavam fora do pedido original (só os 2 fallbacks
 de timeline foram citados). Ficam registrados aqui pra não se perder.
+
+---
+
+## 6. Metadados de medição — só a Oscar tem hoje
+
+`src/data/card-metadata.ts` (criado em 09/ago/2026, ver
+`docs/MODELO_MOTOR_OS1.md` seção "Decisão de arquitetura — metadados de
+medição") só tem os 4 registros dos cards da Oscar
+(`oscar-centauro-azzas-1t26`, `oscar-nike-lojas-proprias`,
+`oscar-pmc-vestuario-virada`, `oscar-confianca-consumidor`). Os cards reais
+de Combrasil (10, sendo 7 com fonte), McDonald's (10) e Pacheco (4) foram
+escritos **antes** dessa decisão de arquitetura e não têm entrada
+correspondente no arquivo. Enquanto isso não for preenchido, a base de
+medição de diferencial fica pela metade — não dá pra fazer a leitura futura
+("este atributo te distinguia e hoje N de M concorrentes já oferecem") pros
+27 cards reais de fora da Oscar. Preencher exige reconstruir os 5 metadados
+(atributo tocado, concorrente(s), movimento, eixo, data da fonte) pra cada
+card já publicado — trabalho equivalente ao que foi feito pra Oscar, só que
+retroativo.
