@@ -4,7 +4,7 @@ import {
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
   Home, Plus, Globe, Upload, Bell, RefreshCw, Pin, Copy, AlertTriangle, Info, GitCompare, Settings,
   Languages, Users, Send as SendIcon, Bookmark, Share2, Brain, Award, MessageSquare, FileQuestion,
-  Sparkles, Loader2, History, MapPin, ChevronDown,
+  Sparkles, Loader2, History, ChevronDown,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import type { IntelligenceCard, WorkspaceIntent } from './WorkspacePanel';
@@ -1998,20 +1998,16 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
             isDark={dark ?? true}
           />
 
-          {/* Película — ativa: bloqueia gestos no mapa / inativa: mapa livre */}
+          {/* Película — ativa: bloqueia gestos no mapa / inativa: mapa livre.
+              Botão "abrir mapa" (mapa fullscreen/CompetitiveMap) removido em
+              09/ago/2026 — era o único gatilho vivo pro mapa fullscreen, que
+              a sessão decidiu não manter como opção. Ver
+              docs/pendencias-e-alcancabilidade.md, seção 7. */}
           <div
             onClick={handleFilmClick}
             className={`absolute inset-0 z-[10] flex items-center justify-center transition-opacity duration-500${mapFilmActive ? '' : ' opacity-0'}`}
             style={{ pointerEvents: mapFilmActive ? 'auto' : 'none' }}
-          >
-            <button
-              onClick={(e) => { e.stopPropagation(); onMapOpen?.(); }}
-              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full shadow-lg select-none transition-colors duration-150 cursor-pointer backdrop-blur-sm ${dark ? 'bg-black/55 text-white hover:bg-black/75' : 'bg-white/85 text-neutral-700 border border-neutral-200 hover:bg-white/95'}`}
-            >
-              <MapPin size={12} />
-              abrir mapa
-            </button>
-          </div>
+          />
 
           {/* Indicador discreto "mapa ativo" — aparece quando película está fora */}
           <div

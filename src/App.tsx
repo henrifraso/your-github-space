@@ -100,7 +100,6 @@ import { SectorSwitcherModal, DepartmentSwitcherModal, SECTORS, type ProfileConf
 import type { SectorId } from './components/SectorSwitcher';
 import type { DepartmentId, CompanySectorFeeds } from './types';
 import { SectorFeed } from './components/SectorFeed';
-import { PROFILE_SECTOR_FEEDS } from './data/sector-feeds/index';
 import { WorkspacePanel } from './components/WorkspacePanel';
 import type { IntelligenceCard, WorkspaceIntent } from './components/WorkspacePanel';
 import type { WorkspaceContext } from './components/ChatPanel';
@@ -1265,6 +1264,19 @@ function AuthenticatedApp() {
     [activeProduct]
   );
 
+  // Cards do feed geral da empresa — mesma lista usada no feed principal e nas
+  // abas de departamento (SectorFeed), que hoje não filtram por departamento
+  // (09/ago/2026 — ver docs/pendencias-e-alcancabilidade.md).
+  const feedCards = useMemo(() => {
+    const base = activeSector === 'os1' ? [] : (DEMO_FEED_CARDS[feedKey] ?? []);
+    const realIds = new Set(apiIntelligenceCards.map(c => c.id));
+    return [
+      ...apiIntelligenceCards,
+      ...cmedCards.filter(c => !realIds.has(c.id)),
+      ...base.filter(c => !realIds.has(c.id) && !cmedCards.some(r => r.id === c.id)),
+    ];
+  }, [activeSector, feedKey, apiIntelligenceCards, cmedCards]);
+
   // ─── helpers ─────────────────────────────────────────────────────────────────
   const timeline = data.timeline ?? MOCK_DATA.timeline!;
   const notaMediaNum = (() => {
@@ -1861,7 +1873,7 @@ function AuthenticatedApp() {
       {((activeSector !== 'os1' && activeDepartment !== 'geral') || (role === 'franchise' && activeDepartment !== 'geral')) && (
         <SectorFeed
           department={activeDepartment as Exclude<DepartmentId, 'geral'>}
-          feeds={PROFILE_SECTOR_FEEDS[feedKey] ?? PROFILE_SECTOR_FEEDS['mcdonalds']}
+          cards={feedCards}
           onOpenWorkspace={openWorkspaceFromCard}
           topGapClass={isSplitView ? SPLIT_TOP_GAP_MT : undefined}
           rightPadClass={isSplitView ? 'pr-5' : 'pr-[380px]'}
@@ -2030,16 +2042,7 @@ function AuthenticatedApp() {
             - Fase 6.2 — cards reais da Codify API (Oscar/Pacheco/McDonald's
               quando sector != os1) entram NO TOPO antes do fallback demo.
               Dedupe por id pra evitar duplicação caso um demo coincida. */}
-        {(() => {
-          const base = activeSector === 'os1' ? [] : (DEMO_FEED_CARDS[feedKey] ?? []);
-          const realIds = new Set(apiIntelligenceCards.map(c => c.id));
-          const merged = [
-            ...apiIntelligenceCards,
-            ...cmedCards.filter(c => !realIds.has(c.id)),
-            ...base.filter(c => !realIds.has(c.id) && !cmedCards.some(r => r.id === c.id)),
-          ];
-          return merged;
-        })().map(card => (
+        {feedCards.map(card => (
           <motion.div key={card.id} variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } } }}>
             <FeedCard
               onWorkspaceIntent={(intent) => openWorkspaceFromCard(card, intent)}

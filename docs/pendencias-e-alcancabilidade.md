@@ -162,14 +162,32 @@ Em 09/ago/2026, o mapa de concorrentes (`CompetitiveMap.tsx`, aberto via
 `MarketMapContent`/`MarketMap.tsx`) recebeu correção estrutural completa:
 `lat`/`lng` reais adicionados a `negocio` em `types.ts`/`mockData.ts` pra
 todos os perfis, `clientPosition` passado desde `App.tsx` até o mapa,
-`SECTOR_CENTERS` (tabela hardcoded duplicada) removida. **Essa correção foi
-aplicada corretamente, mas não é visível em lugar nenhum do app hoje** — o
-único caminho de UI que abriria esse mapa fullscreen (o botão/fluxo que
-chama `setMapOpen(true)`) não está mais na navegação atual. `CompetitiveMap`
-e `MarketMap` continuam existindo no código, compilam, mas não são
-alcançáveis por nenhum clique. Não desfazer a correção — ela fica pronta
-pra quando/se esse mapa for religado à navegação — mas não contar esse
-trabalho como visível na demo hoje.
+`SECTOR_CENTERS` (tabela hardcoded duplicada) removida. Não desfazer a
+correção — ela fica pronta pra quando/se esse mapa for religado à
+navegação.
+
+**Correção deste registro (10/ago/2026):** a frase original dizia "não
+existe mais nenhum clique que chame `setMapOpen(true)`" — **isso estava
+errado**. Existia sim um gatilho vivo: o botão "abrir mapa" dentro da
+película do mapa de fundo (`ChatPanel.tsx`, `ChatDesktop`, overlay que
+cobre o `LeafletFallbackMap`). Cadeia completa: botão → `onMapOpen` →
+`openMapLauncherInWorkspace` (`App.tsx`) → abre card-lançador na Área de
+Trabalho → `WorkspaceMapLauncherBlock` (escolha de raio) → `onOpen` →
+`openMapWithRadius` → `setMapOpen(true)` → `<MarketMapContent>` renderiza
+o `CompetitiveMap` fullscreen de verdade (não quebrado — funcionava, com a
+correção de coordenadas inclusive). Esse botão foi removido em
+10/ago/2026 (só o botão — a película continua existindo, ela também serve
+pra destravar gestos de pan/zoom no mapa de fundo, isso não mexeu).
+
+Com essa remoção, `CompetitiveMap`/`MarketMap` **agora são código morto de
+verdade** — confirmado que `dominio: 'Mapa'` (o card que abre
+`WorkspaceMapLauncherBlock`) só é criado em `openMapLauncherInWorkspace`,
+e essa função não tem mais nenhum call site vivo (os outros 3
+`onClick={openMapLauncherInWorkspace}` em `App.tsx` já eram
+`className="hidden"`, nunca clicáveis). `openMapLauncherInWorkspace`,
+`openMapWithRadius`, `WorkspaceMapLauncherBlock`, o estado `mapOpen` e o
+`<MarketMapContent>` continuam no código, órfãos — não foram removidos
+(fora do pedido desta rodada), só ficaram sem nenhum caminho de clique.
 
 O mapa que **é** visível — o de fundo dentro do container da Área de
 Trabalho, montado sempre (`ChatPanel.tsx`, componente `ChatDesktop`, dentro
