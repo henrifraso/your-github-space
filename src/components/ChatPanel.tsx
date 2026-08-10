@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   X, ArrowUp, LayoutDashboard, Search, Zap, BookOpen, BarChart2, Compass, Eye, ClipboardList, Target,
   Lightbulb, FileText, FlaskConical, CheckCircle, Gauge, AlignLeft, Star as StarIcon, TrendingUp,
@@ -32,7 +32,8 @@ import {
   saveSettings,
   type CompanySettings,
 } from '../features/modals/CompanySettingsModal';
-import type { DepartmentId } from '../types';
+import type { DepartmentId, Competitor } from '../types';
+import { MAP_COMPETITOR_POINTS } from '../data/map-competitor-points';
 import type {
   WorkspaceTool,
   WorkspaceToolContext,
@@ -1954,6 +1955,27 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
 
   const ww = windowWidth ?? window.innerWidth;
   const { rightPx, widthPx } = getDesktopChatLayout(ww, !!wide);
+
+  // Marcadores reais (OSM/Overpass) do perfil ativo — mapa de fundo.
+  const mapMarkers = useMemo(() => {
+    const group = MAP_COMPETITOR_POINTS[activeSector ?? ''];
+    if (!group) return [];
+    return group.pontos.map(p => {
+      const competitor: Competitor = {
+        nome: p.nome,
+        nota_google: '—',
+        endereco: '—',
+        cidade: group.cidade,
+        faixa_preco: '—',
+      };
+      return {
+        position: { lat: p.lat, lng: p.lng },
+        competitor,
+        onClick: () => {},
+      };
+    });
+  }, [activeSector]);
+
   return (
     <div
       ref={wrapperRef}
@@ -1972,7 +1994,7 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
             zoom={12}
             radius={Infinity}
             clientPosition={clientPosition ?? { lat: -23.1896, lng: -45.8841 }}
-            markers={[]}
+            markers={mapMarkers}
             isDark={dark ?? true}
           />
 

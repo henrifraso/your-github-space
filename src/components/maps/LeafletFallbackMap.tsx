@@ -108,29 +108,24 @@ export function LeafletFallbackMap({ center, zoom, radius, clientPosition, marke
     // Marker do cliente (centro)
     const clientIcon = L.divIcon({
       className: 'os1-leaflet-client',
-      html: '<div style="width:18px;height:18px;border-radius:50%;background:#3b82f6;border:2px solid white;box-shadow:0 0 0 4px rgba(59,130,246,0.25)"></div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9],
+      html: '<div style="width:9px;height:9px;border-radius:50%;background:#3b82f6;border:1px solid white;box-shadow:0 0 0 2px rgba(59,130,246,0.25)"></div>',
+      iconSize: [9, 9],
+      iconAnchor: [4, 4],
     });
     L.marker([clientPosition.lat, clientPosition.lng], { icon: clientIcon, zIndexOffset: 1000 }).addTo(group);
 
-    // Markers dos concorrentes — bolinha + etiqueta clicável numa div unificada
+    // Markers dos concorrentes — idênticos ao do cliente (mesma cor/tamanho/
+    // formato); só a posição diferencia. Nome aparece em tooltip no hover.
     markers.forEach(({ position, competitor, onClick }) => {
-      const risk = competitor.risco_competitivo;
-      const color = risk === 'alto' ? '#ef4444' : risk === 'medio' ? '#f59e0b' : '#22c55e';
       const nome = competitor.nome;
       const icon = L.divIcon({
         className: '',
-        html: `<div style="display:flex;align-items:center;gap:5px;cursor:pointer;pointer-events:all">` +
-          `<div style="width:12px;height:12px;flex-shrink:0;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.18);box-shadow:0 0 0 2px rgba(0,0,0,0.45),0 1px 5px rgba(0,0,0,0.7)"></div>` +
-          `<span style="color:#f0f0f0;font-size:10px;font-weight:600;white-space:nowrap;line-height:1.4;` +
-            `background:rgba(8,8,10,0.82);padding:2px 6px;border-radius:4px;` +
-            `border:0.5px solid rgba(255,255,255,0.1);text-shadow:0 1px 2px rgba(0,0,0,0.8)">` +
-            `${nome}</span>` +
-          `</div>`,
-        iconAnchor: [7, 8],
+        html: '<div style="width:9px;height:9px;border-radius:50%;background:#3b82f6;border:1px solid white;box-shadow:0 0 0 2px rgba(59,130,246,0.25);cursor:pointer;pointer-events:all"></div>',
+        iconSize: [9, 9],
+        iconAnchor: [4, 4],
       });
       const m = L.marker([position.lat, position.lng], { icon }).addTo(group);
+      m.bindTooltip(nome, { direction: 'top', offset: [0, -8], className: 'os1-leaflet-tooltip' });
       m.on('click', () => onClick(competitor));
     });
 

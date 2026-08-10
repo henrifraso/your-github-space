@@ -1734,8 +1734,8 @@ function AuthenticatedApp() {
                       <div className="flex items-center gap-2 px-3 py-2 bg-[#F5F5F6] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-300 dark:border-[#3d3d3d] shadow-[0_8px_20px_-4px_rgba(0,0,0,0.22),0_2px_6px_-2px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.6),0_2px_8px_rgba(0,0,0,0.4)] rounded-xl transition-transform duration-200 hover:scale-[1.01] origin-left">
                         <div className="flex-1 space-y-0.5 sm:space-y-1">
                           {roleConfig.bioLines.map((line, i) => {
-                            const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
-                            const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
+                            const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : line.icon === 'layers' ? '#3b82f6' : '#16a34a';
+                            const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : line.icon === 'layers' ? Layers : Zap;
                             // Linha "Evolução" segue o mesmo estado dinâmico dos demais
                             // perfis (atualizando → atualizado), em vez do texto fixo.
                             const text = line.text.startsWith('Evolução ·') ? `Evolução · ${evolucaoStatus}` : line.text;

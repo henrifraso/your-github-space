@@ -60,7 +60,7 @@ export interface RoleStatItem {
 }
 
 export interface RoleBioLine {
-  icon: 'store' | 'mappin' | 'zap';
+  icon: 'store' | 'mappin' | 'zap' | 'layers';
   text: string;
 }
 
@@ -108,7 +108,7 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
       { icon: 'store',  text: 'Mercado · Software & IA' },
       { icon: 'mappin', text: 'Posição · líder do segmento' },
       { icon: 'zap',    text: 'Evolução · atualizado' },
-      { icon: 'zap',    text: 'Diferencial · em observação' },
+      { icon: 'layers', text: 'Diferencial · em observação' },
     ],
     useDefaultSectors: false,
   },
