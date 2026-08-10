@@ -18,13 +18,6 @@ import { useMapAnalysis } from '../../features/map/useMapAnalysis';
 
 const OSCAR_SECTORS = new Set(['nike', 'oscar-piloto-01']);
 
-const SECTOR_CENTERS: Record<string, google.maps.LatLngLiteral> = {
-  nike:              { lat: -23.2237, lng: -45.9009 },
-  'oscar-piloto-01': { lat: -23.2237, lng: -45.9009 },
-  nubank:            { lat: -22.9068, lng: -43.1729 }, // Centro RJ — HQ Pacheco
-  'pacheco-loja-01': { lat: -22.9068, lng: -43.1729 }, // Centro RJ — loja
-};
-
 function getCoordsForSector(sector: string | undefined): google.maps.LatLngLiteral[] | undefined {
   if (OSCAR_SECTORS.has(sector ?? '')) return OSCAR_COORDS;
   if (sector === 'nubank') return NUBANK_COORDS;
@@ -50,7 +43,7 @@ interface Props {
 }
 
 export function CompetitiveMap({ competitors, onClose, clientPosition, sector, businessName }: Props) {
-  const center = SECTOR_CENTERS[sector ?? ''] ?? clientPosition ?? DEFAULT_CENTER;
+  const center = clientPosition ?? DEFAULT_CENTER;
   const coords = getCoordsForSector(sector);
   const [radius, setRadius] = useState(5000);
   const [selected, setSelected] = useState<Competitor | null>(null);

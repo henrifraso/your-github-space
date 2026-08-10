@@ -77,6 +77,8 @@ export interface OmniData {
     segmento: string;
     cidade: string;
     estado: string;
+    lat: number;
+    lng: number;
     telefone: string;
     nivel: number;
     pontos: number;

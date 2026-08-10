@@ -14,6 +14,7 @@ interface ContentProps {
   onCompetitorClick?: (c: Competitor) => void;
   sector?: string;
   businessName?: string;
+  clientPosition?: google.maps.LatLngLiteral;
 }
 
 export function MarketMapButton({ bioOpen, onHome: _onHome, onMap }: ButtonProps) {
@@ -28,7 +29,7 @@ export function MarketMapButton({ bioOpen, onHome: _onHome, onMap }: ButtonProps
   );
 }
 
-export function MarketMapContent({ open, onClose, competitors, sector, businessName }: ContentProps) {
+export function MarketMapContent({ open, onClose, competitors, sector, businessName, clientPosition }: ContentProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -36,7 +37,7 @@ export function MarketMapContent({ open, onClose, competitors, sector, businessN
       exit={{ opacity: 0, y: 24 }}
       transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
     >
-      <CompetitiveMap competitors={competitors} onClose={onClose} sector={sector} businessName={businessName} />
+      <CompetitiveMap competitors={competitors} onClose={onClose} sector={sector} businessName={businessName} clientPosition={clientPosition} />
     </motion.div>
   );
 }

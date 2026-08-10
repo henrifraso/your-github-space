@@ -1875,9 +1875,11 @@ interface ChatDesktopProps {
   onDeleteSessions?: (ids: string[]) => void;
   codifyScope?: CodifyScope | null;
   windowWidth?: number;
+  /** Centro real do perfil ativo (mockData.negocio.lat/lng) — usado pelo mapa de fundo. */
+  clientPosition?: { lat: number; lng: number };
 }
 
-export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, onOpenBrowserUrl, onOpenMapWithRadius, activeDepartment, onSelectDepartment, onSelectSector, onDeleteSessions, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onAutoArchive, onWorkspaceCleared, logoutPending, onCancelLogout, onConfirmLogout, codifyScope, windowWidth }: ChatDesktopProps) {
+export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMapOpen, onOpenBrowserUrl, onOpenMapWithRadius, activeDepartment, onSelectDepartment, onSelectSector, onDeleteSessions, activeSector, userRole, workspaceContext, dark, onToggleTheme, onShowHistory, chatHistoryOpen, archivedSessions, onSelectHistorySession, onArchive, onAutoArchive, onWorkspaceCleared, logoutPending, onCancelLogout, onConfirmLogout, codifyScope, windowWidth, clientPosition }: ChatDesktopProps) {
   const btnCls = "cursor-pointer text-neutral-500 dark:text-neutral-300 p-2 rounded-full bg-[#EFEFF1] dark:bg-[#2f2f2f] border-[0.5px] border-neutral-200 dark:border-[#3d3d3d] shadow-[0_4px_10px_-1px_rgba(0,0,0,0.22),0_1px_3px_rgba(0,0,0,0.1),inset_0_1px_2px_rgba(255,255,255,0.6)] dark:shadow-[0_4px_10px_-1px_rgba(0,0,0,0.55),0_1px_3px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.04)] hover:bg-[#E3E4E6] dark:hover:bg-[#353535] hover:text-neutral-800 dark:hover:text-white transition-all duration-200 hover:scale-105 active:scale-90";
   // Bloqueia scroll do body (= feed) enquanto o cursor está sobre o ChatDesktop.
   // O scroll interno do ChatBody (overflow-y-auto) continua funcionando — só o
@@ -1966,10 +1968,10 @@ export function ChatDesktop({ wide, onHome, homeTitle, onSector, onBrowser, onMa
       {/* Mapa de fundo — permanece montado mesmo com workspace aberto */}
       <div ref={mapWrapperRef} className="absolute inset-0 z-[1] overflow-hidden">
           <LeafletFallbackMap
-            center={{ lat: -23.1896, lng: -45.8841 }}
+            center={clientPosition ?? { lat: -23.1896, lng: -45.8841 }}
             zoom={12}
             radius={Infinity}
-            clientPosition={{ lat: -23.1896, lng: -45.8841 }}
+            clientPosition={clientPosition ?? { lat: -23.1896, lng: -45.8841 }}
             markers={[]}
             isDark={dark ?? true}
           />

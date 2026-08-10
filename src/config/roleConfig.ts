@@ -107,7 +107,8 @@ const ROLE_CONFIGS: Record<string, RoleConfig> = {
     bioLines: [
       { icon: 'store',  text: 'Mercado · Software & IA' },
       { icon: 'mappin', text: 'Posição · líder do segmento' },
-      { icon: 'zap',    text: 'Evolução · 96% pro próximo nível' },
+      { icon: 'zap',    text: 'Evolução · atualizado' },
+      { icon: 'zap',    text: 'Diferencial · em observação' },
     ],
     useDefaultSectors: false,
   },

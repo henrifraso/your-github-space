@@ -153,3 +153,30 @@ medição de diferencial fica pela metade — não dá pra fazer a leitura futur
 (atributo tocado, concorrente(s), movimento, eixo, data da fonte) pra cada
 card já publicado — trabalho equivalente ao que foi feito pra Oscar, só que
 retroativo.
+
+---
+
+## 7. `CompetitiveMap`/`MarketMap` são código morto — a correção de coordenadas não aparece na tela
+
+Em 09/ago/2026, o mapa de concorrentes (`CompetitiveMap.tsx`, aberto via
+`MarketMapContent`/`MarketMap.tsx`) recebeu correção estrutural completa:
+`lat`/`lng` reais adicionados a `negocio` em `types.ts`/`mockData.ts` pra
+todos os perfis, `clientPosition` passado desde `App.tsx` até o mapa,
+`SECTOR_CENTERS` (tabela hardcoded duplicada) removida. **Essa correção foi
+aplicada corretamente, mas não é visível em lugar nenhum do app hoje** — o
+único caminho de UI que abriria esse mapa fullscreen (o botão/fluxo que
+chama `setMapOpen(true)`) não está mais na navegação atual. `CompetitiveMap`
+e `MarketMap` continuam existindo no código, compilam, mas não são
+alcançáveis por nenhum clique. Não desfazer a correção — ela fica pronta
+pra quando/se esse mapa for religado à navegação — mas não contar esse
+trabalho como visível na demo hoje.
+
+O mapa que **é** visível — o de fundo dentro do container da Área de
+Trabalho, montado sempre (`ChatPanel.tsx`, componente `ChatDesktop`, dentro
+de `<div ref={mapWrapperRef}>`) — usa `LeafletFallbackMap` diretamente, sem
+passar por `CompetitiveMap`. Recebeu a mesma correção separadamente, no
+mesmo dia: antes tinha centro fixo hardcoded (`{ lat: -23.1896, lng:
+-45.8841 }`, um ponto perto de SJC, sem relação com o perfil ativo); agora
+`ChatDesktop` aceita prop `clientPosition` e `App.tsx` passa
+`{ lat: data.negocio.lat, lng: data.negocio.lng }` do perfil ativo — esse
+sim reflete o perfil na tela.

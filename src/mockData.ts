@@ -4,8 +4,10 @@ export const MOCK_DATA: OmniData = {
   negocio: {
     nome_fantasia: "OS1",
     segmento: "Software & Inteligência Artificial",
-    cidade: "São Paulo",
+    cidade: "São José dos Campos",
     estado: "SP",
+    lat: -23.2145,
+    lng: -45.9088,
     telefone: "(11) 9 9000-0001",
     nivel: 5,
     pontos: 4800
@@ -187,7 +189,7 @@ const CLIMA_SP: OmniData['previsao_clima'] = [
 ];
 
 const MCDONALDS_DATA: OmniData = {
-  negocio: { nome_fantasia: "McDonald's", segmento: "Fast Food & Hamburgeria", cidade: "São Paulo", estado: "SP", telefone: "(11) 3266-1800", nivel: 5, pontos: 4800 },
+  negocio: { nome_fantasia: "McDonald's", segmento: "Fast Food & Hamburgeria", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 3266-1800", nivel: 5, pontos: 4800 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Fast Food & Alimentação Rápida",
   mercado_tamanho: "R$ 2.1bi/mês no Brasil",
@@ -244,7 +246,7 @@ const MCDONALDS_DATA: OmniData = {
 };
 
 const NIKE_DATA: OmniData = {
-  negocio: { nome_fantasia: "Oscar Calçados", segmento: "Varejo de Calçados & Moda", cidade: "São José dos Campos", estado: "SP", telefone: "(12) 99171-5785", nivel: 5, pontos: 4750 },
+  negocio: { nome_fantasia: "Oscar Calçados", segmento: "Varejo de Calçados & Moda", cidade: "São José dos Campos", estado: "SP", lat: -23.2237, lng: -45.9009, telefone: "(12) 99171-5785", nivel: 5, pontos: 4750 },
   semana_label: "Semana de 01 de Junho de 2026",
   mercado_nome: "Varejo Calçadista Multimarca",
   mercado_tamanho: "R$ 2.4bi/mês no Brasil",
@@ -307,7 +309,7 @@ const NIKE_DATA: OmniData = {
 };
 
 const NUBANK_DATA: OmniData = {
-  negocio: { nome_fantasia: "Drogarias Pacheco", segmento: "Varejo Farmacêutico", cidade: "Rio de Janeiro", estado: "RJ", telefone: "(21) 4003-6700", nivel: 5, pontos: 4720 },
+  negocio: { nome_fantasia: "Drogarias Pacheco", segmento: "Varejo Farmacêutico", cidade: "Rio de Janeiro", estado: "RJ", lat: -22.9068, lng: -43.1729, telefone: "(21) 4003-6700", nivel: 5, pontos: 4720 },
   semana_label: "Semana de 01 de Junho de 2026",
   mercado_nome: "Varejo Farmacêutico & Saúde",
   mercado_tamanho: "R$ 20bi/mês no Brasil",
@@ -362,7 +364,7 @@ const NUBANK_DATA: OmniData = {
 };
 
 const IFOOD_DATA: OmniData = {
-  negocio: { nome_fantasia: "iFood", segmento: "Delivery & Foodtech", cidade: "Osasco", estado: "SP", telefone: "(11) 3074-2600", nivel: 5, pontos: 4850 },
+  negocio: { nome_fantasia: "iFood", segmento: "Delivery & Foodtech", cidade: "Osasco", estado: "SP", lat: -23.5325, lng: -46.7917, telefone: "(11) 3074-2600", nivel: 5, pontos: 4850 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Delivery de Alimentação & Foodtech",
   mercado_tamanho: "R$ 1.5bi/mês no Brasil",
@@ -415,7 +417,7 @@ const IFOOD_DATA: OmniData = {
 };
 
 const AMBEV_DATA: OmniData = {
-  negocio: { nome_fantasia: "Ambev", segmento: "Bebidas & FMCG", cidade: "São Paulo", estado: "SP", telefone: "(11) 2122-1313", nivel: 5, pontos: 4820 },
+  negocio: { nome_fantasia: "Ambev", segmento: "Bebidas & FMCG", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 2122-1313", nivel: 5, pontos: 4820 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Bebidas Alcoólicas & Não Alcoólicas",
   mercado_tamanho: "R$ 8.5bi/mês no Brasil",
@@ -469,7 +471,7 @@ const AMBEV_DATA: OmniData = {
 };
 
 const MAGALU_DATA: OmniData = {
-  negocio: { nome_fantasia: "Magazine Luiza", segmento: "Varejo & E-commerce", cidade: "Franca", estado: "SP", telefone: "(11) 3504-2000", nivel: 5, pontos: 4750 },
+  negocio: { nome_fantasia: "Magazine Luiza", segmento: "Varejo & E-commerce", cidade: "Franca", estado: "SP", lat: -20.5382, lng: -47.4010, telefone: "(11) 3504-2000", nivel: 5, pontos: 4750 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Varejo Omnichannel & E-commerce",
   mercado_tamanho: "R$ 15bi/mês no Brasil",
@@ -523,7 +525,7 @@ const MAGALU_DATA: OmniData = {
 };
 
 const EMBRAER_DATA: OmniData = {
-  negocio: { nome_fantasia: "Embraer", segmento: "Aeronáutica & Defesa", cidade: "São José dos Campos", estado: "SP", telefone: "(12) 3927-1000", nivel: 5, pontos: 4880 },
+  negocio: { nome_fantasia: "Embraer", segmento: "Aeronáutica & Defesa", cidade: "São José dos Campos", estado: "SP", lat: -23.2237, lng: -45.9009, telefone: "(12) 3927-1000", nivel: 5, pontos: 4880 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Aviação Comercial, Executiva & Defesa",
   mercado_tamanho: "US$ 4.2bi/ano em receita",
@@ -576,7 +578,7 @@ const EMBRAER_DATA: OmniData = {
 };
 
 const TESLA_DATA: OmniData = {
-  negocio: { nome_fantasia: "Tesla", segmento: "Veículos Elétricos & Energia", cidade: "São Paulo", estado: "SP", telefone: "(11) 3055-8000", nivel: 5, pontos: 4900 },
+  negocio: { nome_fantasia: "Tesla", segmento: "Veículos Elétricos & Energia", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 3055-8000", nivel: 5, pontos: 4900 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Veículos Elétricos & Energia Limpa",
   mercado_tamanho: "R$ 8.2bi/ano no Brasil",
@@ -630,7 +632,7 @@ const TESLA_DATA: OmniData = {
 };
 
 const NETFLIX_DATA: OmniData = {
-  negocio: { nome_fantasia: "Netflix", segmento: "Streaming & Entretenimento Digital", cidade: "São Paulo", estado: "SP", telefone: "(11) 4130-7000", nivel: 5, pontos: 4870 },
+  negocio: { nome_fantasia: "Netflix", segmento: "Streaming & Entretenimento Digital", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 4130-7000", nivel: 5, pontos: 4870 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Streaming & Entretenimento Digital",
   mercado_tamanho: "R$ 5.8bi/ano no Brasil",
@@ -684,7 +686,7 @@ const NETFLIX_DATA: OmniData = {
 };
 
 const SPOTIFY_DATA: OmniData = {
-  negocio: { nome_fantasia: "Spotify", segmento: "Música & Áudio Digital", cidade: "São Paulo", estado: "SP", telefone: "(11) 4080-0000", nivel: 5, pontos: 4820 },
+  negocio: { nome_fantasia: "Spotify", segmento: "Música & Áudio Digital", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 4080-0000", nivel: 5, pontos: 4820 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Streaming de Música & Podcasts",
   mercado_tamanho: "R$ 2.9bi/ano no Brasil",
@@ -737,7 +739,7 @@ const SPOTIFY_DATA: OmniData = {
 };
 
 const AIRBNB_DATA: OmniData = {
-  negocio: { nome_fantasia: "Airbnb", segmento: "Viagens & Hospitalidade", cidade: "São Paulo", estado: "SP", telefone: "(11) 4130-9000", nivel: 5, pontos: 4750 },
+  negocio: { nome_fantasia: "Airbnb", segmento: "Viagens & Hospitalidade", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 4130-9000", nivel: 5, pontos: 4750 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Aluguel por Temporada & Viagens",
   mercado_tamanho: "R$ 12.4bi/ano no Brasil",
@@ -790,7 +792,7 @@ const AIRBNB_DATA: OmniData = {
 };
 
 const UBER_DATA: OmniData = {
-  negocio: { nome_fantasia: "Uber", segmento: "Mobilidade Urbana & Logística", cidade: "São Paulo", estado: "SP", telefone: "(11) 4130-6000", nivel: 5, pontos: 4830 },
+  negocio: { nome_fantasia: "Uber", segmento: "Mobilidade Urbana & Logística", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 4130-6000", nivel: 5, pontos: 4830 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Mobilidade Urbana & Entrega sob Demanda",
   mercado_tamanho: "R$ 22bi/ano no Brasil",
@@ -842,7 +844,7 @@ const UBER_DATA: OmniData = {
 };
 
 const APPLE_DATA: OmniData = {
-  negocio: { nome_fantasia: "Apple", segmento: "Eletrônicos & Ecossistema Digital", cidade: "São Paulo", estado: "SP", telefone: "(11) 4780-0000", nivel: 5, pontos: 4980 },
+  negocio: { nome_fantasia: "Apple", segmento: "Eletrônicos & Ecossistema Digital", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 4780-0000", nivel: 5, pontos: 4980 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Smartphones Premium & Ecossistema Digital",
   mercado_tamanho: "R$ 45bi/ano no Brasil",
@@ -895,7 +897,7 @@ const APPLE_DATA: OmniData = {
 };
 
 const AMAZON_DATA: OmniData = {
-  negocio: { nome_fantasia: "Amazon", segmento: "E-commerce & Cloud Computing", cidade: "São Paulo", estado: "SP", telefone: "(11) 3728-3000", nivel: 5, pontos: 4960 },
+  negocio: { nome_fantasia: "Amazon", segmento: "E-commerce & Cloud Computing", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 3728-3000", nivel: 5, pontos: 4960 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "E-commerce, Logística & Cloud",
   mercado_tamanho: "R$ 210bi/ano no Brasil",
@@ -948,7 +950,7 @@ const AMAZON_DATA: OmniData = {
 };
 
 const NATURA_DATA: OmniData = {
-  negocio: { nome_fantasia: "Natura", segmento: "Cosméticos & Sustentabilidade", cidade: "São Paulo", estado: "SP", telefone: "(11) 4446-2000", nivel: 5, pontos: 4780 },
+  negocio: { nome_fantasia: "Natura", segmento: "Cosméticos & Sustentabilidade", cidade: "São Paulo", estado: "SP", lat: -23.5614, lng: -46.6560, telefone: "(11) 4446-2000", nivel: 5, pontos: 4780 },
   semana_label: "Semana de 06 de Maio de 2026",
   mercado_nome: "Cosméticos, Perfumaria & Higiene Pessoal",
   mercado_tamanho: "R$ 48bi/ano no Brasil",
@@ -1001,7 +1003,7 @@ const NATURA_DATA: OmniData = {
 };
 
 const CERVEJA_IMPERIO_DATA: OmniData = {
-  negocio: { nome_fantasia: 'Cerveja Império', segmento: 'Bebidas & Mercado Regional', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0000', nivel: 3, pontos: 1800 },
+  negocio: { nome_fantasia: 'Cerveja Império', segmento: 'Bebidas & Mercado Regional', cidade: 'Petrópolis', estado: 'RJ', lat: -22.5076, lng: -43.1785, telefone: '(24) 3300-0000', nivel: 3, pontos: 1800 },
   semana_label: 'Semana de 23 de Junho de 2026',
   mercado_nome: 'Cerveja Artesanal & Distribuição Regional',
   mercado_tamanho: 'R$ 2.8bi/mês no Brasil',
@@ -1073,7 +1075,7 @@ const CERVEJA_IMPERIO_DATA: OmniData = {
 };
 
 const CERVEJA_IMPERIO_DISTRIBUIDORA_DATA: OmniData = {
-  negocio: { nome_fantasia: 'Distribuidora Império', segmento: 'Bebidas · Distribuição Regional', cidade: 'Petrópolis', estado: 'RJ', telefone: '(24) 3300-0100', nivel: 2, pontos: 900 },
+  negocio: { nome_fantasia: 'Distribuidora Império', segmento: 'Bebidas · Distribuição Regional', cidade: 'Petrópolis', estado: 'RJ', lat: -22.5076, lng: -43.1785, telefone: '(24) 3300-0100', nivel: 2, pontos: 900 },
   semana_label: 'Semana de 23 de Junho de 2026',
   mercado_nome: 'Distribuição Regional de Bebidas',
   mercado_tamanho: 'Região Serrana + Região dos Lagos',
@@ -1191,6 +1193,8 @@ export const PROFILE_MOCK_DATA: Record<string, OmniData> = {
       segmento: 'Indústria de Alimentos & Grãos',
       cidade: 'São José dos Campos',
       estado: 'SP',
+      lat: -23.2237,
+      lng: -45.9009,
       telefone: '(12) 3900-0000',
     },
     mercado_nome: 'Indústria de Alimentos & Grãos',

@@ -566,8 +566,7 @@ function AuthenticatedApp() {
   function loadPhotoForProfile(profileId: string): PhotoSettings {
     const saved = localStorage.getItem(`photo_settings_${profileId}`);
     if (saved) { try { return JSON.parse(saved); } catch {} }
-    // Default: codify (perfil personalizado em os1) usa moldura quadrada; demos usam redonda.
-    const defaultShape: 'round' | 'square' = profileId === 'os1' ? 'square' : 'round';
+    const defaultShape: 'round' | 'square' = 'round';
     return { src: DEFAULT_PHOTOS[profileId] ?? '', x: 0, y: 0, zoom: 1, locked: true, shape: defaultShape };
   }
 
@@ -1569,7 +1568,7 @@ function AuthenticatedApp() {
             {(() => {
               const isRoleView = isPersonalizedRole(role) && activeSector === 'os1';
               const bio = roleConfig.bio;
-              const photoShape: 'round' | 'square' = photoSettings.shape ?? (activeSector === 'os1' ? 'square' : 'round');
+              const photoShape: 'round' | 'square' = photoSettings.shape ?? 'round';
               const photoShapeOuter = photoShape === 'round' ? 'rounded-full' : 'rounded-2xl';
               const photoShapeMid   = photoShape === 'round' ? 'rounded-full' : 'rounded-[14px] md:rounded-[18px]';
               const photoShapeInner = photoShape === 'round' ? 'rounded-full' : 'rounded-[12px] md:rounded-[14px]';
@@ -1737,11 +1736,14 @@ function AuthenticatedApp() {
                           {roleConfig.bioLines.map((line, i) => {
                             const color = line.icon === 'store' ? '#0891b2' : line.icon === 'mappin' ? '#f59e0b' : '#16a34a';
                             const Icon = line.icon === 'store' ? Store : line.icon === 'mappin' ? MapPin : Zap;
+                            // Linha "Evolução" segue o mesmo estado dinâmico dos demais
+                            // perfis (atualizando → atualizado), em vez do texto fixo.
+                            const text = line.text.startsWith('Evolução ·') ? `Evolução · ${evolucaoStatus}` : line.text;
                             return (
                               <div key={i} className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs md:text-sm">
                                 <Icon size={13} className="sm:hidden flex-shrink-0" style={{ color }} strokeWidth={2.2} />
                                 <Icon size={15} className="hidden sm:block flex-shrink-0" style={{ color }} strokeWidth={2.2} />
-                                <span className="text-neutral-800 dark:text-neutral-200 truncate">{line.text}</span>
+                                <span className="text-neutral-800 dark:text-neutral-200 truncate">{text}</span>
                               </div>
                             );
                           })}
@@ -2173,7 +2175,7 @@ function AuthenticatedApp() {
 
       {/* Modal Mapa do Mercado */}
       <AnimatePresence>
-        {mapOpen && <MarketMapContent open={mapOpen} onClose={() => setMapOpen(false)} competitors={data.concorrentes} onCompetitorClick={setSelectedConcorrente} sector={activeSector} businessName={data.negocio?.nome_fantasia} />}
+        {mapOpen && <MarketMapContent open={mapOpen} onClose={() => setMapOpen(false)} competitors={data.concorrentes} onCompetitorClick={setSelectedConcorrente} sector={activeSector} businessName={data.negocio?.nome_fantasia} clientPosition={{ lat: data.negocio.lat, lng: data.negocio.lng }} />}
       </AnimatePresence>
 
       {/* Modal Configuração da Empresa */}
@@ -2324,6 +2326,7 @@ function AuthenticatedApp() {
         workspaceContext={workspaceContext}
         codifyScope={codifyScope}
         windowWidth={windowWidth}
+        clientPosition={{ lat: data.negocio.lat, lng: data.negocio.lng }}
         dark={dark}
         onToggleTheme={toggleTheme}
         onShowHistory={() => setChatHistoryOpen(o => !o)}
